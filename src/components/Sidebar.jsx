@@ -1,32 +1,34 @@
 import { useState } from "react";
-import Logo from "../images/logo.png"
+import Logo from "../images/logo.png";
 export const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
-  }
+  };
 
   return (
     <>
       <div>
-        <button
+        {/* <button
           class="font-medium rounded-lg text-sm px-5 py-2.5"
           type="button"
           onClick={toggleSidebar}
         >
           <i class="fa-solid fa-bars fa-2xl"></i>
-        </button>
+        </button> */}
       </div>
 
       <div
         id="drawer-navigation"
-        className={`fixed top-0 left-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform bg-white ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 z-40 w-60 h-screen p-4 overflow-y-auto transition-transform bg-white ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
         tabindex="-1"
         aria-labelledby="drawer-navigation-label"
       >
-        <img src={Logo} alt="" />
-        <button
+        <img src={Logo} class="h-16" alt="Spay Logo" />
+        {/* <button
           type="button"
           data-drawer-hide="drawer-navigation"
           aria-controls="drawer-navigation"
@@ -47,7 +49,7 @@ export const Sidebar = () => {
             ></path>
           </svg>
           <span class="sr-only">Close menu</span>
-        </button>
+        </button> */}
         <div class="py-4 overflow-y-auto">
           <ul class="space-y-2 font-medium">
             <li>
@@ -174,7 +176,7 @@ export const Sidebar = () => {
             </li>
           </ul>
         </div>
-      </div>      
+      </div>
     </>
   );
 };
