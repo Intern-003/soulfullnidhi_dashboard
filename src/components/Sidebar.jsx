@@ -1,6 +1,6 @@
 import { useState } from "react";
 export const Sidebar = () => {
-  const [resourcesDropDown, setResourcesDropDown] = useState(false);
+  const [schemeDropDown, setSchemeDropDown] = useState(false);
   const [memberDropDown, setMemberDropDown] = useState(false);
   const [fundDropDown, setFundDropDown] = useState(false);
   const [payoutDropDown, setPayoutDropDown] = useState(false);
@@ -38,14 +38,14 @@ export const Sidebar = () => {
               </a>
             </li>
 
-            {/** Dropdown button of resources */}
+            {/** Dropdown button of scheme */}
             <li>
               <a
                 class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
                 type="button"
-                onClick={() => setResourcesDropDown(!resourcesDropDown)}
+                onClick={() => setSchemeDropDown(!schemeDropDown)}
               >
-                <span className="ms-3">Resources</span>
+                <span className="ms-3">Scheme Manager</span>
                 <svg
                   class="w-2.5 h-2.5 ms-3"
                   aria-hidden="true"
@@ -65,19 +65,16 @@ export const Sidebar = () => {
             </li>
 
             {/*
-            Dropdown body of resources
+            Dropdown body of scheme
             */}
             <div
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                resourcesDropDown ? "" : "hidden"
+                schemeDropDown ? "" : "hidden"
               }`}
             >
               <ul>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">Scheme Manager</a>
-                </li>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">Payout Settings</a>
+                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                  <a href="">Scheme</a>
                 </li>
               </ul>
             </div>
