@@ -118,7 +118,7 @@ export const Sidebar = () => {
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">Merchant</a>
+                  <a href="">Merchant Onboarding</a>
                 </li>
               </ul>
             </div>
@@ -162,7 +162,10 @@ export const Sidebar = () => {
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">Transfer/Return</a>
+                  <a href="">Load Wallet</a>
+                </li>
+                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                  <a href="">Payin Settlement</a>
                 </li>
               </ul>
             </div>
