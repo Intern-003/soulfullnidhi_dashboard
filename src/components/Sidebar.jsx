@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../css/sidebar.css"
+import Logo from "../images/logo.png";
+
 export const Sidebar = () => {
   const [schemeDropDown, setSchemeDropDown] = useState(false);
   const [memberDropDown, setMemberDropDown] = useState(false);
@@ -16,10 +18,15 @@ export const Sidebar = () => {
     <>
       <div
         id="drawer-navigation"
-        className={`sidebar sticky top-20 left-0 z-40 w-62 h-screen p-4 overflow-y-auto transition-transform bg-sky-600 translate-x-0 bg-linear-to-t from-sky-300 to-blue-500`}
+        className={`sidebar fixed top-0 left-0 z-40 w-62 h-screen p-4 overflow-y-auto transition-transform translate-x-0 bg-linear-to-t from-sky-300 to-blue-500`}
         tabindex="-1"
         aria-labelledby="drawer-navigation-label"
       >
+        <div className="ml-10 rounded-full h-30 w-30 bg-white flex items-center justify-center">
+          <a href="#" class="space-x-3 rtl:space-x-reverse">
+            <img src={Logo} class="w-25" alt="Spay Logo" />
+          </a>
+        </div>
         <div class="py-4">
           <ul class="space-y-2 font-medium">
             <li>
