@@ -8,6 +8,7 @@ export const Sidebar = () => {
   const [accountDropDown, setAccountDropDown] = useState(false);
   const [rolesDropDown, setRolesDropDown] = useState(false);
   const [ticketsDropDown, setTicketsDropDown] = useState(false);
+  const [payinDropDown, setPayinDropDown] = useState(false);
 
   return (
     <>
@@ -215,6 +216,50 @@ export const Sidebar = () => {
             </div>
 
             {/**
+             * Dropdown button of payin
+             */}  
+            <li>
+              <a
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                type="button"
+                onClick={() => setPayinDropDown(!payinDropDown)}
+              >
+                <span className="ms-3">Payin</span>
+                <svg
+                  class="w-2.5 h-2.5 ms-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 10 6"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </a>
+            </li>
+
+            {/**
+             * Dropdown body of payin
+             */
+            }
+            <div
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
+                payinDropDown ? "" : "hidden"
+              }`}
+            >
+              <ul>
+                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                  <a href="">Request</a>
+                </li>
+              </ul>
+            </div>
+
+            {/**
              * Dropdown button of transaction
              */}  
             <li>
@@ -258,9 +303,6 @@ export const Sidebar = () => {
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                   <a href="">Payout Statement</a>
                 </li>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">Complaints List</a>
-                </li>
               </ul>
             </div>
 
@@ -302,8 +344,11 @@ export const Sidebar = () => {
               }`}
             >
               <ul>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">Main Wallet</a>
+                <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                  <a href="">Topup Statement</a>
+                </li>
+                <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                  <a href="">Settlement Payin Statement</a>
                 </li>
               </ul>
             </div>
@@ -364,7 +409,7 @@ export const Sidebar = () => {
                 type="button"
                 onClick={() => setTicketsDropDown(!ticketsDropDown)}
               >
-                <span className="ms-3">Manage Tickets</span>
+                <span className="ms-3">Complaints</span>
                 <svg
                   class="w-2.5 h-2.5 ms-3"
                   aria-hidden="true"
@@ -394,7 +439,10 @@ export const Sidebar = () => {
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">View</a>
+                  <a href="">Register Complain</a>
+                </li>
+                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                  <a href="">View Complain</a>
                 </li>
               </ul>
             </div>
