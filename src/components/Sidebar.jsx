@@ -165,10 +165,10 @@ export const Sidebar = () => {
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">Load Wallet</a>
+                  <Link to="/load-wallet"> Load Wallet</Link>
                 </li>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">Payin Settlement</a>
+                  <Link to="/payin-settlement">Payin Settlement</Link>
                 </li>
               </ul>
             </div>
