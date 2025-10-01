@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Logo from "../images/logo.png";
 export const Sidebar = () => {
   const [resourcesDropDown, setResourcesDropDown] = useState(false);
   const [memberDropDown, setMemberDropDown] = useState(false);
@@ -14,11 +13,11 @@ export const Sidebar = () => {
     <>
       <div
         id="drawer-navigation"
-        className={`fixed top-20 left-0 z-40 w-60 h-screen p-4 overflow-y-auto transition-transform bg-sky-600 translate-x-0`}
+        className={`fixed top-20 left-0 z-40 w-60 h-screen p-4 overflow-y-auto transition-transform bg-sky-600 translate-x-0 bg-linear-to-t from-sky-300 to-blue-500`}
         tabindex="-1"
         aria-labelledby="drawer-navigation-label"
       >
-        <div class="py-4 overflow-y-auto">
+        <div class="py-4">
           <ul class="space-y-2 font-medium">
             <li>
               <a
