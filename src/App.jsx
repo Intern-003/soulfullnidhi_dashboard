@@ -12,14 +12,14 @@ function App() {
     <>
     {/* <Header />
     <Sidebar /> */}
-    {/* <Layout> */}
+    <Layout>
       <div className="main-content h-screen">
         <Routes>
           <Route path="/payout-request" element={<Payoutrequest />} />
-          <Route path="/Scheme" element={<Scheme />} />
+          <Route path="/scheme" element={<Scheme />} />
         </Routes>
       </div>
-      {/* </Layout> */}
+      </Layout>
     </>
   );
 }
