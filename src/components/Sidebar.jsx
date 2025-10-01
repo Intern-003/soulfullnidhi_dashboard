@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import "../css/sidebar.css"
 export const Sidebar = () => {
   const [schemeDropDown, setSchemeDropDown] = useState(false);
@@ -211,7 +212,7 @@ export const Sidebar = () => {
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">Request</a>
+                  <Link to="/payout-request">Request</Link>
                 </li>
               </ul>
             </div>
