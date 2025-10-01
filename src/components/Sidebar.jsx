@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../css/sidebar.css"
 export const Sidebar = () => {
   const [schemeDropDown, setSchemeDropDown] = useState(false);
   const [memberDropDown, setMemberDropDown] = useState(false);
@@ -14,7 +15,7 @@ export const Sidebar = () => {
     <>
       <div
         id="drawer-navigation"
-        className={`fixed top-20 left-0 z-40 w-60 h-screen p-4 overflow-y-auto transition-transform bg-sky-600 translate-x-0 bg-linear-to-t from-sky-300 to-blue-500`}
+        className={`sidebar sticky top-20 left-0 z-40 w-62 h-screen p-4 overflow-y-auto transition-transform bg-sky-600 translate-x-0 bg-linear-to-t from-sky-300 to-blue-500`}
         tabindex="-1"
         aria-labelledby="drawer-navigation-label"
       >
