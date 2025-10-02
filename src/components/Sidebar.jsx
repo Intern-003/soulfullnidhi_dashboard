@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import "../css/sidebar.css"
+import "../css/sidebar.css";
 import Logo from "../images/logo.png";
 
 export const Sidebar = () => {
@@ -18,16 +18,19 @@ export const Sidebar = () => {
     <>
       <div
         id="drawer-navigation"
-        className={`sidebar fixed top-0 left-0 z-40 w-62 h-screen p-4 overflow-y-auto transition-transform translate-x-0 bg-linear-to-t from-sky-300 to-blue-500`}
+        className={`w-62 h-screen flex flex-col p-4 transition-transform translate-x-0 bg-linear-to-t from-sky-300 to-blue-500`}
         tabindex="-1"
         aria-labelledby="drawer-navigation-label"
       >
-        <div className="ml-10 rounded-full h-30 w-30 bg-white flex items-center justify-center">
-          <a href="#" class="space-x-3 rtl:space-x-reverse">
-            <img src={Logo} class="w-25" alt="Spay Logo" />
-          </a>
+        <div className="flex-shrink-0 p-4 justify-center items-center">
+          <div className="ml-6 rounded-full h-24 w-24 bg-white flex items-center justify-center">
+            <a href="#">
+              <img src={Logo} className="w-20" alt="Spay Logo" />
+            </a>
+          </div>
         </div>
-        <div class="py-4">
+
+        <div class="sidebar flex-1 overflow-y-auto py-4">
           <ul class="space-y-2 font-medium">
             <li>
               <a
@@ -91,7 +94,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown button of member
-             */}  
+             */}
             <li>
               <a
                 class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
@@ -119,8 +122,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown body of member
-             */
-            }
+             */}
             <div
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
                 memberDropDown ? "" : "hidden"
@@ -135,7 +137,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown button of fund
-             */}  
+             */}
             <li>
               <a
                 class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
@@ -163,8 +165,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown body of fund
-             */
-            }
+             */}
             <div
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
                 fundDropDown ? "" : "hidden"
@@ -182,7 +183,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown button of payout
-             */}  
+             */}
             <li>
               <a
                 class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
@@ -210,8 +211,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown body of payout
-             */
-            }
+             */}
             <div
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
                 payoutDropDown ? "" : "hidden"
@@ -226,7 +226,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown button of payin
-             */}  
+             */}
             <li>
               <a
                 class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
@@ -254,8 +254,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown body of payin
-             */
-            }
+             */}
             <div
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
                 payinDropDown ? "" : "hidden"
@@ -270,7 +269,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown button of transaction
-             */}  
+             */}
             <li>
               <a
                 class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
@@ -298,8 +297,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown body of transaction
-             */
-            }
+             */}
             <div
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
                 transactionDropDown ? "" : "hidden"
@@ -317,7 +315,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown button of account
-             */}  
+             */}
             <li>
               <a
                 class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
@@ -345,8 +343,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown body of account
-             */
-            }
+             */}
             <div
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
                 accountDropDown ? "" : "hidden"
@@ -364,7 +361,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown button of roles
-             */}  
+             */}
             <li>
               <a
                 class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
@@ -392,8 +389,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown body of roles
-             */
-            }
+             */}
             <div
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
                 rolesDropDown ? "" : "hidden"
@@ -411,7 +407,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown button of tickets
-             */}  
+             */}
             <li>
               <a
                 class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
@@ -439,8 +435,7 @@ export const Sidebar = () => {
 
             {/**
              * Dropdown body of tickets
-             */
-            }
+             */}
             <div
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
                 ticketsDropDown ? "" : "hidden"
