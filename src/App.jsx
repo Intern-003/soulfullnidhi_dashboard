@@ -16,9 +16,13 @@ function App() {
       <div className="main-content h-screen">
         <Routes>
           <Route path="/payout-request" element={<Payoutrequest />} />
+<<<<<<< HEAD
           <Route path="/Scheme" element={<Scheme />} />
           <Route path="/load-wallet" element={<Loadwallet />} />
           <Route path="/payin-settlement" element={<Payinsettlement />} />
+=======
+          <Route path="/scheme" element={<Scheme />} />
+>>>>>>> dc9983c7dfb9343eaca0238bc27df3a6a246319a
         </Routes>
       </div>
       </Layout>
