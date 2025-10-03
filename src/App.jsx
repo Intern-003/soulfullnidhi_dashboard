@@ -6,6 +6,7 @@ import Loadwallet from './pages/LoadWallet';
 import Payinsettlement from './pages/PayinSettlement';
 import LoginForm from './pages/LoginForm';
 import { MemberOnboardForm } from './pages/MemberOnboardForm';
+import { Member } from './pages/Member';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/scheme" element={<Scheme />} />
           <Route path="/load-wallet" element={<Loadwallet />} />
           <Route path="/payin-settlement" element={<Payinsettlement />} />
+          <Route path="/member-list" element={<Member />} />
           <Route path="/member-create" element={<MemberOnboardForm />} />
         </Routes>
       </div>

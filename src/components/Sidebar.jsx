@@ -131,7 +131,7 @@ export const Sidebar = () => {
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">Merchant Onboarding</a>
+                  <Link to={"/member-list"}>Merchant Onboarding</Link>
                 </li>
               </ul>
             </div>
