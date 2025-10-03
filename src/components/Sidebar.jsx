@@ -35,7 +35,7 @@ export const Sidebar = () => {
             <li>
               <a
                 href="#"
-                class="flex items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
               >
                 <i class="fa-solid fa-chart-pie fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                 <span class="ms-3">Dashboard</span>
@@ -45,7 +45,7 @@ export const Sidebar = () => {
             {/** Dropdown button of scheme */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setSchemeDropDown(!schemeDropDown)}
               >
@@ -82,9 +82,9 @@ export const Sidebar = () => {
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">
+                  <Link to={"/scheme"}>
                     <span className="ms-3">Scheme</span>
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -94,7 +94,7 @@ export const Sidebar = () => {
              */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setMemberDropDown(!memberDropDown)}
               >
@@ -141,7 +141,7 @@ export const Sidebar = () => {
              */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setFundDropDown(!fundDropDown)}
               >
@@ -190,7 +190,7 @@ export const Sidebar = () => {
              */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setPayoutDropDown(!payoutDropDown)}
               >
@@ -236,7 +236,7 @@ export const Sidebar = () => {
              */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setPayinDropDown(!payinDropDown)}
               >
@@ -282,7 +282,7 @@ export const Sidebar = () => {
              */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setTransactionDropDown(!transactionDropDown)}
               >
@@ -331,7 +331,7 @@ export const Sidebar = () => {
              */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setAccountDropDown(!accountDropDown)}
               >
@@ -380,7 +380,7 @@ export const Sidebar = () => {
              */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setRolesDropDown(!rolesDropDown)}
               >
@@ -429,7 +429,7 @@ export const Sidebar = () => {
              */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900"
+                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setTicketsDropDown(!ticketsDropDown)}
               >
