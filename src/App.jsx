@@ -1,17 +1,17 @@
-// import { Header } from "./components/Header";
-// import { Sidebar } from "./components/Sidebar";
 import { Routes, Route } from 'react-router-dom';
 import Payoutrequest from './pages/Payoutrequest';
 import Scheme from './pages/Scheme';
 import Layout from "./components/Layout";
 import Loadwallet from './pages/LoadWallet';
 import Payinsettlement from './pages/PayinSettlement';
+import LoginForm from './pages/LoginForm';
 
 function App() {
   return (
     <>
-    {/* <Header />
-    <Sidebar /> */}
+    <Routes>
+      <Route path="/login" element={<LoginForm />}></Route>
+    </Routes>
     <Layout>
       <div className="main-content h-screen">
         <Routes>
