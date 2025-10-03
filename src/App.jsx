@@ -4,8 +4,8 @@ import { Routes, Route } from 'react-router-dom';
 import Payoutrequest from './pages/Payoutrequest';
 import Scheme from './pages/Scheme';
 import Layout from "./components/Layout";
-
-
+import Loadwallet from './pages/LoadWallet';
+import Payinsettlement from './pages/PayinSettlement';
 
 function App() {
   return (
@@ -17,6 +17,8 @@ function App() {
         <Routes>
           <Route path="/payout-request" element={<Payoutrequest />} />
           <Route path="/scheme" element={<Scheme />} />
+          <Route path="/load-wallet" element={<Loadwallet />} />
+          <Route path="/payin-settlement" element={<Payinsettlement />} />
         </Routes>
       </div>
       </Layout>
