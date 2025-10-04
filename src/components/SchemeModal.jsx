@@ -1,4 +1,4 @@
-export const SchemeModal = ({showModal, handleModal}) => {
+export const SchemeModal = ({ showModal, handleModal }) => {
   return (
     <>
       {showModal && (
@@ -18,16 +18,87 @@ export const SchemeModal = ({showModal, handleModal}) => {
               </button>
             </div>
 
-            <form className="p-6">
-              <div className="mb-3">
-                <label className="block mb-1 text-sm font-medium">
-                  Scheme Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter Scheme Name"
-                  className="w-full border rounded-lg p-2 text-sm"
-                />
+            <form className="p-2">
+              <div className="grid gap-6 mb-6 md:grid-cols-2">
+                <div className="mb-3 col-span-2">
+                  <label className="block mb-1 text-sm font-medium">
+                    Scheme Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter Scheme Name"
+                    className="w-full border rounded-lg p-2 text-sm"
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="block mb-1 text-sm font-medium">
+                    Payin Commission Type
+                  </label>
+                  <select className="w-full border rounded-lg p-2 text-sm">
+                    <option selected>Select type</option>
+                    <option value="flat">Flat</option>
+                    <option value="percent">Percent</option>
+                  </select>
+                </div>
+
+                <div className="mb-3">
+                  <label className="block mb-1 text-sm font-medium">
+                    Payin Commission Amount
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="Enter Payin Amount"
+                    className="w-full border rounded-lg p-2 text-sm"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="block mb-1 text-sm font-medium">
+                    Payout Commission Type Below
+                  </label>
+                  <select className="w-full border rounded-lg p-2 text-sm">
+                    <option selected>Select type</option>
+                    <option value="flat">Flat</option>
+                    <option value="percent">Percent</option>
+                  </select>
+                </div>
+
+                <div className="mb-3">
+                  <label className="block mb-1 text-sm font-medium">
+                    Payout Commission Amount Below
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="Enter Payin Amount"
+                    className="w-full border rounded-lg p-2 text-sm"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="block mb-1 text-sm font-medium">
+                    Payout Commission Type Above
+                  </label>
+                  <select className="w-full border rounded-lg p-2 text-sm">
+                    <option selected>Select type</option>
+                    <option value="flat">Flat</option>
+                    <option value="percent">Percent</option>
+                  </select>
+                </div>
+
+                <div className="mb-3">
+                  <label className="block mb-1 text-sm font-medium">
+                    Payout Commission Amount Above
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="Enter Payin Amount"
+                    className="w-full border rounded-lg p-2 text-sm"
+                    step="0.01"
+                  />
+                </div>
               </div>
 
               <button
