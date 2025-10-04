@@ -329,7 +329,8 @@ export const MemberOnboardForm = () => {
                 for="floating_outlined"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
-                Document Of Cancel Cheque <span className="text-red-600">*</span>
+                Document Of Cancel Cheque{" "}
+                <span className="text-red-600">*</span>
               </label>
             </div>
             <div class="relative">
@@ -455,7 +456,7 @@ export const MemberOnboardForm = () => {
         )}
 
         {currentStep === 4 && (
-          <div class="grid gap-6 mb-6 md:grid-cols-4">
+          <div class="grid gap-6 mb-6 md:grid-cols-2">
             <div className="relative">
               <label
                 for="default"
@@ -488,29 +489,31 @@ export const MemberOnboardForm = () => {
               </select>
             </div>
 
-            <div className="relative">
-              <label
-                for="default"
-                class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-              >
-                Scheme
-              </label>
-              <select
-                id="default"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
-              >
-                <option selected>Select Scheme</option>
-                <option value="commission">Commission</option>
-              </select>
-            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative flex-1">
+                <label
+                  htmlFor="default"
+                  className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+                >
+                  Scheme
+                </label>
+                <select
+                  id="default"
+                  className="peer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
+                >
+                  <option value="">Select Scheme</option>
+                  <option value="commission">Commission</option>
+                </select>
+              </div>
 
-            <button
-              type="button"
-              className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-3 bg-blue-500 hover:bg-blue-800`}
-              onClick={handleModal}
-            >
-              + Add New Scheme
-            </button>
+              <button
+                type="button"
+                className="text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                onClick={handleModal}
+              >
+                +
+              </button>
+            </div>
           </div>
         )}
 
