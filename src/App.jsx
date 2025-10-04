@@ -15,7 +15,6 @@ function App() {
       <Route path="/login" element={<LoginForm />}></Route>
     </Routes>
     <Layout>
-      <div className="main-content h-screen">
         <Routes>
           <Route path="/payout-request" element={<Payoutrequest />} />
           <Route path="/scheme" element={<Scheme />} />
@@ -24,7 +23,6 @@ function App() {
           <Route path="/member-list" element={<Member />} />
           <Route path="/member-create" element={<MemberOnboardForm />} />
         </Routes>
-      </div>
       </Layout>
     </>
   );
