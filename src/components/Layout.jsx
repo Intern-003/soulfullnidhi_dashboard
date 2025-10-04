@@ -14,7 +14,7 @@ const Layout = ({ children }) => {
         </div>
 
         <main className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-5xl border-2 mx-auto">
+          <div className="bg-white shadow-md rounded-lg w-full max-w-5xl border-2 mx-auto">
             {children}
           </div>
         </main>

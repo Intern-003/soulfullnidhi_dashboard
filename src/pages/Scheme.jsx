@@ -20,7 +20,7 @@ const Scheme = () => {
 
     <div>
       <div
-        className="bg-blue-500 flex justify-between item-center"
+        className=" bg-linear-to-t from-sky-500 to-indigo-500 flex justify-between item-center"
         style={{ margin: "0px  0px 20px 0px", padding: "10px" }}>
         <h4 className="font-bold text-white text-lg py-2">Scheme manager</h4>
         <button
