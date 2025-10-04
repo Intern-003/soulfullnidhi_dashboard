@@ -3,6 +3,7 @@ import { Stepper } from "../components/Stepper";
 
 export const MemberOnboardForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [showModal, setShowModal] = useState(false);
 
   const handlePrev = () => {
     if (currentStep > 1) {
@@ -433,7 +434,7 @@ export const MemberOnboardForm = () => {
         )}
 
         {currentStep === 4 && (
-          <div class="grid gap-6 mb-6 md:grid-cols-2">
+          <div class="grid gap-6 mb-6 md:grid-cols-4">
             <div className="relative">
               <label
                 for="default"
@@ -481,6 +482,14 @@ export const MemberOnboardForm = () => {
                 <option value="commission">Commission</option>
               </select>
             </div>
+
+            <button
+              type="button"
+              className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-3 bg-blue-500 hover:bg-blue-800`}
+              onClick={() => setShowModal(!showModal)}
+            >
+              + Add New Scheme
+            </button>
           </div>
         )}
 
@@ -515,6 +524,46 @@ export const MemberOnboardForm = () => {
           </button>
         )}
       </form>
+
+      {showModal && (
+        <>
+          <div
+            className="fixed inset-0 bg-black opacity-75 z-40"
+            onClick={() => setShowModal(false)}
+          ></div>
+          <div className="fixed top-10 left-1/2 transform -translate-x-1/2 z-50 bg-white border rounded-lg max-w-md w-full">
+            <div className="text-white bg-blue-500 font-medium rounded-t-lg text-sm px-5 py-2.5 flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Add New Scheme</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-white hover:text-gray-200 font-bold"
+              >
+                ✖
+              </button>
+            </div>
+
+            <form className="p-6">
+              <div className="mb-3">
+                <label className="block mb-1 text-sm font-medium">
+                  Scheme Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter Scheme Name"
+                  className="w-full border rounded-lg p-2 text-sm"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </>
+      )}
     </>
   );
 };
