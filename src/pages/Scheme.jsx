@@ -1,35 +1,124 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import Table from "../components/Table";
+import { SchemeModal } from "../components/SchemeModal";
 
 const Scheme = () => {
+  // ✅ States
+  const [showModal, setShowModal] = useState(false);
+  const [schemedata, setSchemeData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // ✅ Table Columns
   const schemecolumn = [
     { header: "SQ NO", accessor: "sqno" },
     { header: "Name", accessor: "name" },
     { header: "Status", accessor: "status" },
     { header: "Action", accessor: "action" },
   ];
-  const schemedata = [
-    { sqno: "1", name: "yuvraj", status: "active", action: "edit" },
-    { sqno: "2", name: "Akash", status: "active", action: "edit" },
-    { sqno: "3", name: "Aman", status: "active", action: "edit" },
-    { sqno: "4", name: "Sahil", status: "active", action: "edit" },
+
+  // ✅ Toggle Modal
+  const handleModal = () => setShowModal((prev) => !prev);
+
+  // ✅ Dummy Data (temporary until API is ready)
+  const dummyData = [
+    {  name: "Yuvraj", status: "Active" },
+    {  name: "Akash", status: "Inactive" },
+    { name: "Aman", status: "Pending" },
+    {  name: "Sahil", status: "Active" },
+    { name: "Yuvraj", status: "Active" },
+    {  name: "Akash", status: "Inactive" },
+    {  name: "Aman", status: "Pending" },
+    { name: "Sahil", status: "Active" },
   ];
+
+  // ✅ Fetch Data (for now using dummy data)
+  useEffect(() => {
+    const fetchSchemes = async () => {
+      try {
+        setLoading(true);
+
+        // 🟢 WHEN API IS READY, UNCOMMENT BELOW:
+        /*
+        const response = await fetch("http://localhost:5000/api/schemes");
+        if (!response.ok) throw new Error("Failed to fetch data");
+        const data = await response.json();
+        */
+
+        // 🟣 TEMPORARY — simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        // 🟢 Replace "data" with "dummyData" for now
+        const data = dummyData;
+
+        // ✅ Format data for table
+        const formattedData = data.map((item, index) => ({
+          sqno: index + 1,
+          name: item.name,
+          status: item.status,
+          action: (
+            <button
+              onClick={() => handleEdit(item)}
+              className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md"
+            >
+              Edit
+            </button>
+          ),
+        }));
+
+        setSchemeData(formattedData);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSchemes();
+  }, []);
+
+  // ✅ Edit button handler
+  const handleEdit = (scheme) => {
+    console.log("Editing:", scheme);
+    setShowModal(true);
+    // You can pass scheme data to modal here later
+  };
+
   return (
     // <Layout>
-
     <div>
+      {/* Header Section */}
       <div
-        className=" bg-linear-to-t from-sky-500 to-indigo-500 flex justify-between item-center"
-        style={{ margin: "0px  0px 20px 0px", padding: "10px" }}>
-        <h4 className="font-bold text-white text-lg py-2">Scheme manager</h4>
+        className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center"
+        style={{ margin: "0px  0px 20px 0px", padding: "10px" }}
+      >
+        <h4 className="font-bold text-white text-lg py-2">Scheme Manager</h4>
+
+        {/* Add New Button */}
         <button
           type="button"
-          class="text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 shadow-lg shadow-cyan-500/50 dark:shadow-lg dark:shadow-cyan-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
-           + Add New
+          onClick={handleModal}
+          className="text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 
+            hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 
+            shadow-lg font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+        >
+          + Add New
         </button>
+
+        {/* Modal */}
+        <SchemeModal showModal={showModal} handleModal={handleModal} />
       </div>
-      <Table columns={schemecolumn} data={schemedata} />
+
+      {/* Table / Loader / Error */}
+      {loading ? (
+        <div className="text-center py-6 text-gray-500">Loading...</div>
+      ) : error ? (
+        <div className="text-center py-6 text-red-500">Error: {error}</div>
+      ) : (
+        <Table columns={schemecolumn} data={schemedata} />
+      )}
     </div>
     // </Layout>
   );
