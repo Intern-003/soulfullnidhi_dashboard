@@ -7,6 +7,7 @@ import Payinsettlement from './pages/PayinSettlement';
 import LoginForm from './pages/LoginForm';
 import { MemberOnboardForm } from './pages/MemberOnboardForm';
 import { Member } from './pages/Member';
+import { Dashboard } from './pages/Dashboard';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
     </Routes>
     <Layout>
         <Routes>
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/payout-request" element={<Payoutrequest />} />
           <Route path="/scheme" element={<Scheme />} />
           <Route path="/load-wallet" element={<Loadwallet />} />
