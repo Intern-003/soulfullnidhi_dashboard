@@ -166,8 +166,8 @@ export const Dashboard = () => {
         <div className="lg:col-span-3 flex justify-center">
           <div className="w-full max-w-lg p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-8">
             <div className="flex items-center justify-between mb-4">
-              <h5 className="text-xl font-bold leading-none text-gray-900">
-                Latest Customers
+              <h5 className="text-lg font-bold leading-none text-gray-900">
+                Large Transactions
               </h5>
               <a
                 href="#"
@@ -187,7 +187,7 @@ export const Dashboard = () => {
                       </p>
                     </div>
                     <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      $320
+                      ₹32000
                     </div>
                   </div>
                 </li>
@@ -200,7 +200,7 @@ export const Dashboard = () => {
                       </p>
                     </div>
                     <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      $3467
+                      ₹346720
                     </div>
                   </div>
                 </li>
@@ -213,7 +213,7 @@ export const Dashboard = () => {
                       </p>
                     </div>
                     <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      $67
+                      ₹67000
                     </div>
                   </div>
                 </li>
@@ -226,7 +226,7 @@ export const Dashboard = () => {
                       </p>
                     </div>
                     <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      $367
+                      ₹367250
                     </div>
                   </div>
                 </li>
