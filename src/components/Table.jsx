@@ -1,30 +1,38 @@
 import React, { useState, useMemo } from "react";
 
-const Table = ({ columns, data }) => {
+const Table = ({
+  columns,
+  data,
+  showSearch = true,
+  showPagination = true,
+  showExport = true,
+  showStatusFilter = true,
+}) => {
   const [search, setSearch] = useState("");
-  const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [openExport, setOpenExport] = useState(false);
+  const [statusFilter, setStatusFilter] = useState(""); // ✅ New state
 
   if (!columns || !data || data.length === 0) {
     return <h6>No data found</h6>;
   }
 
-  // 🔍 Filtered Data
+  // 🔍 Filtered Data (Search + Status)
   const filteredData = useMemo(() => {
-    return data.filter((row) =>
-      Object.values(row).some((val) =>
+    return data.filter((row) => {
+      const matchesSearch = Object.values(row).some((val) =>
         String(val).toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }, [search, data]);
+      );
 
-  // 📑 Pagination
-  const totalPages = Math.ceil(filteredData.length / entriesPerPage);
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * entriesPerPage,
-    currentPage * entriesPerPage
-  );
+      const matchesStatus =
+        !statusFilter ||
+        statusFilter === "all" ||
+        String(row.status).toLowerCase() === statusFilter.toLowerCase();
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [search, statusFilter, data]);
 
   // 📂 Export Handlers
   const downloadFile = (content, fileName, mimeType) => {
@@ -39,18 +47,22 @@ const Table = ({ columns, data }) => {
 
   const exportCSV = () => {
     const headers = columns.map((c) => c.header).join(",");
-    const rows = data
+    const rows = filteredData
       .map((row) => columns.map((c) => `"${row[c.accessor] ?? ""}"`).join(","))
       .join("\n");
     downloadFile(`${headers}\n${rows}`, "table.csv", "text/csv");
   };
 
   const exportJSON = () =>
-    downloadFile(JSON.stringify(data, null, 2), "table.json", "application/json");
+    downloadFile(
+      JSON.stringify(filteredData, null, 2),
+      "table.json",
+      "application/json"
+    );
 
   const exportTXT = () => {
     const headers = columns.map((c) => c.header).join(" | ");
-    const rows = data
+    const rows = filteredData
       .map((row) => columns.map((c) => row[c.accessor]).join(" | "))
       .join("\n");
     downloadFile(`${headers}\n${rows}`, "table.txt", "text/plain");
@@ -58,7 +70,7 @@ const Table = ({ columns, data }) => {
 
   const exportSQL = () => {
     const tableName = "export_table";
-    const sqlRows = data
+    const sqlRows = filteredData
       .map((row) => {
         const values = columns
           .map((c) => {
@@ -75,174 +87,241 @@ const Table = ({ columns, data }) => {
       .join("\n");
     downloadFile(sqlRows, "table.sql", "text/sql");
   };
+
   return (
-        <div className="w-full">
-      {/* 🔍 Search + Entries + Export */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3 p-6 bg-blue-100 rounded-b-xl mx-4" style={{}}>
-        {/* Search */}
-        <div className="w-full md:w-1/3 ">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full rounded-lg border border-sky-500 px-3 py-2 text-sm shadow-xl/10"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-        </div>
-
-        {/* Entries per page */}
-        <div className="flex items-center gap-2 border-sky-500 ">
-          <label className="text-sm">Show</label>
-          <select
-            className="rounded-lg border border-gray-300 px-2 py-1 text-sm border-sky-500 "
-            value={entriesPerPage}
-            onChange={(e) => {
-              setEntriesPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-          >
-            {[10, 25, 50, 100].map((num) => (
-              <option key={num} value={num}>
-                {num}
-              </option>
-            ))}
-          </select>
-          <span className="text-sm">entries</span>
-        </div>
-
-        {/* Export Dropdown */}
-        <div className="relative border-sky-500 ">
-          <button
-            onClick={() => setOpenExport(!openExport)}
-            className="flex items-center justify-center rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100"
-          >
-            Export as
-            <svg
-              className="ml-2 h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
-            </svg>
-          </button>
-
-          {openExport && (
-            <div className="absolute right-0 mt-2 w-44 bg-white border rounded-lg shadow-lg text-sm text-gray-700">
-              <ul className="py-2">
-                <li>
-                  <button
-                    onClick={exportCSV}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                  >
-                    CSV
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={exportJSON}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                  >
-                    JSON
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={exportTXT}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                  >
-                    TXT
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={exportSQL}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                  >
-                    SQL
-                  </button>
-                </li>
-              </ul>
+    <div className="w-full">
+      {(showSearch || showStatusFilter || showExport) && (
+        <div className="flex flex-col md:flex-row justify-between items-center px-2 rounded-b-xl mx-4">
+          {/* Search */}
+          {showSearch && (
+            <div className="w-full md:w-1/3">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full rounded-lg border border-sky-500 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
           )}
+
+          <div className="flex items-center justify-end gap-4 mt-3 md:mt-0">
+            {/* Status Filter */}
+            {showStatusFilter && (
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="border border-sky-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-sky-400 focus:outline-none hover:border-sky-400 transition"
+              >
+                <option value="">Select Status</option>
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="success">Success</option>
+                <option value="failed">Failed</option>
+                <option value="pending">Pending</option>
+              </select>
+            )}
+
+            {/* Export Dropdown */}
+            {showExport && (
+              <div className="relative border border-sky-300 rounded-lg">
+                <button
+                  onClick={() => setOpenExport(!openExport)}
+                  className="flex items-center justify-center rounded-lg bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100"
+                >
+                  Export as
+                  <svg
+                    className="ml-2 h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m19 9-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {openExport && (
+                  <div className="absolute right-0 mt-2 w-44 bg-white border rounded-lg shadow-lg text-sm text-gray-700 z-50">
+                    <ul className="py-2">
+                      <li>
+                        <button
+                          onClick={exportCSV}
+                          className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          CSV
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          onClick={exportJSON}
+                          className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          JSON
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          onClick={exportTXT}
+                          className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          TXT
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          onClick={exportSQL}
+                          className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          SQL
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-    <div className=" bg-gray-300 rounded-b-xl mx-4">
-
-   
-<table
-  style={{
-    width: "100%",
-    borderCollapse: "collapse",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-    borderRadius: "12px",
-    overflow: "hidden",
-    background: "white",
-  }}
-  className="w-full text-sm text-left rtl:text-right text-gray-700"
->
-  {/* Table Head */}
-  <thead
-    style={{
-      background: "linear-gradient(90deg, #007BFF, #00C8FF)",
-      color: "white",
-    }}
-    className="uppercase text-xs tracking-wide"
-  >
-    <tr>
-      {columns.map((column, index) => (
-        <th
-          key={index}
-          style={{
-            borderBottom: "1px solid rgba(255,255,255,0.3)",
-            padding: "12px 16px",
-          }}
-          className="font-semibold text-sm"
-        >
-          {column.header}
-        </th>
-      ))}
-    </tr>
-  </thead>
-
-  {/* Table Body */}
-  <tbody>
-    {data.map((row, rowIndex) => (
-      <tr
-        key={rowIndex}
-        className={`${
-          rowIndex % 2 === 0 ? "bg-[#f8fbff]" : "bg-white"
-        } hover:bg-[#e9f8ff] transition-colors duration-200`}
-        style={{
-          borderBottom: "1px solid #e0f2fe",
-        }}
+      {/* Table */}
+      <div
+        className="bg-gray-300 rounded-lg mx-4 my-4 border border-sky-300"
+        style={{}}
       >
-        {columns.map((column, colIndex) => (
-          <td
-            key={colIndex}
+        <table
+          className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden inset-shadow-sm inset-shadow-indigo-500/100 "
+          style={{
+            borderCollapse: "collapse",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+          }}
+        >
+          <thead
             style={{
-              padding: "10px 16px",
+              background: "linear-gradient(90deg, #007BFF, #00C8FF)",
+              color: "white",
             }}
-            className="text-gray-800"
+            className="uppercase text-xs tracking-wide"
           >
-            {row[column.accessor]}
-          </td>
-        ))}
-      </tr>
-    ))}
-  </tbody>
-</table>
+            <tr>
+              {columns.map((column, index) => (
+                <th
+                  key={index}
+                  className="font-semibold text-sm px-4 py-3 border-b border-white/30"
+                >
+                  {column.header}
+                </th>
+              ))}
+            </tr>
+          </thead>
 
+          <tbody>
+            {filteredData.length > 0 ? (
+              filteredData
+                .slice(
+                  (currentPage - 1) * entriesPerPage,
+                  currentPage * entriesPerPage
+                )
+                .map((row, rowIndex) => (
+                  <tr
+                    key={rowIndex}
+                    className={`${
+                      rowIndex % 2 === 0 ? "bg-[#f8fbff]" : "bg-white"
+                    } hover:bg-[#dbeafe] transition-colors duration-200`}
+                  >
+                    {columns.map((column, colIndex) => (
+                      <td key={colIndex} className="px-4 py-2 text-gray-800">
+                        {row[column.accessor]}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="text-center py-4 text-gray-500"
+                >
+                  No matching records found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
 
-     </div>
+        {showPagination && (
+          <div
+            className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-3 rounded-b-lg border border-sky-200"
+            style={{}}
+          >
+            {/* Left - Entries per page */}
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <span>Show</span>
+              <select
+                value={entriesPerPage}
+                onChange={(e) => setEntriesPerPage(Number(e.target.value))}
+                className="border border-gray-300 rounded-md px-2 py-1 focus:ring-1 focus:ring-sky-400 focus:outline-none"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+              <span>entries</span>
+            </div>
+
+            {/* Right - Pagination controls */}
+            <div className="flex items-center gap-2 mt-3 md:mt-0">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 text-sm rounded-md border ${
+                  currentPage === 1
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                Prev
+              </button>
+              <span className="text-sm text-gray-600">
+                Page <span className="font-semibold">{currentPage}</span>
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    prev < Math.ceil(filteredData.length / entriesPerPage)
+                      ? prev + 1
+                      : prev
+                  )
+                }
+                disabled={
+                  currentPage ===
+                  Math.ceil(filteredData.length / entriesPerPage)
+                }
+                className={`px-3 py-1 text-sm rounded-md border ${
+                  currentPage ===
+                  Math.ceil(filteredData.length / entriesPerPage)
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export default Table;
