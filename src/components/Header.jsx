@@ -21,12 +21,12 @@ export const Header = () => {
     <nav className="bg-white shadow-lg shadow-indigo-500/50">
       <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
         <div>
-          <i class="fa-solid fa-angle-up me-2 text-green-400 fa-lg"></i>
+          <i class="fa-solid fa-arrow-trend-up me-2 text-green-400 fa-lg"></i>
           <span>Payin Rolling Amount: </span>
           <span className="font-semibold">165.08/-</span>
         </div>
         <div>
-          <i class="fa-solid fa-angle-up me-2 text-green-400 fa-lg"></i>
+          <i class="fa-solid fa-arrow-trend-up me-2 text-green-400 fa-lg"></i>
           <span>Payin Total Charges: </span>
           <span className="font-semibold">23.04/-</span>
         </div>
