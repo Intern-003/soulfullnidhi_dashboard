@@ -35,7 +35,9 @@ export const Dashboard = () => {
               <div className="bg-white rounded-full p-3">
                 <i className="fa-solid fa-wallet text-blue-500 fa-lg"></i>
               </div>
-              <h5 className="text-lg font-semibold tracking-tight">Total Pay-IN Collection</h5>
+              <h5 className="text-lg font-semibold tracking-tight">
+                Total Pay-IN Collection
+              </h5>
             </div>
 
             <svg
@@ -63,9 +65,41 @@ export const Dashboard = () => {
           <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
             <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
               <div className="bg-white rounded-full p-3">
+                <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
+              </div>
+              <h5 className="text-lg font-semibold tracking-tight">
+                Today Pay-IN Collection
+              </h5>
+            </div>
+
+            <svg
+              className="absolute bottom-0 w-full"
+              viewBox="0 0 500 50"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
+                className="fill-gray-400"
+              />
+            </svg>
+
+            <div className="flex justify-between items-center p-6 relative z-10">
+              <h6 className="text-2xl font-bold text-gray-800">₹ 00.0</h6>
+              <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
+                <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
+                3.2%
+              </div>
+            </div>
+          </div>
+
+          <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
+            <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
+              <div className="bg-white rounded-full p-3">
                 <i className="fa-solid fa-wallet text-blue-500 fa-lg"></i>
               </div>
-              <h5 className="text-lg font-semibold tracking-tight">Total Pay-OUT</h5>
+              <h5 className="text-lg font-semibold tracking-tight">
+                Total Pay-OUT
+              </h5>
             </div>
 
             <svg
@@ -93,9 +127,11 @@ export const Dashboard = () => {
           <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
             <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
               <div className="bg-white rounded-full p-3">
-                <i className="fa-solid fa-wallet text-blue-500 fa-lg"></i>
+                <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
               </div>
-              <h5 className="text-lg font-semibold tracking-tight">Today Pay-IN Collection</h5>
+              <h5 className="text-lg font-semibold tracking-tight">
+                Today Pay-OUT
+              </h5>
             </div>
 
             <svg
@@ -110,39 +146,7 @@ export const Dashboard = () => {
             </svg>
 
             <div className="flex justify-between items-center p-6 relative z-10">
-              <h6 className="text-2xl font-bold text-gray-800">
-                ₹ 00.0
-              </h6>
-              <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
-                <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
-                3.2%
-              </div>
-            </div>
-          </div>
-
-          <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
-            <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
-              <div className="bg-white rounded-full p-3">
-                <i className="fa-solid fa-wallet text-blue-500 fa-lg"></i>
-              </div>
-              <h5 className="text-lg font-semibold tracking-tight">Today Pay-OUT</h5>
-            </div>
-
-            <svg
-              className="absolute bottom-0 w-full"
-              viewBox="0 0 500 50"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
-                className="fill-gray-400"
-              />
-            </svg>
-
-            <div className="flex justify-between items-center p-6 relative z-10">
-              <h6 className="text-2xl font-bold text-gray-800">
-                ₹ 00.0
-              </h6>
+              <h6 className="text-2xl font-bold text-gray-800">₹ 00.0</h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
                 3.2%
