@@ -240,7 +240,7 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <Table columns={transactioncolumn} data={transactiondata} />
+      <Table columns={transactioncolumn} data={transactiondata} showSearch ={false} showPagination= {false} showExport={false} showStatusFilter={false}/>
     </>
   );
 };
