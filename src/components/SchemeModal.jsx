@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 export const SchemeModal = ({ showModal, handleModal }) => {
-  const [tab, setTab] = useState(false);
+  const [activeTab, setActiveTab] = useState("tab1");
 
   return (
     <>
@@ -39,12 +39,12 @@ export const SchemeModal = ({ showModal, handleModal }) => {
                   <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
                     <li
                       className={`me-2 hover:text-blue-900 ${
-                        tab ? "text-blue-500" : "text-gray-500"
+                        activeTab === "tab1" ? "text-blue-500" : "text-gray-500"
                       }`}
                     >
                       <button
                         type="button"
-                        onClick={() => setTab(true)}
+                        onClick={() => setActiveTab("tab1")}
                         class="cursor-pointer inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:border-blue-900 group"
                       >
                         <i class="fa-solid fa-money-bill-transfer fa-lg me-2 transition duration-75"></i>
@@ -53,16 +53,44 @@ export const SchemeModal = ({ showModal, handleModal }) => {
                     </li>
                     <li
                       className={`me-2 hover:text-blue-900 ${
-                        !tab ? "text-blue-500" : "text-gray-500"
+                        activeTab === "tab2" ? "text-blue-500" : "text-gray-500"
                       }`}
                     >
                       <button
                         type="button"
-                        onClick={() => setTab(false)}
+                        onClick={() => setActiveTab("tab2")}
                         class="cursor-pointer inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:border-blue-900 group"
                       >
                         <i class="fa-solid fa-credit-card fa-lg me-2 transition duration-75"></i>
                         Payout
+                      </button>
+                    </li>
+                    <li
+                      className={`me-2 hover:text-blue-900 ${
+                        activeTab === "tab3" ? "text-blue-500" : "text-gray-500"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("tab3")}
+                        class="cursor-pointer inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:border-blue-900 group"
+                      >
+                        <i class="fa-solid fa-rotate fa-lg me-2 transition duration-75"></i>
+                        Rolling Amount
+                      </button>
+                    </li>
+                    <li
+                      className={`me-2 hover:text-blue-900 ${
+                        activeTab === "tab4" ? "text-blue-500" : "text-gray-500"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("tab4")}
+                        class="cursor-pointer inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:border-blue-900 group"
+                      >
+                        <i class="fa-solid fa-percent fa-lg me-2 transition duration-75"></i>
+                        GST
                       </button>
                     </li>
                   </ul>
@@ -79,12 +107,38 @@ export const SchemeModal = ({ showModal, handleModal }) => {
                           Type
                         </th>
                         <th scope="col" class="px-6 py-3">
-                          Amount
+                          Amount/Percentage
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {!tab && (
+                      {activeTab === "tab1" && (
+                        <tr class="border-b border-gray-500">
+                          <th
+                            scope="row"
+                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                          >
+                            Payin Commission Slab
+                          </th>
+                          <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <select>
+                              <option value="flat">Flat</option>
+                              <option selected value="percent">
+                                Percent
+                              </option>
+                            </select>
+                          </td>
+                          <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <input
+                              type="number"
+                              className="w-full border rounded-lg p-2 text-sm"
+                              step="0.01"
+                            />
+                          </td>
+                        </tr>
+                      )}
+
+                      {activeTab === "tab2" && (
                         <>
                           <tr class="border-b border-gray-500">
                             <th
@@ -104,7 +158,6 @@ export const SchemeModal = ({ showModal, handleModal }) => {
                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                               <input
                                 type="number"
-                                placeholder="Enter Amount"
                                 className="w-full border rounded-lg p-2 text-md"
                                 step="0.01"
                               />
@@ -120,13 +173,14 @@ export const SchemeModal = ({ showModal, handleModal }) => {
                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                               <select>
                                 <option value="flat">Flat</option>
-                                <option selected value="percent">Percent</option>
+                                <option selected value="percent">
+                                  Percent
+                                </option>
                               </select>
                             </td>
                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                               <input
                                 type="number"
-                                placeholder="Enter Amount"
                                 className="w-full border rounded-lg p-2 text-sm"
                                 step="0.01"
                               />
@@ -135,24 +189,100 @@ export const SchemeModal = ({ showModal, handleModal }) => {
                         </>
                       )}
 
-                      {tab && (
+                      {activeTab === "tab3" && (
+                        <>
+                          {/* Row 1 */}
+                          <tr className="border-b border-gray-500">
+                            <th
+                              scope="row"
+                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                            >
+                              <label className="flex items-center space-x-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="rollingOption"
+                                  value="payin"
+                                  className="accent-blue-600"
+                                  defaultChecked
+                                />
+                                <span>Rolling Payin Amount</span>
+                              </label>
+                            </th>
+
+                            <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                              <select>
+                                <option value="flat">Flat</option>
+                                <option selected value="percent">
+                                  Percent
+                                </option>
+                              </select>
+                            </td>
+
+                            <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                              <input
+                                type="number"
+                                className="w-full border rounded-lg p-2 text-md"
+                                step="0.01"
+                              />
+                            </td>
+                          </tr>
+
+                          {/* Row 2 */}
+                          <tr className="border-b border-gray-500 bg-blue-100">
+                            <th
+                              scope="row"
+                              className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                            >
+                              <label className="flex items-center space-x-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="rollingOption"
+                                  value="fixed"
+                                  className="accent-blue-600"
+                                />
+                                <span>Rolling Fixed Amount</span>
+                              </label>
+                            </th>
+
+                            <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                              <select>
+                                <option value="flat">Flat</option>
+                                <option selected value="percent">
+                                  Percent
+                                </option>
+                              </select>
+                            </td>
+
+                            <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                              <input
+                                type="number"
+                                className="w-full border rounded-lg p-2 text-sm"
+                                step="0.01"
+                              />
+                            </td>
+                          </tr>
+                        </>
+                      )}
+
+                      {activeTab === "tab4" && (
                         <tr class="border-b border-gray-500">
                           <th
                             scope="row"
                             class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
                           >
-                            Payin Commission Slab
+                            Goods And Service Tax
                           </th>
                           <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <select>
-                              <option value="flat">Flat</option>
-                              <option selected value="percent">Percent</option>
+                              <option value="percent" selected>
+                                Percent
+                              </option>
                             </select>
                           </td>
                           <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <input
-                              type="number"
-                              placeholder="Enter Amount"
+                              type="percentage"
+                              value="18"
                               className="w-full border rounded-lg p-2 text-sm"
                               step="0.01"
                             />
