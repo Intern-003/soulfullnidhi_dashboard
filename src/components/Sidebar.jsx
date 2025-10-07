@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "../css/sidebar.css";
 import Logo from "../images/logo.png";
 
-export const Sidebar = () => {
+export const Sidebar = ({open ,setOpen}) => {
   const [schemeDropDown, setSchemeDropDown] = useState(false);
   const [memberDropDown, setMemberDropDown] = useState(false);
   const [fundDropDown, setFundDropDown] = useState(false);
@@ -24,16 +24,20 @@ export const Sidebar = () => {
   tabIndex="-1"
   aria-labelledby="drawer-navigation-label"
 > */}
-
+     <div className={`fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300 ${open ? "opacity-100 visible" : "opacity-0 invisible" }`} 
+     onClick ={() => setOpen(false)} />
       <div
         id="drawer-navigation"
-        className={`w-62 h-screen flex flex-col p-4 transition-all duration-500 translate-x-0 
-  bg-blue-500 bg-[url('https://upload.wikimedia.org/wikipedia/commons/5/53/Designsz.png')] 
-  bg-cover bg-no-repeat bg-center bg-blend-soft-light 
-  shadow-[10px_0_25px_rgba(0,0,0,0.3)] hover:shadow-[22px_0_35px_rgba(0,0,0,0.4)] hover:-translate-x-0.6 transition-all duration-500 ease-in-out`}
+        className={`fixed top-0 left-0 h-full w-64 md:w-64 p-4 flex flex-col
+        bg-blue-500 bg-[url('https://upload.wikimedia.org/wikipedia/commons/5/53/Designsz.png')]
+        bg-cover bg-no-repeat bg-center bg-blend-soft-light shadow-xl
+        z-40 transform transition-transform duration-300 ease-in-out
+        md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
         tabIndex="-1"
         aria-labelledby="drawer-navigation-label"
       >
+        <button className="absolute top-4 right-4 text-2xl md:hidden" onClick ={() =>setOpen(false)}
+            > <i className="fa-solid fa-xmark text-red-600"></i> </button>
         <div className="flex-shrink-0 p-4 justify-center items-center">
           <div className="ml-6 rounded-full h-24 w-24 bg-white flex items-center justify-center">
             <a href="#">
@@ -100,13 +104,13 @@ export const Sidebar = () => {
                 schemeDropDown ? "" : "hidden"
               }`}
             >
-              <ul>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <Link to={"/scheme"}>
+              <Link to={"/scheme"}>
+                <ul>
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                     <span className="ms-3">Scheme</span>
-                  </Link>
-                </li>
-              </ul>
+                  </li>
+                </ul>
+              </Link>
             </div>
 
             {/**
@@ -151,11 +155,13 @@ export const Sidebar = () => {
                 memberDropDown ? "" : "hidden"
               }`}
             >
-              <ul>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <Link to={"/member-list"}>Merchant Onboarding</Link>
-                </li>
-              </ul>
+              <Link to={"/member-list"}>
+                <ul>
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    Merchant Onboarding
+                  </li>
+                </ul>
+              </Link>
             </div>
 
             {/**
@@ -200,12 +206,16 @@ export const Sidebar = () => {
               }`}
             >
               <ul>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <Link to="/load-wallet"> Load Wallet</Link>
-                </li>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <Link to="/payin-settlement">Payin Settlement</Link>
-                </li>
+                <Link to="/load-wallet">
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    Load Wallet
+                  </li>
+                </Link>
+                <Link to="/payin-settlement">
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    Payin Settlement
+                  </li>
+                </Link>
               </ul>
             </div>
 
@@ -251,9 +261,11 @@ export const Sidebar = () => {
               }`}
             >
               <ul>
+                  <Link to="/payout-request">
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <Link to="/payout-request">Request</Link>
+                  Request
                 </li>
+                  </Link>
               </ul>
             </div>
 
@@ -349,12 +361,16 @@ export const Sidebar = () => {
               }`}
             >
               <ul>
+                <Link to ="/upi-statement">
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">UPI Statement</a>
+                  UPI Statement
                 </li>
+                 </Link>
+                 <Link to="/payout-statement">
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">Payout Statement</a>
+                  Payout Statement
                 </li>
+               </Link>
               </ul>
             </div>
 

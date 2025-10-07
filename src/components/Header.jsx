@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 
-export const Header = () => {
+export const Header = ({ onMenuClick }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  // For mobile stats click
+  const [activeStat, setActiveStat] = useState(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -12,44 +15,95 @@ export const Header = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const stats = [
+    {
+      id: 1,
+      icon: "fa-solid fa-arrow-trend-up text-green-400",
+      label: "Payin Rolling Amount",
+      value: "165.08/-",
+    },
+    {
+      id: 2,
+      icon: "fa-solid fa-arrow-trend-up text-green-400",
+      label: "Payin Total Charges",
+      value: "23.04/-",
+    },
+    {
+      id: 3,
+      icon: "fa-solid fa-wallet text-red-400",
+      label: "Payout Wallet",
+      value: "54.40/-",
+    },
+    {
+      id: 4,
+      icon: "fa-solid fa-wallet text-green-400",
+      label: "Payin Wallet",
+      value: "365/-",
+    },
+  ];
 
   return (
     <nav className="bg-white shadow-lg shadow-indigo-500/50">
-      <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
-        <div>
-          <i class="fa-solid fa-arrow-trend-up me-2 text-green-400 fa-lg"></i>
-          <span>Payin Rolling Amount: </span>
-          <span className="font-semibold">165.08/-</span>
-        </div>
-        <div>
-          <i class="fa-solid fa-arrow-trend-up me-2 text-green-400 fa-lg"></i>
-          <span>Payin Total Charges: </span>
-          <span className="font-semibold">23.04/-</span>
-        </div>
-        <div>
-          <i class="fa-solid fa-wallet me-2 text-red-400 fa-lg"></i>
-          <span>Payout Wallet: </span>
-          <span className="font-semibold">54.40/-</span>
-        </div>
-        <div>
-          <i class="fa-solid fa-wallet me-2 text-green-400 fa-lg"></i>
-          <span>Payin Wallet: </span>
-          <span className="font-semibold">365/-</span>
+      <div className="flex items-center justify-between w-full px-4 py-3">
+        {/* Mobile menu button */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden text-2xl text-blue-600"
+        >
+          ☰
+        </button>
+
+        {/* --- Desktop Stats Section --- */}
+        <div className="hidden md:flex items-center gap-6">
+          {stats.map((item) => (
+            <div key={item.id}>
+              <i className={`${item.icon} me-2 fa-lg`}></i>
+              <span>{item.label}: </span>
+              <span className="font-semibold">{item.value}</span>
+            </div>
+          ))}
         </div>
 
+        {/* --- Mobile Icons Row --- */}
+        <div className="flex items-center gap-6 md:hidden relative">
+          {stats.map((item) => (
+            <div key={item.id} className="relative"
+              onMouseEnter={() => setActiveStat(item.id)}   // 👈 add this
+               onMouseLeave={() => setActiveStat(null)} >
+              
+              <button
+                onClick={() =>
+                  setActiveStat(activeStat === item.id ? null : item.id)
+                }
+                className="flex flex-col items-center"
+              >
+                <i className={`${item.icon} fa-xl`}></i>
+              </button>
+
+              {/* Show label + value when active */}
+              {activeStat === item.id && (
+                <div className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white shadow-lg rounded-lg p-2 text-sm text-gray-700 w-40 text-center z-50">
+                  <div>{item.label}</div>
+                  <div className="font-semibold">{item.value}</div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Profile Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setOpen(!open)}
             className="flex items-center focus:outline-none"
           >
             <img
-              className="w-12 h-12 rounded-full border"
+              className="w-10 h-10 rounded-full border"
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRduYoJopcD2_WmDjt978P3pjTLl-oQX-ZsTOaof805POhNgFzpYEy5LnA&s"
-              alt="profile image"
+              alt="profile"
             />
           </button>
 
@@ -60,7 +114,7 @@ export const Header = () => {
             >
               <div className="bg-gray-100 rounded-lg">
                 <div className="text-center text-gray-700 py-2">
-                  <h6 className="font-semisemibold">username</h6>
+                  <h6 className="font-semibold">username</h6>
                   <h6 className="text-sm">username@gmail.com</h6>
                   <hr className="my-2" />
                 </div>

@@ -195,11 +195,12 @@ const Table = ({
 
       {/* Table */}
       <div
-        className="bg-gray-300 rounded-lg mx-4 my-4 border border-sky-300"
-        style={{}}
+        className="bg-gray-300 rounded-lg mx-4 my-4 border border-sky-300 " 
+        
       >
+        <div className="overflow-x-scroll"  style={{ scrollbarWidth: "thin", scrollbarColor: "#9ca3af #e5e7eb" }}>
         <table
-          className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden inset-shadow-sm inset-shadow-indigo-500/100 "
+          className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden  inset-shadow-sm inset-shadow-indigo-500/100 "
           style={{
             borderCollapse: "collapse",
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
@@ -240,7 +241,9 @@ const Table = ({
                   >
                     {columns.map((column, colIndex) => (
                       <td key={colIndex} className="px-4 py-2 text-gray-800">
-                        {row[column.accessor]}
+                       {column.Cell
+                        ? column.Cell({ value: row[column.accessor], row })
+                        : row[column.accessor]}
                       </td>
                     ))}
                   </tr>
@@ -257,7 +260,7 @@ const Table = ({
             )}
           </tbody>
         </table>
-
+           </div>
         {showPagination && (
           <div
             className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-3 rounded-b-lg border border-sky-200"

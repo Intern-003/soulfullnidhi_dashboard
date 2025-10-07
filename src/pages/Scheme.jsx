@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import Table from "../components/Table";
 import { SchemeModal } from "../components/SchemeModal";
+import Toggle from "../components/Toggle";
+import Button from "../components/Button";
 
 const Scheme = () => {
   // ✅ States
@@ -14,7 +16,16 @@ const Scheme = () => {
   const schemecolumn = [
     { header: "SQ NO", accessor: "sqno" },
     { header: "Name", accessor: "name" },
-    { header: "Status", accessor: "status" },
+    {
+      header: "Status",
+      accessor: "status",
+      Cell: ({ value, row }) => (
+        <Toggle
+          defaultChecked={value === "Active"}
+          onChange={(checked) => handleStatusToggle(row.sqno, checked)}
+        />
+      ),
+    },
     { header: "Action", accessor: "action" },
   ];
 
@@ -23,13 +34,13 @@ const Scheme = () => {
 
   // ✅ Dummy Data (temporary until API is ready)
   const dummyData = [
-    {  name: "Yuvraj", status: "Active" },
-    {  name: "Akash", status: "Inactive" },
-    { name: "Aman", status: "Pending" },
-    {  name: "Sahil", status: "Active" },
     { name: "Yuvraj", status: "Active" },
-    {  name: "Akash", status: "Inactive" },
-    {  name: "Aman", status: "Pending" },
+    { name: "Akash", status: "Inactive" },
+    { name: "Aman", status: "Pending" },
+    { name: "Sahil", status: "Active" },
+    { name: "Yuvraj", status: "Active" },
+    { name: "Akash", status: "Inactive" },
+    { name: "Aman", status: "Pending" },
     { name: "Sahil", status: "Active" },
   ];
 
@@ -86,6 +97,17 @@ const Scheme = () => {
     // You can pass scheme data to modal here later
   };
 
+  // ✅ Toggle status handler
+  const handleStatusToggle = (sqno, checked) => {
+    setSchemeData((prev) =>
+      prev.map((item) =>
+        item.sqno === sqno
+          ? { ...item, status: checked ? "Active" : "Inactive" }
+          : item
+      )
+    );
+  };
+
   return (
     // <Layout>
     <div>
@@ -97,7 +119,7 @@ const Scheme = () => {
         <h4 className="font-bold text-white text-lg py-2">Scheme Manager</h4>
 
         {/* Add New Button */}
-        <button
+        {/* <button
           type="button"
           onClick={handleModal}
           className="text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 
@@ -105,7 +127,8 @@ const Scheme = () => {
             shadow-lg font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
         >
           + Add New
-        </button>
+        </button> */}
+        <Button type="button" variant="AddNewBtn" onClick={handleModal}>ADD NEW</Button>
 
         {/* Modal */}
         <SchemeModal showModal={showModal} handleModal={handleModal} />
