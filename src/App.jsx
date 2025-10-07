@@ -8,6 +8,8 @@ import LoginForm from "./pages/LoginForm";
 import { MemberOnboardForm } from "./pages/MemberOnboardForm";
 import { Member } from "./pages/Member";
 import { Dashboard } from "./pages/Dashboard";
+import UpiStatement from "./pages/UpiStatement";
+import PayoutStatement from "./pages/PayoutStatement";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
           <Route path="/payin-settlement" element={<Payinsettlement />} />
           <Route path="/member-list" element={<Member />} />
           <Route path="/member-create" element={<MemberOnboardForm />} />
+          <Route path="/upi-statement" element= {< UpiStatement/>} />
+          <Route path="/payout-statement" element = {< PayoutStatement/>} />
         </Route>
       </Routes>
     </>

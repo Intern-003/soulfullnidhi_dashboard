@@ -361,12 +361,16 @@ export const Sidebar = ({open ,setOpen}) => {
               }`}
             >
               <ul>
+                <Link to ="/upi-statement">
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">UPI Statement</a>
+                  UPI Statement
                 </li>
+                 </Link>
+                 <Link to="/payout-statement">
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">Payout Statement</a>
+                  Payout Statement
                 </li>
+               </Link>
               </ul>
             </div>
 
