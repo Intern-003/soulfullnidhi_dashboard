@@ -1,5 +1,6 @@
 import React from 'react'
 import Table from '../components/Table'
+import Button from '../components/Button';
 
 const PayoutStatement = () => {
       const payoutcolumn = [
@@ -53,9 +54,11 @@ const PayoutStatement = () => {
     <div>
                     <div
         className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center"
-        style={{ margin: "0px  0px 20px 0px", padding: "10px" }}
-      >
+        style={{ margin: "0px  0px 20px 0px", padding: "10px" }}  >
         <h4 className="font-bold text-white text-lg py-2">Payout Statement</h4></div>
+
+        <Button variant="AddNewBtn" onClick={()=> alert("button clicked")}>primary button</Button>
+
         <Table columns={payoutcolumn} data={payoutdata}/>
     </div>
   )

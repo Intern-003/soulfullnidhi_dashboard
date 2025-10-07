@@ -3,6 +3,7 @@ import Layout from "../components/Layout";
 import Table from "../components/Table";
 import { SchemeModal } from "../components/SchemeModal";
 import Toggle from "../components/Toggle";
+import Button from "../components/Button";
 
 const Scheme = () => {
   // ✅ States
@@ -118,7 +119,7 @@ const Scheme = () => {
         <h4 className="font-bold text-white text-lg py-2">Scheme Manager</h4>
 
         {/* Add New Button */}
-        <button
+        {/* <button
           type="button"
           onClick={handleModal}
           className="text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 
@@ -126,7 +127,8 @@ const Scheme = () => {
             shadow-lg font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
         >
           + Add New
-        </button>
+        </button> */}
+        <Button type="button" variant="AddNewBtn" onClick={handleModal}>ADD NEW</Button>
 
         {/* Modal */}
         <SchemeModal showModal={showModal} handleModal={handleModal} />
