@@ -16,6 +16,11 @@ const Scheme = () => {
     { header: "Name", accessor: "name" },
     { header: "Status", accessor: "status" },
     { header: "Action", accessor: "action" },
+    { header: "Status", accessor: "status" },
+    { header: "Status", accessor: "status" },
+    { header: "Status", accessor: "status" },
+    { header: "Status", accessor: "status" },
+    { header: "Status", accessor: "status" },
   ];
 
   // ✅ Toggle Modal
