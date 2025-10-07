@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import Table from "../components/Table";
 import { SchemeModal } from "../components/SchemeModal";
+import Toggle from "../components/Toggle";
 
 const Scheme = () => {
   // ✅ States
@@ -14,13 +15,17 @@ const Scheme = () => {
   const schemecolumn = [
     { header: "SQ NO", accessor: "sqno" },
     { header: "Name", accessor: "name" },
-    { header: "Status", accessor: "status" },
+    {
+      header: "Status",
+      accessor: "status",
+      Cell: ({ value, row }) => (
+        <Toggle
+          defaultChecked={value === "Active"}
+          onChange={(checked) => handleStatusToggle(row.sqno, checked)}
+        />
+      ),
+    },
     { header: "Action", accessor: "action" },
-    { header: "Status", accessor: "status" },
-    { header: "Status", accessor: "status" },
-    { header: "Status", accessor: "status" },
-    { header: "Status", accessor: "status" },
-    { header: "Status", accessor: "status" },
   ];
 
   // ✅ Toggle Modal
@@ -28,13 +33,13 @@ const Scheme = () => {
 
   // ✅ Dummy Data (temporary until API is ready)
   const dummyData = [
-    {  name: "Yuvraj", status: "Active" },
-    {  name: "Akash", status: "Inactive" },
-    { name: "Aman", status: "Pending" },
-    {  name: "Sahil", status: "Active" },
     { name: "Yuvraj", status: "Active" },
-    {  name: "Akash", status: "Inactive" },
-    {  name: "Aman", status: "Pending" },
+    { name: "Akash", status: "Inactive" },
+    { name: "Aman", status: "Pending" },
+    { name: "Sahil", status: "Active" },
+    { name: "Yuvraj", status: "Active" },
+    { name: "Akash", status: "Inactive" },
+    { name: "Aman", status: "Pending" },
     { name: "Sahil", status: "Active" },
   ];
 
@@ -89,6 +94,17 @@ const Scheme = () => {
     console.log("Editing:", scheme);
     setShowModal(true);
     // You can pass scheme data to modal here later
+  };
+
+  // ✅ Toggle status handler
+  const handleStatusToggle = (sqno, checked) => {
+    setSchemeData((prev) =>
+      prev.map((item) =>
+        item.sqno === sqno
+          ? { ...item, status: checked ? "Active" : "Inactive" }
+          : item
+      )
+    );
   };
 
   return (
