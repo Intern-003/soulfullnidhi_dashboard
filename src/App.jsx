@@ -8,6 +8,7 @@ import LoginForm from './pages/LoginForm';
 import { MemberOnboardForm } from './pages/MemberOnboardForm';
 import { Member } from './pages/Member';
 import { Dashboard } from './pages/Dashboard';
+import { CreateComplain } from './pages/CreateComplain';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/payin-settlement" element={<Payinsettlement />} />
           <Route path="/member-list" element={<Member />} />
           <Route path="/member-create" element={<MemberOnboardForm />} />
+          <Route path="/register-complain" element={<CreateComplain />} />
         </Routes>
       </Layout>
     </>
