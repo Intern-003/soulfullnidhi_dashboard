@@ -311,9 +311,11 @@ export const Sidebar = ({open ,setOpen}) => {
               }`}
             >
               <ul>
+                <Link to="/payin-request">
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">Request</a>
+                  Request
                 </li>
+                </Link>
               </ul>
             </div>
 

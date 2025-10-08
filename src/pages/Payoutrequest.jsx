@@ -43,10 +43,10 @@ const Payoutrequest = () => {
       {/* Table Section */}
       <div className="bg-white  rounded-lg shadow-sm shadow-gray-900/100">
         <div className=" flex justify-between items-center p-2 mb-4 rounded-t-lg">
-          <h4 className="font-bold text-blue-500 text-lg py-2">Beneficiary List</h4>
+          <h4 className="font-bold text-blue-500 text-lg py-2 ml-4">Beneficiary List</h4>
           <button type="button" onClick={() => setShowFormModal(true)} class="text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 
             hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 
-            shadow-lg font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">+ Add New Beneficiary</button>
+            shadow-lg font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 mt-2">+ Add New Beneficiary</button>
         </div>
         <Table columns={membercolumn} data={tableDataWithActions} showSearch ={false} showExport={false} showStatusFilter={false}/>
 
