@@ -1,9 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import Payoutrequest from "./pages/Payoutrequest";
 import Scheme from "./pages/Scheme";
 import Layout from "./components/Layout";
 import Loadwallet from "./pages/LoadWallet";
 import Payinsettlement from "./pages/PayinSettlement";
+import Payoutrequest from "./pages/Payoutrequest";
+
 import LoginForm from "./pages/LoginForm";
 import { MemberOnboardForm } from "./pages/MemberOnboardForm";
 import { Member } from "./pages/Member";
@@ -12,6 +13,7 @@ import UpiStatement from "./pages/UpiStatement";
 import PayoutStatement from "./pages/PayoutStatement";
 import { CreateComplain } from "./pages/CreateComplain";
 import { ViewComplain } from "./pages/ViewComplain";
+import Payinrequest from "./pages/payinRequest";
 
 function App() {
   return (
@@ -22,6 +24,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/payout-request" element={<Payoutrequest />} />
+          <Route path="/payin-request" element={<Payinrequest />} />
           <Route path="/scheme" element={<Scheme />} />
           <Route path="/load-wallet" element={<Loadwallet />} />
           <Route path="/payin-settlement" element={<Payinsettlement />} />
