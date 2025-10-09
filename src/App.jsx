@@ -13,6 +13,7 @@ import UpiStatement from "./pages/UpiStatement";
 import PayoutStatement from "./pages/PayoutStatement";
 import { ViewComplain } from "./pages/ViewComplain";
 import Payinrequest from "./pages/payinRequest";
+import OnboardBank from "./pages/OnboardBank";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/upi-statement" element={<UpiStatement />} />
           <Route path="/payout-statement" element={<PayoutStatement />} />
           <Route path="/view-complain" element={<ViewComplain />} />
+          <Route path="/onboard-bank" element={< OnboardBank/>} />
         </Route>
       </Routes>
     </>
