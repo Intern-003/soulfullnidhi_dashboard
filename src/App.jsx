@@ -32,7 +32,6 @@ function App() {
           <Route path="/member-create" element={<MemberOnboardForm />} />
           <Route path="/upi-statement" element={<UpiStatement />} />
           <Route path="/payout-statement" element={<PayoutStatement />} />
-          <Route path="/register-complain" element={<CreateComplain />} />
           <Route path="/view-complain" element={<ViewComplain />} />
         </Route>
       </Routes>
