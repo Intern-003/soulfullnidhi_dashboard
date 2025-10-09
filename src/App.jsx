@@ -11,7 +11,6 @@ import { Member } from "./pages/Member";
 import { Dashboard } from "./pages/Dashboard";
 import UpiStatement from "./pages/UpiStatement";
 import PayoutStatement from "./pages/PayoutStatement";
-import { CreateComplain } from "./pages/CreateComplain";
 import { ViewComplain } from "./pages/ViewComplain";
 import Payinrequest from "./pages/payinRequest";
 import OnboardBank from "./pages/OnboardBank";
@@ -33,7 +32,6 @@ function App() {
           <Route path="/member-create" element={<MemberOnboardForm />} />
           <Route path="/upi-statement" element={<UpiStatement />} />
           <Route path="/payout-statement" element={<PayoutStatement />} />
-          <Route path="/register-complain" element={<CreateComplain />} />
           <Route path="/view-complain" element={<ViewComplain />} />
           <Route path="/onboard-bank" element={< OnboardBank/>} />
         </Route>

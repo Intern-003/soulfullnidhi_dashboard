@@ -579,10 +579,7 @@ export const Sidebar = ({ open, setOpen }) => {
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">Register Complain</a>
-                </li>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <a href="">View Complain</a>
+                  <Link to={"/view-complain"}>View Complain</Link>
                 </li>
               </ul>
             </div>
