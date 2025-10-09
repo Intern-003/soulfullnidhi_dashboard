@@ -11,7 +11,6 @@ import { Member } from "./pages/Member";
 import { Dashboard } from "./pages/Dashboard";
 import UpiStatement from "./pages/UpiStatement";
 import PayoutStatement from "./pages/PayoutStatement";
-import { CreateComplain } from "./pages/CreateComplain";
 import { ViewComplain } from "./pages/ViewComplain";
 import Payinrequest from "./pages/payinRequest";
 
