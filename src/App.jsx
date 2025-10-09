@@ -14,6 +14,7 @@ import PayoutStatement from "./pages/PayoutStatement";
 import { CreateComplain } from "./pages/CreateComplain";
 import { ViewComplain } from "./pages/ViewComplain";
 import Payinrequest from "./pages/payinRequest";
+import OnboardBank from "./pages/OnboardBank";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="/payout-statement" element={<PayoutStatement />} />
           <Route path="/register-complain" element={<CreateComplain />} />
           <Route path="/view-complain" element={<ViewComplain />} />
+          <Route path="/onboard-bank" element={< OnboardBank/>} />
         </Route>
       </Routes>
     </>

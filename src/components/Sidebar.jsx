@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "../css/sidebar.css";
 import Logo from "../images/logo.png";
 
-export const Sidebar = ({open ,setOpen}) => {
+export const Sidebar = ({ open, setOpen }) => {
   const [schemeDropDown, setSchemeDropDown] = useState(false);
   const [memberDropDown, setMemberDropDown] = useState(false);
   const [fundDropDown, setFundDropDown] = useState(false);
@@ -13,6 +13,8 @@ export const Sidebar = ({open ,setOpen}) => {
   const [rolesDropDown, setRolesDropDown] = useState(false);
   const [ticketsDropDown, setTicketsDropDown] = useState(false);
   const [payinDropDown, setPayinDropDown] = useState(false);
+  const [ApiDocDropDown, setApiDocDropDown] = useState(false);  
+
 
   return (
     <>
@@ -24,8 +26,8 @@ export const Sidebar = ({open ,setOpen}) => {
   tabIndex="-1"
   aria-labelledby="drawer-navigation-label"
 > */}
-     <div className={`fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300 ${open ? "opacity-100 visible" : "opacity-0 invisible" }`} 
-     onClick ={() => setOpen(false)} />
+      <div className={`fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300 ${open ? "opacity-100 visible" : "opacity-0 invisible"}`}
+        onClick={() => setOpen(false)} />
       <div
         id="drawer-navigation"
         className={`fixed top-0 left-0 h-full w-64 md:w-64 p-4 flex flex-col
@@ -36,8 +38,8 @@ export const Sidebar = ({open ,setOpen}) => {
         tabIndex="-1"
         aria-labelledby="drawer-navigation-label"
       >
-        <button className="absolute top-4 right-4 text-2xl md:hidden" onClick ={() =>setOpen(false)}
-            > <i className="fa-solid fa-xmark text-red-600"></i> </button>
+        <button className="absolute top-4 right-4 text-2xl md:hidden" onClick={() => setOpen(false)}
+        > <i className="fa-solid fa-xmark text-red-600"></i> </button>
         <div className="flex-shrink-0 p-4 justify-center items-center">
           <div className="ml-6 rounded-full h-24 w-24 bg-white flex items-center justify-center">
             <a href="#">
@@ -100,9 +102,8 @@ export const Sidebar = ({open ,setOpen}) => {
             Dropdown body of scheme
             */}
             <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                schemeDropDown ? "" : "hidden"
-              }`}
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${schemeDropDown ? "" : "hidden"
+                }`}
             >
               <Link to={"/scheme"}>
                 <ul>
@@ -151,9 +152,8 @@ export const Sidebar = ({open ,setOpen}) => {
              * Dropdown body of member
              */}
             <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                memberDropDown ? "" : "hidden"
-              }`}
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${memberDropDown ? "" : "hidden"
+                }`}
             >
               <Link to={"/member-list"}>
                 <ul>
@@ -201,9 +201,8 @@ export const Sidebar = ({open ,setOpen}) => {
              * Dropdown body of fund
              */}
             <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                fundDropDown ? "" : "hidden"
-              }`}
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${fundDropDown ? "" : "hidden"
+                }`}
             >
               <ul>
                 <Link to="/load-wallet">
@@ -256,16 +255,15 @@ export const Sidebar = ({open ,setOpen}) => {
              * Dropdown body of payout
              */}
             <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                payoutDropDown ? "" : "hidden"
-              }`}
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${payoutDropDown ? "" : "hidden"
+                }`}
             >
               <ul>
-                  <Link to="/payout-request">
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  Request
-                </li>
-                  </Link>
+                <Link to="/payout-request">
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    Request
+                  </li>
+                </Link>
               </ul>
             </div>
 
@@ -306,15 +304,14 @@ export const Sidebar = ({open ,setOpen}) => {
              * Dropdown body of payin
              */}
             <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                payinDropDown ? "" : "hidden"
-              }`}
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${payinDropDown ? "" : "hidden"
+                }`}
             >
               <ul>
                 <Link to="/payin-request">
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  Request
-                </li>
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    Request
+                  </li>
                 </Link>
               </ul>
             </div>
@@ -358,21 +355,20 @@ export const Sidebar = ({open ,setOpen}) => {
              * Dropdown body of transaction
              */}
             <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                transactionDropDown ? "" : "hidden"
-              }`}
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${transactionDropDown ? "" : "hidden"
+                }`}
             >
               <ul>
-                <Link to ="/upi-statement">
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  UPI Statement
-                </li>
-                 </Link>
-                 <Link to="/payout-statement">
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  Payout Statement
-                </li>
-               </Link>
+                <Link to="/upi-statement">
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                    UPI Statement
+                  </li>
+                </Link>
+                <Link to="/payout-statement">
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                    Payout Statement
+                  </li>
+                </Link>
               </ul>
             </div>
 
@@ -413,9 +409,8 @@ export const Sidebar = ({open ,setOpen}) => {
              * Dropdown body of account
              */}
             <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                accountDropDown ? "" : "hidden"
-              }`}
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${accountDropDown ? "" : "hidden"
+                }`}
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
@@ -426,7 +421,19 @@ export const Sidebar = ({open ,setOpen}) => {
                 </li>
               </ul>
             </div>
-
+            
+            <li>
+              <Link to={"/onboard-bank"}
+                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
+                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
+                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
+              >
+                <i className="fa-solid fa-chart-pie fa-lg text-white transition-all duration-300 ease-in-out group-hover:text-blue-900 group-hover:scale-125"></i>
+                <span className="ms-3 transition-colors duration-300 group-hover:text-blue-900 group-hover:text-sm">
+                  Onboard Bank
+                </span>
+              </Link>
+            </li>
             {/**
              * Dropdown button of roles
              */}
@@ -441,7 +448,7 @@ export const Sidebar = ({open ,setOpen}) => {
                 <div>
                   <i class="fa-solid fa-gears fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                   <span className="ms-2 group-hover:text-sm">
-                    Roles & Permissions
+                    Api Settings
                   </span>
                 </div>
                 <svg
@@ -466,19 +473,71 @@ export const Sidebar = ({open ,setOpen}) => {
              * Dropdown body of roles
              */}
             <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                rolesDropDown ? "" : "hidden"
-              }`}
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${rolesDropDown ? "" : "hidden"
+                }`}
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">Roles</a>
-                </li>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">Permissions</a>
+                  <a href="">Callback and Token</a>
                 </li>
               </ul>
             </div>
+
+
+            <li>
+              <a
+                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
+                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
+                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
+                type="button"
+                onClick={() => setApiDocDropDown(!ApiDocDropDown)}
+              >
+                <div>
+                  <i class="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                  <span className="ms-3 group-hover:text-sm">
+                    API Documents
+                  </span>
+                </div>
+
+                <svg
+                  class="w-2.5 h-2.5 ms-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 10 6"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </a>
+            </li>
+
+            {/*
+            Dropdown body of scheme
+            */}
+            <div
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${ApiDocDropDown ? "" : "hidden"
+                }`}
+            >
+              <Link to={"/scheme"}>
+                <ul>
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    <span className="ms-3">Payin Documents</span>
+                  </li>
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    <span className="ms-3">Payout Documents</span>
+                  </li>
+                </ul>
+              </Link>
+            </div>
+
+
+
 
             {/**
              * Dropdown button of tickets
@@ -515,9 +574,8 @@ export const Sidebar = ({open ,setOpen}) => {
              * Dropdown body of tickets
              */}
             <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                ticketsDropDown ? "" : "hidden"
-              }`}
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${ticketsDropDown ? "" : "hidden"
+                }`}
             >
               <ul>
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">

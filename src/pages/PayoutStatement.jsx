@@ -57,7 +57,7 @@ const PayoutStatement = () => {
         style={{ margin: "0px  0px 20px 0px", padding: "10px" }}  >
         <h4 className="font-bold text-white text-lg py-2">Payout Statement</h4></div>
 
-        <Button variant="AddNewBtn" onClick={()=> alert("button clicked")}>primary button</Button>
+        {/* <Button variant="AddNewBtn" onClick={()=> alert("button clicked")}>primary button</Button> */}
 
         <Table columns={payoutcolumn} data={payoutdata}/>
     </div>
