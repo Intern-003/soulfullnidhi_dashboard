@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from "react";
+import Button from "./Button";
+import { ConfirmModal } from "./ConfirmModal";
 
 const Table = ({
   columns,
@@ -7,12 +9,18 @@ const Table = ({
   showPagination = true,
   showExport = true,
   showStatusFilter = true,
+  showDeleteColumn = true,
 }) => {
   const [search, setSearch] = useState("");
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [openExport, setOpenExport] = useState(false);
   const [statusFilter, setStatusFilter] = useState(""); // ✅ New state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const handleConfirmModal = () => {
+    setShowConfirmModal(!showConfirmModal);
+  }
 
   if (!columns || !data || data.length === 0) {
     return <h6>No data found</h6>;
@@ -194,73 +202,92 @@ const Table = ({
       )}
 
       {/* Table */}
-      <div
-        className="bg-gray-300 rounded-lg mx-4 my-4 border border-sky-300 " 
-        
-      >
-        <div className="overflow-x-scroll"  style={{ scrollbarWidth: "thin", scrollbarColor: "#9ca3af #e5e7eb" }}>
-        <table
-          className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden  inset-shadow-sm inset-shadow-indigo-500/100 "
-          style={{
-            borderCollapse: "collapse",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-          }}
+      <div className="bg-gray-300 rounded-lg mx-4 my-4 border border-sky-300 ">
+        <div
+          className="overflow-x-scroll"
+          style={{ scrollbarWidth: "thin", scrollbarColor: "#9ca3af #e5e7eb" }}
         >
-          <thead
+          <table
+            className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden  inset-shadow-sm inset-shadow-indigo-500/100 "
             style={{
-              background: "linear-gradient(90deg, #007BFF, #00C8FF)",
-              color: "white",
+              borderCollapse: "collapse",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
             }}
-            className="uppercase text-xs tracking-wide"
           >
-            <tr>
-              {columns.map((column, index) => (
-                <th
-                  key={index}
-                  className="font-semibold text-sm px-4 py-3 border-b border-white/30"
-                >
-                  {column.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredData.length > 0 ? (
-              filteredData
-                .slice(
-                  (currentPage - 1) * entriesPerPage,
-                  currentPage * entriesPerPage
-                )
-                .map((row, rowIndex) => (
-                  <tr
-                    key={rowIndex}
-                    className={`${
-                      rowIndex % 2 === 0 ? "bg-[#f8fbff]" : "bg-white"
-                    } hover:bg-[#dbeafe] transition-colors duration-200`}
-                  >
-                    {columns.map((column, colIndex) => (
-                      <td key={colIndex} className="px-4 py-2 text-gray-800">
-                       {column.Cell
-                        ? column.Cell({ value: row[column.accessor], row })
-                        : row[column.accessor]}
-                      </td>
-                    ))}
-                  </tr>
-                ))
-            ) : (
+            <thead
+              style={{
+                background: "linear-gradient(90deg, #007BFF, #00C8FF)",
+                color: "white",
+              }}
+              className="uppercase tracking-wide"
+            >
               <tr>
-                <td
-                  colSpan={columns.length}
-                  className="text-center py-4 text-gray-500"
-                >
-                  No matching records found
-                </td>
+                {columns.map((column, index) => (
+                  <th
+                    key={index}
+                    className="font-semibold text-md px-4 py-3 border-b border-white/30"
+                  >
+                    {column.header}
+                  </th>
+                ))}
+                {showDeleteColumn && (
+                  <th className="font-semibold text-md px-4 py-3 border-b border-white/30">
+                    Delete
+                  </th>
+                )}
               </tr>
-            )}
-          </tbody>
-        </table>
-           </div>
+            </thead>
+
+            <tbody>
+              {filteredData.length > 0 ? (
+                filteredData
+                  .slice(
+                    (currentPage - 1) * entriesPerPage,
+                    currentPage * entriesPerPage
+                  )
+                  .map((row, rowIndex) => (
+                    <tr
+                      key={rowIndex}
+                      className={`${
+                        rowIndex % 2 === 0 ? "bg-[#f8fbff]" : "bg-white"
+                      } hover:bg-[#dbeafe] transition-colors duration-200`}
+                    >
+                      {columns.map((column, colIndex) => (
+                        <td key={colIndex} className="px-4 py-2 text-gray-800">
+                          {column.Cell
+                            ? column.Cell({ value: row[column.accessor], row })
+                            : row[column.accessor]}
+                        </td>
+                      ))}
+                      {showDeleteColumn && (
+                        <td className="px-4 py-2">
+                          <Button
+                            type="button"
+                            onClick={handleConfirmModal}
+                            className="text-red-800 p-3 rounded-xl cursor-pointer"
+                          >
+                            <i class="fa-solid fa-trash fa-lg"></i>
+                          </Button>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="text-center py-4 text-gray-500"
+                  >
+                    No matching records found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <ConfirmModal showConfirmModal={showConfirmModal} handleConfirmModal={handleConfirmModal} heading={"Are you sure you want to delete?"} body={"If you delete the record it will be not recovered."} action={() => setShowConfirmModal(false)}/>
+
         {showPagination && (
           <div
             className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-3 rounded-b-lg border border-sky-200"
@@ -284,21 +311,21 @@ const Table = ({
 
             {/* Right - Pagination controls */}
             <div className="flex items-center gap-2 mt-3 md:mt-0">
-              <button
+              <Button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className={`px-3 py-1 text-sm rounded-md border ${
                   currentPage === 1
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
                 }`}
               >
                 Prev
-              </button>
+              </Button>
               <span className="text-sm text-gray-600">
                 Page <span className="font-semibold">{currentPage}</span>
               </span>
-              <button
+              <Button
                 onClick={() =>
                   setCurrentPage((prev) =>
                     prev < Math.ceil(filteredData.length / entriesPerPage)
@@ -314,11 +341,11 @@ const Table = ({
                   currentPage ===
                   Math.ceil(filteredData.length / entriesPerPage)
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
                 }`}
               >
                 Next
-              </button>
+              </Button>
             </div>
           </div>
         )}

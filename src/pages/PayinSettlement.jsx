@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Table from "../components/Table";
-import Toggle from "../components/Toggle";
+import Button from "../components/Button";
 
 const PayinSettlement = () => {
   const [showModal, setShowModal] = useState(false);
@@ -29,15 +29,15 @@ const PayinSettlement = () => {
   const tableDataWithActions = memberdata.map((row) => ({
     ...row,
     action: (
-      <button
+      <Button
         onClick={() => {
           setSelectedUser(row);
           setShowModal(true);
         }}
-        className="text-white bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded-lg text-sm"
+        className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
       >
         Payin Settlement
-      </button>
+      </Button>
     ),
   }));
 
@@ -54,8 +54,8 @@ const PayinSettlement = () => {
       >
         Payin Settlement
       </button> */}
-      <div className="bg-blue-500 flex justify-between items-center p-2 mb-4">
-        <h4 className="font-bold text-white text-lg py-2">Member List</h4>
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
+        <h4 className="font-bold text-white text-lg py-2">Payin Settlement</h4>
       </div>
 
       <Table columns={membercolumn} data={tableDataWithActions} />
@@ -78,12 +78,12 @@ const PayinSettlement = () => {
               <h3 className="text-lg font-semibold">
                 Payin Settlement to {selectedUser?.name}
               </h3>
-              <button
+              <Button
                 onClick={() => setShowModal(false)}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black font-bold text-lg shadow-md hover:bg-gray-200 transition"
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
               >
-                ✖
-              </button>
+                <i class="fa-solid fa-xmark fa-lg"></i>
+              </Button>
             </div>
             
 
@@ -107,12 +107,12 @@ const PayinSettlement = () => {
                 />
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg w-full"
+                className="text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg w-full cursor-pointer"
               >
                 Submit
-              </button>
+              </Button>
             </form>
           </div>
         </div>

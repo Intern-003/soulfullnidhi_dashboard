@@ -2,10 +2,12 @@ import { useState } from "react";
 import Button from "../components/Button";
 import Table from "../components/Table";
 import Logo from "../images/logo.png";
+import Placeholder from "../images/placeholder.jpeg";
 
 export const ViewComplain = () => {
   const [showModal, setShowModal] = useState(false);
   const [showViewMessageModal, setShowViewMessageModal] = useState(false);
+  const [showSendMessageModal, setShowSendMessageModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
 
   const complainColumns = [
@@ -15,7 +17,8 @@ export const ViewComplain = () => {
     { header: "Description", accessor: "description" },
     { header: "Status", accessor: "status" },
     { header: "Priority", accessor: "priority" },
-    { header: "View Message", accessor: "message" },
+    { header: "Send Message", accessor: "send" },
+    { header: "View Message", accessor: "view" },
     { header: "Issue Image", accessor: "image" },
   ];
 
@@ -27,7 +30,8 @@ export const ViewComplain = () => {
       description: "Can't send email from your portal.",
       status: "Open",
       priority: "High",
-      message: "",
+      send: "",
+      view: "",
       image: "",
     },
     {
@@ -37,7 +41,8 @@ export const ViewComplain = () => {
       description: "Can't register on your portal.",
       status: "Open",
       priority: "High",
-      message: "",
+      send: "",
+      view: "",
       image: "",
     },
   ];
@@ -92,31 +97,38 @@ export const ViewComplain = () => {
       </select>
     ),
 
-    message: (
-      <button
+    send: (
+      <Button
+        onClick={() => setShowSendMessageModal(!showSendMessageModal)}
+        className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+      >
+        Send Message
+      </Button>
+    ),
+
+    view: (
+      <Button
         onClick={() => setShowViewMessageModal(!showViewMessageModal)}
-        className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md"
+        className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
       >
         View Message
-      </button>
+      </Button>
     ),
 
     image: (
-      <button onClick={() => setShowImageModal(!showImageModal)}>
-        <img src={Logo} alt="" />
-      </button>
+      <Button className="cursor-pointer" onClick={() => setShowImageModal(!showImageModal)}>
+        <img src={Logo ? Logo : Placeholder} alt="" />
+      </Button>
     ),
   }));
 
   return (
     <>
-      <div
-        className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center"
-        style={{ margin: "0px  0px 20px 0px", padding: "10px" }}
-      >
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
         <h4 className="font-bold text-white text-lg py-2">View Complain</h4>
         <Button
           type="button"
+          className="cursor-pointer"
           variant="AddNewBtn"
           onClick={() => setShowModal(!showModal)}
         >
@@ -145,12 +157,12 @@ export const ViewComplain = () => {
               <h4 className="font-bold text-white text-lg py-2">
                 Register Complain
               </h4>
-              <button
+              <Button
                 onClick={() => setShowModal(false)}
                 className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
               >
                 <i class="fa-solid fa-xmark fa-lg"></i>
-              </button>
+              </Button>
             </div>
 
             <form className="p-6">
@@ -201,22 +213,22 @@ export const ViewComplain = () => {
                 </div>
               </div>
               <div className="flex justify-center mt-6">
-                <button
+                <Button
                   type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                  className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
                   Submit
-                </button>
+                </Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {showViewMessageModal && (
+      {showSendMessageModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
-          onClick={() => setShowViewMessageModal(false)}
+          onClick={() => setShowSendMessageModal(false)}
         >
           <div
             className="bg-white border rounded-lg shadow-lg max-w-3xl w-full mx-2 p-6 transform transition-all scale-100"
@@ -227,14 +239,14 @@ export const ViewComplain = () => {
               font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
             >
               <h4 className="font-bold text-white text-lg py-2">
-                Send/View Message
+                Send Message
               </h4>
-              <button
-                onClick={() => setShowViewMessageModal(false)}
+              <Button
+                onClick={() => setShowSendMessageModal(false)}
                 className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
               >
                 <i class="fa-solid fa-xmark fa-lg"></i>
-              </button>
+              </Button>
             </div>
 
             <form className="p-6">
@@ -255,14 +267,57 @@ export const ViewComplain = () => {
                 </label>
               </div>
               <div className="flex justify-center mt-6">
-                <button
+                <Button
                   type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                  className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
                   Submit
-                </button>
+                </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showViewMessageModal && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50 overflow-y-scroll"
+          onClick={() => setShowViewMessageModal(false)}
+        >
+          <div
+            className="bg-white border rounded-lg shadow-lg max-w-3xl w-full mx-2 p-6 transform transition-all scale-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
+              font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
+            >
+              <h4 className="font-bold text-white text-lg py-2">
+                View Message
+              </h4>
+              <Button
+                onClick={() => setShowViewMessageModal(false)}
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
+              >
+                <i class="fa-solid fa-xmark fa-lg"></i>
+              </Button>
+            </div>
+
+            <div class="flex justify-end mt-3">
+              <div class="block relative max-w-xs bg-blue-500 text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md">
+                <p class="text-lg leading-relaxed">Chat 1</p>
+                <p class="text-xs leading-relaxed text-gray-200">{new Date().toLocaleString()}</p>
+                <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-blue-500 rotate-45 rounded-sm"></span>
+              </div>
+            </div>
+
+            <div class="flex justify-end mt-3">
+              <div class="block relative max-w-xs bg-blue-500 text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md">
+                <p class="text-lg leading-relaxed">Chat 2</p>
+                <p class="text-xs leading-relaxed text-gray-200">{new Date().toLocaleString()}</p>
+                <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-blue-500 rotate-45 rounded-sm"></span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -283,15 +338,15 @@ export const ViewComplain = () => {
               <h4 className="font-bold text-white text-lg py-2">
                 Image of Issue
               </h4>
-              <button
+              <Button
                 onClick={() => setShowImageModal(false)}
                 className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
               >
                 <i class="fa-solid fa-xmark fa-lg"></i>
-              </button>
+              </Button>
             </div>
 
-            <img src={Logo} alt="" />
+            <img src={Logo ? Logo : Placeholder} alt="" />
           </div>
         </div>
       )}

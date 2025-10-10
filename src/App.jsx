@@ -12,8 +12,8 @@ import { Dashboard } from "./pages/Dashboard";
 import UpiStatement from "./pages/UpiStatement";
 import PayoutStatement from "./pages/PayoutStatement";
 import { ViewComplain } from "./pages/ViewComplain";
-import Payinrequest from "./pages/payinRequest";
 import OnboardBank from "./pages/OnboardBank";
+import { PayinRequest } from "./pages/PayinRequest";
 import Payindoc from "./pages/payindoc";
 import Acc_upi_setlement from "./pages/Acc_upi_setlement";
 import Acc_topup_settlement from "./pages/Acc_topup_settlement";
@@ -28,7 +28,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/payout-request" element={<Payoutrequest />} />
-          <Route path="/payin-request" element={<Payinrequest />} />
+          <Route path="/payin-request" element={<PayinRequest />} />
           <Route path="/scheme" element={<Scheme />} />
           <Route path="/load-wallet" element={<Loadwallet />} />
           <Route path="/payin-settlement" element={<Payinsettlement />} />
