@@ -448,10 +448,10 @@ export const Sidebar = ({ open, setOpen }) => {
                 onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
                 className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                 type="button"
-                onClick={() => setBankDropDown(!payinDropDown)}
+                onClick={() => setBankDropDown(!BankDropDown)}
               >
                 <div>
-                  <i class="fa-solid fa-money-bill-transfer fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                  <i class="fa-solid fa-building-columns fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                   <span className="ms-3 group-hover:text-sm">Onboard Bank</span>
                 </div>
                 <svg
@@ -487,9 +487,6 @@ export const Sidebar = ({ open, setOpen }) => {
                 </Link>
               </ul>
             </div>
-
-
-
 
             <li>
               <a
