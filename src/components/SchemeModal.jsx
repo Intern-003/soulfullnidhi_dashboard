@@ -1,25 +1,27 @@
 import { useState } from "react";
+import Button from "./Button";
 
 export const SchemeModal = ({ showModal, handleModal }) => {
   const [activeTab, setActiveTab] = useState("tab1");
+  const [percentage, setPercentage] = useState(18);
 
   return (
     <>
       {showModal && (
         <>
           <div
-            className="fixed inset-0 bg-black opacity-75 z-40"
+            className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
             onClick={handleModal}
           ></div>
           <div className="fixed top-10 left-1/2 transform -translate-x-1/2 z-50 bg-white border rounded-lg w-full max-w-xl">
-            <div className="text-white bg-blue-500 font-medium rounded-t-lg text-sm px-5 py-2.5 flex justify-between items-center">
+            <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
               <h3 className="text-lg font-semibold">Add New Scheme</h3>
-              <button
+              <Button
                 onClick={handleModal}
-                className="text-red-600 hover:text-red-900 font-bold"
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
               >
-                <i class="fa-solid fa-xmark fa-xl"></i>
-              </button>
+                <i class="fa-solid fa-xmark fa-lg"></i>
+              </Button>
             </div>
 
             <form className="p-5">
@@ -42,56 +44,56 @@ export const SchemeModal = ({ showModal, handleModal }) => {
                         activeTab === "tab1" ? "text-blue-500" : "text-gray-500"
                       }`}
                     >
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setActiveTab("tab1")}
                         class="cursor-pointer inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:border-blue-900 group"
                       >
                         <i class="fa-solid fa-money-bill-transfer fa-lg me-2 transition duration-75"></i>
                         Payin
-                      </button>
+                      </Button>
                     </li>
                     <li
                       className={`me-2 hover:text-blue-900 ${
                         activeTab === "tab2" ? "text-blue-500" : "text-gray-500"
                       }`}
                     >
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setActiveTab("tab2")}
                         class="cursor-pointer inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:border-blue-900 group"
                       >
                         <i class="fa-solid fa-credit-card fa-lg me-2 transition duration-75"></i>
                         Payout
-                      </button>
+                      </Button>
                     </li>
                     <li
                       className={`me-2 hover:text-blue-900 ${
                         activeTab === "tab3" ? "text-blue-500" : "text-gray-500"
                       }`}
                     >
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setActiveTab("tab3")}
                         class="cursor-pointer inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:border-blue-900 group"
                       >
                         <i class="fa-solid fa-rotate fa-lg me-2 transition duration-75"></i>
                         Rolling Amount
-                      </button>
+                      </Button>
                     </li>
                     <li
                       className={`me-2 hover:text-blue-900 ${
                         activeTab === "tab4" ? "text-blue-500" : "text-gray-500"
                       }`}
                     >
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setActiveTab("tab4")}
                         class="cursor-pointer inline-flex items-center justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:border-blue-900 group"
                       >
                         <i class="fa-solid fa-percent fa-lg me-2 transition duration-75"></i>
                         GST
-                      </button>
+                      </Button>
                     </li>
                   </ul>
                 </div>
@@ -246,10 +248,10 @@ export const SchemeModal = ({ showModal, handleModal }) => {
 
                             <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                               <select>
-                                <option value="flat">Flat</option>
-                                <option selected value="percent">
-                                  Percent
+                                <option selected value="flat">
+                                  Flat
                                 </option>
+                                <option value="percent">Percent</option>
                               </select>
                             </td>
 
@@ -281,8 +283,9 @@ export const SchemeModal = ({ showModal, handleModal }) => {
                           </td>
                           <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <input
-                              type="percentage"
-                              value="18"
+                              type="number"
+                              value={percentage}
+                              onChange={(e) => setPercentage(e.target.value)}
                               className="w-full border rounded-lg p-2 text-sm"
                               step="0.01"
                             />
@@ -294,13 +297,13 @@ export const SchemeModal = ({ showModal, handleModal }) => {
                 </div>
               </div>
 
-              <button
+              <Button
                 type="submit"
                 onClick={handleModal}
-                className="text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
+                className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
               >
                 Submit
-              </button>
+              </Button>
             </form>
           </div>
         </>
