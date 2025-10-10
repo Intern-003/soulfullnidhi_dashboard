@@ -35,7 +35,7 @@ const Payoutrequest = () => {
           setSelectedUser(row);
           setShowModal(true);
         }}
-        className="text-white bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded-lg text-sm"
+        className="text-white bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded-lg text-sm cursor-pointer"
       >
         Send
       </Button>
@@ -58,7 +58,6 @@ const Payoutrequest = () => {
       <Table
         columns={membercolumn}
         data={tableDataWithActions}
-        showSearch={false}
         showExport={false}
         showStatusFilter={false}
       />
