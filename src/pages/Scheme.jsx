@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import Layout from "../components/Layout";
+import { useState, useEffect } from "react";
 import Table from "../components/Table";
 import { SchemeModal } from "../components/SchemeModal";
 import Toggle from "../components/Toggle";
@@ -69,12 +68,12 @@ const Scheme = () => {
           name: item.name,
           status: item.status,
           action: (
-            <button
+            <Button
               onClick={() => handleEdit(item)}
-              className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md"
+              className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md"
             >
               Edit
-            </button>
+            </Button>
           ),
         }));
 
@@ -128,7 +127,7 @@ const Scheme = () => {
         >
           + Add New
         </button> */}
-        <Button type="button" variant="AddNewBtn" onClick={handleModal}>ADD NEW</Button>
+        <Button className="cursor-pointer" type="button" variant="AddNewBtn" onClick={handleModal}>ADD NEW</Button>
 
         {/* Modal */}
         <SchemeModal showModal={showModal} handleModal={handleModal} />
