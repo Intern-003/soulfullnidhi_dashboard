@@ -428,7 +428,7 @@ export const Sidebar = ({ open, setOpen }) => {
                 onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
                 className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
               >
-                <i className="fa-solid fa-chart-pie fa-lg text-white transition-all duration-300 ease-in-out group-hover:text-blue-900 group-hover:scale-125"></i>
+                <i className="fa-solid fa-building-columns fa-lg text-white transition-all duration-300 ease-in-out group-hover:text-blue-900 group-hover:scale-125"></i>
                 <span className="ms-3 transition-colors duration-300 group-hover:text-blue-900 group-hover:text-sm">
                   Onboard Bank
                 </span>
@@ -544,13 +544,13 @@ export const Sidebar = ({ open, setOpen }) => {
              */}
             <li>
               <a
-                class="flex justify-between items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
+                class="flex items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => setTicketsDropDown(!ticketsDropDown)}
               >
                 <div>
                   <i class="fa-solid fa-comment fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm ">Complaints</span>
+                  <span className="ms-3 group-hover:text-sm">Complaints</span>
                 </div>
                 <svg
                   class="w-2.5 h-2.5 ms-3"
