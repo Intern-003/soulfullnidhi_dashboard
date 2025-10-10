@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { Stepper } from "../components/Stepper";
 import { SchemeModal } from "../components/SchemeModal";
+import Button from "../components/Button";
+import { useNavigate } from "react-router-dom";
 
 export const MemberOnboardForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleModal = () => {
     setShowModal(!showModal);
@@ -24,8 +28,8 @@ export const MemberOnboardForm = () => {
 
   return (
     <>
-      <div className="bg-blue-500 flex justify-between item-center p-2 mb-4">
-        <h4 className="font-bold text-white text-lg">
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
+        <h4 className="font-bold text-white text-lg py-2">
           Add New Merchant Details
         </h4>
       </div>
@@ -517,39 +521,93 @@ export const MemberOnboardForm = () => {
           </div>
         )}
 
-        <button
-          type="button"
-          className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-3 ${
-            currentStep === 1
-              ? "disabled bg-gray-500"
-              : "bg-blue-500 hover:bg-blue-800"
-          }`}
-          onClick={handlePrev}
-        >
-          &lt; Prev
-        </button>
+        <div className="flex justify-between">
+          <div>
+            <button
+              type="button"
+              className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-3 ${
+                currentStep === 1
+                  ? "disabled bg-gray-500 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-800 cursor-pointer"
+              }`}
+              onClick={handlePrev}
+            >
+              &lt; Prev
+            </button>
 
-        {currentStep < 4 && (
-          <button
-            type="button"
-            class="text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-            onClick={handleNext}
-          >
-            Next &gt;
-          </button>
-        )}
+            {currentStep < 4 && (
+              <button
+                type="button"
+                class="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                onClick={handleNext}
+              >
+                Next &gt;
+              </button>
+            )}
 
-        {currentStep === 4 && (
-          <button
-            type="button"
-            class="text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-          >
-            Submit
-          </button>
-        )}
+            {currentStep === 4 && (
+              <button
+                type="button"
+                class="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+              >
+                Submit
+              </button>
+            )}
+          </div>
+          <div>
+            <Button
+              onClick={() => setShowConfirmModal(!showConfirmModal)}
+              type="button"
+              className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-cente"
+            >
+              Go Back
+            </Button>
+          </div>
+        </div>
       </form>
 
       <SchemeModal showModal={showModal} handleModal={handleModal} />
+
+      {showConfirmModal && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
+          onClick={() => setShowConfirmModal(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 transform transition-all scale-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Are you sure?</h3>
+              <Button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
+              >
+                <i class="fa-solid fa-xmark fa-lg"></i>
+              </Button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p>If you go back then you will lose your filled data in form.</p>
+            </div>
+            <div className="flex justify-end space-x-3 pt-4 m-2">
+                <Button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-5 py-2.5 text-sm font-medium rounded-lg border border-gray-300 text-white bg-gray-500 hover:bg-gray-100 transition"
+                >
+                  No
+                </Button>
+                <Button
+                  onClick={() => navigate("/member-list")}
+                  type="button"
+                  className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                >
+                  Yes
+                </Button>
+              </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
