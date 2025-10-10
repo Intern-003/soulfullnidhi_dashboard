@@ -13,6 +13,7 @@ export const Sidebar = ({ open, setOpen }) => {
   const [rolesDropDown, setRolesDropDown] = useState(false);
   const [ticketsDropDown, setTicketsDropDown] = useState(false);
   const [payinDropDown, setPayinDropDown] = useState(false);
+  const [BankDropDown, setBankDropDown] = useState(false);  
   const [ApiDocDropDown, setApiDocDropDown] = useState(false);  
 
 
@@ -413,16 +414,20 @@ export const Sidebar = ({ open, setOpen }) => {
                 }`}
             >
               <ul>
+                <Link to="/topup-settlement">
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                   <a href="">Topup Statement</a>
                 </li>
+                </Link>
+                <Link to="/account upi settlement">
                 <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                   <a href="">Settlement Payin Statement</a>
                 </li>
+                </Link>
               </ul>
             </div>
             
-            <li>
+            {/* <li>
               <Link to={"/onboard-bank"}
                 onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
                 onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
@@ -433,10 +438,59 @@ export const Sidebar = ({ open, setOpen }) => {
                   Onboard Bank
                 </span>
               </Link>
-            </li>
+            </li> */}
             {/**
              * Dropdown button of roles
              */}
+            <li>
+              <a
+                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
+                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
+                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
+                type="button"
+                onClick={() => setBankDropDown(!payinDropDown)}
+              >
+                <div>
+                  <i class="fa-solid fa-money-bill-transfer fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                  <span className="ms-3 group-hover:text-sm">Onboard Bank</span>
+                </div>
+                <svg
+                  class="w-2.5 h-2.5 ms-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 10 6"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </a>
+            </li>
+
+            {/**
+             * Dropdown body of payin
+             */}
+            <div
+              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${BankDropDown ? "" : "hidden"
+                }`}
+            >
+              <ul>
+                <Link to="/onboard-bank">
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    Bank
+                  </li>
+                </Link>
+              </ul>
+            </div>
+
+
+
+
             <li>
               <a
                 onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
@@ -524,16 +578,20 @@ export const Sidebar = ({ open, setOpen }) => {
               className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${ApiDocDropDown ? "" : "hidden"
                 }`}
             >
-              <Link to={"/scheme"}>
+              
                 <ul>
+                  <Link to="/payin-doc">
                   <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                     <span className="ms-3">Payin Documents</span>
                   </li>
+                  </Link>
+                  <Link to="/payout-doc">
                   <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                     <span className="ms-3">Payout Documents</span>
                   </li>
+                  </Link>
                 </ul>
-              </Link>
+              
             </div>
 
 
