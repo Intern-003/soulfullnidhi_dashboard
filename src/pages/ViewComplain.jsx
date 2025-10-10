@@ -128,6 +128,7 @@ export const ViewComplain = () => {
         <h4 className="font-bold text-white text-lg py-2">View Complain</h4>
         <Button
           type="button"
+          className="cursor-pointer"
           variant="AddNewBtn"
           onClick={() => setShowModal(!showModal)}
         >
@@ -212,12 +213,12 @@ export const ViewComplain = () => {
                 </div>
               </div>
               <div className="flex justify-center mt-6">
-                <button
+                <Button
                   type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                  className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
                   Submit
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -268,7 +269,7 @@ export const ViewComplain = () => {
               <div className="flex justify-center mt-6">
                 <Button
                   type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                  className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
                   Submit
                 </Button>
