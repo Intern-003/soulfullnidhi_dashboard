@@ -91,6 +91,7 @@ export const Member = () => {
 
         <Button
           onClick={() => navigate("/member-create")}
+          className="cursor-pointer"
           variant="AddNewBtn"
         >
           + Create New
