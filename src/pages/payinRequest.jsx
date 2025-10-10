@@ -3,12 +3,13 @@ import Button from "../components/Button";
 export const PayinRequest = () => {
   return (
     <>
-        <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
-          <h4 className="font-bold text-white text-lg py-2">
-            Create New Payment
-          </h4>
-        </div>
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
+        <h4 className="font-bold text-white text-lg py-2">
+          Create New Payment
+        </h4>
+      </div>
 
+      <div className="p-5 border border-gray-200 shadow-md m-5">
         <div class="grid md:grid-cols-2 md:gap-6 px-4">
           <div class="relative z-0 w-full mb-5 group">
             <input
@@ -78,7 +79,6 @@ export const PayinRequest = () => {
             </label>
           </div>
         </div>
-
         <div class="flex justify-center mt-2 py-2">
           <Button
             type="submit"
@@ -90,6 +90,7 @@ export const PayinRequest = () => {
             Submit
           </Button>
         </div>
+      </div>
     </>
   );
 };
