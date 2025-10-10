@@ -311,21 +311,21 @@ const Table = ({
 
             {/* Right - Pagination controls */}
             <div className="flex items-center gap-2 mt-3 md:mt-0">
-              <button
+              <Button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className={`px-3 py-1 text-sm rounded-md border ${
                   currentPage === 1
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
                 }`}
               >
                 Prev
-              </button>
+              </Button>
               <span className="text-sm text-gray-600">
                 Page <span className="font-semibold">{currentPage}</span>
               </span>
-              <button
+              <Button
                 onClick={() =>
                   setCurrentPage((prev) =>
                     prev < Math.ceil(filteredData.length / entriesPerPage)
@@ -341,11 +341,11 @@ const Table = ({
                   currentPage ===
                   Math.ceil(filteredData.length / entriesPerPage)
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
                 }`}
               >
                 Next
-              </button>
+              </Button>
             </div>
           </div>
         )}
