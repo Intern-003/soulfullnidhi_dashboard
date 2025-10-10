@@ -3,15 +3,29 @@ import { Stepper } from "../components/Stepper";
 import { SchemeModal } from "../components/SchemeModal";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
+import { BankModal } from "../components/BankModal";
 
 export const MemberOnboardForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [showModal, setShowModal] = useState(false);
+  const [showSchemeModal, setShowSchemeModal] = useState(false);
+  const [showPayinModal, setShowPayinModal] = useState(false);
+  const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("payin");
   const navigate = useNavigate();
 
-  const handleModal = () => {
-    setShowModal(!showModal);
+  const handleSchemeModal = () => {
+    setShowSchemeModal(!showSchemeModal);
+  };
+
+  const handlePayoutModal = () => {
+    setShowPayoutModal(!showPayoutModal);
+    setActiveTab("payout");
+  };
+
+  const handlePayinModal = () => {
+    setShowPayinModal(!showPayinModal);
+    setActiveTab("payin");
   };
 
   const handlePrev = () => {
@@ -460,37 +474,57 @@ export const MemberOnboardForm = () => {
         )}
 
         {currentStep === 4 && (
-          <div class="grid gap-6 mb-6 md:grid-cols-2">
-            <div className="relative">
-              <label
-                for="default"
-                class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+          <div class="grid gap-6 mb-6 md:grid-cols-2 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative flex-1">
+                <label
+                  for="default"
+                  class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                >
+                  Payin at Onboard
+                </label>
+                <select
+                  id="default"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
+                >
+                  <option selected>Select Bank</option>
+                  <option value="yesbank">Yes Bank</option>
+                </select>
+              </div>
+
+              <Button
+                type="button"
+                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                onClick={handlePayinModal}
               >
-                Payin at Onboard
-              </label>
-              <select
-                id="default"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
-              >
-                <option selected>Select Bank</option>
-                <option value="yesbank">Yes Bank</option>
-              </select>
+                +
+              </Button>
             </div>
 
-            <div className="relative">
-              <label
-                for="default"
-                class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative flex-1">
+                <label
+                  for="default"
+                  class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                >
+                  Payout at Onboard
+                </label>
+                <select
+                  id="default"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
+                >
+                  <option selected>Select Bank</option>
+                  <option value="bulkpe">BulkPe</option>
+                </select>
+              </div>
+
+              <Button
+                type="button"
+                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                onClick={handlePayoutModal}
               >
-                Payout at Onboard
-              </label>
-              <select
-                id="default"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
-              >
-                <option selected>Select Bank</option>
-                <option value="bulkpe">BulkPe</option>
-              </select>
+                +
+              </Button>
             </div>
 
             <div className="flex items-center gap-2 mb-4">
@@ -510,13 +544,13 @@ export const MemberOnboardForm = () => {
                 </select>
               </div>
 
-              <button
+              <Button
                 type="button"
-                className="text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
-                onClick={handleModal}
+                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                onClick={handleSchemeModal}
               >
                 +
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -566,7 +600,24 @@ export const MemberOnboardForm = () => {
         </div>
       </form>
 
-      <SchemeModal showModal={showModal} handleModal={handleModal} />
+      <SchemeModal
+        showModal={showSchemeModal}
+        handleModal={handleSchemeModal}
+      />
+
+      {activeTab === "payin" ? (
+        <BankModal
+          showModal={showPayinModal}
+          handleModal={handlePayinModal}
+          activeTab={activeTab}
+        />
+      ) : (
+        <BankModal
+          showModal={showPayoutModal}
+          handleModal={handlePayoutModal}
+          activeTab={activeTab}
+        />
+      )}
 
       {showConfirmModal && (
         <div
@@ -590,21 +641,21 @@ export const MemberOnboardForm = () => {
               <p>If you go back then you will lose your filled data in form.</p>
             </div>
             <div className="flex justify-end space-x-3 pt-4 m-2">
-                <Button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-5 py-2.5 text-sm font-medium rounded-lg border border-gray-300 text-white bg-gray-500 hover:bg-gray-100 transition"
-                >
-                  No
-                </Button>
-                <Button
-                  onClick={() => navigate("/member-list")}
-                  type="button"
-                  className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-                >
-                  Yes
-                </Button>
-              </div>
+              <Button
+                type="button"
+                onClick={() => setShowSchemeModal(false)}
+                className="px-5 py-2.5 text-sm font-medium rounded-lg border border-gray-300 text-white bg-gray-500 hover:bg-gray-100 transition"
+              >
+                No
+              </Button>
+              <Button
+                onClick={() => navigate("/member-list")}
+                type="button"
+                className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+              >
+                Yes
+              </Button>
+            </div>
           </div>
         </div>
       )}
