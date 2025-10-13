@@ -34,23 +34,125 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="/payout-request" element={<Payoutrequest />} />
-          <Route path="/payin-request" element={<PayinRequest />} />
-          <Route path="/scheme" element={<Scheme />} />
-          <Route path="/load-wallet" element={<Loadwallet />} />
-          <Route path="/payin-settlement" element={<Payinsettlement />} />
-          <Route path="/member-list" element={<Member />} />
-          <Route path="/member-create" element={<MemberOnboardForm />} />
-          <Route path="/upi-statement" element={<UpiStatement />} />
-          <Route path="/payout-statement" element={<PayoutStatement />} />
-          <Route path="/view-complain" element={<ViewComplain />} />
-          <Route path="/onboard-bank" element={<OnboardBank />} />
-          <Route path="/payin-doc" element={<Payindoc />} />
-          <Route path="/payout-doc" element={<PayoutDoc />} />
-          <Route path="/topup-settlement" element={<Acc_topup_settlement />} />
+          <Route
+            path="/payout-request"
+            element={
+              <PrivateRoute>
+                <Payoutrequest />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/payin-request"
+            element={
+              <PrivateRoute>
+                <PayinRequest />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/scheme"
+            element={
+              <PrivateRoute role={"admin"}>
+                <Scheme />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/load-wallet"
+            element={
+              <PrivateRoute role={"admin"}>
+                <Loadwallet />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/payin-settlement"
+            element={
+              <PrivateRoute role={"admin"}>
+                <Payinsettlement />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/member-list"
+            element={
+              <PrivateRoute role={"admin"}>
+                <Member />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/member-create"
+            element={
+              <PrivateRoute role={"admin"}>
+                <MemberOnboardForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/upi-statement"
+            element={
+              <PrivateRoute>
+                <UpiStatement />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/payout-statement"
+            element={
+              <PrivateRoute>
+                <PayoutStatement />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/view-complain"
+            element={
+              <PrivateRoute>
+                <ViewComplain />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/onboard-bank"
+            element={
+              <PrivateRoute role={"admin"}>
+                <OnboardBank />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/payin-doc"
+            element={
+              <PrivateRoute role={"user"}>
+                <Payindoc />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/payout-doc"
+            element={
+              <PrivateRoute role={"user"}>
+                <PayoutDoc />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/topup-settlement"
+            element={
+              <PrivateRoute role={"admin"}>
+                <Acc_topup_settlement />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/account upi settlement"
-            element={<Acc_upi_setlement />}
+            element={
+              <PrivateRoute role={"admin"}>
+                <Acc_upi_setlement />
+              </PrivateRoute>
+            }
           />
         </Route>
       </Routes>
