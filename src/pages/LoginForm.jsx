@@ -2,10 +2,12 @@ import { useState } from "react";
 import logo from "../images/logo.png";
 import paymentGatewayBg from "../images/payment-gateway-bg.jpg";
 import { usePost } from "../hooks/usePost";
+import { useNavigate } from "react-router-dom";
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
 
   const { execute: login, error, loading } = usePost("/login");
 
@@ -17,6 +19,12 @@ function LoginForm() {
     e.preventDefault();
     try {
       const response = await login(formData);
+      console.log(response.user.role_type);
+
+      if (response) {
+        localStorage.setItem("message", response.message);
+        navigate("/dashboard", { replace: true });
+      }
     } catch (err) {
       console.log("Login failed:", err);
     }
@@ -129,7 +137,9 @@ function LoginForm() {
             </button>
 
             {error?.errors.password && (
-              <p className="mt-1 text-sm text-red-500">{error.errors.password}</p>
+              <p className="mt-1 text-sm text-red-500">
+                {error.errors.password}
+              </p>
             )}
           </div>
 

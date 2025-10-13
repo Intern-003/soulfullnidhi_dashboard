@@ -4,7 +4,6 @@ import Layout from "./components/Layout";
 import Loadwallet from "./pages/LoadWallet";
 import Payinsettlement from "./pages/PayinSettlement";
 import Payoutrequest from "./pages/Payoutrequest";
-
 import LoginForm from "./pages/LoginForm";
 import { MemberOnboardForm } from "./pages/MemberOnboardForm";
 import { Member } from "./pages/Member";
@@ -18,6 +17,7 @@ import Payindoc from "./pages/payindoc";
 import Acc_upi_setlement from "./pages/Acc_upi_setlement";
 import Acc_topup_settlement from "./pages/Acc_topup_settlement";
 import PayoutDoc from "./pages/PayoutDoc";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
@@ -26,7 +26,14 @@ function App() {
         <Route path="/" element={<LoginForm />} />
 
         <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
           <Route path="/payout-request" element={<Payoutrequest />} />
           <Route path="/payin-request" element={<PayinRequest />} />
           <Route path="/scheme" element={<Scheme />} />
@@ -37,11 +44,14 @@ function App() {
           <Route path="/upi-statement" element={<UpiStatement />} />
           <Route path="/payout-statement" element={<PayoutStatement />} />
           <Route path="/view-complain" element={<ViewComplain />} />
-          <Route path="/onboard-bank" element={< OnboardBank/>} />  
-          <Route path ="/payin-doc" element={ < Payindoc/> }/>
-          <Route path="/payout-doc" element={<PayoutDoc/>} />
-          <Route path="/topup-settlement" element={< Acc_topup_settlement/>} />
-          <Route path="/account upi settlement" element={< Acc_upi_setlement/>} />
+          <Route path="/onboard-bank" element={<OnboardBank />} />
+          <Route path="/payin-doc" element={<Payindoc />} />
+          <Route path="/payout-doc" element={<PayoutDoc />} />
+          <Route path="/topup-settlement" element={<Acc_topup_settlement />} />
+          <Route
+            path="/account upi settlement"
+            element={<Acc_upi_setlement />}
+          />
         </Route>
       </Routes>
     </>
