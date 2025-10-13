@@ -4,16 +4,16 @@ import { useEffect } from "react";
 const PrivateRoute = ({ children, roles = [] }) => {
   const navigate = useNavigate();
   useEffect(() => {
-    if (!localStorage.getItem("message")) {
+    if (!localStorage.getItem("token")) {
       navigate("/", { replace: true });
     }
   }, [navigate]);
 
-  if (!localStorage.getItem("message")) return null;
+  if (!localStorage.getItem("token")) return null;
 
-  const fetchedRole = localStorage.getItem("message").split(" ")[3];
-  localStorage.setItem("role", fetchedRole);
+  const fetchedRole = localStorage.getItem("role");
   
+
   if (roles.length > 0 && !roles.includes(fetchedRole)) {
     navigate("/", { replace: true });
   }
