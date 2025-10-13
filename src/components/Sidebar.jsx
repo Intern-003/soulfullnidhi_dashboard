@@ -25,6 +25,7 @@ export const Sidebar = ({ open, setOpen }) => {
   bg-cover bg-no-repeat bg-center bg-blend-multiply`}
   tabIndex="-1"
   aria-labelledby="drawer-navigation-label"
+  bg-[url('https://upload.wikimedia.org/wikipedia/commons/5/53/Designsz.png')]
 > */}
       <div
         className={`fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300 ${
@@ -35,8 +36,7 @@ export const Sidebar = ({ open, setOpen }) => {
       <div
         id="drawer-navigation"
         className={`fixed top-0 left-0 h-full w-64 md:w-64 p-4 flex flex-col
-        bg-blue-500 bg-[url('https://upload.wikimedia.org/wikipedia/commons/5/53/Designsz.png')]
-        bg-cover bg-no-repeat bg-center bg-blend-soft-light shadow-xl
+        bg-blue-500 bg-cover bg-no-repeat bg-center bg-blend-soft-light shadow-xl
         z-40 transform transition-transform duration-300 ease-in-out
         md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
         tabIndex="-1"
@@ -51,9 +51,9 @@ export const Sidebar = ({ open, setOpen }) => {
         </button>
         <div className="flex-shrink-0 p-4 justify-center items-center">
           <div className="ml-6 rounded-full h-24 w-24 bg-white flex items-center justify-center">
-            <a href="#">
+            <Link to={"/dashboard"}>
               <img src={Logo} className="w-20" alt="Spay Logo" />
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -74,38 +74,42 @@ export const Sidebar = ({ open, setOpen }) => {
             </li>
 
             {/** Dropdown button of scheme */}
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => setSchemeDropDown(!schemeDropDown)}
-              >
-                <div>
-                  <i class="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm">
-                    Scheme Manager
-                  </span>
-                </div>
-
-                <svg
-                  class="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
+            {atob(localStorage.getItem("role")) === "admin" && (
+              <li>
+                <a
+                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
+                  onMouseUp={(e) =>
+                    e.currentTarget.classList.remove("scale-95")
+                  }
+                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
+                  type="button"
+                  onClick={() => setSchemeDropDown(!schemeDropDown)}
                 >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
+                  <div>
+                    <i class="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <span className="ms-3 group-hover:text-sm">
+                      Scheme Manager
+                    </span>
+                  </div>
+
+                  <svg
+                    class="w-2.5 h-2.5 ms-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </a>
+              </li>
+            )}
 
             {/*
             Dropdown body of scheme
@@ -127,36 +131,40 @@ export const Sidebar = ({ open, setOpen }) => {
             {/**
              * Dropdown button of member
              */}
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => setMemberDropDown(!memberDropDown)}
-              >
-                <div>
-                  <i class="fa-solid fa-user-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm">Member</span>
-                </div>
-
-                <svg
-                  class="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
+            {atob(localStorage.getItem("role")) === "admin" && (
+              <li>
+                <a
+                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
+                  onMouseUp={(e) =>
+                    e.currentTarget.classList.remove("scale-95")
+                  }
+                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
+                  type="button"
+                  onClick={() => setMemberDropDown(!memberDropDown)}
                 >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
+                  <div>
+                    <i class="fa-solid fa-user-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <span className="ms-3 group-hover:text-sm">Member</span>
+                  </div>
+
+                  <svg
+                    class="w-2.5 h-2.5 ms-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </a>
+              </li>
+            )}
 
             {/**
              * Dropdown body of member
@@ -178,57 +186,63 @@ export const Sidebar = ({ open, setOpen }) => {
             {/**
              * Dropdown button of fund
              */}
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => setFundDropDown(!fundDropDown)}
-              >
-                <div>
-                  <i class="fa-solid fa-piggy-bank fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm">Fund</span>
-                </div>
-                <svg
-                  class="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
+            {atob(localStorage.getItem("role")) === "admin" && (
+              <li>
+                <a
+                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
+                  onMouseUp={(e) =>
+                    e.currentTarget.classList.remove("scale-95")
+                  }
+                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
+                  type="button"
+                  onClick={() => setFundDropDown(!fundDropDown)}
                 >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
+                  <div>
+                    <i class="fa-solid fa-piggy-bank fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <span className="ms-3 group-hover:text-sm">Fund</span>
+                  </div>
+                  <svg
+                    class="w-2.5 h-2.5 ms-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </a>
+              </li>
+            )}
 
             {/**
              * Dropdown body of fund
              */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                fundDropDown ? "" : "hidden"
-              }`}
-            >
-              <ul>
-                <Link to="/load-wallet">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                    Load Wallet
-                  </li>
-                </Link>
-                <Link to="/payin-settlement">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                    Payin Settlement
-                  </li>
-                </Link>
-              </ul>
-            </div>
+            {atob(localStorage.getItem("role")) === "admin" && (
+              <div
+                className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
+                  fundDropDown ? "" : "hidden"
+                }`}
+              >
+                <ul>
+                  <Link to="/load-wallet">
+                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                      Load Wallet
+                    </li>
+                  </Link>
+                  <Link to="/payin-settlement">
+                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                      Payin Settlement
+                    </li>
+                  </Link>
+                </ul>
+              </div>
+            )}
 
             {/**
              * Dropdown button of payout
@@ -429,12 +443,12 @@ export const Sidebar = ({ open, setOpen }) => {
               }`}
             >
               <ul>
-                <Link to="/topup-settlement">
+                <Link to="/topup-statement">
                   <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                     Topup Statement
                   </li>
                 </Link>
-                <Link to="/account upi settlement">
+                <Link to="/settlement-payin-statement">
                   <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                     Settlement Payin Statement
                   </li>
@@ -442,167 +456,179 @@ export const Sidebar = ({ open, setOpen }) => {
               </ul>
             </div>
 
-            {/* <li>
-              <Link to={"/onboard-bank"}
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-              >
-                <i className="fa-solid fa-building-columns fa-lg text-white transition-all duration-300 ease-in-out group-hover:text-blue-900 group-hover:scale-125"></i>
-                <span className="ms-3 transition-colors duration-300 group-hover:text-blue-900 group-hover:text-sm">
-                  Onboard Bank
-                </span>
-              </Link>
-            </li> */}
             {/**
-             * Dropdown button of roles
+             * Dropdown button of Bank
              */}
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => setBankDropDown(!BankDropDown)}
-              >
-                <div>
-                  <i class="fa-solid fa-building-columns fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm">Onboard Bank</span>
-                </div>
-                <svg
-                  class="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
+            {atob(localStorage.getItem("role")) === "admin" && (
+              <li>
+                <a
+                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
+                  onMouseUp={(e) =>
+                    e.currentTarget.classList.remove("scale-95")
+                  }
+                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
+                  type="button"
+                  onClick={() => setBankDropDown(!BankDropDown)}
                 >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
+                  <div>
+                    <i class="fa-solid fa-building-columns fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <span className="ms-3 group-hover:text-sm">
+                      Onboard Bank
+                    </span>
+                  </div>
+                  <svg
+                    class="w-2.5 h-2.5 ms-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </a>
+              </li>
+            )}
 
             {/**
-             * Dropdown body of payin
+             * Dropdown body of Bank
              */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                BankDropDown ? "" : "hidden"
-              }`}
-            >
-              <ul>
-                <Link to="/onboard-bank">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                    Bank
+            {atob(localStorage.getItem("role")) === "admin" && (
+              <div
+                className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
+                  BankDropDown ? "" : "hidden"
+                }`}
+              >
+                <ul>
+                  <Link to="/onboard-bank">
+                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                      Bank
+                    </li>
+                  </Link>
+                </ul>
+              </div>
+            )}
+
+            {/**Dropdown button of Api Settings */}
+            {atob(localStorage.getItem("role")) === "user" && (
+              <li>
+                <a
+                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
+                  onMouseUp={(e) =>
+                    e.currentTarget.classList.remove("scale-95")
+                  }
+                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
+                  type="button"
+                  onClick={() => setRolesDropDown(!rolesDropDown)}
+                >
+                  <div>
+                    <i class="fa-solid fa-gears fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <span className="ms-2 group-hover:text-sm">
+                      Api Settings
+                    </span>
+                  </div>
+                  <svg
+                    class="w-2.5 h-2.5 ms-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </a>
+              </li>
+            )}
+
+            {/**
+             * Dropdown body of Api Settings
+             */}
+            {atob(localStorage.getItem("role")) === "user" && (
+              <div
+                className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
+                  rolesDropDown ? "" : "hidden"
+                }`}
+              >
+                <ul>
+                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                    <a href="">Callback and Token</a>
                   </li>
-                </Link>
-              </ul>
-            </div>
+                </ul>
+              </div>
+            )}
 
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => setRolesDropDown(!rolesDropDown)}
-              >
-                <div>
-                  <i class="fa-solid fa-gears fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-2 group-hover:text-sm">Api Settings</span>
-                </div>
-                <svg
-                  class="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
+            {/**Dropdown button of ApiDoc */}
+            {atob(localStorage.getItem("role")) === "user" && (
+              <li>
+                <a
+                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
+                  onMouseUp={(e) =>
+                    e.currentTarget.classList.remove("scale-95")
+                  }
+                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
+                  type="button"
+                  onClick={() => setApiDocDropDown(!ApiDocDropDown)}
                 >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
+                  <div>
+                    <i class="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <span className="ms-3 group-hover:text-sm">
+                      API Documents
+                    </span>
+                  </div>
 
-            {/**
-             * Dropdown body of roles
-             */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                rolesDropDown ? "" : "hidden"
-              }`}
-            >
-              <ul>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                  <a href="">Callback and Token</a>
-                </li>
-              </ul>
-            </div>
-
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => setApiDocDropDown(!ApiDocDropDown)}
-              >
-                <div>
-                  <i class="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm">
-                    API Documents
-                  </span>
-                </div>
-
-                <svg
-                  class="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
+                  <svg
+                    class="w-2.5 h-2.5 ms-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </a>
+              </li>
+            )}
 
             {/*
-            Dropdown body of scheme
+            Dropdown body of ApiDoc
             */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                ApiDocDropDown ? "" : "hidden"
-              }`}
-            >
-              <ul>
-                <Link to="/payin-doc">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                    <span className="ms-3">Payin Documents</span>
-                  </li>
-                </Link>
-                <Link to="/payout-doc">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                    <span className="ms-3">Payout Documents</span>
-                  </li>
-                </Link>
-              </ul>
-            </div>
+            {atob(localStorage.getItem("role")) === "user" && (
+              <div
+                className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
+                  ApiDocDropDown ? "" : "hidden"
+                }`}
+              >
+                <ul>
+                  <Link to="/payin-doc">
+                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                      <span className="ms-3">Payin Documents</span>
+                    </li>
+                  </Link>
+                  <Link to="/payout-doc">
+                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                      <span className="ms-3">Payout Documents</span>
+                    </li>
+                  </Link>
+                </ul>
+              </div>
+            )}
 
             {/**
              * Dropdown button of tickets

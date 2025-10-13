@@ -139,17 +139,17 @@ function App() {
             }
           />
           <Route
-            path="/topup-settlement"
+            path="/topup-statement"
             element={
-              <PrivateRoute role={"admin"}>
+              <PrivateRoute>
                 <Acc_topup_settlement />
               </PrivateRoute>
             }
           />
           <Route
-            path="/account upi settlement"
+            path="/settlement-payin-statement"
             element={
-              <PrivateRoute role={"admin"}>
+              <PrivateRoute>
                 <Acc_upi_setlement />
               </PrivateRoute>
             }

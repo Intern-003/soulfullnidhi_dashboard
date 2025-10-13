@@ -10,7 +10,7 @@ const PrivateRoute = ({ children, role }) => {
   }, [navigate]);
 
   useEffect(() => {
-    const fetchedRole = localStorage.getItem("role");
+    const fetchedRole = atob(localStorage.getItem("role"));
     if (role && fetchedRole !== role) {
       navigate("/", { replace: true });
     }
