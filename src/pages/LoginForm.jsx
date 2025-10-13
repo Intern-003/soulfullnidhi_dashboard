@@ -23,7 +23,7 @@ function LoginForm() {
 
       if (response) {
         localStorage.setItem("token", response.token);
-        localStorage.setItem("role", response.user.role_type);
+        localStorage.setItem("role", btoa(response.user.role_type));
         navigate("/dashboard", { replace: true });
       }
     } catch (err) {

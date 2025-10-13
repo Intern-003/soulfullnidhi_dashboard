@@ -19,7 +19,7 @@ const PrivateRoute = ({ children, role }) => {
   // Prevent rendering while checks are happening
   if (!localStorage.getItem("token")) return null;
   
-  const fetchedRole = localStorage.getItem("role");
+  const fetchedRole = atob(localStorage.getItem("role"));
   if (role && fetchedRole !== role) return null;
 
   return children;
