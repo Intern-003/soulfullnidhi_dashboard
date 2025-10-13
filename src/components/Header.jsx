@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { usePost } from "../hooks/usePost";
 
 export const Header = ({ onMenuClick }) => {
+  const navigate = useNavigate();
+  const { execute: logout, loading } = usePost("/logout");
+
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -45,6 +50,18 @@ export const Header = ({ onMenuClick }) => {
     },
   ];
 
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await logout();
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      navigate("/");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
   return (
     <nav className="bg-white shadow-lg shadow-indigo-500/50">
       <div className="flex items-center justify-between w-full px-4 py-3">
@@ -70,10 +87,12 @@ export const Header = ({ onMenuClick }) => {
         {/* --- Mobile Icons Row --- */}
         <div className="flex items-center gap-6 md:hidden relative">
           {stats.map((item) => (
-            <div key={item.id} className="relative"
-              onMouseEnter={() => setActiveStat(item.id)}   // 👈 add this
-               onMouseLeave={() => setActiveStat(null)} >
-              
+            <div
+              key={item.id}
+              className="relative"
+              onMouseEnter={() => setActiveStat(item.id)} // 👈 add this
+              onMouseLeave={() => setActiveStat(null)}
+            >
               <button
                 onClick={() =>
                   setActiveStat(activeStat === item.id ? null : item.id)
@@ -128,7 +147,7 @@ export const Header = ({ onMenuClick }) => {
                 </li>
                 <li>
                   <a
-                    href="#logout"
+                    onClick={handleLogout}
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
                   >
                     Logout
