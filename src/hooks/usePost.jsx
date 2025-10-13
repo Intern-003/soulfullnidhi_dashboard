@@ -29,7 +29,7 @@ export function usePost(endpoint) {
       return response.data;
     } catch (err) {
       // Handle axios error properly
-      setError(err.response?.data || err.message || "Something went wrong");
+      setError(err.response?.data || "Something went wrong");
     } finally {
       setLoading(false);
     }
