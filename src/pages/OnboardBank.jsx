@@ -10,8 +10,8 @@ const OnboardBank = () => {
   const [bankData, setBankData] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
-  const { data: payinbanks } = useGet("/payinbanks-List");
-  const { data: payoutbanks } = useGet("/payoutbanks-List");
+  const { data: payinbanks, refetch: payinRefetch } = useGet("/payinbanks-List");
+  const { data: payoutbanks, refetch: payoutRefetch } = useGet("/payoutbanks-List");
 
   const handleModal = () => {
     setShowModal(!showModal);
@@ -121,7 +121,7 @@ const OnboardBank = () => {
           columns={bankColumn}
           data={bankData}
           showPagination={true}
-          showStatusFilter={true}
+          showStatusFilter={false}
           showExport={false}
           showSearch={false}
         />
@@ -131,6 +131,7 @@ const OnboardBank = () => {
         showModal={showModal}
         handleModal={handleModal}
         activeTab={activeTab}
+        refreshTable={activeTab === "payin" ? payinRefetch : payoutRefetch}
       />
     </div>
   );
