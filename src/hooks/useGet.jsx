@@ -17,6 +17,7 @@ export function useGet(endpoint) {
         withCredentials: true, // ✅ Sends HTTP-only cookies automatically
         headers: {
           "Content-Type": "application/json",
+          "Authorization": "Bearer " + localStorage.getItem("token")
         },
       });
       setData(response.data);
