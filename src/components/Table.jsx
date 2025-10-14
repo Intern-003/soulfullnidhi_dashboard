@@ -22,26 +22,26 @@ const Table = ({
     setShowConfirmModal(!showConfirmModal);
   }
 
-  if (!columns || !data || data.length === 0) {
-    return <h6>No data found</h6>;
-  }
-
+  
   // 🔍 Filtered Data (Search + Status)
   const filteredData = useMemo(() => {
     return data.filter((row) => {
       const matchesSearch = Object.values(row).some((val) =>
         String(val).toLowerCase().includes(search.toLowerCase())
-      );
-
-      const matchesStatus =
-        !statusFilter ||
-        statusFilter === "all" ||
-        String(row.status).toLowerCase() === statusFilter.toLowerCase();
-
+    );
+    
+    const matchesStatus =
+    !statusFilter ||
+    statusFilter === "all" ||
+    String(row.status).toLowerCase() === statusFilter.toLowerCase();
+    
       return matchesSearch && matchesStatus;
     });
   }, [search, statusFilter, data]);
-
+  
+  if (!columns || !data || data.length === 0) {
+    return <h6>No data found</h6>;
+  }
   // 📂 Export Handlers
   const downloadFile = (content, fileName, mimeType) => {
     const blob = new Blob([content], { type: mimeType });
