@@ -18,6 +18,7 @@ import Payindoc from "./pages/payindoc";
 import Acc_upi_setlement from "./pages/Acc_upi_setlement";
 import Acc_topup_settlement from "./pages/Acc_topup_settlement";
 import PayoutDoc from "./pages/PayoutDoc";
+import ApiSetting from "./pages/ApiSetting";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
           <Route path="/payout-doc" element={<PayoutDoc/>} />
           <Route path="/topup-settlement" element={< Acc_topup_settlement/>} />
           <Route path="/account upi settlement" element={< Acc_upi_setlement/>} />
+          <Route path="/ApiSetting" element={<ApiSetting />} />
         </Route>
       </Routes>
     </>
