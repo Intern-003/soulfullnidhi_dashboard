@@ -12,7 +12,6 @@ export const Dashboard = () => {
     { header: "Payin Wallet", accessor: "walletpayin" },
     { header: "Payout Wallet", accessor: "walletpayout" },
     { header: "Total Transacts", accessor: "total" },
-    { header: "Action", accessor: "action" },
   ];
   const transactiondata = [
     {
@@ -23,12 +22,10 @@ export const Dashboard = () => {
       walletpayin: "Rs.200",
       walletpayout: "Rs.1000",
       total: "Rs.800",
-      action: "action",
     },
   ];
 
-  const {data} = useAutoFetch("/collection-record");
-  console.log(data);
+  const { data: cardData } = useAutoFetch("/collection-record");
 
   return (
     <>
@@ -57,38 +54,8 @@ export const Dashboard = () => {
 
             <div className="flex justify-between items-center p-6 relative z-10">
               <h6 className="text-2xl font-bold text-gray-800">
-                ₹ {data?.total_payin_amount ?? 0}
+                ₹ {cardData?.total_payin_amount ?? 0}
               </h6>
-              <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
-                <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
-                3.2%
-              </div>
-            </div>
-          </div>
-
-          <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
-            <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
-              <div className="bg-white rounded-full p-3">
-                <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
-              </div>
-              <h5 className="text-lg font-semibold tracking-tight">
-                Today Pay-IN Collection
-              </h5>
-            </div>
-
-            <svg
-              className="absolute bottom-0 w-full"
-              viewBox="0 0 500 50"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
-                className="fill-gray-400"
-              />
-            </svg>
-
-            <div className="flex justify-between items-center p-6 relative z-10">
-              <h6 className="text-2xl font-bold text-gray-800">₹ {data?.today_payin ?? 0}</h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
                 3.2%
@@ -119,7 +86,39 @@ export const Dashboard = () => {
 
             <div className="flex justify-between items-center p-6 relative z-10">
               <h6 className="text-2xl font-bold text-gray-800">
-                ₹ {data?.total_payout_amount ?? 0}
+                ₹ {cardData?.total_payout_amount ?? 0}
+              </h6>
+              <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
+                <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
+                3.2%
+              </div>
+            </div>
+          </div>
+
+          <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
+            <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
+              <div className="bg-white rounded-full p-3">
+                <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
+              </div>
+              <h5 className="text-lg font-semibold tracking-tight">
+                Today Pay-IN Collection
+              </h5>
+            </div>
+
+            <svg
+              className="absolute bottom-0 w-full"
+              viewBox="0 0 500 50"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
+                className="fill-gray-400"
+              />
+            </svg>
+
+            <div className="flex justify-between items-center p-6 relative z-10">
+              <h6 className="text-2xl font-bold text-gray-800">
+                ₹ {cardData?.today_payin ?? 0}
               </h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
@@ -150,7 +149,9 @@ export const Dashboard = () => {
             </svg>
 
             <div className="flex justify-between items-center p-6 relative z-10">
-              <h6 className="text-2xl font-bold text-gray-800">₹ {data?.today_payout ?? 0}</h6>
+              <h6 className="text-2xl font-bold text-gray-800">
+                ₹ {cardData?.today_payout ?? 0}
+              </h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
                 3.2%
@@ -244,7 +245,15 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <Table columns={transactioncolumn} data={transactiondata} showSearch ={false} showPagination= {false} showExport={false} showStatusFilter={false}/>
+      <Table
+        columns={transactioncolumn}
+        data={transactiondata}
+        showSearch={false}
+        showPagination={false}
+        showExport={false}
+        showStatusFilter={false}
+        showDeleteColumn={false}
+      />
     </>
   );
 };
