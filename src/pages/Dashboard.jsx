@@ -1,6 +1,7 @@
 import { DonutChart } from "../components/DonutChart";
 import { LineChart } from "../components/LineChart";
 import Table from "../components/Table";
+import useAutoFetch from "../hooks/useAutoFetch";
 
 export const Dashboard = () => {
   const transactioncolumn = [
@@ -25,6 +26,9 @@ export const Dashboard = () => {
       action: "action",
     },
   ];
+
+  const {data} = useAutoFetch("/collection-record");
+  console.log(data);
 
   return (
     <>
@@ -53,7 +57,7 @@ export const Dashboard = () => {
 
             <div className="flex justify-between items-center p-6 relative z-10">
               <h6 className="text-2xl font-bold text-gray-800">
-                ₹ 2,430,317.10
+                ₹ {data?.total_payin_amount ?? 0}
               </h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
@@ -84,7 +88,7 @@ export const Dashboard = () => {
             </svg>
 
             <div className="flex justify-between items-center p-6 relative z-10">
-              <h6 className="text-2xl font-bold text-gray-800">₹ 00.0</h6>
+              <h6 className="text-2xl font-bold text-gray-800">₹ {data?.today_payin ?? 0}</h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
                 3.2%
@@ -115,7 +119,7 @@ export const Dashboard = () => {
 
             <div className="flex justify-between items-center p-6 relative z-10">
               <h6 className="text-2xl font-bold text-gray-800">
-                ₹ 4,961,286.02
+                ₹ {data?.total_payout_amount ?? 0}
               </h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
@@ -146,7 +150,7 @@ export const Dashboard = () => {
             </svg>
 
             <div className="flex justify-between items-center p-6 relative z-10">
-              <h6 className="text-2xl font-bold text-gray-800">₹ 00.0</h6>
+              <h6 className="text-2xl font-bold text-gray-800">₹ {data?.today_payout ?? 0}</h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
                 3.2%

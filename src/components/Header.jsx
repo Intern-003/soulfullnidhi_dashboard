@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePost } from "../hooks/usePost";
+import useAutoFetch from "../hooks/useAutoFetch";
 
 export const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
-  const { execute: logout, loading } = usePost("/logout");
+  const { execute: logout } = usePost("/logout");
+  const { data } = useAutoFetch("/collection-record");
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -28,25 +30,25 @@ export const Header = ({ onMenuClick }) => {
       id: 1,
       icon: "fa-solid fa-arrow-trend-up text-green-400",
       label: "Payin Rolling Amount",
-      value: "165.08/-",
+      value: `${ data?.PayinRollingAmount ?? 0 }`,
     },
     {
       id: 2,
       icon: "fa-solid fa-arrow-trend-up text-green-400",
       label: "Payin Total Charges",
-      value: "23.04/-",
+      value: `${ data?.PayinProfitAmount ?? 0 }`,
     },
     {
       id: 3,
       icon: "fa-solid fa-wallet text-red-400",
       label: "Payout Wallet",
-      value: "54.40/-",
+      value: `${ data?.payout_wallet ?? 0 }`,
     },
     {
       id: 4,
       icon: "fa-solid fa-wallet text-green-400",
       label: "Payin Wallet",
-      value: "365/-",
+      value: `${ data?.PayingAmount ?? 0 }`,
     },
   ];
 
@@ -148,7 +150,7 @@ export const Header = ({ onMenuClick }) => {
                 <li>
                   <a
                     onClick={handleLogout}
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
+                    className="cursor-pointer block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
                   >
                     Logout
                   </a>
