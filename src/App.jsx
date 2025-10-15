@@ -18,6 +18,7 @@ import Acc_upi_setlement from "./pages/Acc_upi_setlement";
 import Acc_topup_settlement from "./pages/Acc_topup_settlement";
 import PayoutDoc from "./pages/PayoutDoc";
 import PrivateRoute from "./components/PrivateRoute";
+import ApiSetting from "./pages/ApiSetting";
 
 function App() {
   return (
@@ -153,6 +154,14 @@ function App() {
                 <Acc_upi_setlement />
               </PrivateRoute>
             }
+            />
+         <Route
+            path="/ApiSetting"
+            element={
+              <PrivateRoute>
+                <ApiSetting  />
+              </PrivateRoute>
+            }            
           />
         </Route>
       </Routes>
