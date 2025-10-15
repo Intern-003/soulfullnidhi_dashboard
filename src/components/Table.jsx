@@ -247,7 +247,7 @@ const Table = ({
                   )
                   .map((row, rowIndex) => (
                     <tr
-                      key={rowIndex}
+                      key={row.id}
                       className={`${
                         rowIndex % 2 === 0 ? "bg-[#f8fbff]" : "bg-white"
                       } hover:bg-[#dbeafe] transition-colors duration-200`}
