@@ -1,31 +1,78 @@
+import { useEffect, useMemo, useState } from "react";
 import { DonutChart } from "../components/DonutChart";
 import { LineChart } from "../components/LineChart";
 import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
+import { MONTH_NAMES } from "../constants/Constants";
 
 export const Dashboard = () => {
-  const transactioncolumn = [
-    { header: "User Id", accessor: "id" },
-    { header: "Name", accessor: "name" },
-    { header: "Payin", accessor: "payin" },
-    { header: "Payout", accessor: "payout" },
-    { header: "Payin Wallet", accessor: "walletpayin" },
-    { header: "Payout Wallet", accessor: "walletpayout" },
-    { header: "Total Transacts", accessor: "total" },
-  ];
-  const transactiondata = [
-    {
-      id: "1",
-      name: "yuvraj",
-      payin: "active",
-      payout: "active",
-      walletpayin: "Rs.200",
-      walletpayout: "Rs.1000",
-      total: "Rs.800",
-    },
-  ];
+  const [transactionData, setTransactionData] = useState([]);
+  const [largeTransactionData, setLargeTransactionData] = useState([]);
 
   const { data: cardData } = useAutoFetch("/collection-record");
+  const { data: tableData } = useAutoFetch(
+    "/reportrecords-List?status=success"
+  );
+  const initialDataOfTransactions = tableData?.data;
+
+  const processTableData = useMemo(() => {
+    if (!initialDataOfTransactions) return [];
+
+    return [...initialDataOfTransactions].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+  }, [initialDataOfTransactions]);
+
+  const processLargeTransactionData = useMemo(() => {
+    if (!initialDataOfTransactions) return [];
+    return [...initialDataOfTransactions]
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 4);
+  }, [initialDataOfTransactions]);
+
+  useEffect(() => {
+    const formattedTableData = processTableData.map((item, index) => ({
+      sqno: index + 1,
+      txnid: item.txnid,
+      name: item.user.name,
+      type: item.product,
+      amount: item.amount,
+      status: (
+        <span
+          className={`px-2 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800`}
+        >
+          {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+        </span>
+      ),
+      time:
+        new Date(item.created_at).getDate().toString() +
+        " " +
+        MONTH_NAMES[new Date(item.created_at).getMonth()] +
+        " " +
+        new Date(item.created_at).getFullYear() +
+        " - " +
+        new Date(item.created_at).toLocaleTimeString(),
+    }));
+    setTransactionData(formattedTableData);
+
+    const formattedLargeTransactionData = processLargeTransactionData.map(
+      (item) => ({
+        name: item.user.name,
+        amount: item.amount,
+      })
+    );
+    setLargeTransactionData(formattedLargeTransactionData);
+  }, [processTableData, processLargeTransactionData]);
+
+  const transactioncolumn = [
+    { header: "SQ No.", accessor: "sqno" },
+    { header: "TXN Id", accessor: "txnid" },
+    { header: "Name", accessor: "name" },
+    { header: "Type", accessor: "type" },
+    { header: "Amount", accessor: "amount" },
+    { header: "Status", accessor: "status" },
+    { header: "Time", accessor: "time" },
+  ];
 
   return (
     <>
@@ -178,67 +225,30 @@ export const Dashboard = () => {
               <h5 className="text-lg font-bold leading-none text-gray-900">
                 Large Transactions
               </h5>
-              <a
+              {/* <a
                 href="#"
                 className="text-sm font-medium text-blue-600 hover:underline"
               >
                 View all
-              </a>
+              </a> */}
             </div>
 
             <div className="flow-root">
               <ul role="list" className="divide-y divide-gray-200">
-                <li className="py-3 sm:py-4">
-                  <div className="flex items-center">
-                    <div className="flex-1 min-w-0 ms-4">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        Neil Sims
-                      </p>
+                {largeTransactionData.map((item) => 
+                  (<li className="py-3 sm:py-4">
+                    <div className="flex items-center">
+                      <div className="flex-1 min-w-0 ms-4">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {item.name}
+                        </p>
+                      </div>
+                      <div className="inline-flex items-center text-base font-semibold text-gray-900">
+                        ₹{item.amount}
+                      </div>
                     </div>
-                    <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      ₹32000
-                    </div>
-                  </div>
-                </li>
-
-                <li className="py-3 sm:py-4">
-                  <div className="flex items-center">
-                    <div className="flex-1 min-w-0 ms-4">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        Bonnie Green
-                      </p>
-                    </div>
-                    <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      ₹346720
-                    </div>
-                  </div>
-                </li>
-
-                <li className="py-3 sm:py-4">
-                  <div className="flex items-center">
-                    <div className="flex-1 min-w-0 ms-4">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        Michael Gough
-                      </p>
-                    </div>
-                    <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      ₹67000
-                    </div>
-                  </div>
-                </li>
-
-                <li className="py-3 sm:py-4">
-                  <div className="flex items-center">
-                    <div className="flex-1 min-w-0 ms-4">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        Lana Byrd
-                      </p>
-                    </div>
-                    <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      ₹367250
-                    </div>
-                  </div>
-                </li>
+                  </li>)
+                )}
               </ul>
             </div>
           </div>
@@ -247,9 +257,9 @@ export const Dashboard = () => {
 
       <Table
         columns={transactioncolumn}
-        data={transactiondata}
+        data={transactionData}
         showSearch={false}
-        showPagination={false}
+        showPagination={true}
         showExport={false}
         showStatusFilter={false}
         showDeleteColumn={false}
