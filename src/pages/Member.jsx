@@ -4,17 +4,21 @@ import Table from "../components/Table";
 import Toggle from "../components/Toggle";
 import Button from "../components/Button";
 import { SchemeModal } from "../components/SchemeModal";
-import { useGet } from "../hooks/useGet";
+import useAutoFetch from "../hooks/useAutoFetch";
 import { usePut } from "../hooks/usePut";
+import { MONTH_NAMES } from "../constants/Constants";
 
 export const Member = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
   const [merchantData, setMerchantData] = useState([]);
-  const { executePut } = usePut("/update-user-statuses");
+  const { executePut: updateSingle } = usePut("/update-user-statuses");
+  const { executePut: updateAll } = usePut("/payin-payout-statuses");
 
-  const { data: dataOfMerchants, refetch: refetchMerchantsData } =
-    useGet("/get-merchants");
+  const { data: dataOfMerchants, refetch: refetchOfMerchants } = useAutoFetch(
+    "/get-merchants",
+    20000
+  );
 
   const initialDataOfMerchants = useMemo(
     () => dataOfMerchants?.data ?? [],
@@ -24,7 +28,7 @@ export const Member = () => {
   const handlePayinToggle = async (v, rowId, accountStatus) => {
     try {
       if (accountStatus) {
-        await executePut({ user_id: rowId, payin_status: v });
+        await updateSingle({ user_id: rowId, payin_status: v });
       }
     } catch (err) {
       console.log("Payin Toggle Failed: ", err);
@@ -34,7 +38,7 @@ export const Member = () => {
   const handlePayoutToggle = async (v, rowId, accountStatus) => {
     try {
       if (accountStatus) {
-        await executePut({ user_id: rowId, payout_status: v });
+        await updateSingle({ user_id: rowId, payout_status: v });
       }
     } catch (err) {
       console.log("Payout Toggle Failed: ", err);
@@ -43,16 +47,38 @@ export const Member = () => {
 
   const handleAccountToggle = async (v, rowId) => {
     try {
-      const response = await executePut({
+      const response = await updateSingle({
         user_id: rowId,
         payin_status: false,
         payout_status: false,
         account_status: v,
       });
-
-      if (response) refetchMerchantsData();  
+      if (response) refetchOfMerchants();
     } catch (err) {
       console.log("Account Toggle Failed: ", err);
+    }
+  };
+
+  const handleAllPayinToggle = async (v) => {
+    console.log("All Payin: " + v);
+
+    // 1️⃣ Update local state instantly
+    setMerchantData((prev) =>
+      prev.map((item) => ({
+        ...item,
+        payin: item.account ? v : false, // only accounts that are active
+      }))
+    );
+
+    try {
+      // 2️⃣ Update backend
+      const response = await updateAll({ payin_status: v });
+      console.log(response);
+
+      // 3️⃣ Refetch in case backend has extra changes
+      refetchOfMerchants();
+    } catch (err) {
+      console.log("All Payin Toggle Failed: ", err);
     }
   };
 
@@ -66,6 +92,12 @@ export const Member = () => {
       account: item.account_status,
       walletpayin: item.payin_wallet,
       walletpayout: item.payout_wallet,
+      onboarddate:
+        new Date(item.created_at).getDate() +
+        " " +
+        MONTH_NAMES[new Date(item.created_at).getMonth()] +
+        " " +
+        new Date(item.created_at).getFullYear(),
     }));
     setMerchantData(formattedMerchantData);
   }, [initialDataOfMerchants]);
@@ -79,13 +111,11 @@ export const Member = () => {
     { header: "Name", accessor: "name" },
     { header: "Payin", accessor: "payin" },
     { header: "Payout", accessor: "payout" },
-    { header: "Account", accessor: "account" },
     { header: "Payin Wallet", accessor: "walletpayin" },
     { header: "Payout Wallet", accessor: "walletpayout" },
     { header: "Action", accessor: "action" },
   ];
 
-  // ✅ Attach toggle + button per row
   const tableDataWithActions = merchantData?.map((row) => ({
     ...row,
     payin: (
@@ -102,11 +132,21 @@ export const Member = () => {
         disabled={!row.account ? true : false}
       />
     ),
-    account: (
-      <Toggle
-        defaultChecked={row.account}
-        onChange={(v) => handleAccountToggle(v, row.id)}
-      />
+    sqno: (
+      <>
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-semibold">{row.sqno}</span>
+          <Toggle
+            defaultChecked={row.account}
+            onChange={(v) => handleAccountToggle(v, row.id)}
+          />
+        </div>
+        <div>
+          <span className="text-xs text-blue-400 font-semibold">
+            {row.onboarddate}
+          </span>
+        </div>
+      </>
     ),
     action: (
       <select
@@ -135,10 +175,7 @@ export const Member = () => {
 
         <div className="flex items-center space-x-2">
           <span className="font-bold text-white">All Payin ON/OFF</span>
-          <Toggle
-            defaultChecked={true}
-            onChange={(v) => console.log("All Payin:", v)}
-          />
+          <Toggle onChange={(v) => handleAllPayinToggle(v)} />
         </div>
 
         <div className="flex items-center space-x-2">
