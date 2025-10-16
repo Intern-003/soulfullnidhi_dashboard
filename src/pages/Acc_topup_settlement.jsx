@@ -1,66 +1,85 @@
-import React from 'react'
-import Table from '../components/Table'
+import { useState, useEffect } from "react";
+import Table from "../components/Table";
+import { useGet } from "../hooks/useGet"; // <-- import your hook
 
 const Acc_topup_settlement = () => {
-      const payoutcolumn = [
-        // {header:"order id" ,accessor:"order_id"},
-        // { header:"Type", accessor:"type"},
-        { header:"Merchant Details", accessor:"merchantdetails"},
-        { header:"Payer-Payee Details", accessor:"payerpayeedetails"},
-        { header:"Transaction Details", accessor:"Txndetails"},
-        { header:"Amount/Commission", accessor:"amt_comm"},
-        // { header:"Status", accessor:"status"},
-    ];
- const payoutdata = [
-  {
-    // order_id: "ORD12345 " ,
-    // type: "UPI",
-    merchantdetails: "Amazon Pvt Ltd",
-    payerpayeedetails: "akash Sharma (akash@upi)",
-    Txndetails: "Txn ID: TXN001234, Date:07-Oct-2025, 10:30 AM ",
-    amt_comm: "₹1,500 / ₹15",
-    // status: "Success",
-  },
-  {
-    // order_id: "ORD12346",
-    // type: "UPI",
-    merchantdetails: "Flipkart India",
-    payerpayeedetails: "Rahul Mehta (rahul@upi)",
-    Txndetails: "Txn ID: TXN001235, Date: 07-Oct-2025, 11:10 AM",
-    amt_comm: "₹2,250 / ₹22",
-    // status: "Pending",
-  },
-  {
-    // order_id: "ORD12347",
-    // type: "UPI",
-    merchantdetails: "Zomato Ltd",
-    payerpayeedetails: "Sneha Gupta (sneha@upi)",
-    Txndetails: "Txn ID: TXN001236, Date: 07-Oct-2025, 12:45 PM",
-    amt_comm: "₹980 / ₹9",
-    // status: "Failed",
-  },
-  {
-    // order_id: "ORD12348",
-    // type: "UPI",
-    merchantdetails: "Myntra Online",
-    payerpayeedetails: "Aman Verma (aman@upi)",
-    Txndetails: "Txn ID: TXN001237, Date: 07-Oct-2025, 1:30 PM",
-    amt_comm: "₹3,600 / ₹36",
-    // status: "Success",
-  },
-];
+  const [topupPayoutData, setTopupPayoutData] = useState([]);
+
+  // ✅ Use your hook to fetch schemes
+  const { data, loading, error, refetch } = useGet(
+    "/reportrecords-List?product=topup_payout"
+  );
+
+  // ✅ Format data whenever "data" changes
+  useEffect(() => {
+    const statusClasses = {
+      pending: "bg-yellow-100 text-yellow-800",
+      initiated: "bg-blue-100 text-blue-800",
+      success: "bg-green-100 text-green-800",
+      complete: "bg-green-100 text-green-800",
+      failed: "bg-red-100 text-red-800",
+      reversed: "bg-red-100 text-red-800",
+      refunded: "bg-gray-100 text-gray-800",
+    };
+
+    if (data?.data) {
+      const formattedData = data.data.map((item, index) => ({
+        sqno: index + 1,
+        order_id: item.id ?? "N/A",
+        product_type: item.product ?? "N/A",
+        merchant_details: item.user.name ?? "N/A",
+        txnid: item.txnid ?? "N/A",
+        amount: item.amount ?? "N/A",
+        status: (
+          <span
+            className={`px-2 py-1 rounded-full text-sm font-medium ${
+              statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {item.status ?? "N/A"}
+          </span>
+        ),
+      }));
+      setTopupPayoutData(formattedData);
+    }
+  }, [data]);
+
+  const topupPayoutColumn = [
+    { header: "SQ NO", accessor: "sqno" },
+    { header: "Order id", accessor: "order_id" },
+    { header: "Product Type", accessor: "product_type" },
+    { header: "Merchant Details", accessor: "merchant_details" },
+    { header: "Transaction Id", accessor: "txnid" },
+    { header: "Amount", accessor: "amount" },
+    { header: "Status", accessor: "status" },
+  ];
+
   return (
     <div>
-                    <div
+      <div
         className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center"
-        style={{ margin: "0px  0px 20px 0px", padding: "10px" }}  >
-        <h4 className="font-bold text-white text-lg py-2">Topup Settlement Statement</h4></div>
+        style={{ margin: "0 0 20px 0", padding: "10px" }}
+      >
+        <h4 className="font-bold text-white text-lg py-2">
+          Topup Settlement Statement
+        </h4>
+      </div>
 
-        {/* <Button variant="AddNewBtn" onClick={()=> alert("button clicked")}>primary button</Button> */}
-
-        <Table columns={payoutcolumn} data={payoutdata}/>
+      {loading ? (
+        <div className="text-center py-6 text-gray-500">Loading...</div>
+      ) : error ? (
+        <div className="text-center py-6 text-red-500">Error: {error}</div>
+      ) : (
+        <Table
+          columns={topupPayoutColumn}
+          data={topupPayoutData}
+          showStatusFilter={true}
+          showExport={true}
+          showSearch={true}
+        />
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default Acc_topup_settlement
+export default Acc_topup_settlement;
