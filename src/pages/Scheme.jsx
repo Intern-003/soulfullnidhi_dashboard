@@ -8,6 +8,7 @@ import { useGet } from "../hooks/useGet"; // <-- import your hook
 const Scheme = () => {
   const [showModal, setShowModal] = useState(false);
   const [schemedata, setSchemeData] = useState([]);
+  const [editData, setEditData] = useState(null);
   const StatusToggle = ({ value, sqno, onToggle }) => {
     const handleChange = (checked) => {
       if (onToggle) onToggle(sqno, checked);
@@ -40,9 +41,13 @@ const Scheme = () => {
     }
   }, [data]);
 
-  const handleModal = () => setShowModal((prev) => !prev);
+  const handleModal = () => {
+    setShowModal((prev) => !prev);
+    if (showModal) setEditData(null);
+  }
   const handleEdit = (scheme) => {
     console.log("Editing:", scheme);
+    setEditData(scheme);
     setShowModal(true);
   };
 
@@ -90,7 +95,7 @@ const Scheme = () => {
         >
           ADD NEW
         </Button>
-        <SchemeModal showModal={showModal} handleModal={handleModal} />
+        <SchemeModal showModal={showModal} handleModal={handleModal}  />
       </div>
 
       {loading ? (
