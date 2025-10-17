@@ -11,5 +11,5 @@ export default function useAutoFetch(endpoint, intervalMs = 10000) {
     return () => clearInterval(interval);
   }, [refetch, intervalMs]);
 
-  return { data, loading, error };
+  return { data, loading, error, refetch };
 }

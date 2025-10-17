@@ -13,6 +13,30 @@ export const MemberOnboardForm = () => {
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [activeTab, setActiveTab] = useState("payin");
+  const [memberFormData, setMemberFormData] = useState({
+    name: "",
+    mobile_no: "",
+    email: "",
+    business_mcc: "",
+    city: "",
+    district: "",
+    state: "",
+    pin_code: "",
+    address: "",
+    company_pan_no: "",
+    company_gst_no: "",
+    cin_llpin: "",
+    account_holder_name: "",
+    bank_account_no: "",
+    ifsc_code: "",
+    website_url: "",
+    company_type: "",
+    date_of_incorporation: "",
+    cancel_cheque_doc: null,
+    company_pan_no_doc: null,
+    company_gst_no_doc: null,
+  });
+
   const navigate = useNavigate();
 
   const handleSchemeModal = () => {
@@ -41,6 +65,15 @@ export const MemberOnboardForm = () => {
     }
   };
 
+  const handleChange = (e) => {
+    setMemberFormData({ ...memberFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(memberFormData);
+  };
+
   return (
     <>
       <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
@@ -51,18 +84,21 @@ export const MemberOnboardForm = () => {
 
       <Stepper currentStep={currentStep} />
 
-      <form>
+      <form onSubmit={handleSubmit}>
         {currentStep === 1 && (
           <div class="grid gap-6 mb-6 md:grid-cols-2">
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="name"
+                id="floating_outlined_name"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.name}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_name"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Business Name <span className="text-red-600">*</span>
@@ -71,12 +107,15 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="number"
-                id="floating_outlined"
+                name="mobile_no"
+                id="floating_outlined_mobile"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.mobile_no}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_mobile"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Business Mobile <span className="text-red-600">*</span>
@@ -85,12 +124,15 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="email"
-                id="floating_outlined"
+                name="email"
+                id="floating_outlined_email"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.email}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_email"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Business Email <span className="text-red-600">*</span>
@@ -99,12 +141,15 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="number"
-                id="floating_outlined"
+                name="business_mcc"
+                id="floating_outlined_mcc"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.business_mcc}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_mcc"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Business MCC <span className="text-red-600">*</span>
@@ -113,12 +158,15 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="city"
+                id="floating_outlined_city"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.city}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_city"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 City <span className="text-red-600">*</span>
@@ -127,12 +175,15 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="state"
+                id="floating_outlined_state"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.state}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_state"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 State <span className="text-red-600">*</span>
@@ -141,12 +192,15 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="district"
+                id="floating_outlined_district"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.district}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_district"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 District <span className="text-red-600">*</span>
@@ -154,13 +208,16 @@ export const MemberOnboardForm = () => {
             </div>
             <div class="relative">
               <input
-                type="text"
-                id="floating_outlined"
+                type="number"
+                name="pin_code"
+                id="floating_outlined_pin"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.pin_code}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_pin"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Pincode <span className="text-red-600">*</span>
@@ -169,12 +226,15 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="address"
+                id="floating_outlined_address"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.address}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_address"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Address <span className="text-red-600">*</span>
@@ -188,12 +248,15 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="company_pan_no"
+                id="floating_outlined_pan"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                value={memberFormData.company_pan_no}
+                onChange={handleChange}
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_pan"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Company Pan Number <span className="text-red-600">*</span>
@@ -202,12 +265,19 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="file"
-                id="floating_outlined"
+                name="company_pan_no_doc"
+                id="floating_outlined_pan_doc"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
+                onChange={(e) =>
+                  setMemberFormData((prev) => ({
+                    ...prev,
+                    company_pan_no_doc: e.target.files[0],
+                  }))
+                }
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_pan_doc"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Document Of Pan Card <span className="text-red-600">*</span>
@@ -216,12 +286,13 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="company_gst_no"
+                id="floating_outlined_gst"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_gst"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 GST Number <span className="text-red-600">*</span>
@@ -230,12 +301,13 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="file"
-                id="floating_outlined"
+                name="company_gst_no_doc"
+                id="floating_outlined_gst_doc"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_gst_doc"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Document Of GST Number <span className="text-red-600">*</span>
@@ -244,12 +316,13 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="cin_llpin"
+                id="floating_outlined_cin"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_cin"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 CIN Number <span className="text-red-600">*</span>
@@ -257,13 +330,14 @@ export const MemberOnboardForm = () => {
             </div>
             <div className="relative">
               <label
-                for="default"
+                for="company_type"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Company Type
               </label>
               <select
-                id="default"
+                id="company_type"
+                name="company_type"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
               >
                 <option selected>Choose company type</option>
@@ -284,12 +358,13 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="date"
-                id="floating_outlined"
+                name="date_of_incorporation"
+                id="floating_outlined_date"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_date"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Date Of Incorporation <span className="text-red-600">*</span>
@@ -298,12 +373,13 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="account_holder_name"
+                id="floating_outlined_account_holder_name"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_account_holder_name"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Account Holder Name <span className="text-red-600">*</span>
@@ -312,12 +388,13 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="number"
-                id="floating_outlined"
+                name="bank_account_no"
+                id="floating_outlined_account_number"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_account_number"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Bank Account Number <span className="text-red-600">*</span>
@@ -326,12 +403,13 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="ifsc_code"
+                id="floating_outlined_ifsc"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_ifsc"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 IFSC Code <span className="text-red-600">*</span>
@@ -340,12 +418,13 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="file"
-                id="floating_outlined"
+                name="cancel_cheque_doc"
+                id="floating_outlined_cancel_doc"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_cancel_doc"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Document Of Cancel Cheque{" "}
@@ -355,12 +434,13 @@ export const MemberOnboardForm = () => {
             <div class="relative">
               <input
                 type="text"
-                id="floating_outlined"
+                name="website_url"
+                id="floating_outlined_web"
                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
                 placeholder=""
               />
               <label
-                for="floating_outlined"
+                for="floating_outlined_web"
                 class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
               >
                 Website Url <span className="text-red-600">*</span>
@@ -582,7 +662,7 @@ export const MemberOnboardForm = () => {
 
             {currentStep === 4 && (
               <button
-                type="button"
+                type="submit"
                 class="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
               >
                 Submit
