@@ -1,17 +1,20 @@
 import React, { useEffect, useRef } from "react";
 
-export const DonutChart = () => {
+export const DonutChart = ({ data }) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
     if (chartRef.current && typeof ApexCharts !== "undefined") {
       const getChartOptions = () => ({
-        series: [35, 23, 2],
+        series: [data?.pending, data?.success, data?.failed],
         colors: ["#FDBA8C", "#1C64F2", "#16BDCA"],
         chart: {
           height: 320,
           width: "100%",
           type: "donut",
+          animations: {
+            enabled: false,
+          },
         },
         stroke: { colors: ["transparent"] },
         plotOptions: {
@@ -20,14 +23,21 @@ export const DonutChart = () => {
               size: "80%",
               labels: {
                 show: true,
-                name: { show: true, fontFamily: "Inter, sans-serif", offsetY: 20 },
+                name: {
+                  show: true,
+                  fontFamily: "Inter, sans-serif",
+                  offsetY: 20,
+                },
                 total: {
                   showAlways: true,
                   show: true,
                   label: "Transactions",
                   fontFamily: "Inter, sans-serif",
                   formatter: function (w) {
-                    const sum = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                    const sum = w.globals.seriesTotals.reduce(
+                      (a, b) => a + b,
+                      0
+                    );
                     return sum;
                   },
                 },
@@ -54,7 +64,7 @@ export const DonutChart = () => {
         chart.destroy();
       };
     }
-  }, []);
+  }, [data]);
 
   return (
     <div className="max-w-sm w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
