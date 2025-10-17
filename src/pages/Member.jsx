@@ -61,24 +61,41 @@ export const Member = () => {
 
   const handleAllPayinToggle = async (v) => {
     console.log("All Payin: " + v);
-
-    // 1️⃣ Update local state instantly
-    setMerchantData((prev) =>
-      prev.map((item) => ({
-        ...item,
-        payin: item.account ? v : false, // only accounts that are active
-      }))
-    );
-
+    let x = v ? 1 : 0;
     try {
-      // 2️⃣ Update backend
-      const response = await updateAll({ payin_status: v });
+      const response = await updateAll({ payin_status: x });
       console.log(response);
 
-      // 3️⃣ Refetch in case backend has extra changes
-      refetchOfMerchants();
+      if (response) {
+        setMerchantData((prev) =>
+          prev.map((item) => ({
+            ...item,
+            payin: item.account ? v : false,
+          }))
+        );
+      }
     } catch (err) {
       console.log("All Payin Toggle Failed: ", err);
+    }
+  };
+
+  const handleAllPayoutToggle = async (v) => {
+    console.log("All Payout: " + v);
+    let x = v ? 1 : 0;
+    try {
+      const response = await updateAll({ payout_status: x });
+      console.log(response);
+
+      if (response) {
+        setMerchantData((prev) =>
+          prev.map((item) => ({
+            ...item,
+            payout: item.account ? v : false,
+          }))
+        );
+      }
+    } catch (err) {
+      console.log("All Payout Toggle Failed: ", err);
     }
   };
 
@@ -181,8 +198,7 @@ export const Member = () => {
         <div className="flex items-center space-x-2">
           <span className="font-bold text-white">All Payout ON/OFF</span>
           <Toggle
-            defaultChecked={true}
-            onChange={(v) => console.log("All Payout:", v)}
+            onChange={(v) => handleAllPayoutToggle(v)}
           />
         </div>
 
