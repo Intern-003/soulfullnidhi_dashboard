@@ -1,7 +1,17 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export const LineChart = () => {
+export const LineChart = ({ data }) => {
   const chartRef = useRef(null);
+  const [amount, setAmount] = useState([1]);
+  const [months, setMonths] = useState([]);
+
+  useEffect(() => {
+    const fetchedAmount = data?.map((item) => item.total);
+    const fetchedMonths = data?.map((item) => item.month_name);
+
+    setAmount(fetchedAmount);
+    setMonths(fetchedMonths);
+  }, [data]);
 
   useEffect(() => {
     if (window.ApexCharts && chartRef.current) {
@@ -37,25 +47,12 @@ export const LineChart = () => {
         series: [
           {
             name: "Transactions",
-            data: [6500, 6418, 6456, 6526, 6356, 6456, 6654, 6589, 6897, 6400, 6600, 6560],
+            data: amount,
             color: "#1A56DB",
           },
         ],
         xaxis: {
-          categories: [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sept",
-            "Oct",
-            "Nov",
-            "Dec"
-          ],
+          categories: months,
           labels: { show: false },
           axisBorder: { show: false },
           axisTicks: { show: false },
@@ -68,16 +65,18 @@ export const LineChart = () => {
 
       return () => chart.destroy();
     }
-  }, []);
+  }, [data, amount, months]);
 
   return (
     <div className="max-w-3xl w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
       <div className="flex justify-between">
         <div>
           <h5 className="leading-none text-3xl font-bold text-gray-900 pb-2">
-            32.4k
+            {amount ? amount.reduce((item1, item2) => item1 + item2) : 0}
           </h5>
-          <p className="text-base font-normal text-gray-500">Transactions this year</p>
+          <p className="text-base font-normal text-gray-500">
+            Transactions this year
+          </p>
         </div>
       </div>
 

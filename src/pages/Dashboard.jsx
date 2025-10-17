@@ -216,7 +216,7 @@ export const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-5">
         <div className="lg:col-span-7">
-          <LineChart />
+          <LineChart data={cardData?.monthWiseStatusCounts}/>
         </div>
 
         <div className="lg:col-span-3 flex justify-center">
