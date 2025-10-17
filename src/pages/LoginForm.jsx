@@ -1,52 +1,43 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import logo from "../images/logo.png";
 import paymentGatewayBg from "../images/payment-gateway-bg.jpg";
+import { usePost } from "../hooks/usePost";
+import { useNavigate } from "react-router-dom";
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
+  const { execute: login, error, loading } = usePost("/login");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.email.includes("@")) {
-      newErrors.email = "Enter a valid email";
-    }
-    if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-    return newErrors;
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
+    try {
+      const response = await login(formData);
+      console.log(response.user.role_type);
+
+      if (response) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("role", btoa(response.user.role_type));
+        navigate("/dashboard", { replace: true });
+      }
+    } catch (err) {
+      console.log("Login failed:", err);
     }
-    setErrors({});
-    setLoading(true);
-    setTimeout(() => {
-      alert("Logged in!");
-      setLoading(false);
-    }, 1500);
   };
 
   return (
     <section className="bg-gray-100 min-h-screen flex items-center justify-center px-6">
-      {/* Background overlay image */}
       <div
         className="absolute inset-0 bg-no-repeat bg-center bg-cover opacity-60"
         style={{ backgroundImage: `url(${paymentGatewayBg})` }}
       ></div>
       <div className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-gray-200 opacity-90">
-        {/* Logo */}
         <div className="flex justify-center mb-6">
           <img className="w-70 mr-2" src={logo} alt="logo" />
         </div>
@@ -63,12 +54,11 @@ function LoginForm() {
               value={formData.email}
               onChange={handleChange}
               className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 peer ${
-                errors.email
+                error?.errors.email
                   ? "border-red-500 focus:border-red-500"
                   : "border-gray-300 focus:border-blue-600"
               }`}
               placeholder=" "
-              required
             />
             <label
               htmlFor="email"
@@ -76,10 +66,11 @@ function LoginForm() {
             >
               Email
             </label>
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+            {error?.errors.email && (
+              <p className="mt-1 text-sm text-red-500">{error.errors.email}</p>
             )}
           </div>
+
           {/* Password */}
           <div className="relative z-0 w-full mb-5">
             <input
@@ -89,12 +80,11 @@ function LoginForm() {
               value={formData.password}
               onChange={handleChange}
               className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 peer ${
-                errors.password
+                error?.errors.password
                   ? "border-red-500 focus:border-red-500"
                   : "border-gray-300 focus:border-blue-600"
               }`}
               placeholder=" "
-              required
             />
             <label
               htmlFor="password"
@@ -103,14 +93,12 @@ function LoginForm() {
               Password
             </label>
 
-            {/* Show/Hide Password */}
             <button
               type="button"
               className="absolute right-0 top-2.5 text-gray-500 hover:text-gray-700"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
-                /* Eye with slash */
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-5 h-5"
@@ -126,7 +114,6 @@ function LoginForm() {
                   />
                 </svg>
               ) : (
-                /* Eye open */
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-5 h-5"
@@ -150,24 +137,14 @@ function LoginForm() {
               )}
             </button>
 
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+            {error?.errors.password && (
+              <p className="mt-1 text-sm text-red-500">
+                {error.errors.password}
+              </p>
             )}
           </div>
-          {/* Remember + Forgot */}
-          {/* <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm text-gray-600">
-              <input type="checkbox" className="rounded border-gray-300" />
-              Remember me
-            </label>
-            <a
-              href="#"
-              className="text-sm font-medium text-blue-600 hover:underline"
-            >
-              Forgot password?
-            </a>
-          </div> */}
-          {/* Button */}
+
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
@@ -182,16 +159,10 @@ function LoginForm() {
               "Sign in"
             )}
           </button>
-          {/* Signup Link */}
-          {/* <p className="text-sm text-center text-gray-500">
-            Don’t have an account yet?{" "}
-            <a href="#" className="font-medium text-blue-600 hover:underline">
-              Sign up
-            </a>
-          </p> */}
         </form>
       </div>
     </section>
   );
 }
+
 export default LoginForm;

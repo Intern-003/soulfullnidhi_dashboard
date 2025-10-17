@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { usePost } from "../hooks/usePost";
+import useAutoFetch from "../hooks/useAutoFetch";
 
 export const Header = ({ onMenuClick }) => {
+  const navigate = useNavigate();
+  const { execute: logout } = usePost("/logout");
+  const { data } = useAutoFetch("/collection-record");
+
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -23,31 +30,43 @@ export const Header = ({ onMenuClick }) => {
       id: 1,
       icon: "fa-solid fa-arrow-trend-up text-green-400",
       label: "Payin Rolling Amount",
-      value: "165.08/-",
+      value: `${data?.PayinRollingAmount ?? 0}`,
     },
     {
       id: 2,
       icon: "fa-solid fa-arrow-trend-up text-green-400",
       label: "Payin Total Charges",
-      value: "23.04/-",
+      value: `${data?.PayinProfitAmount ?? 0}`,
     },
     {
       id: 3,
       icon: "fa-solid fa-wallet text-red-400",
       label: "Payout Wallet",
-      value: "54.40/-",
+      value: `${data?.payout_wallet ?? 0}`,
     },
     {
       id: 4,
       icon: "fa-solid fa-wallet text-green-400",
       label: "Payin Wallet",
-      value: "365/-",
+      value: `${data?.PayingAmount ?? 0}`,
     },
   ];
 
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await logout();
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      navigate("/");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
   return (
-    <nav className="bg-white shadow-lg shadow-indigo-500/50">
-      <div className="flex items-center justify-between w-full px-4 py-3">
+    <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-indigo-500/50">
+      <div>
         {/* Mobile menu button */}
         <button
           onClick={onMenuClick}
@@ -56,45 +75,51 @@ export const Header = ({ onMenuClick }) => {
           ☰
         </button>
 
-        {/* --- Desktop Stats Section --- */}
-        <div className="hidden md:flex items-center gap-6">
-          {stats.map((item) => (
-            <div key={item.id}>
-              <i className={`${item.icon} me-2 fa-lg`}></i>
-              <span>{item.label}: </span>
-              <span className="font-semibold">{item.value}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* --- Mobile Icons Row --- */}
-        <div className="flex items-center gap-6 md:hidden relative">
-          {stats.map((item) => (
-            <div key={item.id} className="relative"
-              onMouseEnter={() => setActiveStat(item.id)}   // 👈 add this
-               onMouseLeave={() => setActiveStat(null)} >
-              
-              <button
-                onClick={() =>
-                  setActiveStat(activeStat === item.id ? null : item.id)
-                }
-                className="flex flex-col items-center"
-              >
-                <i className={`${item.icon} fa-xl`}></i>
-              </button>
-
-              {/* Show label + value when active */}
-              {activeStat === item.id && (
-                <div className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white shadow-lg rounded-lg p-2 text-sm text-gray-700 w-40 text-center z-50">
-                  <div>{item.label}</div>
-                  <div className="font-semibold">{item.value}</div>
+        {atob(localStorage.getItem("role")) !== "admin" && (
+          <>
+            {/* --- Desktop Stats Section --- */}
+            <div className="hidden md:flex items-center gap-6">
+              {stats.map((item) => (
+                <div key={item.id}>
+                  <i className={`${item.icon} me-2 fa-lg`}></i>
+                  <span>{item.label}: </span>
+                  <span className="font-semibold">{item.value}</span>
                 </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Profile Dropdown */}
+            {/* --- Mobile Icons Row --- */}
+            <div className="flex items-center gap-6 md:hidden relative">
+              {stats.map((item) => (
+                <div
+                  key={item.id}
+                  className="relative"
+                  onMouseEnter={() => setActiveStat(item.id)} // 👈 add this
+                  onMouseLeave={() => setActiveStat(null)}
+                >
+                  <button
+                    onClick={() =>
+                      setActiveStat(activeStat === item.id ? null : item.id)
+                    }
+                    className="flex flex-col items-center"
+                  >
+                    <i className={`${item.icon} fa-xl`}></i>
+                  </button>
+
+                  {/* Show label + value when active */}
+                  {activeStat === item.id && (
+                    <div className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white shadow-lg rounded-lg p-2 text-sm text-gray-700 w-40 text-center z-50">
+                      <div>{item.label}</div>
+                      <div className="font-semibold">{item.value}</div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+      {/* Profile Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setOpen(!open)}
@@ -128,8 +153,8 @@ export const Header = ({ onMenuClick }) => {
                 </li>
                 <li>
                   <a
-                    href="#logout"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
+                    onClick={handleLogout}
+                    className="cursor-pointer block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
                   >
                     Logout
                   </a>
@@ -138,7 +163,6 @@ export const Header = ({ onMenuClick }) => {
             </ul>
           )}
         </div>
-      </div>
     </nav>
   );
 };

@@ -1,9 +1,48 @@
-import Button from './Button'
+import Button from "./Button";
+import { usePost } from "../hooks/usePost";
+import { useEffect, useState } from "react";
 
-export const BankModal = ({showModal, handleModal, activeTab}) => {
+export const BankModal = ({ showModal, handleModal, activeTab, refreshTable }) => {
+  const apiEndPoint =
+    activeTab === "payin" ? "/onboard-payinbank" : "/onboard-payoutbank";
+  const [bankName, setBankName] = useState("");
+  const {
+    error,
+    execute: onBoardBank,
+    loading,
+    setError,
+  } = usePost(apiEndPoint);
+
+  useEffect(() => {
+    if (showModal) {
+      setBankName("");
+      setError(null);
+    }
+  }, [showModal]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const payload =
+      activeTab === "payin"
+        ? { onboard_payin_bank: bankName }
+        : { onboard_payout_bank: bankName };
+
+    try {
+      const response = await onBoardBank(payload);
+      if (response) {
+        handleModal(false);
+        setBankName(" ");
+        if(refreshTable) refreshTable();
+      }
+    } catch (err) {
+      console.log("Login failed:", err);
+    }
+  };
+
   return (
     <>
-        {showModal && (
+      {showModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
           onClick={() => handleModal(false)}
@@ -16,7 +55,9 @@ export const BankModal = ({showModal, handleModal, activeTab}) => {
               className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
               font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
             >
-              <h4 className="font-bold text-white text-lg py-2">Add Bank</h4>
+              <h4 className="font-bold text-white text-lg py-2">
+                {activeTab === "payin" ? "Add Payin Bank" : "Add Payout Bank"}
+              </h4>
               <Button
                 onClick={() => handleModal(false)}
                 className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
@@ -25,23 +66,36 @@ export const BankModal = ({showModal, handleModal, activeTab}) => {
               </Button>
             </div>
 
-            <form className="p-6">
+            <form className="p-6" onSubmit={handleSubmit}>
               <div className="grid md:grid-cols-1 md:gap-6 px-4">
                 <div className="relative z-0 w-full mb-5 group">
                   <input
                     type="text"
-                    name="bankname"
+                    name={
+                      activeTab === "payin"
+                        ? "onboard_payin_bank"
+                        : "onboard_payout_bank"
+                    }
                     id="floating_bank"
-                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 peer ${
+                      error?.error
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:border-blue-600"
+                    }`}
                     placeholder=" "
                     required
                   />
                   <label
-                    for="floating_bank"
-                    className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                    htmlFor="floating_bank"
+                    className={`peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}
                   >
                     Bank Name
                   </label>
+                  {error?.error && (
+                    <p className="mt-1 text-sm text-red-500">{error.error}</p>
+                  )}
                 </div>
                 <div className="relative z-0 w-full mb-5 group">
                   <label className="block text-sm font-medium text-gray-500 mb-1">
@@ -55,9 +109,10 @@ export const BankModal = ({showModal, handleModal, activeTab}) => {
               <div className="flex justify-center mt-6">
                 <Button
                   type="submit"
-                  className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                  disabled={loading}
+                  className={`cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  Save
+                  {loading ? "Saving..." : "Save"}
                 </Button>
               </div>
             </form>
@@ -65,5 +120,5 @@ export const BankModal = ({showModal, handleModal, activeTab}) => {
         </div>
       )}
     </>
-  )
-}
+  );
+};

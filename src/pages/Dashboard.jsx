@@ -1,29 +1,77 @@
+import { useEffect, useMemo, useState } from "react";
 import { DonutChart } from "../components/DonutChart";
 import { LineChart } from "../components/LineChart";
 import Table from "../components/Table";
+import useAutoFetch from "../hooks/useAutoFetch";
+import { MONTH_NAMES } from "../constants/Constants";
 
 export const Dashboard = () => {
+  const [transactionData, setTransactionData] = useState([]);
+  const [largeTransactionData, setLargeTransactionData] = useState([]);
+
+  const { data: cardData } = useAutoFetch("/collection-record");
+  const { data: tableData } = useAutoFetch(
+    "/reportrecords-List?status=success"
+  );
+  const initialDataOfTransactions = tableData?.data;
+
+  const processTableData = useMemo(() => {
+    if (!initialDataOfTransactions) return [];
+
+    return [...initialDataOfTransactions].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+  }, [initialDataOfTransactions]);
+
+  const processLargeTransactionData = useMemo(() => {
+    if (!initialDataOfTransactions) return [];
+    return [...initialDataOfTransactions]
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 4);
+  }, [initialDataOfTransactions]);
+
+  useEffect(() => {
+    const formattedTableData = processTableData.map((item, index) => ({
+      sqno: index + 1,
+      txnid: item.txnid,
+      name: item.user.name,
+      type: item.product,
+      amount: item.amount,
+      status: (
+        <span
+          className={`px-2 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800`}
+        >
+          {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+        </span>
+      ),
+      time:
+        new Date(item.created_at).getDate().toString() +
+        " " +
+        MONTH_NAMES[new Date(item.created_at).getMonth()] +
+        " " +
+        new Date(item.created_at).getFullYear() +
+        " - " +
+        new Date(item.created_at).toLocaleTimeString(),
+    }));
+    setTransactionData(formattedTableData);
+
+    const formattedLargeTransactionData = processLargeTransactionData.map(
+      (item) => ({
+        name: item.user.name,
+        amount: item.amount,
+      })
+    );
+    setLargeTransactionData(formattedLargeTransactionData);
+  }, [processTableData, processLargeTransactionData]);
+
   const transactioncolumn = [
-    { header: "User Id", accessor: "id" },
+    { header: "SQ No.", accessor: "sqno" },
+    { header: "TXN Id", accessor: "txnid" },
     { header: "Name", accessor: "name" },
-    { header: "Payin", accessor: "payin" },
-    { header: "Payout", accessor: "payout" },
-    { header: "Payin Wallet", accessor: "walletpayin" },
-    { header: "Payout Wallet", accessor: "walletpayout" },
-    { header: "Total Transacts", accessor: "total" },
-    { header: "Action", accessor: "action" },
-  ];
-  const transactiondata = [
-    {
-      id: "1",
-      name: "yuvraj",
-      payin: "active",
-      payout: "active",
-      walletpayin: "Rs.200",
-      walletpayout: "Rs.1000",
-      total: "Rs.800",
-      action: "action",
-    },
+    { header: "Type", accessor: "type" },
+    { header: "Amount", accessor: "amount" },
+    { header: "Status", accessor: "status" },
+    { header: "Time", accessor: "time" },
   ];
 
   return (
@@ -53,38 +101,8 @@ export const Dashboard = () => {
 
             <div className="flex justify-between items-center p-6 relative z-10">
               <h6 className="text-2xl font-bold text-gray-800">
-                ₹ 2,430,317.10
+                ₹ {cardData?.total_payin_amount ?? 0}
               </h6>
-              <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
-                <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
-                3.2%
-              </div>
-            </div>
-          </div>
-
-          <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
-            <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
-              <div className="bg-white rounded-full p-3">
-                <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
-              </div>
-              <h5 className="text-lg font-semibold tracking-tight">
-                Today Pay-IN Collection
-              </h5>
-            </div>
-
-            <svg
-              className="absolute bottom-0 w-full"
-              viewBox="0 0 500 50"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
-                className="fill-gray-400"
-              />
-            </svg>
-
-            <div className="flex justify-between items-center p-6 relative z-10">
-              <h6 className="text-2xl font-bold text-gray-800">₹ 00.0</h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
                 3.2%
@@ -115,7 +133,39 @@ export const Dashboard = () => {
 
             <div className="flex justify-between items-center p-6 relative z-10">
               <h6 className="text-2xl font-bold text-gray-800">
-                ₹ 4,961,286.02
+                ₹ {cardData?.total_payout_amount ?? 0}
+              </h6>
+              <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
+                <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
+                3.2%
+              </div>
+            </div>
+          </div>
+
+          <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
+            <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
+              <div className="bg-white rounded-full p-3">
+                <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
+              </div>
+              <h5 className="text-lg font-semibold tracking-tight">
+                Today Pay-IN Collection
+              </h5>
+            </div>
+
+            <svg
+              className="absolute bottom-0 w-full"
+              viewBox="0 0 500 50"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
+                className="fill-gray-400"
+              />
+            </svg>
+
+            <div className="flex justify-between items-center p-6 relative z-10">
+              <h6 className="text-2xl font-bold text-gray-800">
+                ₹ {cardData?.today_payin ?? 0}
               </h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
@@ -146,7 +196,9 @@ export const Dashboard = () => {
             </svg>
 
             <div className="flex justify-between items-center p-6 relative z-10">
-              <h6 className="text-2xl font-bold text-gray-800">₹ 00.0</h6>
+              <h6 className="text-2xl font-bold text-gray-800">
+                ₹ {cardData?.today_payout ?? 0}
+              </h6>
               <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
                 <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
                 3.2%
@@ -157,14 +209,14 @@ export const Dashboard = () => {
 
         <div className="flex justify-center items-center">
           <div className="w-full">
-            <DonutChart />
+            <DonutChart data={cardData?.transactionStatusCounts}/>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-5">
         <div className="lg:col-span-7">
-          <LineChart />
+          <LineChart data={cardData?.monthWiseStatusCounts}/>
         </div>
 
         <div className="lg:col-span-3 flex justify-center">
@@ -173,74 +225,45 @@ export const Dashboard = () => {
               <h5 className="text-lg font-bold leading-none text-gray-900">
                 Large Transactions
               </h5>
-              <a
+              {/* <a
                 href="#"
                 className="text-sm font-medium text-blue-600 hover:underline"
               >
                 View all
-              </a>
+              </a> */}
             </div>
 
             <div className="flow-root">
               <ul role="list" className="divide-y divide-gray-200">
-                <li className="py-3 sm:py-4">
-                  <div className="flex items-center">
-                    <div className="flex-1 min-w-0 ms-4">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        Neil Sims
-                      </p>
+                {largeTransactionData.map((item) => 
+                  (<li className="py-3 sm:py-4">
+                    <div className="flex items-center">
+                      <div className="flex-1 min-w-0 ms-4">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {item.name}
+                        </p>
+                      </div>
+                      <div className="inline-flex items-center text-base font-semibold text-gray-900">
+                        ₹{item.amount}
+                      </div>
                     </div>
-                    <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      ₹32000
-                    </div>
-                  </div>
-                </li>
-
-                <li className="py-3 sm:py-4">
-                  <div className="flex items-center">
-                    <div className="flex-1 min-w-0 ms-4">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        Bonnie Green
-                      </p>
-                    </div>
-                    <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      ₹346720
-                    </div>
-                  </div>
-                </li>
-
-                <li className="py-3 sm:py-4">
-                  <div className="flex items-center">
-                    <div className="flex-1 min-w-0 ms-4">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        Michael Gough
-                      </p>
-                    </div>
-                    <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      ₹67000
-                    </div>
-                  </div>
-                </li>
-
-                <li className="py-3 sm:py-4">
-                  <div className="flex items-center">
-                    <div className="flex-1 min-w-0 ms-4">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        Lana Byrd
-                      </p>
-                    </div>
-                    <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                      ₹367250
-                    </div>
-                  </div>
-                </li>
+                  </li>)
+                )}
               </ul>
             </div>
           </div>
         </div>
       </div>
 
-      <Table columns={transactioncolumn} data={transactiondata} showSearch ={false} showPagination= {false} showExport={false} showStatusFilter={false}/>
+      <Table
+        columns={transactioncolumn}
+        data={transactionData}
+        showSearch={false}
+        showPagination={true}
+        showExport={false}
+        showStatusFilter={false}
+        showDeleteColumn={false}
+      />
     </>
   );
 };
