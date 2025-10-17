@@ -209,7 +209,7 @@ export const Dashboard = () => {
 
         <div className="flex justify-center items-center">
           <div className="w-full">
-            <DonutChart />
+            <DonutChart data={cardData?.transactionStatusCounts}/>
           </div>
         </div>
       </div>
