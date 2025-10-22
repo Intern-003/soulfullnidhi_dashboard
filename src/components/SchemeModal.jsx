@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Button from "./Button";
 import { usePost } from "../hooks/usePost";
 
-export const SchemeModal = ({ showModal, handleModal, editData }) => {
+export const SchemeModal = ({ showModal, handleModal, editData, refreshTable }) => {
   const [activeTab, setActiveTab] = useState("tab1");
   const [percentage, setPercentage] = useState(18);
 
@@ -13,11 +13,18 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
     above700: { type: "percent", amount: 0 },
   });
 
-  const [rollingPayin, setRollingPayin] = useState({ type: "percent", amount: 0 });
-  const [rollingFixed, setRollingFixed] = useState({ type: "percent", amount: 0 });
+  const [rollingPayin, setRollingPayin] = useState({
+    type: "percent",
+    amount: 0,
+  });
+  const [rollingFixed, setRollingFixed] = useState({
+    type: "percent",
+    amount: 0,
+  });
   const [selectedRolling, setSelectedRolling] = useState("payin");
 
-  const { execute: createScheme, loading: creating } = usePost("/create-scheme");
+  const { execute: createScheme, loading: creating } =
+    usePost("/create-scheme");
   const { execute: updateScheme, loading: updating } = usePost(
     editData ? `/update-scheme/${editData.id}` : ""
   );
@@ -63,10 +70,14 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
       payout_commision_type_above: payout.above700.type,
       payout_commision_amount_above: payout.above700.amount,
 
-      rolling_payin_amount: selectedRolling === "payin" ? rollingPayin.amount : 0,
-      rolling_payin_type: selectedRolling === "payin" ? rollingPayin.type : null,
-      rolling_fixed_amount: selectedRolling === "fixed" ? rollingFixed.amount : 0,
-      rolling_fixed_type: selectedRolling === "fixed" ? rollingFixed.type : null,
+      rolling_payin_amount:
+        selectedRolling === "payin" ? rollingPayin.amount : 0,
+      rolling_payin_type:
+        selectedRolling === "payin" ? rollingPayin.type : null,
+      rolling_fixed_amount:
+        selectedRolling === "fixed" ? rollingFixed.amount : 0,
+      rolling_fixed_type:
+        selectedRolling === "fixed" ? rollingFixed.type : null,
 
       gst_amount: parseFloat(percentage),
       gst_type: "percent",
@@ -82,6 +93,7 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
         alert("Scheme created successfully!");
       }
       console.log("Response:", res);
+      refreshTable();
       handleModal();
     } catch (err) {
       console.error("Error saving scheme:", err);
@@ -117,7 +129,9 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
         <form className="p-5" onSubmit={handleSubmit}>
           {/* Scheme Name */}
           <div className="mb-5">
-            <label className="block mb-1 text-sm font-medium">Scheme Name</label>
+            <label className="block mb-1 text-sm font-medium">
+              Scheme Name
+            </label>
             <input
               type="text"
               placeholder="Enter Scheme Name"
@@ -132,7 +146,12 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center">
               {["tab1", "tab2", "tab3", "tab4"].map((tab, idx) => {
                 const tabInfo = ["Payin", "Payout", "Rolling Amount", "GST"];
-                const icons = ["fa-money-bill-transfer","fa-credit-card","fa-rotate","fa-percent"];
+                const icons = [
+                  "fa-money-bill-transfer",
+                  "fa-credit-card",
+                  "fa-rotate",
+                  "fa-percent",
+                ];
                 return (
                   <li
                     key={tab}
@@ -168,11 +187,15 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
                 {/* Payin */}
                 {activeTab === "tab1" && (
                   <tr className="border-b border-gray-500">
-                    <td className="px-6 py-4 font-medium text-gray-900">Payin Commission Slab</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      Payin Commission Slab
+                    </td>
                     <td className="px-6 py-4">
                       <select
                         value={payin.type}
-                        onChange={(e) => setPayin({ ...payin, type: e.target.value })}
+                        onChange={(e) =>
+                          setPayin({ ...payin, type: e.target.value })
+                        }
                       >
                         <option value="flat">Flat</option>
                         <option value="percent">Percent</option>
@@ -182,7 +205,9 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
                       <input
                         type="number"
                         value={payin.amount}
-                        onChange={(e) => setPayin({ ...payin, amount: e.target.value })}
+                        onChange={(e) =>
+                          setPayin({ ...payin, amount: e.target.value })
+                        }
                         className="w-full border rounded-lg p-2 text-sm"
                       />
                     </td>
@@ -193,14 +218,19 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
                 {activeTab === "tab2" && (
                   <>
                     <tr className="border-b border-gray-500">
-                      <td className="px-6 py-4 font-medium text-gray-900">Payout Below 700</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        Payout Below 700
+                      </td>
                       <td className="px-6 py-4">
                         <select
                           value={payout.below700.type}
                           onChange={(e) =>
                             setPayout({
                               ...payout,
-                              below700: { ...payout.below700, type: e.target.value },
+                              below700: {
+                                ...payout.below700,
+                                type: e.target.value,
+                              },
                             })
                           }
                         >
@@ -215,7 +245,10 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
                           onChange={(e) =>
                             setPayout({
                               ...payout,
-                              below700: { ...payout.below700, amount: e.target.value },
+                              below700: {
+                                ...payout.below700,
+                                amount: e.target.value,
+                              },
                             })
                           }
                           className="w-full border rounded-lg p-2 text-sm"
@@ -224,14 +257,19 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
                     </tr>
 
                     <tr className="border-b border-gray-500 bg-blue-100">
-                      <td className="px-6 py-4 font-medium text-gray-900">Payout Above 700</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        Payout Above 700
+                      </td>
                       <td className="px-6 py-4">
                         <select
                           value={payout.above700.type}
                           onChange={(e) =>
                             setPayout({
                               ...payout,
-                              above700: { ...payout.above700, type: e.target.value },
+                              above700: {
+                                ...payout.above700,
+                                type: e.target.value,
+                              },
                             })
                           }
                         >
@@ -246,7 +284,10 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
                           onChange={(e) =>
                             setPayout({
                               ...payout,
-                              above700: { ...payout.above700, amount: e.target.value },
+                              above700: {
+                                ...payout.above700,
+                                amount: e.target.value,
+                              },
                             })
                           }
                           className="w-full border rounded-lg p-2 text-sm"
@@ -257,93 +298,106 @@ export const SchemeModal = ({ showModal, handleModal, editData }) => {
                 )}
 
                 {/* Rolling */}
-             {activeTab === "tab3" && (
-  <>
-    {/* Rolling Payin */}
-    <tr className="border-b border-gray-500">
-      <td className="px-6 py-4 font-medium text-gray-900">
-        <label className="flex items-center space-x-2 cursor-pointer">
-          <input
-            type="radio"
-            name="rollingOption"
-            value="payin"
-            checked={selectedRolling === "payin"}
-            onChange={() => setSelectedRolling("payin")}
-          />
-          <span>Rolling Payin Amount</span>
-        </label>
-      </td>
-      <td className="px-6 py-4">
-        <select
-          value={rollingPayin.type}
-          onChange={(e) =>
-            setRollingPayin({ ...rollingPayin, type: e.target.value })
-          }
-          disabled={selectedRolling !== "payin"}
-        >
-          <option value="flat">Flat</option>
-          <option value="percent">Percent</option>
-        </select>
-      </td>
-      <td className="px-6 py-4">
-        <input
-          type="number"
-          value={rollingPayin.amount}
-          onChange={(e) =>
-            setRollingPayin({ ...rollingPayin, amount: parseFloat(e.target.value) || 0 })
-          }
-          disabled={selectedRolling !== "payin"}
-          className="w-full border rounded-lg p-2 text-sm"
-        />
-      </td>
-    </tr>
+                {activeTab === "tab3" && (
+                  <>
+                    {/* Rolling Payin */}
+                    <tr className="border-b border-gray-500">
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="rollingOption"
+                            value="payin"
+                            checked={selectedRolling === "payin"}
+                            onChange={() => setSelectedRolling("payin")}
+                          />
+                          <span>Rolling Payin Amount</span>
+                        </label>
+                      </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={rollingPayin.type}
+                          onChange={(e) =>
+                            setRollingPayin({
+                              ...rollingPayin,
+                              type: e.target.value,
+                            })
+                          }
+                          disabled={selectedRolling !== "payin"}
+                        >
+                          <option value="flat">Flat</option>
+                          <option value="percent">Percent</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4">
+                        <input
+                          type="number"
+                          value={rollingPayin.amount}
+                          onChange={(e) =>
+                            setRollingPayin({
+                              ...rollingPayin,
+                              amount: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          disabled={selectedRolling !== "payin"}
+                          className="w-full border rounded-lg p-2 text-sm"
+                        />
+                      </td>
+                    </tr>
 
-    {/* Rolling Fixed */}
-    <tr className="border-b border-gray-500">
-      <td className="px-6 py-4 font-medium text-gray-900">
-        <label className="flex items-center space-x-2 cursor-pointer">
-          <input
-            type="radio"
-            name="rollingOption"
-            value="fixed"
-            checked={selectedRolling === "fixed"}
-            onChange={() => setSelectedRolling("fixed")}
-          />
-          <span>Rolling Fixed Amount</span>
-        </label>
-      </td>
-      <td className="px-6 py-4">
-        <select
-          value={rollingFixed.type}
-          onChange={(e) =>
-            setRollingFixed({ ...rollingFixed, type: e.target.value })
-          }
-          disabled={selectedRolling !== "fixed"}
-        >
-          <option value="flat">Flat</option>
-          <option value="percent">Percent</option>
-        </select>
-      </td>
-      <td className="px-6 py-4">
-        <input
-          type="number"
-          value={rollingFixed.amount}
-          onChange={(e) =>
-            setRollingFixed({ ...rollingFixed, amount: parseFloat(e.target.value) || 0 })
-          }
-          disabled={selectedRolling !== "fixed"}
-          className="w-full border rounded-lg p-2 text-sm"
-        />
-      </td>
-    </tr>
-  </>
-)}
-
+                    {/* Rolling Fixed */}
+                    <tr className="border-b border-gray-500">
+                      <td className="px-6 py-4 font-medium text-gray-900">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="rollingOption"
+                            value="fixed"
+                            checked={selectedRolling === "fixed"}
+                            onChange={() => setSelectedRolling("fixed")}
+                          />
+                          <span>Rolling Fixed Amount</span>
+                        </label>
+                      </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={rollingFixed.type}
+                          onChange={(e) =>
+                            setRollingFixed({
+                              ...rollingFixed,
+                              type: e.target.value,
+                            })
+                          }
+                          disabled={selectedRolling !== "fixed"}
+                        >
+                          <option value="flat">Flat</option>
+                          <option value="percent">Percent</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4">
+                        <input
+                          type="number"
+                          value={rollingFixed.amount}
+                          onChange={(e) =>
+                            setRollingFixed({
+                              ...rollingFixed,
+                              amount: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          disabled={selectedRolling !== "fixed"}
+                          className="w-full border rounded-lg p-2 text-sm"
+                        />
+                      </td>
+                    </tr>
+                  </>
+                )}
 
                 {/* GST */}
                 {activeTab === "tab4" && (
                   <tr className="border-b border-gray-500">
-                    <td className="px-6 py-4 font-medium text-gray-900">Goods and Service Tax</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      Goods and Service Tax
+                    </td>
                     <td className="px-6 py-4">
                       <select value="percent" disabled>
                         <option value="percent">Percent</option>
