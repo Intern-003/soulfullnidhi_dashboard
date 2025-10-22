@@ -5,6 +5,7 @@ import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
 import { BankModal } from "../components/BankModal";
 import { ConfirmModal } from "../components/ConfirmModal";
+import { useGet } from "../hooks/useGet";
 
 export const MemberOnboardForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -47,9 +48,16 @@ export const MemberOnboardForm = () => {
         director_aadhar_doc: null,
       },
     ],
+    payin_at_onboard: "",
+    payout_at_onboard: "",
+    scheme_id: ""
   });
 
   const navigate = useNavigate();
+
+  const { data: payoutBanks, refetch: refetchPayout } = useGet("/payoutbanks-List?status=1");
+  const { data: payinBanks, refetch: refetchPayin} = useGet("/payinbanks-List?status=1");
+  const { data: schemes, refetch: refetchScheme } = useGet("/get-scheme");
 
   const handleSchemeModal = () => {
     setShowSchemeModal(!showSchemeModal);
@@ -665,10 +673,19 @@ export const MemberOnboardForm = () => {
                 </label>
                 <select
                   id="default"
+                  name="payin_at_onboard"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
+                  value={memberFormData.payin_at_onboard}
+                  onChange={handleChange}
                 >
                   <option selected>Select Bank</option>
-                  <option value="yesbank">Yes Bank</option>
+                  {payinBanks?.data.map((item) => {
+                    return (
+                      <option key={item.id} value={item.onboard_payin_bank}>
+                        {item.onboard_payin_bank}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -691,10 +708,19 @@ export const MemberOnboardForm = () => {
                 </label>
                 <select
                   id="default"
+                  name="payout_at_onboard"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
+                  value={memberFormData.payout_at_onboard}
+                  onChange={handleChange}
                 >
                   <option selected>Select Bank</option>
-                  <option value="bulkpe">BulkPe</option>
+                  {payoutBanks?.data.map((item) => {
+                    return (
+                      <option key={item.id} value={item.onboard_payout_bank}>
+                        {item.onboard_payout_bank}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -717,10 +743,19 @@ export const MemberOnboardForm = () => {
                 </label>
                 <select
                   id="default"
+                  name="scheme_id"
                   className="peer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
+                  value={memberFormData.scheme_id}
+                  onChange={handleChange}
                 >
                   <option value="">Select Scheme</option>
-                  <option value="commission">Commission</option>
+                  {schemes?.data.map((item) => {
+                    return (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -792,6 +827,7 @@ export const MemberOnboardForm = () => {
       <SchemeModal
         showModal={showSchemeModal}
         handleModal={handleSchemeModal}
+        refreshTable={refetchScheme}
       />
 
       {activeTab === "payin" ? (
@@ -799,12 +835,14 @@ export const MemberOnboardForm = () => {
           showModal={showPayinModal}
           handleModal={handlePayinModal}
           activeTab={activeTab}
+          refreshTable={refetchPayin}
         />
       ) : (
         <BankModal
           showModal={showPayoutModal}
           handleModal={handlePayoutModal}
           activeTab={activeTab}
+          refreshTable={refetchPayout}
         />
       )}
 
