@@ -1,6 +1,33 @@
+import { useState } from "react";
 import Button from "../components/Button";
+import axios from "axios";
 
 export const PayinRequest = () => {
+  const [payerName, setPayerName] = useState("");
+  const [amount, setAmount] = useState("");
+  const [payerMobile, setPayerMobile] = useState("");
+  const [payerEmail, setPayerEmail] = useState("");
+
+   const [qrUrl, setQrUrl] = useState(""); // to store QR image URL
+
+
+  const handlePayinSubmit = () => {
+    const response = {
+      status_code: 200,
+      status: "success",
+      data: {
+        qrcode_string:
+          "upi://pay?pa=soulfuloverseas348596@ypbiz&pn=f59d23ac19020c989cd8566a4ea16646ad4e02f67516cedc3bd7d833efda516e&cu=INR&tn=Pay+to+f59d23ac19020c989cd8566a4ea16646ad4e02f67516cedc3bd7d833efda516e&am=54&mam=54&mc=5311&mode=04&tr=AIRPAY1384557594&ver=1"
+      }
+    };
+
+    const upiString = response.data.qrcode_string;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
+    setQrUrl(qrUrl);
+  };
+
+
+
   return (
     <>
       <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
@@ -8,7 +35,7 @@ export const PayinRequest = () => {
           Create New Payment
         </h4>
       </div>
-
+  {!qrUrl && (
       <div className="p-5 border border-gray-200 shadow-md m-5">
         <div class="grid md:grid-cols-2 md:gap-6 px-4">
           <div class="relative z-0 w-full mb-5 group">
@@ -16,6 +43,8 @@ export const PayinRequest = () => {
               type="text"
               name="payer_name"
               id="payer_name"
+              value={payerName}
+              onChange={(e) => setPayerName(e.target.value)}
               class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               placeholder=" "
               required
@@ -34,6 +63,8 @@ export const PayinRequest = () => {
               id="amount"
               class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               placeholder=" "
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
               required
             />
             <label
@@ -53,6 +84,8 @@ export const PayinRequest = () => {
               id="payer_mobile"
               class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               placeholder=" "
+              value={payerMobile}
+              onChange={(e) => setpayerMobile(e.target.value)}
               required
             />
             <label
@@ -69,6 +102,8 @@ export const PayinRequest = () => {
               id="payer_email"
               class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               placeholder=" "
+              value={payerEmail}
+              onChange={(e) => setpayerEmail(e.target.value)}
               required
             />
             <label
@@ -81,16 +116,35 @@ export const PayinRequest = () => {
         </div>
         <div class="flex justify-center mt-2 py-2">
           <Button
-            type="submit"
-            onClick={() =>
-              (window.location.href = "https://live.spay.live/payment")
-            }
+            type="button"
+            // onClick={() =>
+            //   (window.location.href = "https://live.spay.live/payment")
+          // }
+          onClick={handlePayinSubmit}
             className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
           >
             Submit
           </Button>
         </div>
       </div>
+  )}
+           {qrUrl && (
+  <div className="flex justify-center mt-10">
+    <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col items-center border border-gray-200">
+      <h3 className="text-xl font-semibold mb-4 text-gray-800">Scan to Pay</h3>
+      <img src={qrUrl} alt="UPI QR Code" className="w-64 h-64 mb-4" />
+      <p className="text-gray-600 text-center text-sm">
+        Open your UPI app and scan this QR code to complete the payment.
+      </p>
+      <button
+        className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        onClick={() => setQrUrl("")} // optional: go back to form
+      >
+        Back
+      </button>
+    </div>
+  </div>
+      )}
     </>
   );
 };
