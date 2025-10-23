@@ -44,7 +44,7 @@ const Scheme = () => {
   const handleModal = () => {
     setShowModal((prev) => !prev);
     if (showModal) setEditData(null);
-  }
+  };
   const handleEdit = (scheme) => {
     console.log("Editing:", scheme);
     setEditData(scheme);
@@ -79,9 +79,7 @@ const Scheme = () => {
   ];
 
   return (
-
     <div>
-
       <div
         className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center"
         style={{ margin: "0 0 20px 0", padding: "10px" }}
@@ -95,7 +93,7 @@ const Scheme = () => {
         >
           ADD NEW
         </Button>
-        <SchemeModal showModal={showModal} handleModal={handleModal}  />
+        <SchemeModal showModal={showModal} handleModal={handleModal} editData={editData} refreshTable={refetch}/>
       </div>
 
       {loading ? (
@@ -103,10 +101,15 @@ const Scheme = () => {
       ) : error ? (
         <div className="text-center py-6 text-red-500">Error: {error}</div>
       ) : (
-        <Table columns={schemecolumn} data={schemedata} showStatusFilter={true} showExport={true} showSearch={true}/>
+        <Table
+          columns={schemecolumn}
+          data={schemedata}
+          showStatusFilter={true}
+          showExport={true}
+          showSearch={true}
+        />
       )}
     </div>
-
   );
 };
 
