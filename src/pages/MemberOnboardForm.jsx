@@ -100,8 +100,7 @@ export const MemberOnboardForm = () => {
   );
   const { data: schemes, refetch: refetchScheme } = useGet("/get-scheme");
 
-  const { execute: executeMember } =
-    usePost("/onboard-merchant");
+  const { execute: executeMember } = usePost("/onboard-merchant");
 
   const handleSchemeModal = () => {
     setShowSchemeModal(!showSchemeModal);
@@ -127,21 +126,29 @@ export const MemberOnboardForm = () => {
     const requiredFields = stepRequiredFields[currentStep];
     const newErrors = {};
 
-    requiredFields.forEach((field) => {
-      let value;
+    if (currentStep === 3) {
+      memberFormData.director_info.forEach((director, idx) => {
+        requiredFields.forEach((field) => {
+          if (!director[field] || director[field].trim() === "") {
+            if (!newErrors.director) newErrors.director = [];
+            newErrors.director[idx] = {
+              ...newErrors.director[idx],
+              [field]: "This field is required",
+            };
+          }
+        });
+      });
+    } else {
+      requiredFields.forEach((field) => {
+        let value;
 
-      if (currentStep === 3) {
-        // For director_info
-        value = memberFormData.director_info[field];
-        console.log(field);
-      } else {
         value = memberFormData[field];
-      }
 
-      if (!value || value === "") {
-        newErrors[field] = `This field is required`;
-      }
-    });
+        if (!value || value === "") {
+          newErrors[field] = `This field is required`;
+        }
+      });
+    }
 
     setErrors(newErrors);
 
@@ -205,11 +212,16 @@ export const MemberOnboardForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await executeMember(memberFormData);
-      if (res) navigate("/member-list");
-    } catch (err) {
-      toast.error(Object.values(err?.errors)[0][0]);
+    if (validateStep()) {
+      try {
+        const res = await executeMember(memberFormData);
+        if (res) {
+          toast.success("Form submitted successfully!");
+          navigate("/member-list");
+        }
+      } catch (err) {
+        toast.error(Object.values(err?.errors)[0][0]);
+      }
     }
   };
 
@@ -803,7 +815,7 @@ export const MemberOnboardForm = () => {
                   id="floating_outlined_director_name"
                   name="director_name"
                   className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                    errors?.director?.director_name
+                    errors?.director?.[index]?.director_name
                       ? "border-red-500"
                       : "border-gray-300"
                   }`}
@@ -815,16 +827,16 @@ export const MemberOnboardForm = () => {
                 <label
                   for="floating_outlined_director_name"
                   className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.director_name
+                    errors?.director?.[index]?.director_name
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
                   }`}
                 >
                   Name <span className="text-red-600">*</span>
                 </label>
-                {errors?.director?.director_name && (
+                {errors?.director?.[index]?.director_name && (
                   <span className="text-sm text-red-500">
-                    {errors?.director?.director_name}
+                    {errors?.director?.[index]?.director_name}
                   </span>
                 )}
               </div>
@@ -832,7 +844,7 @@ export const MemberOnboardForm = () => {
                 <label
                   for="default"
                   className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.director_gender
+                    errors?.director?.[index]?.director_gender
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
                   }`}
@@ -843,7 +855,7 @@ export const MemberOnboardForm = () => {
                   id="default"
                   name="director_gender"
                   className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
-                    errors?.director?.director_gender
+                    errors?.director?.[index]?.director_gender
                       ? "border-red-500"
                       : " border-gray-300"
                   }`}
@@ -855,9 +867,9 @@ export const MemberOnboardForm = () => {
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                 </select>
-                {errors?.director?.director_gender && (
+                {errors?.director?.[index]?.director_gender && (
                   <span className="text-sm text-red-500">
-                    {errors?.director?.director_gender}
+                    {errors?.director?.[index]?.director_gender}
                   </span>
                 )}
               </div>
@@ -869,7 +881,7 @@ export const MemberOnboardForm = () => {
                   value={director.director_pan_no}
                   onChange={(e) => handleDirectorChange(index, e)}
                   className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                    errors?.director?.director_pan_no
+                    errors?.director?.[index]?.director_pan_no
                       ? "border-red-500"
                       : "border-gray-300"
                   }`}
@@ -879,16 +891,16 @@ export const MemberOnboardForm = () => {
                 <label
                   for="floating_outlined_director_pan"
                   className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.director_pan_no
+                    errors?.director?.[index]?.director_pan_no
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
                   }`}
                 >
                   Pan Number <span className="text-red-600">*</span>
                 </label>
-                {errors?.director?.director_pan_no && (
+                {errors?.director?.[index]?.director_pan_no && (
                   <span className="text-sm text-red-500">
-                    {errors?.director?.director_pan_no}
+                    {errors?.director?.[index]?.director_pan_no}
                   </span>
                 )}
               </div>
@@ -915,7 +927,7 @@ export const MemberOnboardForm = () => {
                   value={director.director_aadhar_no}
                   onChange={(e) => handleDirectorChange(index, e)}
                   className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                    errors?.director?.director_aadhar_no
+                    errors?.director?.[index]?.director_aadhar_no
                       ? "border-red-500"
                       : "border-gray-300"
                   }`}
@@ -925,16 +937,16 @@ export const MemberOnboardForm = () => {
                 <label
                   for="floating_outlined_director_aadhar_no"
                   className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.director_aadhar_no
+                    errors?.director?.[index]?.director_aadhar_no
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
                   }`}
                 >
                   Aadhar Number <span className="text-red-600">*</span>
                 </label>
-                {errors?.director?.director_aadhar_no && (
+                {errors?.director?.[index]?.director_aadhar_no && (
                   <span className="text-sm text-red-500">
-                    {errors?.director?.director_aadhar_no}
+                    {errors?.director?.[index]?.director_aadhar_no}
                   </span>
                 )}
               </div>
@@ -962,7 +974,7 @@ export const MemberOnboardForm = () => {
                   value={director.director_dob}
                   onChange={(e) => handleDirectorChange(index, e)}
                   className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                    errors?.director?.director_dob
+                    errors?.director?.[index]?.director_dob
                       ? "border-red-500"
                       : "border-gray-300"
                   }`}
@@ -972,16 +984,16 @@ export const MemberOnboardForm = () => {
                 <label
                   for="floating_outlined_director_dob"
                   className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.director_dob
+                    errors?.director?.[index]?.director_dob
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
                   }`}
                 >
                   DOB <span className="text-red-600">*</span>
                 </label>
-                {errors?.director?.director_dob && (
+                {errors?.director?.[index]?.director_dob && (
                   <span className="text-sm text-red-500">
-                    {errors?.director?.director_dob}
+                    {errors?.director?.[index]?.director_dob}
                   </span>
                 )}
               </div>
@@ -1117,7 +1129,6 @@ export const MemberOnboardForm = () => {
                   }`}
                   value={memberFormData.scheme_id}
                   onChange={handleChange}
-                  required
                 >
                   <option value="">Select Scheme</option>
                   {schemes?.data.map((item) => {
@@ -1192,7 +1203,7 @@ export const MemberOnboardForm = () => {
             <Button
               onClick={() => setShowConfirmModal(!showConfirmModal)}
               type="button"
-              className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-cente"
+              className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
             >
               Go Back
             </Button>
