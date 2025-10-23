@@ -556,4 +556,61 @@
 
 
 
+.error-status-section h2 {
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.error-status-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.error-status-table th {
+  background: #fef2f2;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #060052;
+  border-bottom: 2px solid #fecaca;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.error-status-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #fef2f2;
+  color: #4b5563;
+}
+
+.error-status-table tr:last-child td {
+  border-bottom: none;
+}
+
+.error-status-table tr:hover {
+  background-color: #fef2f2;
+}
+
+.error-status-badge {
+  background: #fecaca;
+  color: #050505;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #fca5a5;
+}
+
+
+
 
