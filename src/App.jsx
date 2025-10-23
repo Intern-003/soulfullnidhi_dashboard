@@ -157,10 +157,10 @@ function App() {
             }
             />
          <Route
-            path="/ApiSetting"
+            path="/api-settings"
             element={
               <PrivateRoute>
-                <ApiSetting  />
+                <ApiSetting />
               </PrivateRoute>
             }            
           />
