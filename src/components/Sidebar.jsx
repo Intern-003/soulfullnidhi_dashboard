@@ -562,7 +562,7 @@ export const Sidebar = ({ open, setOpen }) => {
               >
                 <ul>
                   <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                    <a href="">Callback and Token</a>
+                    <Link to={"/api-settings"}>Callback and Token</Link>
                   </li>
                 </ul>
               </div>
