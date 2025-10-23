@@ -1,32 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Table from "../components/Table";
 import Button from "../components/Button";
+import { useGet } from "../hooks/useGet";
 
 const LoadWallet = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [walletData, setWalletData] = useState([]);
+
+  const { data: tableData, refetch } = useGet("/get-merchants");
+  
+  const initialDataOfWallet = tableData?.data;
+  
+  useEffect(() => {
+    const formattedTableData = initialDataOfWallet.map((item, index) => ({
+      sqno: index + 1,
+      id: item.id,
+      name: item.name,
+      payout_wallet: item.payout_wallet,
+    }));
+    setWalletData(formattedTableData);
+  }, [initialDataOfWallet]);
 
   const membercolumn = [
-    { header: "User Id", accessor: "id" },
+    { header: "SQNo", accessor: "sqno" },
     { header: "Name", accessor: "name" },
-    { header: "Payout Wallet", accessor: "walletpayout" },
+    { header: "Payout Wallet", accessor: "payout_wallet" },
     { header: "Action", accessor: "action" },
   ];
 
-  const memberdata = [
-    {
-      id: "1",
-      name: "Yuvraj",
-      walletpayout: "Rs.1000",
-    },
-    {
-      id: "2",
-      name: "Aakash",
-      walletpayout: "Rs.4000",
-    },
-  ];
-
-  const tableDataWithActions = memberdata.map((row) => ({
+  const tableDataWithActions = walletData?.map((row) => ({
     ...row,
     action: (
       <Button
@@ -48,7 +51,13 @@ const LoadWallet = () => {
         <h4 className="font-bold text-white text-lg py-2">Load Wallet</h4>
       </div>
 
-      <Table columns={membercolumn} data={tableDataWithActions} />
+      <Table
+        columns={membercolumn}
+        data={tableDataWithActions}
+        showStatusFilter={false}
+        showDeleteColumn={false}
+        showExport={false}
+      />
 
       {/* ✅ Modal with background blur */}
       {showModal && (
