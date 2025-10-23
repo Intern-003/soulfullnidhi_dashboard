@@ -1,25 +1,33 @@
 import { useEffect, useState } from "react";
 import Button from "./Button";
 import { usePost } from "../hooks/usePost";
+import { useToast } from "../contexts/ToastContext";
 
-export const SchemeModal = ({ showModal, handleModal, editData, refreshTable }) => {
+export const SchemeModal = ({
+  showModal,
+  handleModal,
+  editData,
+  refreshTable,
+}) => {
+  const toast = useToast();
+
   const [activeTab, setActiveTab] = useState("tab1");
   const [percentage, setPercentage] = useState(18);
-
   const [name, setName] = useState("");
   const [payin, setPayin] = useState({ type: "percent", amount: 0 });
   const [payout, setPayout] = useState({
     below700: { type: "flat", amount: 0 },
     above700: { type: "percent", amount: 0 },
   });
-
   const [rollingPayin, setRollingPayin] = useState({
     type: "percent",
     amount: 0,
+    amountStr: "0",
   });
   const [rollingFixed, setRollingFixed] = useState({
     type: "percent",
     amount: 0,
+    amountStr: "0",
   });
   const [selectedRolling, setSelectedRolling] = useState("payin");
 
@@ -29,75 +37,101 @@ export const SchemeModal = ({ showModal, handleModal, editData, refreshTable }) 
     editData ? `/update-scheme/${editData.id}` : ""
   );
 
+  // Initialize modal state when it opens
   useEffect(() => {
-    if (editData) {
-      setName(editData.name || "");
-      setPayin(editData.payin || { type: "percent", amount: 0 });
-      setPayout(
-        editData.payout || {
+    if (showModal) {
+      if (editData) {
+        // Pre-fill with edit data
+        setName(editData.name || "");
+        setPayin({
+          type: editData.payin_commision_type,
+          amount: editData.payin_commision_amount,
+        });
+        setPayout({
+          below700: {
+            type: editData.payout_commision_type_below,
+            amount: editData.payout_commision_amount_below,
+          },
+          above700: {
+            type: editData.payout_commision_type_above,
+            amount: editData.payout_commision_amount_above,
+          },
+        });
+        setRollingPayin({
+          type: editData.rolling_payin_type || "percent",
+          amount: editData.rolling_payin_amount || 0,
+          amountStr: String(editData.rolling_payin_amount || 0),
+        });
+        setRollingFixed({
+          type: editData.rolling_fixed_type || "percent",
+          amount: editData.rolling_fixed_amount || 0,
+          amountStr: String(editData.rolling_fixed_amount || 0),
+        });
+        setSelectedRolling(
+          editData.rolling_payin_amount > 0 ? "payin" : "fixed"
+        );
+        setPercentage(editData.gst_amount || 18);
+      } else {
+        // Reset for adding new scheme
+        setName("");
+        setPayin({ type: "percent", amount: 0 });
+        setPayout({
           below700: { type: "flat", amount: 0 },
-          above700: { type: "flat", amount: 0 },
-        }
-      );
-
-      setRollingPayin({
-        type: editData.rolling_payin_type || "percent",
-        amount: editData.rolling_payin_amount || 0,
-      });
-      setRollingFixed({
-        type: editData.rolling_fixed_type || "percent",
-        amount: editData.rolling_fixed_amount || 0,
-      });
-
-      setSelectedRolling(editData.rolling_payin_amount ? "payin" : "fixed");
-      setPercentage(editData.gst_amount || 18);
+          above700: { type: "percent", amount: 0 },
+        });
+        setRollingPayin({ type: "percent", amount: 0, amountStr: "0" });
+        setRollingFixed({ type: "percent", amount: 0, amountStr: "0" });
+        setSelectedRolling("payin");
+        setPercentage(18);
+      }
     }
-  }, [editData]);
+  }, [showModal, editData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name) {
-      alert("Please enter scheme name");
+      toast.info("Please enter scheme name");
       return;
     }
 
     const payload = {
-      name,
+      name: name,
       payin_commision_type: payin.type,
-      payin_commision_amount: payin.amount,
+      payin_commision_amount: parseFloat(payin.amount) || 0,
       payout_commision_type_below: payout.below700.type,
-      payout_commision_amount_below: payout.below700.amount,
+      payout_commision_amount_below: parseFloat(payout.below700.amount) || 0,
       payout_commision_type_above: payout.above700.type,
-      payout_commision_amount_above: payout.above700.amount,
-
+      payout_commision_amount_above: parseFloat(payout.above700.amount) || 0,
       rolling_payin_amount:
-        selectedRolling === "payin" ? rollingPayin.amount : 0,
+        selectedRolling === "payin"
+          ? parseFloat(rollingPayin.amountStr) || 0
+          : 0,
       rolling_payin_type:
         selectedRolling === "payin" ? rollingPayin.type : null,
       rolling_fixed_amount:
-        selectedRolling === "fixed" ? rollingFixed.amount : 0,
+        selectedRolling === "fixed"
+          ? parseFloat(rollingFixed.amountStr) || 0
+          : 0,
       rolling_fixed_type:
         selectedRolling === "fixed" ? rollingFixed.type : null,
-
-      gst_amount: parseFloat(percentage),
+      gst_amount: parseFloat(percentage) || 18,
       gst_type: "percent",
     };
 
     try {
-      let res;
       if (editData) {
-        res = await updateScheme(payload);
-        alert("Scheme updated successfully!");
+        await updateScheme(payload);
+        toast.success("Scheme updated successfully!");
       } else {
-        res = await createScheme(payload);
-        alert("Scheme created successfully!");
+        console.log("Payload of Scheme: ", payload);
+        await createScheme(payload);
+        toast.success("Scheme created successfully!");
       }
-      console.log("Response:", res);
       refreshTable();
       handleModal();
     } catch (err) {
       console.error("Error saving scheme:", err);
-      alert(err.message || "Something went wrong");
+      toast.error(err.message || "Something went wrong");
     }
   };
 
@@ -134,6 +168,7 @@ export const SchemeModal = ({ showModal, handleModal, editData, refreshTable }) 
             </label>
             <input
               type="text"
+              name="name"
               placeholder="Enter Scheme Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -318,10 +353,10 @@ export const SchemeModal = ({ showModal, handleModal, editData, refreshTable }) 
                         <select
                           value={rollingPayin.type}
                           onChange={(e) =>
-                            setRollingPayin({
-                              ...rollingPayin,
+                            setRollingPayin((prev) => ({
+                              ...prev,
                               type: e.target.value,
-                            })
+                            }))
                           }
                           disabled={selectedRolling !== "payin"}
                         >
@@ -332,12 +367,17 @@ export const SchemeModal = ({ showModal, handleModal, editData, refreshTable }) 
                       <td className="px-6 py-4">
                         <input
                           type="number"
-                          value={rollingPayin.amount}
+                          value={
+                            selectedRolling === "payin"
+                              ? rollingPayin.amountStr
+                              : ""
+                          }
                           onChange={(e) =>
-                            setRollingPayin({
-                              ...rollingPayin,
+                            setRollingPayin((prev) => ({
+                              ...prev,
+                              amountStr: e.target.value,
                               amount: parseFloat(e.target.value) || 0,
-                            })
+                            }))
                           }
                           disabled={selectedRolling !== "payin"}
                           className="w-full border rounded-lg p-2 text-sm"
@@ -363,10 +403,10 @@ export const SchemeModal = ({ showModal, handleModal, editData, refreshTable }) 
                         <select
                           value={rollingFixed.type}
                           onChange={(e) =>
-                            setRollingFixed({
-                              ...rollingFixed,
+                            setRollingFixed((prev) => ({
+                              ...prev,
                               type: e.target.value,
-                            })
+                            }))
                           }
                           disabled={selectedRolling !== "fixed"}
                         >
@@ -377,12 +417,17 @@ export const SchemeModal = ({ showModal, handleModal, editData, refreshTable }) 
                       <td className="px-6 py-4">
                         <input
                           type="number"
-                          value={rollingFixed.amount}
+                          value={
+                            selectedRolling === "fixed"
+                              ? rollingFixed.amountStr
+                              : ""
+                          }
                           onChange={(e) =>
-                            setRollingFixed({
-                              ...rollingFixed,
+                            setRollingFixed((prev) => ({
+                              ...prev,
+                              amountStr: e.target.value,
                               amount: parseFloat(e.target.value) || 0,
-                            })
+                            }))
                           }
                           disabled={selectedRolling !== "fixed"}
                           className="w-full border rounded-lg p-2 text-sm"
