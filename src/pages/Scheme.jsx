@@ -4,27 +4,31 @@ import { SchemeModal } from "../components/SchemeModal";
 import Toggle from "../components/Toggle";
 import Button from "../components/Button";
 import { useGet } from "../hooks/useGet"; // <-- import your hook
+import { usePost } from "../hooks/usePost";
 
 const Scheme = () => {
   const [showModal, setShowModal] = useState(false);
   const [schemedata, setSchemeData] = useState([]);
   const [editData, setEditData] = useState(null);
-  const StatusToggle = ({ value, sqno, onToggle }) => {
+  const StatusToggle = ({ id, value, sqno, onToggle }) => {
     const handleChange = (checked) => {
-      if (onToggle) onToggle(sqno, checked);
+      if (onToggle) onToggle(id, sqno, checked);
     };
 
     return (
       <Toggle defaultChecked={value === "Active"} onChange={handleChange} />
     );
   };
+
   // ✅ Use your hook to fetch schemes
   const { data, loading, error, refetch } = useGet("/get-scheme"); // replace endpoint with your actual API endpoint
+  const { execute: updateStatus } = usePost("/update-scheme-status");
 
   // ✅ Format data whenever "data" changes
   useEffect(() => {
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
+        id: item.id,
         sqno: index + 1,
         name: item.name,
         status: item.status ? "Active" : "Inactive",
@@ -45,20 +49,24 @@ const Scheme = () => {
     setShowModal((prev) => !prev);
     if (showModal) setEditData(null);
   };
+
   const handleEdit = (scheme) => {
     console.log("Editing:", scheme);
     setEditData(scheme);
     setShowModal(true);
   };
 
-  const handleStatusToggle = (sqno, checked) => {
-    setSchemeData((prev) =>
-      prev.map((item) =>
-        item.sqno === sqno
-          ? { ...item, status: checked ? "Active" : "Inactive" }
-          : item
-      )
-    );
+  const handleStatusToggle = async (id, sqno, checked) => {
+    const res = await updateStatus({ scheme_id: id, status: checked });
+    if (res) {
+      setSchemeData((prev) =>
+        prev.map((item) =>
+          item.sqno === sqno
+            ? { ...item, status: checked ? "Active" : "Inactive" }
+            : item
+        )
+      );
+    }
   };
 
   const schemecolumn = [
@@ -71,6 +79,7 @@ const Scheme = () => {
         <StatusToggle
           value={value}
           sqno={row.sqno}
+          id={row.id}
           onToggle={handleStatusToggle}
         />
       ),
@@ -93,7 +102,12 @@ const Scheme = () => {
         >
           ADD NEW
         </Button>
-        <SchemeModal showModal={showModal} handleModal={handleModal} editData={editData} refreshTable={refetch}/>
+        <SchemeModal
+          showModal={showModal}
+          handleModal={handleModal}
+          editData={editData}
+          refreshTable={refetch}
+        />
       </div>
 
       {loading ? (
