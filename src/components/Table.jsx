@@ -25,7 +25,7 @@ const Table = ({
   
   // 🔍 Filtered Data (Search + Status)
   const filteredData = useMemo(() => {
-    return data.filter((row) => {
+    return data?.filter((row) => {
       const matchesSearch = Object.values(row).some((val) =>
         String(val).toLowerCase().includes(search.toLowerCase())
     );
