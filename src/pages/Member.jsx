@@ -211,7 +211,7 @@ export const Member = () => {
         </Button>
       </div>
 
-      <Table columns={membercolumn} data={tableDataWithActions} />
+      <Table columns={membercolumn} data={tableDataWithActions} endPoint="/delete-merchant" refreshTable={refetchOfMerchants}/>
 
       <SchemeModal showModal={showModal} handleModal={handleModal} />
     </div>

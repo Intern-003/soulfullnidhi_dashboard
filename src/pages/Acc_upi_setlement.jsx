@@ -6,7 +6,7 @@ const Acc_upi_setlement = () => {
   const [payinSettlementData, setPayinSettlementData] = useState([]);
 
   // ✅ Use your hook to fetch schemes
-  const { data, loading, error, refetch } = useGet(
+  const { data, loading, error } = useGet(
     "/reportrecords-List?product=payin_settlement"
   );
 
@@ -36,7 +36,9 @@ const Acc_upi_setlement = () => {
               statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
             }`}
           >
-            {item.status ?? "N/A"}
+            {item?.status
+              ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+              : "N/A"}
           </span>
         ),
       }));
@@ -76,6 +78,7 @@ const Acc_upi_setlement = () => {
           showStatusFilter={true}
           showExport={true}
           showSearch={true}
+          showDeleteColumn={false}
         />
       )}
     </div>

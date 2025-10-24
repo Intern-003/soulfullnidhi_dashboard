@@ -6,7 +6,7 @@ const Acc_topup_settlement = () => {
   const [topupPayoutData, setTopupPayoutData] = useState([]);
 
   // ✅ Use your hook to fetch schemes
-  const { data, loading, error, refetch } = useGet(
+  const { data, loading, error } = useGet(
     "/reportrecords-List?product=topup_payout"
   );
 
@@ -36,7 +36,9 @@ const Acc_topup_settlement = () => {
               statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
             }`}
           >
-            {item.status ?? "N/A"}
+            {item?.status
+              ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+              : "N/A"}
           </span>
         ),
       }));
