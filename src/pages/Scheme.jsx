@@ -121,6 +121,8 @@ const Scheme = () => {
           showStatusFilter={true}
           showExport={true}
           showSearch={true}
+          endPoint="/delete-scheme"
+          refreshTable={refetch}
         />
       )}
     </div>

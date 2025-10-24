@@ -1,6 +1,8 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Button from "./Button";
 import { ConfirmModal } from "./ConfirmModal";
+import { usePost } from "../hooks/usePost";
+import { useToast } from "../contexts/ToastContext";
 
 const Table = ({
   columns,
@@ -10,20 +12,41 @@ const Table = ({
   showExport = true,
   showStatusFilter = true,
   showDeleteColumn = true,
+  endPoint = "",
+  refreshTable
 }) => {
+  const toast = useToast();
   const [search, setSearch] = useState("");
+  const [recordId, setRecordId] = useState(null);
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [openExport, setOpenExport] = useState(false);
-  const [statusFilter, setStatusFilter] = useState(""); // ✅ New state
+  const [statusFilter, setStatusFilter] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const handleConfirmModal = () => {
+  const handleConfirmModal = (id) => {
+    setRecordId(id);
     setShowConfirmModal(!showConfirmModal);
   }
 
-  
-  // 🔍 Filtered Data (Search + Status)
+  const modifiedEndpoint = endPoint + `/${recordId}`
+  const { execute:deleteRecord } = usePost(modifiedEndpoint);
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await deleteRecord({});
+      if(res) {
+        toast.success("Record deleted successfully!");
+        refreshTable();
+        handleConfirmModal();
+        setRecordId(null);
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
   const filteredData = useMemo(() => {
     return data?.filter((row) => {
       const matchesSearch = Object.values(row).some((val) =>
@@ -42,7 +65,7 @@ const Table = ({
   if (!columns || !data || data.length === 0) {
     return <h6>No data found</h6>;
   }
-  // 📂 Export Handlers
+ 
   const downloadFile = (content, fileName, mimeType) => {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
@@ -263,7 +286,7 @@ const Table = ({
                         <td className="px-4 py-2">
                           <Button
                             type="button"
-                            onClick={handleConfirmModal}
+                            onClick={() => handleConfirmModal(row.id)}
                             className="text-red-800 p-3 rounded-xl cursor-pointer"
                           >
                             <i class="fa-solid fa-trash fa-lg"></i>
@@ -286,7 +309,7 @@ const Table = ({
           </table>
         </div>
 
-        <ConfirmModal showConfirmModal={showConfirmModal} handleConfirmModal={handleConfirmModal} heading={"Are you sure you want to delete?"} body={"If you delete the record it will be not recovered."} action={() => setShowConfirmModal(false)}/>
+        <ConfirmModal showConfirmModal={showConfirmModal} handleConfirmModal={handleConfirmModal} heading={"Are you sure you want to delete?"} body={"If you delete the record it will be not recovered."} action={handleDelete}/>
 
         {showPagination && (
           <div

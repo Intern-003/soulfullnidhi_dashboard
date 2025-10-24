@@ -58,7 +58,7 @@ const PayinSettlement = () => {
         <h4 className="font-bold text-white text-lg py-2">Payin Settlement</h4>
       </div>
 
-      <Table columns={membercolumn} data={tableDataWithActions} />
+      <Table columns={membercolumn} data={tableDataWithActions} showDeleteColumn={false}/>
 
       {/* ✅ Modal with background blur */}
       {showModal && (

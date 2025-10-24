@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import Table from "../components/Table";
-import { useGet } from "../hooks/useGet"; // <-- import your hook
+import { useGet } from "../hooks/useGet";
 
 const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
 
   // ✅ Use your hook to fetch schemes
-  const { data, loading, error, refetch } = useGet(
-    "/reportrecords-List?product=payout"
-  );
+  const { data, loading, error } = useGet("/reportrecords-List?product=payout");
 
   // ✅ Format data whenever "data" changes
   useEffect(() => {
@@ -36,7 +34,9 @@ const PayoutStatement = () => {
               statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
             }`}
           >
-            {item.status ?? "N/A"}
+            {item?.status
+              ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+              : "N/A"}
           </span>
         ),
       }));
@@ -60,9 +60,7 @@ const PayoutStatement = () => {
         className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center"
         style={{ margin: "0 0 20px 0", padding: "10px" }}
       >
-        <h4 className="font-bold text-white text-lg py-2">
-          Payout Statement
-        </h4>
+        <h4 className="font-bold text-white text-lg py-2">Payout Statement</h4>
       </div>
 
       {loading ? (
@@ -76,6 +74,7 @@ const PayoutStatement = () => {
           showStatusFilter={true}
           showExport={true}
           showSearch={true}
+          showDeleteColumn={false}
         />
       )}
     </div>
