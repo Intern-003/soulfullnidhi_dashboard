@@ -119,9 +119,7 @@ const Scheme = () => {
         <Table
           columns={schemecolumn}
           data={schemedata}
-          showStatusFilter={true}
-          showExport={true}
-          showSearch={true}
+          showDateFilter={false}
           endPoint="/delete-scheme"
           refreshTable={refetch}
           statusList={TOGGLE_STATUSES}
