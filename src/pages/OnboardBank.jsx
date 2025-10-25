@@ -5,6 +5,7 @@ import { BankModal } from "../components/BankModal";
 import { useGet } from "../hooks/useGet";
 import Toggle from "../components/Toggle";
 import { usePost } from "../hooks/usePost";
+import { TOGGLE_STATUSES } from "../constants/Constants";
 
 const OnboardBank = () => {
   const [activeTab, setActiveTab] = useState("payin");
@@ -85,6 +86,7 @@ const OnboardBank = () => {
           onboard_payin_bank: item.onboard_payin_bank,
           onboarded_payin_bank_status:
             item.onboarded_payin_bank_status === 1 ? "Active" : "Inactive",
+          status: item.onboarded_payin_bank_status ? "Active" : "Inactive"  
         })) || [];
       setBankData(mapped);
     } else {
@@ -95,6 +97,7 @@ const OnboardBank = () => {
           onboard_payout_bank: item.onboard_payout_bank,
           onboarded_payout_bank_status:
             item.onboarded_payout_bank_status === 1 ? "Active" : "Inactive",
+          status: item.onboarded_payout_bank_status ? "Active" : "Inactive"  
         })) || [];
       setBankData(mapped);
     }
@@ -151,14 +154,16 @@ const OnboardBank = () => {
           columns={bankColumn}
           data={bankData}
           showPagination={true}
-          showStatusFilter={false}
+          showStatusFilter={true}
           showExport={false}
-          showSearch={false}
+          showSearch={true}
+          showDateFilter={false}
           setData={setBankData}
           endPoint={
             activeTab === "payin" ? "/delete-payinbank" : "/delete-payoutbank"
           }
           refreshTable={activeTab === "payin" ? payinRefetch : payoutRefetch}
+          statusList={TOGGLE_STATUSES}
         />
       </div>
 
