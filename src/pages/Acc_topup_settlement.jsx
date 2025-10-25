@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet"; // <-- import your hook
+import { MONTH_NAMES } from "../constants/Constants";
 
 const Acc_topup_settlement = () => {
   const [topupPayoutData, setTopupPayoutData] = useState([]);
@@ -28,7 +29,13 @@ const Acc_topup_settlement = () => {
         order_id: item.id ?? "N/A",
         product_type: item.product ?? "N/A",
         merchant_details: item.user.name ?? "N/A",
-        txnid: item.txnid ?? "N/A",
+        txnid: item.txnid,
+        date:
+          new Date(item.created_at).getDate() +
+          " " +
+          MONTH_NAMES[new Date(item.created_at).getMonth()] +
+          " " +
+          new Date(item.created_at).getFullYear(),
         amount: item.amount ?? "N/A",
         status: (
           <span
@@ -54,6 +61,7 @@ const Acc_topup_settlement = () => {
     { header: "Transaction Id", accessor: "txnid" },
     { header: "Amount", accessor: "amount" },
     { header: "Status", accessor: "status" },
+    { header: "Date", accessor: "date" }
   ];
 
   return (
@@ -78,6 +86,7 @@ const Acc_topup_settlement = () => {
           showStatusFilter={true}
           showExport={true}
           showSearch={true}
+          showDeleteColumn={false}
         />
       )}
     </div>
