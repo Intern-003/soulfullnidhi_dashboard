@@ -37,14 +37,13 @@ const LoadWallet = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
-      id: selectedUser.id,
+      user_id: selectedUser.id,
       payout_wallet: walletFormData.payout_wallet,
       remark: walletFormData.remark,
     };
-    console.log(payload);
+    
     try {
       const res = await loadWallet(payload);
-      console.log(res);
       if (res) {
         toast.success("Wallet loaded successfully!!");
         refetch();
@@ -89,8 +88,8 @@ const LoadWallet = () => {
         columns={membercolumn}
         data={tableDataWithActions}
         showStatusFilter={false}
+        showDateFilter={false}
         showDeleteColumn={false}
-        showExport={false}
       />
 
       {/* ✅ Modal with background blur */}
