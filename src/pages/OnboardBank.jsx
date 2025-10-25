@@ -45,6 +45,8 @@ const OnboardBank = () => {
               : item
           )
         );
+        if (activeTab === "payin") payinRefetch();
+        else payoutRefetch();
       }
     } catch (err) {
       console.log(err);
