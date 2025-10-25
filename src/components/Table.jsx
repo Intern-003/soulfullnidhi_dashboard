@@ -18,6 +18,7 @@ const Table = ({
   endPoint = "",
   refreshTable,
   setData,
+  statusList,
 }) => {
   const toast = useToast();
   const [search, setSearch] = useState("");
@@ -25,7 +26,7 @@ const Table = ({
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [openExport, setOpenExport] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -141,7 +142,7 @@ const Table = ({
 
   return (
     <div className="w-full">
-      {(showSearch || showStatusFilter || showExport) && (
+      {(showSearch || showStatusFilter || showExport || showDateFilter) && (
         <>
           <div className="flex flex-col md:flex-row justify-between items-center rounded-b-xl ml-2 mb-3">
             {/* Search */}
@@ -220,12 +221,12 @@ const Table = ({
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="border border-sky-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-sky-400 focus:outline-none hover:border-sky-400 transition"
                 >
-                  <option value="">Select Status</option>
                   <option value="all">All</option>
-                  <option value="active">Active</option>
-                  <option value="success">Success</option>
-                  <option value="failed">Failed</option>
-                  <option value="pending">Pending</option>
+                  {statusList?.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
+                    </option>
+                  ))}
                 </select>
               )}
 
@@ -302,7 +303,7 @@ const Table = ({
               onClick={() => {
                 setStartDate(null);
                 setEndDate(null);
-                setStatusFilter("");
+                setStatusFilter("all");
                 setSearch("");
               }}
             >
@@ -319,7 +320,7 @@ const Table = ({
           style={{ scrollbarWidth: "thin", scrollbarColor: "#9ca3af #e5e7eb" }}
         >
           <table
-            className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden  inset-shadow-sm inset-shadow-indigo-500/100 "
+            className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden  inset-shadow-sm inset-shadow-indigo-500/100"
             style={{
               borderCollapse: "collapse",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
