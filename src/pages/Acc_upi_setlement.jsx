@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet"; // <-- import your hook
+import { MONTH_NAMES } from "../constants/Constants";
 
 const Acc_upi_setlement = () => {
   const [payinSettlementData, setPayinSettlementData] = useState([]);
@@ -30,6 +31,12 @@ const Acc_upi_setlement = () => {
         merchant_details: item.user.name ?? "N/A",
         txnid: item.txnid ?? "N/A",
         amount: item.amount ?? "N/A",
+        date:
+          new Date(item.created_at).getDate() +
+          " " +
+          MONTH_NAMES[new Date(item.created_at).getMonth()] +
+          " " +
+          new Date(item.created_at).getFullYear(),
         status: (
           <span
             className={`px-2 py-1 rounded-full text-sm font-medium ${
@@ -54,6 +61,7 @@ const Acc_upi_setlement = () => {
     { header: "Transaction Id", accessor: "txnid" },
     { header: "Amount", accessor: "amount" },
     { header: "Status", accessor: "status" },
+    { header: "Date", accessor: "date" },
   ];
 
   return (
