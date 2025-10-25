@@ -88,8 +88,8 @@ const LoadWallet = () => {
         columns={membercolumn}
         data={tableDataWithActions}
         showStatusFilter={false}
+        showDateFilter={false}
         showDeleteColumn={false}
-        showExport={false}
       />
 
       {/* ✅ Modal with background blur */}
