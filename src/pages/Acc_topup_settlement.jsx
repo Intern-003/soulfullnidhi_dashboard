@@ -26,7 +26,7 @@ const Acc_topup_settlement = () => {
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
         sqno: index + 1,
-        order_id: item.id ?? "N/A",
+        id: item.id,
         product_type: item.product ?? "N/A",
         merchant_details: item.user.name ?? "N/A",
         txnid: item.txnid,
@@ -35,7 +35,9 @@ const Acc_topup_settlement = () => {
           " " +
           MONTH_NAMES[new Date(item.created_at).getMonth()] +
           " " +
-          new Date(item.created_at).getFullYear(),
+          new Date(item.created_at).getFullYear() +
+          " - " +
+          new Date(item.created_at).toLocaleTimeString(),
         amount: item.amount ?? "N/A",
         status: (
           <span
@@ -55,13 +57,12 @@ const Acc_topup_settlement = () => {
 
   const topupPayoutColumn = [
     { header: "SQ NO", accessor: "sqno" },
-    { header: "Order id", accessor: "order_id" },
     { header: "Product Type", accessor: "product_type" },
     { header: "Merchant Details", accessor: "merchant_details" },
     { header: "Transaction Id", accessor: "txnid" },
     { header: "Amount", accessor: "amount" },
     { header: "Status", accessor: "status" },
-    { header: "Date", accessor: "date" }
+    { header: "Date", accessor: "date" },
   ];
 
   return (
