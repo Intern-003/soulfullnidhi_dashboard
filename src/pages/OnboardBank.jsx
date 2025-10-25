@@ -4,32 +4,56 @@ import Table from "../components/Table";
 import { BankModal } from "../components/BankModal";
 import { useGet } from "../hooks/useGet";
 import Toggle from "../components/Toggle";
+import { usePost } from "../hooks/usePost";
 
 const OnboardBank = () => {
   const [activeTab, setActiveTab] = useState("payin");
   const [bankData, setBankData] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
-  const { data: payinbanks, refetch: payinRefetch } = useGet("/payinbanks-List");
-  const { data: payoutbanks, refetch: payoutRefetch } = useGet("/payoutbanks-List");
+  const { data: payinbanks, refetch: payinRefetch } =
+    useGet("/payinbanks-List");
+  const { data: payoutbanks, refetch: payoutRefetch } =
+    useGet("/payoutbanks-List");
+  const { execute: updatePayinToggle } = usePost("/update-payin-bank-status");
+  const { execute: updatePayoutToggle } = usePost("/update-payout-bank-status");
 
   const handleModal = () => {
     setShowModal(!showModal);
   };
 
-  const handleStatusToggle = (rowId, checked) => {
-    setBankData((prev) =>
-      prev.map((item) =>
-        item.id === rowId
-          ? { ...item, status: checked ? "Active" : "Inactive" }
-          : item
-      )
-    );
+  const handleStatusToggle = async (rowId, checked) => {
+    let res;
+    try {
+      if (activeTab === "payin") {
+        res = await updatePayinToggle({
+          id: rowId,
+          onboarded_payin_bank_status: checked,
+        });
+      } else {
+        res = await updatePayoutToggle({
+          id: rowId,
+          onboarded_payout_bank_status: checked,
+        });
+      }
+
+      if (res) {
+        setBankData((prev) =>
+          prev.map((item) =>
+            item.id === rowId
+              ? { ...item, status: checked ? "Active" : "Inactive" }
+              : item
+          )
+        );
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   // Map columns dynamically based on active tab
   const bankColumn = [
-    { header: "No", accessor: "id" },
+    { header: "SQNo", accessor: "sqno" },
     {
       header: "Bank Name",
       accessor:
@@ -53,16 +77,20 @@ const OnboardBank = () => {
   useEffect(() => {
     if (activeTab === "payin") {
       const mapped =
-        payinbanks?.data?.map((item) => ({
-          ...item,
+        payinbanks?.data?.map((item, index) => ({
+          sqno: index + 1,
+          id: item.id,
+          onboard_payin_bank: item.onboard_payin_bank,
           onboarded_payin_bank_status:
             item.onboarded_payin_bank_status === 1 ? "Active" : "Inactive",
         })) || [];
       setBankData(mapped);
     } else {
       const mapped =
-        payoutbanks?.data?.map((item) => ({
-          ...item,
+        payoutbanks?.data?.map((item, index) => ({
+          sqno: index + 1,
+          id: item.id,
+          onboard_payout_bank: item.onboard_payout_bank,
           onboarded_payout_bank_status:
             item.onboarded_payout_bank_status === 1 ? "Active" : "Inactive",
         })) || [];
@@ -124,6 +152,11 @@ const OnboardBank = () => {
           showStatusFilter={false}
           showExport={false}
           showSearch={false}
+          setData={setBankData}
+          endPoint={
+            activeTab === "payin" ? "/delete-payinbank" : "/delete-payoutbank"
+          }
+          refreshTable={activeTab === "payin" ? payinRefetch : payoutRefetch}
         />
       </div>
 
