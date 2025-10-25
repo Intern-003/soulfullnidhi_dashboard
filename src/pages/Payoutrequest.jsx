@@ -1,11 +1,50 @@
 import React, { useState } from "react";
 import Table from "../components/Table";
 import Button from "../components/Button";
+import { usePost } from "../hooks/usePost";
 
 const Payoutrequest = () => {
   const [showModal, setShowModal] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [amount, setAmount] = useState("");
+  const [paymentMode, setPaymentMode] = useState("IMPS");
+  
+  const {execute:payoutsend} = usePost("/bb/payout/request");
+
+  const handleSubmit =  async (e) =>{
+    e.preventDefault();
+    if(!selectedUser) return;
+    try{
+     const payload = {
+  token: "Pq4mPdo9AkdT2NkEw4MANTy5fw7kBY",
+  apitxnid: "DASH" + Date.now(),
+  email: selectedUser.email ?? "dashboardtest@gmail.com",
+  mobile: selectedUser.mobile ?? "7768985529",
+  amount,
+  account_number: selectedUser.account_number ?? "1745917325",
+  ifsc_code: selectedUser.ifsc_code ?? "KKBK0000629",
+  bene_name: selectedUser.bene_name ?? "Dashboard-test",
+  mode: paymentMode,
+};
+
+      console.log("api clicked");
+      const response = await payoutsend(payload);
+      console.log("response",response);
+      setShowModal(false);
+      
+    }catch(err){
+      console.error("payout error",err)
+    }
+
+
+
+
+
+
+
+  }
+
 
   const membercolumn = [
     { header: "Beneficiary Id", accessor: "beneficiaryid" },
@@ -41,6 +80,7 @@ const Payoutrequest = () => {
       </Button>
     ),
   }));
+
 
   return (
     <>
@@ -129,7 +169,7 @@ const Payoutrequest = () => {
             <div className="border-t border-gray-300 mx-4 mb-1"></div>
 
             {/* ✅ Modal Body */}
-            <form className="p-6 space-y-4">
+            <form className="p-6 space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 {/* Amount */}
                 <div>
@@ -139,12 +179,14 @@ const Payoutrequest = () => {
                   >
                     Amount
                   </label>
-                  <input
-                    id="amount"
-                    type="number"
-                    placeholder="Enter Amount"
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+<input
+  id="amount"
+  type="number"
+  placeholder="Enter Amount"
+  value={amount}
+  onChange={(e) => setAmount(e.target.value)}
+  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+/>
                 </div>
 
                 {/* Payment Mode */}
@@ -156,15 +198,17 @@ const Payoutrequest = () => {
                     {" "}
                     Payment Mode{" "}
                   </label>
-                  <select
-                    id="paymentMode"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                  >
-                    <option>IMPS</option>
-                    <option>NEFT</option>
-                    <option>UPI</option>
-                    <option>RTGS</option>
-                  </select>
+<select
+  id="paymentMode"
+  value={paymentMode}
+  onChange={(e) => setPaymentMode(e.target.value)}
+  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+>
+  <option>IMPS</option>
+  <option>NEFT</option>
+  <option>UPI</option>
+  <option>RTGS</option>
+</select>
                 </div>
               </div>
 
@@ -179,6 +223,7 @@ const Payoutrequest = () => {
                 </Button>
                 <Button
                   type="submit"
+        
                   className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
                   Submit
