@@ -110,7 +110,7 @@ export const Member = () => {
       status: item.account_status ? "Active" : "Inactive",
       walletpayin: item.payin_wallet,
       walletpayout: item.payout_wallet,
-      onboarddate:
+      date:
         new Date(item.created_at).getDate() +
         " " +
         MONTH_NAMES[new Date(item.created_at).getMonth()] +
@@ -161,7 +161,7 @@ export const Member = () => {
         </div>
         <div>
           <span className="text-xs text-blue-400 font-semibold">
-            {row.onboarddate}
+            {row.date}
           </span>
         </div>
       </>
