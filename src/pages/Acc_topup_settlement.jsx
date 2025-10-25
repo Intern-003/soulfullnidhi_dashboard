@@ -39,7 +39,8 @@ const Acc_topup_settlement = () => {
           " - " +
           new Date(item.created_at).toLocaleTimeString(),
         amount: item.amount ?? "N/A",
-        status: (
+        status: item.status,
+        showstatus: (
           <span
             className={`px-2 py-1 rounded-full text-sm font-medium ${
               statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
@@ -61,7 +62,7 @@ const Acc_topup_settlement = () => {
     { header: "Merchant Details", accessor: "merchant_details" },
     { header: "Transaction Id", accessor: "txnid" },
     { header: "Amount", accessor: "amount" },
-    { header: "Status", accessor: "status" },
+    { header: "Status", accessor: "showstatus" },
     { header: "Date", accessor: "date" },
   ];
 
