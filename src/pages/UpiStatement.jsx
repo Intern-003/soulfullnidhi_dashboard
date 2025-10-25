@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet";
+import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 
 const UpiStatement = () => {
   const [upiData, setUpiData] = useState([]);
@@ -23,13 +24,21 @@ const UpiStatement = () => {
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
         sqno: index + 1,
-        order_id: item.id ?? "N/A",
+        id: item.id,
         product_type: item.product ?? "N/A",
         merchant_details: item.user.name ?? "N/A",
         txnid: item.txnid ?? "N/A",
         amount: item.amount ?? "N/A",
-        date: item.created_at,
-        status: (
+        date:
+          new Date(item.created_at).getDate() +
+          " " +
+          MONTH_NAMES[new Date(item.created_at).getMonth()] +
+          " " +
+          new Date(item.created_at).getFullYear() +
+          " - " +
+          new Date(item.created_at).toLocaleTimeString(),
+        status: item.status,  
+        showstatus: (
           <span
             className={`px-2 py-1 rounded-full text-sm font-medium ${
               statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
@@ -47,12 +56,12 @@ const UpiStatement = () => {
 
   const upiColumn = [
     { header: "SQ NO", accessor: "sqno" },
-    { header: "Order id", accessor: "order_id" },
     { header: "Product Type", accessor: "product_type" },
     { header: "Merchant Details", accessor: "merchant_details" },
     { header: "Transaction Id", accessor: "txnid" },
     { header: "Amount", accessor: "amount" },
-    { header: "Status", accessor: "status" },
+    { header: "Status", accessor: "showstatus" },
+    { header: "Date", accessor: "date" },
   ];
 
   return (
@@ -76,6 +85,7 @@ const UpiStatement = () => {
           showExport={true}
           showSearch={true}
           showDeleteColumn={false}
+          statusList={REPORT_STATUSES}
         />
       )}
     </div>

@@ -17,7 +17,8 @@ const Table = ({
   showDateFilter = true,
   endPoint = "",
   refreshTable,
-  setData
+  setData,
+  statusList,
 }) => {
   const toast = useToast();
   const [search, setSearch] = useState("");
@@ -25,7 +26,7 @@ const Table = ({
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [openExport, setOpenExport] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -72,7 +73,7 @@ const Table = ({
         String(row.status).toLowerCase() === statusFilter.toLowerCase();
 
       // Date filter
-      const rowDate = new Date(row.date);
+      const rowDate = new Date(row.date?.split("-")[0]);
       const matchesDate =
         (!startDate || rowDate >= startDate) &&
         (!endDate || rowDate <= endDate);
@@ -141,12 +142,12 @@ const Table = ({
 
   return (
     <div className="w-full">
-      {(showSearch || showStatusFilter || showExport) && (
+      {(showSearch || showStatusFilter || showExport || showDateFilter) && (
         <>
-          <div className="flex flex-col md:flex-row justify-between items-center rounded-b-xl ml-2 mb-4">
+          <div className="flex flex-col md:flex-row justify-between items-center rounded-b-xl ml-2 mb-3">
             {/* Search */}
             {showSearch && (
-              <div className="w-full md:w-1/3">
+              <div className="w-50 md:w-1/3">
                 <input
                   type="text"
                   placeholder="Search..."
@@ -159,6 +160,59 @@ const Table = ({
                 />
               </div>
             )}
+
+            {/* Date Picker*/}
+            {showDateFilter && (
+              <div className="flex items-center">
+                <div className="relative">
+                  <div className="absolute z-10 inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg
+                      className="w-4 h-4 text-gray-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                    </svg>
+                  </div>
+                  <DatePicker
+                    selected={startDate}
+                    onChange={(date) => setStartDate(date)}
+                    selectsStart
+                    startDate={startDate}
+                    endDate={endDate}
+                    placeholderText="Select start date"
+                    className="border border-sky-500 text-gray-900 text-sm rounded-lg w-40 ps-10 p-2.5 focus:ring-2 focus:ring-sky-400 focus:outline-none"
+                  />
+                </div>
+
+                <span className="mx-2 text-gray-500">to</span>
+
+                <div className="relative">
+                  <div className="absolute z-10 inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg
+                      className="w-4 h-4 text-gray-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                    </svg>
+                  </div>
+                  <DatePicker
+                    selected={endDate}
+                    onChange={(date) => setEndDate(date)}
+                    selectsEnd
+                    startDate={startDate}
+                    endDate={endDate}
+                    minDate={startDate}
+                    placeholderText="Select end date"
+                    className="border border-sky-500 text-gray-900 text-sm rounded-lg block w-40 ps-10 p-2.5 focus:ring-2 focus:ring-sky-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-end gap-4 md:mt-0">
               {/* Status Filter */}
               {showStatusFilter && (
@@ -167,12 +221,12 @@ const Table = ({
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="border border-sky-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-sky-400 focus:outline-none hover:border-sky-400 transition"
                 >
-                  <option value="">Select Status</option>
                   <option value="all">All</option>
-                  <option value="active">Active</option>
-                  <option value="success">Success</option>
-                  <option value="failed">Failed</option>
-                  <option value="pending">Pending</option>
+                  {statusList?.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
+                    </option>
+                  ))}
                 </select>
               )}
 
@@ -243,57 +297,19 @@ const Table = ({
             </div>
           </div>
 
-          {/* Date Picker*/}
-          {showDateFilter && (
-            <div className="flex items-center ml-2">
-              <div className="relative">
-                <div className="absolute z-10 inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                  <svg
-                    className="w-4 h-4 text-gray-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                  </svg>
-                </div>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  selectsStart
-                  startDate={startDate}
-                  endDate={endDate}
-                  placeholderText="Select start date"
-                  className="border border-sky-500 text-gray-900 text-sm rounded-lg w-full ps-10 p-2.5 focus:ring-2 focus:ring-sky-400 focus:outline-none"
-                />
-              </div>
-
-              <span className="mx-2 text-gray-500">to</span>
-
-              <div className="relative">
-                <div className="absolute z-10 inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                  <svg
-                    className="w-4 h-4 text-gray-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                  </svg>
-                </div>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  selectsEnd
-                  startDate={startDate}
-                  endDate={endDate}
-                  minDate={startDate}
-                  placeholderText="Select end date"
-                  className="border border-sky-500 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5 focus:ring-2 focus:ring-sky-400 focus:outline-none"
-                />
-              </div>
-            </div>
-          )}
+          <div>
+            <Button
+              className="mr-2 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md flex justify-self-end"
+              onClick={() => {
+                setStartDate(null);
+                setEndDate(null);
+                setStatusFilter("all");
+                setSearch("");
+              }}
+            >
+              Clear All
+            </Button>
+          </div>
         </>
       )}
 
@@ -304,7 +320,7 @@ const Table = ({
           style={{ scrollbarWidth: "thin", scrollbarColor: "#9ca3af #e5e7eb" }}
         >
           <table
-            className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden  inset-shadow-sm inset-shadow-indigo-500/100 "
+            className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden  inset-shadow-sm inset-shadow-indigo-500/100"
             style={{
               borderCollapse: "collapse",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
