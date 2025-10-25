@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet"; // <-- import your hook
-import { MONTH_NAMES } from "../constants/Constants";
+import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 
 const Acc_upi_setlement = () => {
   const [payinSettlementData, setPayinSettlementData] = useState([]);
@@ -89,6 +89,7 @@ const Acc_upi_setlement = () => {
           showExport={true}
           showSearch={true}
           showDeleteColumn={false}
+          statusList={REPORT_STATUSES}
         />
       )}
     </div>

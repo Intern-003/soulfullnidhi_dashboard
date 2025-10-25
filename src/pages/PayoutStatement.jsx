@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet";
-import { MONTH_NAMES } from "../constants/Constants";
+import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 
 const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
@@ -85,6 +85,7 @@ const PayoutStatement = () => {
           showExport={true}
           showSearch={true}
           showDeleteColumn={false}
+          statusList={REPORT_STATUSES}
         />
       )}
     </div>
