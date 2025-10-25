@@ -23,6 +23,7 @@ export const LineChart = ({ data }) => {
           fontFamily: "Inter, sans-serif",
           dropShadow: { enabled: false },
           toolbar: { show: false },
+          animations: { enabled: false }
         },
         tooltip: {
           enabled: true,
