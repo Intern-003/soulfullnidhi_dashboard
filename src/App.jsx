@@ -19,10 +19,11 @@ import Acc_topup_settlement from "./pages/Acc_topup_settlement";
 import PayoutDoc from "./pages/PayoutDoc";
 import PrivateRoute from "./components/PrivateRoute";
 import ApiSetting from "./pages/ApiSetting";
+import { ToastProvider } from "./contexts/ToastContext";
 
 function App() {
   return (
-    <>
+    <ToastProvider>
       <Routes>
         <Route path="/" element={<LoginForm />} />
 
@@ -156,16 +157,16 @@ function App() {
             }
             />
          <Route
-            path="/ApiSetting"
+            path="/api-settings"
             element={
               <PrivateRoute>
-                <ApiSetting  />
+                <ApiSetting />
               </PrivateRoute>
             }            
           />
         </Route>
       </Routes>
-    </>
+    </ToastProvider>
   );
 }
 

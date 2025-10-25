@@ -6,7 +6,7 @@ import Button from "../components/Button";
 import { SchemeModal } from "../components/SchemeModal";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { usePut } from "../hooks/usePut";
-import { MONTH_NAMES } from "../constants/Constants";
+import { MONTH_NAMES, TOGGLE_STATUSES } from "../constants/Constants";
 
 export const Member = () => {
   const [showModal, setShowModal] = useState(false);
@@ -107,9 +107,10 @@ export const Member = () => {
       payin: item.payin_status,
       payout: item.payout_status,
       account: item.account_status,
+      status: item.account_status ? "Active" : "Inactive",
       walletpayin: item.payin_wallet,
       walletpayout: item.payout_wallet,
-      onboarddate:
+      date:
         new Date(item.created_at).getDate() +
         " " +
         MONTH_NAMES[new Date(item.created_at).getMonth()] +
@@ -160,7 +161,7 @@ export const Member = () => {
         </div>
         <div>
           <span className="text-xs text-blue-400 font-semibold">
-            {row.onboarddate}
+            {row.date}
           </span>
         </div>
       </>
@@ -211,7 +212,7 @@ export const Member = () => {
         </Button>
       </div>
 
-      <Table columns={membercolumn} data={tableDataWithActions} />
+      <Table columns={membercolumn} data={tableDataWithActions} endPoint="/delete-merchant" refreshTable={refetchOfMerchants} statusList={TOGGLE_STATUSES}/>
 
       <SchemeModal showModal={showModal} handleModal={handleModal} />
     </div>
