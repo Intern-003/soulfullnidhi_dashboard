@@ -225,7 +225,7 @@ const Table = ({
       )}
 
       {/* Table */}
-      <div className="bg-gray-300 rounded-lg mx-4 my-4 border border-sky-300 ">
+      <div className="bg-gray-300 rounded-lg mx-4 my-4 border border-sky-300">
         <div
           className="overflow-x-scroll"
           style={{ scrollbarWidth: "thin", scrollbarColor: "#9ca3af #e5e7eb" }}
@@ -242,7 +242,7 @@ const Table = ({
                 background: "linear-gradient(90deg, #007BFF, #00C8FF)",
                 color: "white",
               }}
-              className="uppercase tracking-wide"
+              className="uppercase tracking-wide text-center"
             >
               <tr>
                 {columns.map((column, index) => (
@@ -261,7 +261,7 @@ const Table = ({
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="text-center">
               {filteredData.length > 0 ? (
                 filteredData
                   .slice(
