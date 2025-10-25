@@ -28,6 +28,7 @@ const UpiStatement = () => {
         merchant_details: item.user.name ?? "N/A",
         txnid: item.txnid ?? "N/A",
         amount: item.amount ?? "N/A",
+        date: item.created_at,
         status: (
           <span
             className={`px-2 py-1 rounded-full text-sm font-medium ${
