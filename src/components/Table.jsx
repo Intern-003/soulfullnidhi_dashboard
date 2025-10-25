@@ -17,6 +17,7 @@ const Table = ({
   showDateFilter = true,
   endPoint = "",
   refreshTable,
+  setData
 }) => {
   const toast = useToast();
   const [search, setSearch] = useState("");
@@ -43,7 +44,12 @@ const Table = ({
       const res = await deleteRecord({});
       if (res) {
         toast.success("Record deleted successfully!");
-        refreshTable();
+
+        if (setData) {
+          setData((prev) => prev.filter((row) => row.id !== recordId));
+        }
+
+        if (refreshTable) refreshTable();
         handleConfirmModal();
         setRecordId(null);
       }
