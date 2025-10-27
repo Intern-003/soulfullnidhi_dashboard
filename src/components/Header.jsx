@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { usePost } from "../hooks/usePost";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { useGet } from "../hooks/useGet";
-import { MONTH_NAMES } from "../constants/Constants";
 
 export const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
