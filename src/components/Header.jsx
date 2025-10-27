@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePost } from "../hooks/usePost";
 import useAutoFetch from "../hooks/useAutoFetch";
 
 export const Header = ({ onMenuClick }) => {
+
+
+  
   const navigate = useNavigate();
   const { execute: logout } = usePost("/logout");
   const { data } = useAutoFetch("/collection-record");
@@ -138,11 +141,11 @@ export const Header = ({ onMenuClick }) => {
               style={{ backgroundColor: "#A7B7F1" }}
             >
               <div className="bg-gray-100 rounded-lg">
-                <div className="text-center text-gray-700 py-2">
-                  <h6 className="font-semibold">username</h6>
-                  <h6 className="text-sm">username@gmail.com</h6>
-                  <hr className="my-2" />
-                </div>
+ <div className="text-center text-gray-700 py-2">
+  <h6 className="font-semibold">User</h6>
+  <h6 className="text-sm">useremail@gmail.com</h6>
+  <hr className="my-2" />
+</div>
                 <li>
                   <a
                     href="#profile"

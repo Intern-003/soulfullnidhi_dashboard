@@ -1,12 +1,117 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Table from "../components/Table";
 import Button from "../components/Button";
+import { usePost } from "../hooks/usePost";
+import { useGet } from "../hooks/useGet";
+import { useToast } from "../contexts/ToastContext";
+
 
 const Payoutrequest = () => {
   const [showModal, setShowModal] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [amount, setAmount] = useState("");
+  const [paymentMode, setPaymentMode] = useState("IMPS");
 
+ const [AddACcont,setAddAccount] = useState("");
+const [AddIfsc,setAddIfsc] = useState("");
+ const [AddUpi,setAddUpi] = useState("");
+const [AddBeneName,setAddBeneName] = useState("");
+const [beneMobile, setBeneMobile] = useState("");
+ const [AddBeneEmail,setBeneEmail] = useState("");
+  const [AddBank,setAddBank] = useState("");
+ const [AddAddress,setAddAddress] = useState("");
+
+ const [beneficiaery,setbeneficiaery] =  useState([]);
+   const toast = useToast();
+
+ const {execute:getbeneficiaery} = useGet("/");
+ useEffect(() =>{
+  const fetchData = async () =>{
+
+  try{
+     const res = await getbeneficiaery();
+     setbeneficiaery(res?.data || []);
+
+  }catch(err){
+    console.log("error ferching benefeciary",err);F
+  }
+
+  };
+  fetchData();
+ },[]);
+
+
+
+  
+  const {execute:payoutsend} = usePost("/bb/payout/request");
+
+  
+
+  const handleSubmit =  async (e) =>{
+    e.preventDefault();
+    if(!selectedUser) return;
+    try{
+     const payload = {
+  token: "Pq4mPdo9AkdT2NkEw4MANTy5fw7kBY",
+  apitxnid: "DASH" + Date.now(),
+  email: selectedUser.email ?? "dashboardtest@gmail.com",
+  mobile: selectedUser.mobile ?? "7768985529",
+  amount,
+  account_number: selectedUser.account_number ?? "1745917325",
+  ifsc_code: selectedUser.ifsc_code ?? "KKBK0000629",
+  bene_name: selectedUser.bene_name ?? "Dashboard-test",
+  mode: paymentMode,
+};
+
+      console.log("api clicked");
+      const response = await payoutsend(payload);
+      console.log("response",response);
+      setShowModal(false);
+      
+    }catch(err){
+      console.error("payout error",err)
+    }
+
+
+
+
+
+
+
+  }
+
+const {execute:addbeneficiary} = usePost("/store-beneficiary-detail");
+
+const handleAddBeneficiary = async(e) =>{
+  e.preventDefault();
+  try{
+    console.log("add beneficiary api clicked");
+    const payload = {
+      bank_name: AddBank,
+      account_no:AddACcont ,
+      ifsc_code:AddIfsc,
+      upi_number: AddUpi,
+      beneficiary_name:AddBeneName ,
+      beneficiary_mobile_no:beneMobile ,
+      beneficiary_email_id: AddBeneEmail,
+      beneficiary_address:AddAddress, 
+      };
+      const data = await addbeneficiary(payload);
+
+      console.log("added beneficiary" ,data);
+      setShowFormModal(false);
+      toast.success("Form submitted successfully!");
+   
+
+  }catch(err){
+    console.log("error to add beneficiaery",err);
+    toast.error("Error to add Beneficiary");
+ 
+  }
+  
+
+}
   const membercolumn = [
     { header: "Beneficiary Id", accessor: "beneficiaryid" },
     { header: "Bank Details", accessor: "bankdetails" },
@@ -14,21 +119,23 @@ const Payoutrequest = () => {
     { header: "Action", accessor: "action" },
   ];
 
-  const memberdata = [
-    {
-      beneficiaryid: "1",
-      bankdetails: "Yuvraj",
-      beneficiarydetails: "Rs.1000",
-    },
-    {
-      beneficiaryid: "2",
-      bankdetails: "Aakash",
-      beneficiarydetails: "Rs.4000",
-    },
-  ];
+  // const memberdata = [
+  //   {
+  //     beneficiaryid: "1",
+  //     bankdetails: "Yuvraj",
+  //     beneficiarydetails: "Rs.1000",
+  //   },
+  //   {
+  //     beneficiaryid: "2",
+  //     bankdetails: "Aakash",
+  //     beneficiarydetails: "Rs.4000",
+  //   },
+  // ];
 
-  const tableDataWithActions = memberdata.map((row) => ({
-    ...row,
+  const tableDataWithActions = beneficiaery.map((row) => ({
+    beneficiaryid:row.id,
+    bankdetails:`{row.bank_name} (${row.account_no})`,
+    beneficiarydetails:`{row.beneficiary_name} ($(row.beneficiary_mobile_no))`,
     action: (
       <Button
         onClick={() => {
@@ -41,6 +148,7 @@ const Payoutrequest = () => {
       </Button>
     ),
   }));
+
 
   return (
     <>
@@ -129,7 +237,7 @@ const Payoutrequest = () => {
             <div className="border-t border-gray-300 mx-4 mb-1"></div>
 
             {/* ✅ Modal Body */}
-            <form className="p-6 space-y-4">
+            <form className="p-6 space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 {/* Amount */}
                 <div>
@@ -139,12 +247,14 @@ const Payoutrequest = () => {
                   >
                     Amount
                   </label>
-                  <input
-                    id="amount"
-                    type="number"
-                    placeholder="Enter Amount"
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+<input
+  id="amount"
+  type="number"
+  placeholder="Enter Amount"
+  value={amount}
+  onChange={(e) => setAmount(e.target.value)}
+  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+/>
                 </div>
 
                 {/* Payment Mode */}
@@ -156,15 +266,17 @@ const Payoutrequest = () => {
                     {" "}
                     Payment Mode{" "}
                   </label>
-                  <select
-                    id="paymentMode"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                  >
-                    <option>IMPS</option>
-                    <option>NEFT</option>
-                    <option>UPI</option>
-                    <option>RTGS</option>
-                  </select>
+<select
+  id="paymentMode"
+  value={paymentMode}
+  onChange={(e) => setPaymentMode(e.target.value)}
+  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+>
+  <option>IMPS</option>
+  <option>NEFT</option>
+  <option>UPI</option>
+  <option>RTGS</option>
+</select>
                 </div>
               </div>
 
@@ -179,6 +291,7 @@ const Payoutrequest = () => {
                 </Button>
                 <Button
                   type="submit"
+        
                   className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
                   Submit
@@ -216,12 +329,14 @@ const Payoutrequest = () => {
             </div>
 
             {/* Modal Body */}
-            <form className="p-6">
+            <form className="p-6" onSubmit={handleAddBeneficiary}>
               <div class="grid md:grid-cols-2 md:gap-6 px-4">
                 <div class="relative z-0 w-full mb-5 group">
                   <input
                     type="text"
                     name="floating_first_name"
+                    value={AddACcont}
+                    onChange={(e)=>setAddAccount(e.target.value)}
                     id="floating_first_name"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" "
@@ -234,11 +349,33 @@ const Payoutrequest = () => {
                     Account No.
                   </label>
                 </div>
+                 <div class="relative z-0 w-full mb-5 group">
+                  <input
+                    type="text"
+                    name="floating_first_name"
+                    value={AddBank}
+                    onChange={(e)=>setAddBank(e.target.value)}
+                    id="floating_first_name"
+                    class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    placeholder=" "
+                    required
+                  />
+                  <label
+                    for="floating_first_name"
+                    class="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                  >
+                    Bank Name.
+                  </label>
+                </div>
+                </div>
+                <div class="grid md:grid-cols-2 md:gap-6 px-4">
                 <div class="relative z-0 w-full mb-5 group">
                   <input
                     type="text"
                     name="floating_last_name"
                     id="floating_last_name"
+                    value={AddIfsc}
+                    onChange={(e) => setAddIfsc(e.target.value)}
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" "
                     required
@@ -250,13 +387,13 @@ const Payoutrequest = () => {
                     IFSC Code
                   </label>
                 </div>
-              </div>
-              <div class="grid md:grid-cols-2 md:gap-6 px-4">
-                <div class="relative z-0 w-full mb-5 group">
+                               <div class="relative z-0 w-full mb-5 group">
                   <input
                     type="text"
                     name="floating_last_name"
                     id="floating_last_name"
+                    value={AddUpi}
+                    onChange={(e) => setAddUpi(e.target.value)}
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" "
                   />
@@ -267,11 +404,16 @@ const Payoutrequest = () => {
                     UPI Number
                   </label>
                 </div>
+              </div>
+              <div class="grid md:grid-cols-2 md:gap-6 px-4">
+ 
                 <div class="relative z-0 w-full mb-5 group">
                   <input
                     type="text"
                     name="floating_last_name"
                     id="floating_last_name"
+                    value={AddBeneName}
+                    onChange={(e) =>setAddBeneName(e.target.value)}
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" "
                     required
@@ -283,14 +425,34 @@ const Payoutrequest = () => {
                     Beneficiary Name
                   </label>
                 </div>
+                                <div class="relative z-0 w-full mb-5 group">
+                  <input
+                    type="text"
+                    name="floating_first_name"
+                    value={AddAddress}
+                    onChange={(e)=>setAddAddress(e.target.value)}
+                    id="floating_first_name"
+                    class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    placeholder=" "
+                    required
+                  />
+                  <label
+                    for="floating_first_name"
+                    class="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                  >
+                     Beneficiary Address.
+                  </label>
+                </div>
               </div>
               <div class="grid md:grid-cols-2 md:gap-6 px-4">
                 <div class="relative z-0 w-full mb-5 group">
                   <input
                     type="tel"
-                    pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                    pattern="[0-9]{10}"
                     name="floating_phone"
                     id="floating_phone"
+                    value={beneMobile}
+                    onChange={(e)=>setBeneMobile(e.target.value)}
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" "
                   />
@@ -306,6 +468,8 @@ const Payoutrequest = () => {
                     type="text"
                     name="floating_last_name"
                     id="floating_last_name"
+                    value={AddBeneEmail}
+                    onChange={(e) => setBeneEmail(e.target.value)}
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" "
                   />
@@ -316,6 +480,7 @@ const Payoutrequest = () => {
                     Beneficiary Email ID
                   </label>
                 </div>
+   
               </div>
               <div class="flex justify-center mt-6">
                 <Button
