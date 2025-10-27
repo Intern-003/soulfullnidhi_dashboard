@@ -20,6 +20,7 @@ import PayoutDoc from "./pages/PayoutDoc";
 import PrivateRoute from "./components/PrivateRoute";
 import ApiSetting from "./pages/ApiSetting";
 import { ToastProvider } from "./contexts/ToastContext";
+import { Profile } from "./pages/Profile";
 
 function App() {
   return (
@@ -28,6 +29,14 @@ function App() {
         <Route path="/" element={<LoginForm />} />
 
         <Route element={<Layout />}>
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
@@ -155,14 +164,14 @@ function App() {
                 <Acc_upi_setlement />
               </PrivateRoute>
             }
-            />
-         <Route
+          />
+          <Route
             path="/api-settings"
             element={
               <PrivateRoute>
                 <ApiSetting />
               </PrivateRoute>
-            }            
+            }
           />
         </Route>
       </Routes>

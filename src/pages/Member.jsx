@@ -172,7 +172,7 @@ export const Member = () => {
         onChange={(e) => {
           const value = e.target.value;
           if (value === "manage") {
-            window.location.href = "#profile";
+            navigate("/profile", {state: {id: row.id}})
           } else if (value === "scheme") {
             handleModal();
           }
