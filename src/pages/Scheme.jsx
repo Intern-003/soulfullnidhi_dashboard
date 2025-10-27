@@ -5,6 +5,7 @@ import Toggle from "../components/Toggle";
 import Button from "../components/Button";
 import { useGet } from "../hooks/useGet"; // <-- import your hook
 import { usePost } from "../hooks/usePost";
+import { TOGGLE_STATUSES } from "../constants/Constants"
 
 const Scheme = () => {
   const [showModal, setShowModal] = useState(false);
@@ -118,9 +119,10 @@ const Scheme = () => {
         <Table
           columns={schemecolumn}
           data={schemedata}
-          showStatusFilter={true}
-          showExport={true}
-          showSearch={true}
+          showDateFilter={false}
+          endPoint="/delete-scheme"
+          refreshTable={refetch}
+          statusList={TOGGLE_STATUSES}
         />
       )}
     </div>

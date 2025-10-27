@@ -25,7 +25,7 @@ export const SchemeModal = ({
     amountStr: "0",
   });
   const [rollingFixed, setRollingFixed] = useState({
-    type: "percent",
+    type: "flat",
     amount: 0,
     amountStr: "0",
   });

@@ -3,18 +3,45 @@ import { usePost } from "../hooks/usePost";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet";
 import { useToast } from "../contexts/ToastContext";
-
+import { MONTH_NAMES } from "../constants/Constants";
 
 const ApiSetting = () => {
   const [activeTab, setActiveTab] = useState("apiToken");
-  const [apitoken, apitokenData] = useState([]);
+  const [apiToken, setApiToken] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const Toast = useToast();
   const [PayinWebHook, setPayinWebHook] = useState("");
   const [PayoutWebhook,setPayoutWebHook] = useState("");
 
 
-  const { data, loading, error, execute, setError } = usePost("/generate-token");
+  const { execute } = usePost("/generate-token");
+  const endPoint = activeTab === "apiToken" ? "/get-tokens" : "";
+
+  const { data: apiTokensData, refetch: refetchApiTokens } = useGet(endPoint);
+  const initialDataOfTokens = apiTokensData?.data;
+
+  useEffect(() => {
+    const formattedMerchantData = initialDataOfTokens?.map((item, index) => ({
+      sqno: index + 1,
+      id: item.id,
+      ip: item.ip,
+      token: item.token,
+      date:
+        new Date(item.created_at).getDate() +
+        " " +
+        MONTH_NAMES[new Date(item.created_at).getMonth()] +
+        " " +
+        new Date(item.created_at).getFullYear(),
+    }));
+    setApiToken(formattedMerchantData);
+  }, [initialDataOfTokens]);
+
+  const tokenTableColumns = [
+    { header: "SQNo", accessor: "sqno" },
+    { header: "IP", accessor: "ip" },
+    { header: "Token", accessor: "token" },
+    { header: "Date", accessor: "date" },
+  ];
 
   const handleGenerateToken = async (e) => {
     e.preventDefault();
@@ -23,8 +50,8 @@ const ApiSetting = () => {
     try {
       const res = await execute({});
       if (res.message == "Auth token generated successfully") {
-        Toast.success('Token Generated Successfully');
-
+        Toast.success("Token Generated Successfully");
+        refetchApiTokens();
       }
     } catch (err) {
       console.error("Error generating token:", err);
@@ -57,7 +84,7 @@ const handleSaveWebhook = async () => {
   }
 };
   return (
-    <div className="p-6 max-w-3xl mx-auto bg-white rounded-lg shadow">
+    <div className="p-6 mx-auto">
       {/* Tabs */}
       <div className="flex border-b mb-4">
         <button
@@ -147,16 +174,25 @@ const handleSaveWebhook = async () => {
               </button>
             </div>
 
-            <div className="p-4 border rounded-lg text-gray-600">
-              No tokens available.
-            </div>
+            <Table
+              columns={tokenTableColumns}
+              data={apiToken}
+              endPoint="/delete-token"
+              refreshTable={refetchApiTokens}
+              showStatusFilter={false}
+              showExport={false}
+              setData={setApiToken}
+              showDateFilter={false}
+            />
           </div>
         )}
 
         {/* ---- Webhook Config Tab ---- */}
         {activeTab === "webhookConfig" && (
           <div>
-            <h2 className="text-lg font-semibold mb-3">Webhook Configuration</h2>
+            <h2 className="text-lg font-semibold mb-3">
+              Webhook Configuration
+            </h2>
 
             <div className="space-y-6">
               <div>
