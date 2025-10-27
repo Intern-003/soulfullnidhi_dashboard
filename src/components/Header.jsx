@@ -6,6 +6,7 @@ import useAutoFetch from "../hooks/useAutoFetch";
 export const Header = ({ onMenuClick }) => {
 
 
+  
   const navigate = useNavigate();
   const { execute: logout } = usePost("/logout");
   const { data } = useAutoFetch("/collection-record");
@@ -141,8 +142,8 @@ export const Header = ({ onMenuClick }) => {
             >
               <div className="bg-gray-100 rounded-lg">
  <div className="text-center text-gray-700 py-2">
-  <h6 className="font-semibold">{currentMerchant?.name ?? "User"}</h6>
-  <h6 className="text-sm">{currentMerchant?.email ?? "email@gmail.com"}</h6>
+  <h6 className="font-semibold">User</h6>
+  <h6 className="text-sm">useremail@gmail.com</h6>
   <hr className="my-2" />
 </div>
                 <li>

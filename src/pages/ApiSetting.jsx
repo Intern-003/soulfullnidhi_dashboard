@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePost } from "../hooks/usePost";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet";
@@ -10,6 +10,9 @@ const ApiSetting = () => {
   const [apitoken, apitokenData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const Toast = useToast();
+  const [PayinWebHook, setPayinWebHook] = useState("");
+  const [PayoutWebhook,setPayoutWebHook] = useState("");
+
 
   const { data, loading, error, execute, setError } = usePost("/generate-token");
 
@@ -29,7 +32,30 @@ const ApiSetting = () => {
       setIsLoading(false); // stop loading after response
     }
   };
+const {data:WebhookUrl, loading:WebHookLoading} = useGet("/show-merchant");
+useEffect(()=>{
+  if(WebhookUrl){
+    setPayinWebHook(WebhookUrl?.data?.payin_callback || " ");
+    setPayoutWebHook(WebhookUrl?.data?.payout_callback || " ");
+    console.log(WebhookUrl?.data?.payin_callback );
+  }
+},[WebhookUrl]);
+const {execute:updateWebhook} =usePost("/update-merchant");
+const handleSaveWebhook = async () => {
+  try {
+    const res = await updateWebhook({
+      payin_callback: PayinWebHook,
+      payout_callback: PayoutWebhook,
+    });
 
+    if (res?.message === "Merchant updated successfully") {
+      Toast.success("Webhook updated successfully!");
+    }
+  } catch (err) {
+    console.log(err);
+    Toast.error("Failed to update webhook!");
+  }
+};
   return (
     <div className="p-6 max-w-3xl mx-auto bg-white rounded-lg shadow">
       {/* Tabs */}
@@ -141,8 +167,10 @@ const ApiSetting = () => {
                   <span className="text-gray-400 mr-2">🔗</span>
                   <input
                     type="text"
-                    placeholder="https://yourdomain.com/payment-callback"
+                    placeholder=""
                     className="w-full p-2 outline-none"
+                    value={PayinWebHook}
+                    onChange={(e) => setPayinWebHook(e.target.value)}
                   />
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
@@ -158,8 +186,10 @@ const ApiSetting = () => {
                   <span className="text-gray-400 mr-2">🔗</span>
                   <input
                     type="text"
-                    placeholder="https://yourdomain.com/payout-callback"
+                    placeholder=""
                     className="w-full p-2 outline-none"
+                    value={PayoutWebhook}
+                    onChange={(e) => setPayoutWebHook(e.target.value)}
                   />
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
@@ -168,7 +198,9 @@ const ApiSetting = () => {
               </div>
             </div>
 
-            <button className="mt-6 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
+            <button 
+            onClick={handleSaveWebhook}
+            className="mt-6 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
               💾 Save Webhook Settings
             </button>
           </div>
