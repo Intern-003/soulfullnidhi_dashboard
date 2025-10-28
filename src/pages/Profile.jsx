@@ -36,13 +36,7 @@ export const Profile = () => {
         company_gst_no: initialMerchantData?.company_gst_no,
         cin_llpin: initialMerchantData?.cin_llpin,
         date_of_incorporation:
-          new Date(initialMerchantData?.date_of_incorporation).getDate() +
-          " " +
-          MONTH_NAMES[
-            new Date(initialMerchantData?.date_of_incorporation).getMonth()
-          ] +
-          " " +
-          new Date(initialMerchantData?.date_of_incorporation).getFullYear(),
+          initialMerchantData?.date_of_incorporation.split("T")[0],
         account_holder_name: initialMerchantData?.account_holder_name,
         bank_account_no: initialMerchantData?.bank_account_no,
         ifsc_code: initialMerchantData?.ifsc_code,
@@ -60,7 +54,8 @@ export const Profile = () => {
   }, [initialMerchantData]);
 
   //Change Password
-  const { execute: changePassword } = usePost("/change-password");
+  const { execute: changePassword, loading: passwordLoading } =
+    usePost("/change-password");
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -69,13 +64,53 @@ export const Profile = () => {
       if (res) {
         toast.success("Password Changed Successfully!");
         setPasswordFormData({
-            old_password: "",
-            new_password: ""
+          old_password: "",
+          new_password: "",
         });
-      }  
+      }
     } catch (err) {
       console.log(err);
       toast.error(err?.message);
+    }
+  };
+
+  //Update Profile
+  const { execute: updateProfile, loading: profileLoading } = usePost(
+    `/update-merchant/${userData?.id}`
+  );
+
+  const handleInputChange = (e) => {
+    setUserData({ ...userData, [e.target.name]: e.target.value });
+  };
+
+  const handleDirectorChange = (index, e) => {
+    const { name, value, files } = e.target;
+
+    setUserData((prev) => {
+      const updatedDirectors = [...prev.director_info];
+
+      updatedDirectors[index] = {
+        ...updatedDirectors[index],
+        [name]: files ? files[0] : value, // handle file inputs
+      };
+
+      return {
+        ...prev,
+        director_info: updatedDirectors,
+      };
+    });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await updateProfile(userData);
+      if (res) {
+        toast.success("Profile Updated Successfully!");
+      }
+    } catch (err) {
+      toast.error(err?.message);
+      console.log(err);
     }
   };
 
@@ -153,186 +188,195 @@ export const Profile = () => {
       {activeTab === "profile" && (
         <div className="p-6 bg-gray-50 text-medium text-gray-500 rounded-lg w-full">
           <h3 className="text-lg font-bold text-gray-900 mb-2">Profile Info</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative z-0 w-full mb-2 group">
-              <input
-                type="text"
-                name="name"
-                id="floating_outlined_name"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
-                  role !== "admin" ? "bg-gray-100" : ""
-                }`}
-                placeholder=""
-                value={userData?.name}
-                disabled={role !== "admin"}
-              />
-              <label
-                for="floating_outlined_name"
-                className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
-                  role !== "admin" ? "bg-gray-100" : "bg-white"
-                }`}
-              >
-                Name
-              </label>
+          <form>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative z-0 w-full mb-2 group">
+                <input
+                  type="text"
+                  name="name"
+                  id="floating_outlined_name"
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
+                    role !== "admin" ? "bg-gray-100" : ""
+                  }`}
+                  placeholder=""
+                  value={userData?.name}
+                  onChange={role === "admin" ? handleInputChange : undefined}
+                  disabled={role !== "admin"}
+                />
+                <label
+                  for="floating_outlined_name"
+                  className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
+                    role !== "admin" ? "bg-gray-100" : "bg-white"
+                  }`}
+                >
+                  Name
+                </label>
+              </div>
+              <div className="relative z-0 w-full mb-2 group">
+                <input
+                  type="text"
+                  name="email"
+                  id="floating_outlined_email"
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
+                    role !== "admin" ? "bg-gray-100" : ""
+                  }`}
+                  placeholder=""
+                  value={userData?.email}
+                  onChange={role === "admin" ? handleInputChange : undefined}
+                  disabled={role !== "admin"}
+                />
+                <label
+                  for="floating_outlined_name"
+                  className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
+                    role !== "admin" ? "bg-gray-100" : "bg-white"
+                  }`}
+                >
+                  Email
+                </label>
+              </div>
+              <div className="relative z-0 w-full mb-2 group">
+                <input
+                  type="number"
+                  name="mobile_no"
+                  id="floating_outlined_mobile_no"
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
+                    role !== "admin" ? "bg-gray-100" : ""
+                  }`}
+                  placeholder=""
+                  value={userData?.mobile_no}
+                  onChange={role === "admin" ? handleInputChange : undefined}
+                  disabled={role !== "admin"}
+                />
+                <label
+                  for="floating_outlined_mobile_no"
+                  className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
+                    role !== "admin" ? "bg-gray-100" : "bg-white"
+                  }`}
+                >
+                  Phone Number
+                </label>
+              </div>
+              <div className="relative z-0 w-full mb-2 group">
+                <input
+                  type="text"
+                  name="address"
+                  id="floating_outlined_address"
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
+                    role !== "admin" ? "bg-gray-100" : ""
+                  }`}
+                  placeholder=""
+                  value={userData?.address}
+                  onChange={role === "admin" ? handleInputChange : undefined}
+                  disabled={role !== "admin"}
+                />
+                <label
+                  for="floating_outlined_address"
+                  className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
+                    role !== "admin" ? "bg-gray-100" : "bg-white"
+                  }`}
+                >
+                  Address
+                </label>
+              </div>
+              <div className="relative z-0 w-full mb-2 group">
+                <input
+                  type="text"
+                  name="city"
+                  id="floating_outlined_city"
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
+                    role !== "admin" ? "bg-gray-100" : ""
+                  }`}
+                  placeholder=""
+                  value={userData?.city}
+                  onChange={role === "admin" ? handleInputChange : undefined}
+                  disabled={role !== "admin"}
+                />
+                <label
+                  for="floating_outlined_city"
+                  className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
+                    role !== "admin" ? "bg-gray-100" : "bg-white"
+                  }`}
+                >
+                  City
+                </label>
+              </div>
+              <div className="relative z-0 w-full mb-2 group">
+                <input
+                  type="text"
+                  name="district"
+                  id="floating_outlined_district"
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
+                    role !== "admin" ? "bg-gray-100" : ""
+                  }`}
+                  placeholder=""
+                  value={userData?.district}
+                  onChange={role === "admin" ? handleInputChange : undefined}
+                  disabled={role !== "admin"}
+                />
+                <label
+                  for="floating_outlined_district"
+                  className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
+                    role !== "admin" ? "bg-gray-100" : "bg-white"
+                  }`}
+                >
+                  District
+                </label>
+              </div>
+              <div className="relative z-0 w-full mb-2 group">
+                <input
+                  type="text"
+                  name="state"
+                  id="floating_outlined_state"
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
+                    role !== "admin" ? "bg-gray-100" : ""
+                  }`}
+                  placeholder=""
+                  value={userData?.state}
+                  onChange={role === "admin" ? handleInputChange : undefined}
+                  disabled={role !== "admin"}
+                />
+                <label
+                  for="floating_outlined_state"
+                  className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
+                    role !== "admin" ? "bg-gray-100" : "bg-white"
+                  }`}
+                >
+                  State
+                </label>
+              </div>
+              <div className="relative z-0 w-full mb-2 group">
+                <input
+                  type="number"
+                  name="pin_code"
+                  id="floating_outlined_pin"
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
+                    role !== "admin" ? "bg-gray-100" : ""
+                  }`}
+                  placeholder=""
+                  value={userData?.pin_code}
+                  onChange={role === "admin" ? handleInputChange : undefined}
+                  disabled={role !== "admin"}
+                />
+                <label
+                  for="floating_outlined_pin"
+                  className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
+                    role !== "admin" ? "bg-gray-100" : "bg-white"
+                  }`}
+                >
+                  Pin Code
+                </label>
+              </div>
             </div>
-            <div className="relative z-0 w-full mb-2 group">
-              <input
-                type="text"
-                name="email"
-                id="floating_outlined_email"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
-                  role !== "admin" ? "bg-gray-100" : ""
-                }`}
-                placeholder=""
-                value={userData?.email}
-                disabled={role !== "admin"}
-              />
-              <label
-                for="floating_outlined_name"
-                className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
-                  role !== "admin" ? "bg-gray-100" : "bg-white"
-                }`}
-              >
-                Email
-              </label>
-            </div>
-            <div className="relative z-0 w-full mb-2 group">
-              <input
-                type="text"
-                name="mobile_no"
-                id="floating_outlined_mobile_no"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
-                  role !== "admin" ? "bg-gray-100" : ""
-                }`}
-                placeholder=""
-                value={userData?.mobile_no}
-                disabled={role !== "admin"}
-              />
-              <label
-                for="floating_outlined_mobile_no"
-                className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
-                  role !== "admin" ? "bg-gray-100" : "bg-white"
-                }`}
-              >
-                Phone Number
-              </label>
-            </div>
-            <div className="relative z-0 w-full mb-2 group">
-              <input
-                type="text"
-                name="address"
-                id="floating_outlined_address"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
-                  role !== "admin" ? "bg-gray-100" : ""
-                }`}
-                placeholder=""
-                value={userData?.address}
-                disabled={role !== "admin"}
-              />
-              <label
-                for="floating_outlined_address"
-                className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
-                  role !== "admin" ? "bg-gray-100" : "bg-white"
-                }`}
-              >
-                Address
-              </label>
-            </div>
-            <div className="relative z-0 w-full mb-2 group">
-              <input
-                type="text"
-                name="city"
-                id="floating_outlined_city"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
-                  role !== "admin" ? "bg-gray-100" : ""
-                }`}
-                placeholder=""
-                value={userData?.city}
-                disabled={role !== "admin"}
-              />
-              <label
-                for="floating_outlined_city"
-                className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
-                  role !== "admin" ? "bg-gray-100" : "bg-white"
-                }`}
-              >
-                City
-              </label>
-            </div>
-            <div className="relative z-0 w-full mb-2 group">
-              <input
-                type="text"
-                name="district"
-                id="floating_outlined_district"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
-                  role !== "admin" ? "bg-gray-100" : ""
-                }`}
-                placeholder=""
-                value={userData?.district}
-                disabled={role !== "admin"}
-              />
-              <label
-                for="floating_outlined_district"
-                className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
-                  role !== "admin" ? "bg-gray-100" : "bg-white"
-                }`}
-              >
-                District
-              </label>
-            </div>
-            <div className="relative z-0 w-full mb-2 group">
-              <input
-                type="text"
-                name="state"
-                id="floating_outlined_state"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
-                  role !== "admin" ? "bg-gray-100" : ""
-                }`}
-                placeholder=""
-                value={userData?.state}
-                disabled={role !== "admin"}
-              />
-              <label
-                for="floating_outlined_state"
-                className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
-                  role !== "admin" ? "bg-gray-100" : "bg-white"
-                }`}
-              >
-                State
-              </label>
-            </div>
-            <div className="relative z-0 w-full mb-2 group">
-              <input
-                type="text"
-                name="pin_code"
-                id="floating_outlined_pin"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
-                  role !== "admin" ? "bg-gray-100" : ""
-                }`}
-                placeholder=""
-                value={userData?.pin_code}
-                disabled={role !== "admin"}
-              />
-              <label
-                for="floating_outlined_pin"
-                className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
-                  role !== "admin" ? "bg-gray-100" : "bg-white"
-                }`}
-              >
-                Pin Code
-              </label>
-            </div>
-          </div>
-          <Button
-            type="submit"
-            className={`px-5 py-2 rounded-lg ${
-              role !== "admin"
-                ? "bg-gray-400 cursor-not-allowed text-gray-900"
-                : "cursor-pointer text-white bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            Update
-          </Button>
+          </form>
+          {role === "admin" && (
+            <Button
+              type="submit"
+              onClick={handleUpdate}
+              className={`px-5 py-2 rounded-lg cursor-pointer text-white bg-blue-600 hover:bg-blue-700`}
+            >
+              {profileLoading ? "Updating..." : "Update"}
+            </Button>
+          )}
         </div>
       )}
 
@@ -357,6 +401,11 @@ export const Profile = () => {
                     }`}
                     placeholder=""
                     value={director.director_name}
+                    onChange={
+                      role === "admin"
+                        ? (e) => handleDirectorChange(index, e)
+                        : undefined
+                    }
                     disabled={role !== "admin"}
                   />
                   <label
@@ -378,6 +427,11 @@ export const Profile = () => {
                     }`}
                     placeholder=""
                     value={director.director_pan_no}
+                    onChange={
+                      role === "admin"
+                        ? (e) => handleDirectorChange(index, e)
+                        : undefined
+                    }
                     disabled={role !== "admin"}
                   />
                   <label
@@ -391,7 +445,7 @@ export const Profile = () => {
                 </div>
                 <div className="relative z-0 w-full mb-2 group">
                   <input
-                    type="text"
+                    type="number"
                     name="director_aadhar_no"
                     id="floating_outlined_director_aadhar"
                     className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
@@ -399,6 +453,11 @@ export const Profile = () => {
                     }`}
                     placeholder=""
                     value={director.director_aadhar_no}
+                    onChange={
+                      role === "admin"
+                        ? (e) => handleDirectorChange(index, e)
+                        : undefined
+                    }
                     disabled={role !== "admin"}
                   />
                   <label
@@ -423,6 +482,11 @@ export const Profile = () => {
                       director.director_gender.charAt(0).toUpperCase() +
                       director.director_gender.slice(1)
                     }
+                    onChange={
+                      role === "admin"
+                        ? (e) => handleDirectorChange(index, e)
+                        : undefined
+                    }
                     disabled={role !== "admin"}
                   />
                   <label
@@ -436,7 +500,7 @@ export const Profile = () => {
                 </div>
                 <div className="relative z-0 w-full mb-2 group">
                   <input
-                    type="text"
+                    type="date"
                     name="director_dob"
                     id="floating_outlined_director_dob"
                     className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
@@ -444,11 +508,14 @@ export const Profile = () => {
                     }`}
                     placeholder=""
                     value={
-                      new Date(director.director_dob).getDate() +
-                      " " +
-                      MONTH_NAMES[new Date(director.director_dob).getMonth()] +
-                      " " +
-                      new Date(director.director_dob).getFullYear()
+                      new Date(director.director_dob)
+                        .toISOString()
+                        .split("T")[0]
+                    }
+                    onChange={
+                      role === "admin"
+                        ? (e) => handleDirectorChange(index, e)
+                        : undefined
                     }
                     disabled={role !== "admin"}
                   />
@@ -464,16 +531,15 @@ export const Profile = () => {
               </div>
             </div>
           ))}
-          <Button
-            type="submit"
-            className={`px-5 py-2 rounded-lg ${
-              role !== "admin"
-                ? "bg-gray-400 cursor-not-allowed text-gray-900"
-                : "cursor-pointer text-white bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            Update
-          </Button>
+          {role === "admin" && (
+            <Button
+              type="submit"
+              onClick={handleUpdate}
+              className={`px-5 py-2 rounded-lg cursor-pointer text-white bg-blue-600 hover:bg-blue-700`}
+            >
+              {profileLoading ? "Updating..." : "Update"}
+            </Button>
+          )}
         </div>
       )}
 
@@ -491,6 +557,7 @@ export const Profile = () => {
                 }`}
                 placeholder=""
                 value={userData?.company_pan_no}
+                onChange={role === "admin" ? handleInputChange : undefined}
                 disabled={role !== "admin"}
               />
               <label
@@ -512,6 +579,7 @@ export const Profile = () => {
                 }`}
                 placeholder=""
                 value={userData?.company_gst_no}
+                onChange={role === "admin" ? handleInputChange : undefined}
                 disabled={role !== "admin"}
               />
               <label
@@ -525,7 +593,7 @@ export const Profile = () => {
             </div>
             <div className="relative z-0 w-full mb-2 group">
               <input
-                type="text"
+                type="number"
                 name="cin_llpin"
                 id="floating_outlined_cin_llpin"
                 className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
@@ -533,6 +601,7 @@ export const Profile = () => {
                 }`}
                 placeholder=""
                 value={userData?.cin_llpin}
+                onChange={role === "admin" ? handleInputChange : undefined}
                 disabled={role !== "admin"}
               />
               <label
@@ -546,7 +615,7 @@ export const Profile = () => {
             </div>
             <div className="relative z-0 w-full mb-2 group">
               <input
-                type="text"
+                type="date"
                 name="date_of_incorporation"
                 id="floating_outlined_date_of_incorporation"
                 className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300 ${
@@ -554,6 +623,7 @@ export const Profile = () => {
                 }`}
                 placeholder=""
                 value={userData?.date_of_incorporation}
+                onChange={role === "admin" ? handleInputChange : undefined}
                 disabled={role !== "admin"}
               />
               <label
@@ -575,6 +645,7 @@ export const Profile = () => {
                 }`}
                 placeholder=""
                 value={userData?.website_url}
+                onChange={role === "admin" ? handleInputChange : undefined}
                 disabled={role !== "admin"}
               />
               <label
@@ -587,16 +658,15 @@ export const Profile = () => {
               </label>
             </div>
           </div>
-          <Button
-            type="submit"
-            className={`px-5 py-2 rounded-lg ${
-              role !== "admin"
-                ? "bg-gray-400 cursor-not-allowed text-gray-900"
-                : "cursor-pointer text-white bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            Update
-          </Button>
+          {role === "admin" && (
+            <Button
+              type="submit"
+              onClick={handleUpdate}
+              className={`px-5 py-2 rounded-lg cursor-pointer text-white bg-blue-600 hover:bg-blue-700`}
+            >
+              {profileLoading ? "Updating..." : "Update"}
+            </Button>
+          )}
         </div>
       )}
 
@@ -615,6 +685,7 @@ export const Profile = () => {
                   className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
                   placeholder=""
                   value={userData?.account_holder_name}
+                  onChange={handleInputChange}
                 />
                 <label
                   for="floating_outlined_account_holder_name"
@@ -631,6 +702,7 @@ export const Profile = () => {
                   className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
                   placeholder=""
                   value={userData?.bank_account_no}
+                  onChange={handleInputChange}
                 />
                 <label
                   for="floating_outlined_bank_account_no"
@@ -647,6 +719,7 @@ export const Profile = () => {
                   className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
                   placeholder=""
                   value={userData?.ifsc_code}
+                  onChange={handleInputChange}
                 />
                 <label
                   for="floating_outlined_ifsc_code"
@@ -658,9 +731,10 @@ export const Profile = () => {
             </div>
             <Button
               type="submit"
+              onClick={handleUpdate}
               className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
             >
-              Update
+              {profileLoading ? "Updating..." : "Update"}
             </Button>
           </div>
         </>
@@ -681,7 +755,12 @@ export const Profile = () => {
                   className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
                   placeholder=""
                   value={passwordFormData.old_password}
-                  onChange={(e) => setPasswordFormData({ ...passwordFormData, [e.target.name]: e.target.value})}
+                  onChange={(e) =>
+                    setPasswordFormData({
+                      ...passwordFormData,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
                 />
                 <label
                   for="floating_outlined_old_password"
@@ -698,7 +777,12 @@ export const Profile = () => {
                   className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
                   placeholder=""
                   value={passwordFormData.new_password}
-                  onChange={(e) => setPasswordFormData({ ...passwordFormData, [e.target.name]: e.target.value})}
+                  onChange={(e) =>
+                    setPasswordFormData({
+                      ...passwordFormData,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
                 />
                 <label
                   for="floating_outlined_new_password"
@@ -712,7 +796,7 @@ export const Profile = () => {
               type="submit"
               className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
             >
-              Change
+              {passwordLoading ? "Changing" : "Change"}
             </Button>
           </form>
         </div>
