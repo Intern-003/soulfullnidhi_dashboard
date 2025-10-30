@@ -4,6 +4,7 @@ import Button from "../components/Button";
 import { useToast } from "../contexts/ToastContext";
 import { useGet } from "../hooks/useGet";
 import { usePost } from "../hooks/usePost";
+import { TableSkeleton } from "../components/TableSkeleton";
 
 const PayinSettlement = () => {
   const [showModal, setShowModal] = useState(false);
@@ -12,17 +13,17 @@ const PayinSettlement = () => {
   const [payinSettlementData, setPayinSettlementData] = useState([]);
   const [payinFormData, setPayinFormData] = useState({
     payin_wallet: "",
-    remark: ""
+    remark: "",
   });
 
-  const { data: tableData, refetch } = useGet("/get-merchants");
+  const { data: tableData, refetch, loading } = useGet("/get-merchants");
   const { execute: payinSettlement } = usePost("/payin-settlement");
 
   const initialDataOfPayinWallet = tableData?.data;
 
   useEffect(() => {
     const formattedData = initialDataOfPayinWallet?.map((item, index) => ({
-      sqno: index+1,
+      sqno: index + 1,
       id: item.id,
       name: item.name,
       payin_wallet: item.payin_wallet,
@@ -53,8 +54,8 @@ const PayinSettlement = () => {
   }));
 
   const handleChange = (e) => {
-    setPayinFormData({...payinFormData, [e.target.name]: e.target.value});
-  }
+    setPayinFormData({ ...payinFormData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,20 +68,20 @@ const PayinSettlement = () => {
 
     try {
       const res = await payinSettlement(payload);
-      if(res) {
+      if (res) {
         toast.success("Settlement done successfully!!");
         refetch();
         setPayinFormData({
           payin_wallet: null,
-          remark: ""
+          remark: "",
         });
         setShowModal(false);
       }
-    } catch(err) {
+    } catch (err) {
       console.log(err);
       toast.error("Something went wrong!");
     }
-  }
+  };
 
   return (
     <div>
@@ -88,7 +89,17 @@ const PayinSettlement = () => {
         <h4 className="font-bold text-white text-lg py-2">Payin Settlement</h4>
       </div>
 
-      <Table columns={membercolumn} data={tableDataWithActions} showDeleteColumn={false} showDateFilter={false} showStatusFilter={false}/>
+      {loading ? (
+        <TableSkeleton />
+      ) : (
+        <Table
+          columns={membercolumn}
+          data={tableDataWithActions}
+          showDeleteColumn={false}
+          showDateFilter={false}
+          showStatusFilter={false}
+        />
+      )}
 
       {/* ✅ Modal with background blur */}
       {showModal && (
@@ -115,7 +126,6 @@ const PayinSettlement = () => {
                 <i class="fa-solid fa-xmark fa-lg"></i>
               </Button>
             </div>
-            
 
             {/* Modal Body */}
             <form className="p-6" onSubmit={handleSubmit}>

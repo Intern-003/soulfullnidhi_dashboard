@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet"; // <-- import your hook
 import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
+import { TableSkeleton } from "../components/TableSkeleton";
 
 const Acc_upi_setlement = () => {
   const [payinSettlementData, setPayinSettlementData] = useState([]);
@@ -78,7 +79,7 @@ const Acc_upi_setlement = () => {
       </div>
 
       {loading ? (
-        <div className="text-center py-6 text-gray-500">Loading...</div>
+        <TableSkeleton />
       ) : error ? (
         <div className="text-center py-6 text-red-500">Error: {error}</div>
       ) : (

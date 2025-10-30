@@ -4,6 +4,7 @@ import Button from "../components/Button";
 import { useGet } from "../hooks/useGet";
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
+import { TableSkeleton } from "../components/TableSkeleton";
 
 const LoadWallet = () => {
   const [showModal, setShowModal] = useState(false);
@@ -15,7 +16,7 @@ const LoadWallet = () => {
     remark: "",
   });
 
-  const { data: tableData, refetch } = useGet("/get-merchants");
+  const { data: tableData, refetch, loading } = useGet("/get-merchants");
   const { execute: loadWallet } = usePost("/payout-load-wallet");
 
   const initialDataOfWallet = tableData?.data;
@@ -41,7 +42,7 @@ const LoadWallet = () => {
       payout_wallet: walletFormData.payout_wallet,
       remark: walletFormData.remark,
     };
-    
+
     try {
       const res = await loadWallet(payload);
       if (res) {
@@ -84,13 +85,17 @@ const LoadWallet = () => {
         <h4 className="font-bold text-white text-lg py-2">Load Wallet</h4>
       </div>
 
-      <Table
-        columns={membercolumn}
-        data={tableDataWithActions}
-        showStatusFilter={false}
-        showDateFilter={false}
-        showDeleteColumn={false}
-      />
+      {loading ? (
+        <TableSkeleton />
+      ) : (
+        <Table
+          columns={membercolumn}
+          data={tableDataWithActions}
+          showStatusFilter={false}
+          showDateFilter={false}
+          showDeleteColumn={false}
+        />
+      )}
 
       {/* ✅ Modal with background blur */}
       {showModal && (

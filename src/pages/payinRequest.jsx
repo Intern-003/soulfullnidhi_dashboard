@@ -68,7 +68,7 @@ export const PayinRequest = () => {
     return () => clearTimeout(resetTimer);
   }, [showSuccess, showFailed]);
 
-  const { execute: executePayin } = usePost("/Airpay/request");
+  const { execute: executePayin, loading } = usePost("/Airpay/request");
   // console.log(execute);
   const handlePayinSubmit = async () => {
     try {
@@ -202,7 +202,7 @@ export const PayinRequest = () => {
                   setPayerMobile(value);
 
                   // Simple email validation regex
-                  const numberPattern =/^[1-9]\d{9}$/;
+                  const numberPattern = /^[1-9]\d{9}$/;
                   if (!numberPattern.test(value)) {
                     setpayerphoneError("Enter a valid 10-digit mobile number");
                   } else {
@@ -217,7 +217,7 @@ export const PayinRequest = () => {
               >
                 Payer Mobile Number
               </label>
-               {payerphoneError && (
+              {payerphoneError && (
                 <p className="text-red-600 text-sm mt-1">{payerphoneError}</p>
               )}
             </div>
@@ -264,7 +264,14 @@ export const PayinRequest = () => {
               onClick={handlePayinSubmit}
               className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
             >
-              Submit
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Submitting...
+                </span>
+              ) : (
+                "Submit"
+              )}
             </Button>
           </div>
         </div>
