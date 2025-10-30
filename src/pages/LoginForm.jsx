@@ -1,6 +1,6 @@
 import { useState } from "react";
 import logo from "../images/logo.png";
-import paymentGatewayBg from "../images/payment-gateway-bg.jpg";
+import paymentGatewayBg from "../images/login-background.jpg";
 import { usePost } from "../hooks/usePost";
 import { useNavigate } from "react-router-dom";
 
@@ -34,7 +34,7 @@ function LoginForm() {
   return (
     <section className="bg-gray-100 min-h-screen flex items-center justify-center px-6">
       <div
-        className="absolute inset-0 bg-no-repeat bg-center bg-cover opacity-60"
+        className="absolute inset-0 bg-no-repeat bg-center bg-cover opacity-70"
         style={{ backgroundImage: `url(${paymentGatewayBg})` }}
       ></div>
       <div className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-gray-200 opacity-90">
@@ -59,6 +59,7 @@ function LoginForm() {
                   : "border-gray-300 focus:border-blue-600"
               }`}
               placeholder=" "
+              required
             />
             <label
               htmlFor="email"
@@ -85,6 +86,7 @@ function LoginForm() {
                   : "border-gray-300 focus:border-blue-600"
               }`}
               placeholder=" "
+              required
             />
             <label
               htmlFor="password"
