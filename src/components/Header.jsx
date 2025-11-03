@@ -32,25 +32,25 @@ export const Header = ({ onMenuClick }) => {
       id: 1,
       icon: "fa-solid fa-arrow-trend-up text-green-400",
       label: "Payin Rolling Amount",
-      value: `${data?.PayinRollingAmount ?? 0}`,
+      value: `${Number(data?.PayinRollingAmount ?? 0).toFixed(2)}`,
     },
     {
       id: 2,
       icon: "fa-solid fa-arrow-trend-up text-green-400",
       label: "Payin Total Charges",
-      value: `${data?.PayinProfitAmount ?? 0}`,
+      value: `${Number(data?.PayinProfitAmount ?? 0).toFixed(2)}`,
     },
     {
       id: 3,
       icon: "fa-solid fa-wallet text-red-400",
       label: "Payout Wallet",
-      value: `${data?.payout_wallet ?? 0}`,
+      value: `${Number(data?.payout_wallet ?? 0).toFixed(2)}`,
     },
     {
       id: 4,
       icon: "fa-solid fa-wallet text-green-400",
       label: "Payin Wallet",
-      value: `${data?.PayingAmount ?? 0}`,
+      value: `${Number(data?.PayingAmount ?? 0).toFixed(2)}`,
     },
   ];
 

@@ -5,6 +5,7 @@ import { usePost } from "../hooks/usePost";
 import { useGet } from "../hooks/useGet";
 
 import { useToast } from "../contexts/ToastContext";
+import { TableSkeleton } from "../components/TableSkeleton";
 
 const Payoutrequest = () => {
   const [showModal, setShowModal] = useState(false);
@@ -14,7 +15,7 @@ const Payoutrequest = () => {
   const [paymentMode, setPaymentMode] = useState("IMPS");
   const [isLoading, setIsLoading] = useState(false);
 
-   const [amountError, setAmountError] = useState("");
+  const [amountError, setAmountError] = useState("");
   const [beneEmailError, setbeneEmailError] = useState("");
   const [benephoneError, setbenephoneError] = useState("");
 
@@ -42,7 +43,7 @@ const Payoutrequest = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     setIsLoading(true);
     if (!selectedUser) return;
     try {
@@ -63,7 +64,7 @@ const Payoutrequest = () => {
       // console.log("response", response);
       if (response?.status?.toLowerCase() === "success") {
         toast.success("✅ Payout Completed");
-          resetForm();
+        resetForm();
         setShowModal(false);
       } else if (response?.status?.toLowerCase() === "pending") {
         toast.info("⏳ Payout Initiated (Pending Confirmation)");
@@ -78,22 +79,22 @@ const Payoutrequest = () => {
       setIsLoading(false); // stop loading after response
     }
   };
-const resetForm = () => {
-  setAddAddress("");
-  setAddBank("");
-  setBeneEmail("");
-  setBeneMobile("");
-  setAddBeneName("");
-  setAddIfsc("");
-  setAddAccount("");
-  // whatever fields you have
-};
+  const resetForm = () => {
+    setAddAddress("");
+    setAddBank("");
+    setBeneEmail("");
+    setBeneMobile("");
+    setAddBeneName("");
+    setAddIfsc("");
+    setAddAccount("");
+    // whatever fields you have
+  };
 
   const { execute: addbeneficiary } = usePost("/store-beneficiary-detail");
 
   const handleAddBeneficiary = async (e) => {
     e.preventDefault();
-   
+
     setIsLoading(true);
     try {
       // console.log("add beneficiary api clicked");
@@ -113,11 +114,11 @@ const resetForm = () => {
       setShowFormModal(false);
 
       toast.success("Form submitted successfully!");
-       resetForm(); 
+      resetForm();
     } catch (err) {
       // console.log("error to add beneficiary", err);
       toast.error("Error to add Beneficiary");
-    }finally {
+    } finally {
       setIsLoading(false); // stop loading after response
     }
   };
@@ -205,14 +206,19 @@ const resetForm = () => {
           + Add New Beneficiary
         </Button>
       </div>
-      <Table
-        columns={membercolumn}
-        data={tableDataWithActions}
-        showExport={false}
-        showStatusFilter={false}
-        endPoint="/delete-Beneficiary"
-        refreshTable={refetch}
-      />
+      
+      {loading ? (
+        <TableSkeleton />
+      ) : (
+        <Table
+          columns={membercolumn}
+          data={tableDataWithActions}
+          showExport={false}
+          showStatusFilter={false}
+          endPoint="/delete-Beneficiary"
+          refreshTable={refetch}
+        />
+      )}
 
       {/* ✅ Modal with background blur */}
       {showModal && (
@@ -474,7 +480,7 @@ const resetForm = () => {
                     UPI Number
                   </label>
                 </div> */}
-              <div class="relative z-0 w-full mb-5 group">
+                <div class="relative z-0 w-full mb-5 group">
                   <input
                     type="tel"
                     pattern="[0-9]{10}"
@@ -482,18 +488,18 @@ const resetForm = () => {
                     id="floating_phone"
                     value={beneMobile}
                     onChange={(e) => setBeneMobile(e.target.value)}
-                //     onChange={(e) => {
-                //   const value = e.target.value;
-                //   setBeneMobile(value);
+                    //     onChange={(e) => {
+                    //   const value = e.target.value;
+                    //   setBeneMobile(value);
 
-                //   // Simple email validation regex
-                //   const numberPattern =/^[1-9]\d{9}$/;
-                //   if (!numberPattern.test(value)) {
-                //     setbenephoneError("Enter a valid 10-digit mobile number");
-                //   } else {
-                //     setbenephoneError("");
-                //   }
-                // }}
+                    //   // Simple email validation regex
+                    //   const numberPattern =/^[1-9]\d{9}$/;
+                    //   if (!numberPattern.test(value)) {
+                    //     setbenephoneError("Enter a valid 10-digit mobile number");
+                    //   } else {
+                    //     setbenephoneError("");
+                    //   }
+                    // }}
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=""
                   />
@@ -503,13 +509,12 @@ const resetForm = () => {
                   >
                     Beneficiary Mobile Number
                   </label>
-                {benephoneError && (
-                <p className="text-red-600 text-sm mt-1">{benephoneError}</p>
-              )}
+                  {benephoneError && (
+                    <p className="text-red-600 text-sm mt-1">
+                      {benephoneError}
+                    </p>
+                  )}
                 </div>
-
-
-
               </div>
               <div class="grid md:grid-cols-2 md:gap-6 px-4">
                 <div class="relative z-0 w-full mb-5 group">
@@ -590,19 +595,18 @@ const resetForm = () => {
                     id="floating_last_name"
                     value={AddBeneEmail}
                     // onChange={(e) => setBeneEmail(e.target.value)}
-                   onChange={(e) => {
-                  const value = e.target.value;
-                  setBeneEmail(value);
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setBeneEmail(value);
 
-                  // Simple email validation regex
-                  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                  if (!emailPattern.test(value)) {
-                    setbeneEmailError("Enter a valid email address");
-                  } else {
-                    setbeneEmailError("");
-                  }
-                }}
-                    
+                      // Simple email validation regex
+                      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                      if (!emailPattern.test(value)) {
+                        setbeneEmailError("Enter a valid email address");
+                      } else {
+                        setbeneEmailError("");
+                      }
+                    }}
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" "
                   />
@@ -613,14 +617,16 @@ const resetForm = () => {
                     Beneficiary Email ID
                   </label>
                   {beneEmailError && (
-                <p className="text-red-600 text-sm mt-1">{beneEmailError}</p>
-              )}
+                    <p className="text-red-600 text-sm mt-1">
+                      {beneEmailError}
+                    </p>
+                  )}
                 </div>
               </div>
               <div class="flex justify-center mt-6">
                 <Button
                   type="submit"
-                   disabled={isLoading}
+                  disabled={isLoading}
                   className={`${
                     isLoading
                       ? "bg-blue-700 cursor-not-allowed opacity-80"
@@ -629,7 +635,7 @@ const resetForm = () => {
                   // className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
                   {/* Submit */}
-                                   {isLoading && (
+                  {isLoading && (
                     <svg
                       aria-hidden="true"
                       className="w-4 h-4 mr-2 text-gray-200 animate-spin fill-white"
@@ -654,8 +660,6 @@ const resetForm = () => {
           </div>
         </div>
       )}
-
-
     </>
   );
 };

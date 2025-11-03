@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Table from "../components/Table";
 import Toggle from "../components/Toggle";
 import Button from "../components/Button";
@@ -7,15 +7,18 @@ import { SchemeModal } from "../components/SchemeModal";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { usePut } from "../hooks/usePut";
 import { MONTH_NAMES, TOGGLE_STATUSES } from "../constants/Constants";
+import { TableSkeleton } from "../components/TableSkeleton";
 
 export const Member = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
   const [merchantData, setMerchantData] = useState([]);
+  const [initialLoad, setInitialLoad] = useState(true);
+
   const { executePut: updateSingle } = usePut("/update-user-statuses");
   const { executePut: updateAll } = usePut("/payin-payout-statuses");
 
-  const { data: dataOfMerchants, refetch: refetchOfMerchants } = useAutoFetch(
+  const { data: dataOfMerchants, refetch: refetchOfMerchants, loading: merchantLoading } = useAutoFetch(
     "/get-merchants",
     20000
   );
@@ -24,6 +27,10 @@ export const Member = () => {
     () => dataOfMerchants?.data ?? [],
     [dataOfMerchants]
   );
+
+  useEffect(() => {
+  if (!merchantLoading && dataOfMerchants) setInitialLoad(false);
+}, [merchantLoading, dataOfMerchants]);
 
   const handlePayinToggle = async (v, rowId, accountStatus) => {
     try {
@@ -212,7 +219,7 @@ export const Member = () => {
         </Button>
       </div>
 
-      <Table columns={membercolumn} data={tableDataWithActions} endPoint="/delete-merchant" refreshTable={refetchOfMerchants} statusList={TOGGLE_STATUSES}/>
+      {initialLoad ? (<TableSkeleton />) : (<Table columns={membercolumn} data={tableDataWithActions} endPoint="/delete-merchant" refreshTable={refetchOfMerchants} statusList={TOGGLE_STATUSES}/>)}
 
       <SchemeModal showModal={showModal} handleModal={handleModal} />
     </div>

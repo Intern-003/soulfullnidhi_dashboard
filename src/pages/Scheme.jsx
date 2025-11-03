@@ -6,6 +6,7 @@ import Button from "../components/Button";
 import { useGet } from "../hooks/useGet"; // <-- import your hook
 import { usePost } from "../hooks/usePost";
 import { TOGGLE_STATUSES } from "../constants/Constants"
+import { TableSkeleton } from "../components/TableSkeleton";
 
 const Scheme = () => {
   const [showModal, setShowModal] = useState(false);
@@ -112,7 +113,7 @@ const Scheme = () => {
       </div>
 
       {loading ? (
-        <div className="text-center py-6 text-gray-500">Loading...</div>
+        <TableSkeleton />
       ) : error ? (
         <div className="text-center py-6 text-red-500">Error: {error}</div>
       ) : (

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet";
 import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
+import { TableSkeleton } from "../components/TableSkeleton";
 
 const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
@@ -74,7 +75,7 @@ const PayoutStatement = () => {
       </div>
 
       {loading ? (
-        <div className="text-center py-6 text-gray-500">Loading...</div>
+        <TableSkeleton />
       ) : error ? (
         <div className="text-center py-6 text-red-500">Error: {error}</div>
       ) : (
