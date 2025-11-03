@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Button from "./Button";
 import { ConfirmModal } from "./ConfirmModal";
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { CustomSelect } from "./CustomSelect";
 
 const Table = ({
   columns,
@@ -15,6 +16,7 @@ const Table = ({
   showStatusFilter = true,
   showDeleteColumn = true,
   showDateFilter = true,
+  showSelectUserFilter = false,
   endPoint = "",
   refreshTable,
   setData,
@@ -30,6 +32,21 @@ const Table = ({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [selectData, setSelectData] = useState([]);
+  const [selectedMerchant, setSelectedMerchant] = useState(null);
+
+  useEffect(() => {
+    const dataForSelect = Array.from(
+      new Map(
+        data?.map((item) => [
+          item.user_id,
+          { value: item.user_id, label: item.merchant_details },
+        ])
+      ).values()
+    );
+
+    setSelectData(dataForSelect);
+  }, [data]);
 
   const handleConfirmModal = (id) => {
     setRecordId(id);
@@ -78,9 +95,21 @@ const Table = ({
         (!startDate || rowDate >= startDate) &&
         (!endDate || rowDate <= endDate);
 
-      return matchesSearch && matchesStatus && matchesDate;
+      // ✅ Merchant filter (based on custom select)
+      const matchesMerchant =
+        !selectedMerchant || row.user_id === selectedMerchant.value;
+
+      return matchesSearch && matchesStatus && matchesDate && matchesMerchant;
     });
-  }, [search, statusFilter, startDate, endDate, data]);
+  }, [search, statusFilter, startDate, endDate, selectedMerchant, data]);
+
+  const totalSuccessAmount = useMemo(() => {
+    if (!filteredData?.length) return 0;
+
+    return filteredData
+      .filter((row) => String(row.status).toLowerCase() === "success")
+      .reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  }, [filteredData]);
 
   if (!columns || !data || data.length === 0) {
     return <h6>No data found</h6>;
@@ -142,7 +171,11 @@ const Table = ({
 
   return (
     <div className="w-full">
-      {(showSearch || showStatusFilter || showExport || showDateFilter) && (
+      {(showSearch ||
+        showStatusFilter ||
+        showExport ||
+        showDateFilter ||
+        showSelectUserFilter) && (
         <>
           <div className="flex flex-col md:flex-row justify-between items-center rounded-b-xl ml-2 mb-3">
             {/* Search */}
@@ -157,6 +190,18 @@ const Table = ({
                     setSearch(e.target.value);
                     setCurrentPage(1);
                   }}
+                />
+              </div>
+            )}
+
+            {/* Select User Filter */}
+            {showSelectUserFilter && (
+              <div className="w-50 md:w-1/3">
+                <CustomSelect
+                  options={selectData}
+                  placeholder="Select Merchant"
+                  value={selectedMerchant}
+                  onChange={(option) => setSelectedMerchant(option)}
                 />
               </div>
             )}
@@ -297,6 +342,12 @@ const Table = ({
             </div>
           </div>
 
+          {showSelectUserFilter && (
+            <div className="mt-3 ml-3 text-sm font-semibold text-green-700">
+              Total Successful Amount: ₹{totalSuccessAmount.toFixed(2)}
+            </div>
+          )}
+
           <div>
             <Button
               className="mr-2 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md flex justify-self-end"
@@ -305,6 +356,7 @@ const Table = ({
                 setEndDate(null);
                 setStatusFilter("all");
                 setSearch("");
+                setSelectedMerchant("");
               }}
             >
               Clear All

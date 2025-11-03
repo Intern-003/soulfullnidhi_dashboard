@@ -28,6 +28,7 @@ const Acc_upi_setlement = () => {
       const formattedData = data.data.map((item, index) => ({
         sqno: index + 1,
         id: item.id,
+        user_id: item.user_id,
         product_type: item.product ?? "N/A",
         merchant_details: item.user.name ?? "N/A",
         txnid: item.txnid,
@@ -88,7 +89,8 @@ const Acc_upi_setlement = () => {
           data={payinSettlementData}
           showStatusFilter={true}
           showExport={true}
-          showSearch={true}
+          showSearch={false}
+          showSelectUserFilter={true}
           showDeleteColumn={false}
           statusList={REPORT_STATUSES}
         />
