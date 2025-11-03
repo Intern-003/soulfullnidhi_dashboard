@@ -8,6 +8,7 @@ const UpiStatement = () => {
 
   // ✅ Use your hook to fetch schemes
   const { data, loading, error } = useGet("/reportrecords-List?product=UPI");
+  console.log(data);
 
   // ✅ Format data whenever "data" changes
   useEffect(() => {
@@ -25,6 +26,7 @@ const UpiStatement = () => {
       const formattedData = data.data.map((item, index) => ({
         sqno: index + 1,
         id: item.id,
+        user_id: item.user_id,
         product_type: item.product ?? "N/A",
         merchant_details: item.user.name ?? "N/A",
         txnid: item.txnid ?? "N/A",
@@ -83,8 +85,9 @@ const UpiStatement = () => {
           data={upiData}
           showStatusFilter={true}
           showExport={true}
-          showSearch={true}
+          showSearch={false}
           showDeleteColumn={false}
+          showSelectUserFilter={true}
           statusList={REPORT_STATUSES}
         />
       )}
