@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Button from "./Button";
 import { ConfirmModal } from "./ConfirmModal";
 import { usePost } from "../hooks/usePost";
@@ -28,6 +28,7 @@ const Table = ({
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [openExport, setOpenExport] = useState(false);
+  const exportRef = useRef(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [startDate, setStartDate] = useState(null);
@@ -47,6 +48,17 @@ const Table = ({
 
     setSelectData(dataForSelect);
   }, [data]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (exportRef.current && !exportRef.current.contains(event.target)) {
+        setOpenExport(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleConfirmModal = (id) => {
     setRecordId(id);
@@ -99,6 +111,7 @@ const Table = ({
       const matchesMerchant =
         !selectedMerchant || row.user_id === selectedMerchant.value;
 
+      setCurrentPage(1);
       return matchesSearch && matchesStatus && matchesDate && matchesMerchant;
     });
   }, [search, statusFilter, startDate, endDate, selectedMerchant, data]);
@@ -277,7 +290,7 @@ const Table = ({
 
               {/* Export Dropdown */}
               {showExport && (
-                <div className="relative border border-sky-300 rounded-lg mr-2">
+                <div ref={exportRef} className="relative border border-sky-300 rounded-lg mr-2">
                   <button
                     onClick={() => setOpenExport(!openExport)}
                     className="flex items-center justify-center rounded-lg bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-sky-400 focus:outline-none"
@@ -300,12 +313,12 @@ const Table = ({
                   </button>
 
                   {openExport && (
-                    <div className="absolute right-0 mt-2 w-44 bg-white border rounded-lg shadow-lg text-sm text-gray-700 z-50">
+                    <div className="absolute right-0 mt-2 w-30 bg-white border shadow-lg text-sm text-gray-700 z-50">
                       <ul className="py-2">
                         <li>
                           <button
                             onClick={exportCSV}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                            className="block w-full text-left px-4 py-2 hover:bg-blue-100 cursor-pointer"
                           >
                             CSV
                           </button>
@@ -313,7 +326,7 @@ const Table = ({
                         <li>
                           <button
                             onClick={exportJSON}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                            className="block w-full text-left px-4 py-2 hover:bg-blue-100 cursor-pointer"
                           >
                             JSON
                           </button>
@@ -321,7 +334,7 @@ const Table = ({
                         <li>
                           <button
                             onClick={exportTXT}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                            className="block w-full text-left px-4 py-2 hover:bg-blue-100 cursor-pointer"
                           >
                             TXT
                           </button>
@@ -329,7 +342,7 @@ const Table = ({
                         <li>
                           <button
                             onClick={exportSQL}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                            className="block w-full text-left px-4 py-2 hover:bg-blue-100 cursor-pointer"
                           >
                             SQL
                           </button>
@@ -468,7 +481,10 @@ const Table = ({
               <span>Show</span>
               <select
                 value={entriesPerPage}
-                onChange={(e) => setEntriesPerPage(Number(e.target.value))}
+                onChange={(e) => {
+                  setEntriesPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
                 className="border border-gray-300 rounded-md px-2 py-1 focus:ring-1 focus:ring-sky-400 focus:outline-none"
               >
                 <option value="5">5</option>
