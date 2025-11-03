@@ -42,7 +42,7 @@ export const CustomSelect = ({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute w-full mt-1 border bg-white rounded-lg z-10">
+        <div className="absolute w-full mt-1 border bg-white z-10">
           <input
             type="text"
             value={search}
