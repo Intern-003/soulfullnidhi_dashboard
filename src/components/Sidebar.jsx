@@ -16,6 +16,20 @@ export const Sidebar = ({ open, setOpen }) => {
   const [BankDropDown, setBankDropDown] = useState(false);
   const [ApiDocDropDown, setApiDocDropDown] = useState(false);
 
+  const closeAllDropdowns = () => {
+  setSchemeDropDown(false);
+  setMemberDropDown(false);
+  setFundDropDown(false);
+  setPayoutDropDown(false);
+  setTransactionDropDown(false);
+  setAccountDropDown(false);
+  setRolesDropDown(false);
+  setTicketsDropDown(false);
+  setPayinDropDown(false);
+  setBankDropDown(false);
+  setApiDocDropDown(false);
+};
+
   return (
     <>
       {/* <div
@@ -83,7 +97,10 @@ export const Sidebar = ({ open, setOpen }) => {
                   }
                   className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                   type="button"
-                  onClick={() => setSchemeDropDown(!schemeDropDown)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setSchemeDropDown(!schemeDropDown)
+                  }}
                 >
                   <div>
                     <i class="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -140,7 +157,10 @@ export const Sidebar = ({ open, setOpen }) => {
                   }
                   className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                   type="button"
-                  onClick={() => setMemberDropDown(!memberDropDown)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setMemberDropDown(!memberDropDown)
+                  }}
                 >
                   <div>
                     <i class="fa-solid fa-user-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -195,7 +215,10 @@ export const Sidebar = ({ open, setOpen }) => {
                   }
                   className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                   type="button"
-                  onClick={() => setFundDropDown(!fundDropDown)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setFundDropDown(!fundDropDown)
+                  }}
                 >
                   <div>
                     <i class="fa-solid fa-piggy-bank fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -253,7 +276,10 @@ export const Sidebar = ({ open, setOpen }) => {
                 onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
                 className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                 type="button"
-                onClick={() => setPayoutDropDown(!payoutDropDown)}
+                onClick={() => {
+                  closeAllDropdowns();
+                  setPayoutDropDown(!payoutDropDown)
+                }}
               >
                 <div>
                   <i class="fa-solid fa-credit-card fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -303,7 +329,10 @@ export const Sidebar = ({ open, setOpen }) => {
                 onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
                 className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                 type="button"
-                onClick={() => setPayinDropDown(!payinDropDown)}
+                onClick={() => {
+                  closeAllDropdowns();
+                  setPayinDropDown(!payinDropDown)
+                }}
               >
                 <div>
                   <i class="fa-solid fa-money-bill-transfer fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -353,7 +382,10 @@ export const Sidebar = ({ open, setOpen }) => {
                 onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
                 className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                 type="button"
-                onClick={() => setTransactionDropDown(!transactionDropDown)}
+                onClick={() => {
+                  closeAllDropdowns();
+                  setTransactionDropDown(!transactionDropDown)
+                }}
               >
                 <div>
                   <i class="fa-solid fa-clock-rotate-left fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -410,7 +442,10 @@ export const Sidebar = ({ open, setOpen }) => {
                 onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
                 className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                 type="button"
-                onClick={() => setAccountDropDown(!accountDropDown)}
+                onClick={() => {
+                  closeAllDropdowns();
+                  setAccountDropDown(!accountDropDown)
+                }}
               >
                 <div>
                   <i class="fa-solid fa-layer-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -468,7 +503,10 @@ export const Sidebar = ({ open, setOpen }) => {
                   }
                   className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                   type="button"
-                  onClick={() => setBankDropDown(!BankDropDown)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setBankDropDown(!BankDropDown)
+                  }}
                 >
                   <div>
                     <i class="fa-solid fa-building-columns fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -524,7 +562,10 @@ export const Sidebar = ({ open, setOpen }) => {
                   }
                   className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                   type="button"
-                  onClick={() => setRolesDropDown(!rolesDropDown)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setRolesDropDown(!rolesDropDown)
+                  }}
                 >
                   <div>
                     <i class="fa-solid fa-gears fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -578,7 +619,10 @@ export const Sidebar = ({ open, setOpen }) => {
                   }
                   className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
                   type="button"
-                  onClick={() => setApiDocDropDown(!ApiDocDropDown)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setApiDocDropDown(!ApiDocDropDown)
+                  }}
                 >
                   <div>
                     <i class="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
@@ -637,7 +681,10 @@ export const Sidebar = ({ open, setOpen }) => {
               <a
                 class="flex items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
-                onClick={() => setTicketsDropDown(!ticketsDropDown)}
+                onClick={() => {
+                  closeAllDropdowns();
+                  setTicketsDropDown(!ticketsDropDown)
+                }}
               >
                 <div>
                   <i class="fa-solid fa-comment fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
