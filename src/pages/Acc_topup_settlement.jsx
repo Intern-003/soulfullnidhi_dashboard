@@ -9,7 +9,7 @@ const Acc_topup_settlement = () => {
 
   // ✅ Use your hook to fetch schemes
   const { data, loading, error } = useGet(
-    "/reportrecords-List?product=topup_payout"
+    "/reportrecords-List?product[]=topup_payout&product[]=take_back_from_wallet"
   );
 
   // ✅ Format data whenever "data" changes
