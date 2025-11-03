@@ -10,6 +10,8 @@ const LoadWallet = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [walletData, setWalletData] = useState([]);
+  const [modalType, setModalType] = useState("load");
+
   const toast = useToast();
   const [walletFormData, setWalletFormData] = useState({
     payout_wallet: "",
@@ -18,6 +20,7 @@ const LoadWallet = () => {
 
   const { data: tableData, refetch, loading } = useGet("/get-merchants");
   const { execute: loadWallet } = usePost("/payout-load-wallet");
+  const { execute: reverseTopup } = usePost("/payout-take-back");
 
   const initialDataOfWallet = tableData?.data;
 
@@ -35,7 +38,7 @@ const LoadWallet = () => {
     setWalletFormData({ ...walletFormData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmitLoadWallet = async (e) => {
     e.preventDefault();
     const payload = {
       user_id: selectedUser.id,
@@ -56,6 +59,27 @@ const LoadWallet = () => {
     }
   };
 
+  const handleSubmitReverseTopup = async (e) => {
+    e.preventDefault();
+    const payload = {
+      user_id: selectedUser.id,
+      payout_wallet: walletFormData.payout_wallet,
+      remark: walletFormData.remark,
+    };
+
+    try {
+      const res = await reverseTopup(payload);
+      if (res) {
+        toast.success("Deducted balance from wallet successfully!!");
+        refetch();
+        setShowModal(false);
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Something went wrong!!");
+    }
+  };
+
   const membercolumn = [
     { header: "SQNo", accessor: "sqno" },
     { header: "Name", accessor: "name" },
@@ -66,15 +90,28 @@ const LoadWallet = () => {
   const tableDataWithActions = walletData?.map((row) => ({
     ...row,
     action: (
-      <Button
-        onClick={() => {
-          setSelectedUser(row);
-          setShowModal(true);
-        }}
-        className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
-      >
-        Load Wallet
-      </Button>
+      <div className="flex justify-evenly">
+        <Button
+          onClick={() => {
+            setSelectedUser(row);
+            setModalType("load");
+            setShowModal(true);
+          }}
+          className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+        >
+          Load Wallet
+        </Button>
+        <Button
+          onClick={() => {
+            setSelectedUser(row);
+            setModalType("reverse");
+            setShowModal(true);
+          }}
+          className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+        >
+          Reverse Top-up
+        </Button>
+      </div>
     ),
   }));
 
@@ -112,9 +149,15 @@ const LoadWallet = () => {
               className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
               font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
             >
-              <h3 className="text-lg font-semibold">
-                Wallet Topup for {selectedUser?.name}
-              </h3>
+              {modalType === "load" ? (
+                <h3 className="text-lg font-semibold">
+                  Wallet Topup for {selectedUser?.name}
+                </h3>
+              ) : (
+                <h3 className="text-lg font-semibold">
+                  Reverse Topup for {selectedUser?.name}
+                </h3>
+              )}
               <Button
                 onClick={() => setShowModal(false)}
                 className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
@@ -124,7 +167,7 @@ const LoadWallet = () => {
             </div>
 
             {/* Modal Body */}
-            <form className="p-6" onSubmit={handleSubmit}>
+            <form className="p-6" onSubmit={modalType === "load" ? handleSubmitLoadWallet : handleSubmitReverseTopup}>
               <div className="mb-3">
                 <label className="block mb-1 text-sm font-medium">Amount</label>
                 <input
@@ -151,7 +194,7 @@ const LoadWallet = () => {
 
               <Button
                 type="submit"
-                onClick={handleSubmit}
+                onClick={modalType === "load" ? handleSubmitLoadWallet : handleSubmitReverseTopup}
                 className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg w-full"
               >
                 Submit
