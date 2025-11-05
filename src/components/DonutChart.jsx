@@ -1,7 +1,11 @@
 import React, { useEffect, useRef } from "react";
+import nodatapie from "../images/nodatapie.jpeg";
+
 
 export const DonutChart = ({ data }) => {
   const chartRef = useRef(null);
+const total =
+  (data?.pending || 0) + (data?.success || 0) + (data?.failed || 0);
 
   useEffect(() => {
     if (chartRef.current && typeof ApexCharts !== "undefined") {
@@ -74,7 +78,29 @@ export const DonutChart = ({ data }) => {
         </h5>
       </div>
 
-      <div className="py-6" ref={chartRef}></div>
+      {/* <div className="py-6" ref={chartRef}></div> */}
+
+
+      {total > 0 ? (
+  <div className="py-6" ref={chartRef}></div>
+) : (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "320px",
+      flexDirection: "column",
+    }}
+  >
+    <img
+      src={nodatapie}
+      alt="No data found"
+      style={{ width: "150px" }}
+    />
+    {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
+  </div>
+)}
     </div>
   );
 };
