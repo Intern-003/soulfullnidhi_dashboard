@@ -6,6 +6,7 @@ import { useToast } from "../contexts/ToastContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { CustomSelect } from "./CustomSelect";
+import nodatafound from "../images/nodatafound.jpeg";
 
 const Table = ({
   columns,
@@ -125,7 +126,15 @@ const Table = ({
   }, [filteredData]);
 
   if (!columns || !data || data.length === 0) {
-    return <h6>No data found</h6>;
+    // return (
+    //   // <div style={{textAlign:"center",padding:"20px",justifyContent:"center",display: "flex",
+    //   //   flexDirection: "column",alignItems:"center"}}>
+    //   //   <img src={nodatafound}
+    //   //   alt ="no data found"
+    //   //   style={{width:"300px", opacity:0.8}} />
+    //   // </div>
+    // );
+    // <h6>No data found</h6>;
   }
 
   const downloadFile = (content, fileName, mimeType) => {
@@ -379,7 +388,7 @@ const Table = ({
       )}
 
       {/* Table */}
-      <div className="bg-gray-300 rounded-lg mx-4 my-4 border border-sky-300">
+      <div className="bg-white-600 rounded-lg mx-4 my-4 border border-sky-300">
         <div
           className="overflow-x-scroll"
           style={{ scrollbarWidth: "thin", scrollbarColor: "#9ca3af #e5e7eb" }}
@@ -453,9 +462,14 @@ const Table = ({
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="text-center py-4 text-gray-500"
+                    className="text-center  text-gray-500 bg-white"
                   >
-                    No matching records found
+                 <div style={{textAlign:"center",padding:"0px",justifyContent:"center",display: "flex",
+        flexDirection: "column",alignItems:"center"}}>
+        <img src={nodatafound}
+        alt ="no data found"
+        style={{width:"300px", opacity:0.8}} />
+      </div>
                   </td>
                 </tr>
               )}

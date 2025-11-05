@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import nodatafound from "../images/nodatafound.jpeg";
 
 export const LineChart = ({ data }) => {
   const chartRef = useRef(null);
   const [amount, setAmount] = useState([1]);
   const [months, setMonths] = useState([]);
+  const total =
+  (data?.pending || 0) + (data?.success || 0) + (data?.failed || 0);
 
   useEffect(() => {
     const fetchedAmount = data?.map((item) => item.total);
@@ -23,7 +26,7 @@ export const LineChart = ({ data }) => {
           fontFamily: "Inter, sans-serif",
           dropShadow: { enabled: false },
           toolbar: { show: false },
-          animations: { enabled: false }
+          animations: { enabled: false },
         },
         tooltip: {
           enabled: true,
@@ -73,7 +76,9 @@ export const LineChart = ({ data }) => {
       <div className="flex justify-between">
         <div>
           <h5 className="leading-none text-3xl font-bold text-gray-900 pb-2">
-            {amount ? amount.reduce((item1, item2) => item1 + item2) : 0}
+            {Array.isArray(amount)
+              ? amount.reduce((a, b) => (Number(a) || 0) + (Number(b) || 0), 0)
+              : 0}
           </h5>
           <p className="text-base font-normal text-gray-500">
             Transactions this year
@@ -81,7 +86,29 @@ export const LineChart = ({ data }) => {
         </div>
       </div>
 
-      <div ref={chartRef}></div>
+      {/* <div ref={chartRef}></div> */}
+      {total > 0 ? (
+  <div className="py-6" ref={chartRef}></div>
+) : (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "320px",
+      flexDirection: "column",
+    }}
+  >
+    <img
+      src={nodatafound}
+      alt="No data found"
+      style={{ width: "150px" }}
+    />
+    {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
+  </div>
+)}
+
+
     </div>
   );
 };

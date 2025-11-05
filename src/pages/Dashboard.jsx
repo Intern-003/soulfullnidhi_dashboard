@@ -5,6 +5,7 @@ import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { MONTH_NAMES } from "../constants/Constants";
 import DashboardSkeleton from "../components/DashboardSkeleton";
+import nodatafound from "../images/nodatafound.jpeg";
 
 export const Dashboard = () => {
   const [transactionData, setTransactionData] = useState([]);
@@ -68,8 +69,8 @@ export const Dashboard = () => {
   }, [processTableData, processLargeTransactionData]);
 
   useEffect(() => {
-  if (!recordLoading && cardData) setInitialLoad(false);
-}, [recordLoading, cardData]);
+    if (!recordLoading && cardData) setInitialLoad(false);
+  }, [recordLoading, cardData]);
 
   const transactioncolumn = [
     { header: "SQ No.", accessor: "sqno" },
@@ -245,22 +246,33 @@ export const Dashboard = () => {
                 </div>
 
                 <div className="flow-root">
-                  <ul role="list" className="divide-y divide-gray-200">
-                    {largeTransactionData.map((item) => (
-                      <li className="py-3 sm:py-4">
-                        <div className="flex items-center">
-                          <div className="flex-1 min-w-0 ms-4">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {item.name}
-                            </p>
+                  {largeTransactionData && largeTransactionData.length > 0 ? (
+                    <ul role="list" className="divide-y divide-gray-200">
+                      {largeTransactionData.map((item, index) => (
+                        <li key={index} className="py-3 sm:py-4">
+                          <div className="flex items-center">
+                            <div className="flex-1 min-w-0 ms-4">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {item.name}
+                              </p>
+                            </div>
+                            <div className="inline-flex items-center text-base font-semibold text-gray-900">
+                              ₹{item.amount}
+                            </div>
                           </div>
-                          <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                            ₹{item.amount}
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="flex flex-col justify-center items-center py-8">
+                      <img
+                        src={nodatafound}
+                        alt="No data found"
+                        className="w-40 opacity-80 mb-2"
+                      />
+
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
