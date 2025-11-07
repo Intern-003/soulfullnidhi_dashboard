@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import nodatapie from "../images/nodatapie.jpeg";
+import nodatapie from "../images/pienodata.jpeg";
 
 
 export const DonutChart = ({ data }) => {
@@ -96,7 +96,7 @@ const total =
     <img
       src={nodatapie}
       alt="No data found"
-      style={{ width: "150px" }}
+      style={{ width: "250px" }}
     />
     {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
   </div>
