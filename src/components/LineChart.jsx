@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import nodatafound from "../images/nodatafound.jpeg";
+import nodatafound from "../images/nodataLine.jpg";
 
 export const LineChart = ({ data }) => {
   const chartRef = useRef(null);
@@ -102,7 +102,7 @@ export const LineChart = ({ data }) => {
     <img
       src={nodatafound}
       alt="No data found"
-      style={{ width: "150px" }}
+      style={{ width: "350px" }}
     />
     {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
   </div>
