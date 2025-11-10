@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Stepper } from "../components/Stepper";
 import { SchemeModal } from "../components/SchemeModal";
 import Button from "../components/Button";
@@ -18,6 +18,7 @@ export const MemberOnboardForm = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [activeTab, setActiveTab] = useState("payin");
   const toast = useToast();
+  const [airpayMids, setAirpayMids] = useState([]);
 
   const [memberFormData, setMemberFormData] = useState({
     name: "",
@@ -95,6 +96,12 @@ export const MemberOnboardForm = () => {
   const { data: payoutBanks, refetch: refetchPayout } = useGet(
     "/payoutbanks-List?status=1"
   );
+  const {
+    data: midCredentials,
+    refetch: refetchCredentials,
+    isLoading,
+  } = useGet("/credentials");
+
   const { data: payinBanks, refetch: refetchPayin } = useGet(
     "/payinbanks-List?status=1"
   );
@@ -157,14 +164,38 @@ export const MemberOnboardForm = () => {
 
   const handleNext = () => {
     if (validateStep()) {
-      if (currentStep < 4) {
-        setCurrentStep(currentStep + 1);
-      }
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1);
+    }
     }
   };
+  useEffect(() => {
+    if (memberFormData.payin_at_onboard !== "Airpay") return; // only run for Airpay
+    if (isLoading) return; // wait for API
+    const credentialsData = midCredentials?.data || [];
+    if (credentialsData.length > 0) {
+      setAirpayMids(credentialsData);
+      console.log("✅ credentials loaded:", credentialsData);
+    } else {
+      console.warn("⚠️ no credentials found yet");
+      setAirpayMids([]);
+    }
+  }, [memberFormData.payin_at_onboard, midCredentials, isLoading]);
 
   const handleChange = (e) => {
-    setMemberFormData({ ...memberFormData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Convert credentials_id to integer
+    const newValue =
+      name === "credentials_id" ? parseInt(value, 10) || "" : value;
+
+    if (name === "payin_at_onboard" && value === "Airpay") {
+      refetchCredentials();
+    }
+
+    setMemberFormData((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
   };
 
   const handleDirectorChange = (index, e) => {
@@ -514,10 +545,7 @@ export const MemberOnboardForm = () => {
             <div className="relative">
               <input
                 type="file"
-                name="company_pan_no_doc"
-                id="floating_outlined_pan_doc"
-                className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
-                placeholder=""
+                id="company_pan_no_doc"
                 onChange={(e) =>
                   setMemberFormData((prev) => ({
                     ...prev,
@@ -525,6 +553,9 @@ export const MemberOnboardForm = () => {
                   }))
                 }
               />
+              {memberFormData.company_pan_no_doc && (
+                <p>Selected file: {memberFormData.company_pan_no_doc.name}</p>
+              )}
               <label
                 for="floating_outlined_pan_doc"
                 className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
@@ -1012,45 +1043,46 @@ export const MemberOnboardForm = () => {
         {currentStep === 4 && (
           <div className="grid gap-6 mb-6 md:grid-cols-2 p-5">
             <div className="flex items-center gap-2 mb-4">
+              {/* <div className="flex gap-3 items-start"> */}
+              {/* 🏦 Bank Select */}
               <div className="relative flex-1">
                 <label
-                  for="default"
+                  htmlFor="payin_at_onboard"
                   className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
                     errors?.payin_at_onboard
                       ? "peer-focus:text-red-600"
-                      : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                      : "peer-focus:text-blue-600"
                   }`}
                 >
                   Payin at Onboard
                 </label>
+
                 <select
-                  id="default"
+                  id="payin_at_onboard"
                   name="payin_at_onboard"
                   className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
                     errors?.payin_at_onboard
                       ? "border-red-500"
-                      : " border-gray-300"
+                      : "border-gray-300"
                   }`}
                   value={memberFormData.payin_at_onboard}
                   onChange={handleChange}
                   required
                 >
-                  <option selected>Select Bank</option>
-                  {payinBanks?.data.map((item) => {
-                    return (
-                      <option key={item.id} value={item.onboard_payin_bank}>
-                        {item.onboard_payin_bank}
-                      </option>
-                    );
-                  })}
+                  <option value="">Select Bank</option>
+                  {payinBanks?.data.map((item) => (
+                    <option key={item.id} value={item.onboard_payin_bank}>
+                      {item.onboard_payin_bank}
+                    </option>
+                  ))}
                 </select>
+
                 {errors?.payin_at_onboard && (
                   <span className="text-sm text-red-500">
                     {errors?.payin_at_onboard}
                   </span>
                 )}
               </div>
-
               <Button
                 type="button"
                 className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
@@ -1058,6 +1090,34 @@ export const MemberOnboardForm = () => {
               >
                 +
               </Button>
+              {/* 💳 Airpay MID Select — only show when Airpay is selected */}
+              {memberFormData.payin_at_onboard === "Airpay" && (
+                <div className="relative flex-1">
+                  <label
+                    htmlFor="airpay_mid"
+                    className="absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2"
+                  >
+                    Airpay MID
+                  </label>
+
+                  <select
+                    id="airpay_mid"
+                    name="credentials_id"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
+                    value={memberFormData.airpay_mid}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Airpay MID</option>
+                    {airpayMids.map((mid) => (
+                      <option key={mid.id} value={mid.id}>
+                        {mid.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {/* </div> */}
             </div>
 
             <div className="flex items-center gap-2 mb-4">
