@@ -3,58 +3,63 @@ import nodatafound from "../images/nodataLine.jpg";
 
 export const LineChart = ({ data }) => {
   const chartRef = useRef(null);
-  const [amount, setAmount] = useState([1]);
+  const [amount, setAmount] = useState([]);
   const [months, setMonths] = useState([]);
-  const total =
-  (data?.pending || 0) + (data?.success || 0) + (data?.failed || 0);
+
+  const total = Array.isArray(data)
+    ? data.reduce((sum, item) => sum + (Number(item.total) || 0), 0)
+    : 0;
 
   useEffect(() => {
-    const fetchedAmount = data?.map((item) => item.total);
-    const fetchedMonths = data?.map((item) => item.month_name);
-
-    setAmount(fetchedAmount);
-    setMonths(fetchedMonths);
+    if (Array.isArray(data)) {
+      setAmount(data.map((item) => Number(item.total)));
+      setMonths(data.map((item) => item.month_name));
+    }
   }, [data]);
 
   useEffect(() => {
-    if (window.ApexCharts && chartRef.current) {
+    if (window.ApexCharts && chartRef.current && amount.length > 0) {
       const options = {
         chart: {
-          height: "100%",
-          maxWidth: "100%",
           type: "area",
-          fontFamily: "Inter, sans-serif",
-          dropShadow: { enabled: false },
+          height: 300,
           toolbar: { show: false },
-          animations: { enabled: false },
+          zoom: { enabled: false },
+          sparkline: { enabled: true },
+          animations: {
+            enabled: true,
+            easing: "easeinout",
+            speed: 900,
+          },
         },
-        tooltip: {
-          enabled: true,
-          x: { show: false },
+        stroke: {
+          curve: "smooth",
+          width: 6,
+          colors: ["#2563EB"], // main blue line
+          lineCap: "round",
         },
         fill: {
           type: "gradient",
           gradient: {
-            opacityFrom: 0.55,
+            shadeIntensity: 1,
+            gradientToColors: ["#60A5FA"], // lighter blue
+            opacityFrom: 0.5,
             opacityTo: 0,
-            shade: "#1C64F2",
-            gradientToColors: ["#1C64F2"],
+            stops: [0, 100],
           },
         },
+        markers: {
+          size: 0,
+          hover: { size: 7 },
+        },
+        grid: { show: false },
         dataLabels: { enabled: false },
-        stroke: { width: 6 },
-        grid: {
-          show: false,
-          strokeDashArray: 4,
-          padding: { left: 2, right: 2, top: 0 },
+        tooltip: {
+          theme: "light",
+          y: { formatter: (val) => `₹${val}` },
+          style: { fontSize: "14px", fontFamily: "Inter, sans-serif" },
         },
-        series: [
-          {
-            name: "Transactions",
-            data: amount,
-            color: "#1A56DB",
-          },
-        ],
+        series: [{ name: "Transactions", data: amount }],
         xaxis: {
           categories: months,
           labels: { show: false },
@@ -66,19 +71,16 @@ export const LineChart = ({ data }) => {
 
       const chart = new window.ApexCharts(chartRef.current, options);
       chart.render();
-
       return () => chart.destroy();
     }
-  }, [data, amount, months]);
+  }, [amount, months]);
 
   return (
     <div className="max-w-3xl w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
       <div className="flex justify-between">
         <div>
           <h5 className="leading-none text-3xl font-bold text-gray-900 pb-2">
-            {Array.isArray(amount)
-              ? amount.reduce((a, b) => (Number(a) || 0) + (Number(b) || 0), 0)
-              : 0}
+            {total}
           </h5>
           <p className="text-base font-normal text-gray-500">
             Transactions this year
@@ -86,29 +88,25 @@ export const LineChart = ({ data }) => {
         </div>
       </div>
 
-      {/* <div ref={chartRef}></div> */}
       {total > 0 ? (
-  <div className="py-6" ref={chartRef}></div>
-) : (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "320px",
-      flexDirection: "column",
-    }}
-  >
-    <img
-      src={nodatafound}
-      alt="No data found"
-      style={{ width: "350px" }}
-    />
-    {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
-  </div>
-)}
-
-
+        <div className="py-4" ref={chartRef}></div>
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "320px",
+            flexDirection: "column",
+          }}
+        >
+          <img
+            src={nodatafound}
+            alt="No data found"
+            style={{ width: "350px" }}
+          />
+        </div>
+      )}
     </div>
   );
 };

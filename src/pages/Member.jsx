@@ -8,12 +8,14 @@ import useAutoFetch from "../hooks/useAutoFetch";
 import { usePut } from "../hooks/usePut";
 import { MONTH_NAMES, TOGGLE_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
+import { useGet } from "../hooks/useGet";
 
 export const Member = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
   const [merchantData, setMerchantData] = useState([]);
   const [initialLoad, setInitialLoad] = useState(true);
+  // const [credentials,setCredentials] = useState([]);
 
   const { executePut: updateSingle } = usePut("/update-user-statuses");
   const { executePut: updateAll } = usePut("/payin-payout-statuses");
@@ -22,6 +24,14 @@ export const Member = () => {
     "/get-merchants",
     20000
   );
+const { data: credentialsData } = useGet("/credentials");
+// useEffect(()=>{
+//   if(credentialsData){
+
+//     console.log("api hitted");
+//     console.log(credentialsData);
+//   }
+// },[credentialsData]);
 
   const initialDataOfMerchants = useMemo(
     () => dataOfMerchants?.data ?? [],
@@ -106,11 +116,76 @@ export const Member = () => {
     }
   };
 
-  useEffect(() => {
-    const formattedMerchantData = initialDataOfMerchants.map((item, index) => ({
+  // useEffect(() => {
+  //   const formattedMerchantData = initialDataOfMerchants.map((item, index) => ({
+  //     sqno: index + 1,
+  //     id: item.id,
+  //     name: item.name,
+  //     payin_bank:item.payin_at_onboard === "Airpay" ? `airpay (${item.credentials_id})` : item.payin_at_onboard,
+  //     payin: item.payin_status,
+  //     payout: item.payout_status,
+  //     account: item.account_status,
+  //     status: item.account_status ? "Active" : "Inactive",
+  //     walletpayin: item.payin_wallet,
+  //     walletpayout: item.payout_wallet, 
+  //     date:
+  //       new Date(item.created_at).getDate() +
+  //       " " +
+  //       MONTH_NAMES[new Date(item.created_at).getMonth()] +
+  //       " " +
+  //       new Date(item.created_at).getFullYear(),
+  //   }));
+  //   setMerchantData(formattedMerchantData);
+  // }, [initialDataOfMerchants]);
+
+useEffect(() => {
+  if (!initialDataOfMerchants || !credentialsData) return;
+
+  // Support both response types (array or { data: [] })
+  const credentialsList = Array.isArray(credentialsData)
+    ? credentialsData
+    : credentialsData.data || [];
+
+  const formattedMerchantData = initialDataOfMerchants.map((item, index) => {
+    // Find credential by ID
+    const credential = credentialsList.find(
+      (cred) => cred.id === item.credentials_id
+    );
+
+    // Build the Payin Bank name dynamically
+    // const payinBank =
+    //   item.payin_at_onboard === "Airpay"
+    //     ? `Airpay (${credential ? credential.name : "N/A"})`
+    //     : item.payin_at_onboard;
+
+
+    const payinBank =
+  item.payin_at_onboard === "Airpay" ? (
+    <div className="flex items-center space-x-2">
+      <span className="font-medium text-gray-700">Airpay</span>
+      <select
+        value={item.credentials_id || ""}
+        onChange={(e) => handleCredentialChange(item.id, e.target.value)}
+        className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+      >
+        <option value="">Select MID</option>
+        {credentialsData?.data?.map((cred) => (
+          <option key={cred.id} value={cred.id}>
+            {cred.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  ) : (
+    item.payin_at_onboard
+  );
+
+
+    return {
       sqno: index + 1,
       id: item.id,
       name: item.name,
+      payin_bank: payinBank,
       payin: item.payin_status,
       payout: item.payout_status,
       account: item.account_status,
@@ -123,9 +198,13 @@ export const Member = () => {
         MONTH_NAMES[new Date(item.created_at).getMonth()] +
         " " +
         new Date(item.created_at).getFullYear(),
-    }));
-    setMerchantData(formattedMerchantData);
-  }, [initialDataOfMerchants]);
+    };
+  });
+
+  setMerchantData(formattedMerchantData);
+}, [initialDataOfMerchants, credentialsData]);
+
+
 
   const handleModal = () => {
     setShowModal(!showModal);
@@ -138,6 +217,7 @@ export const Member = () => {
     { header: "Payout", accessor: "payout" },
     { header: "Payin Wallet", accessor: "walletpayin" },
     { header: "Payout Wallet", accessor: "walletpayout" },
+    {header:"Payin_onboarded_Bank",accessor:"payin_bank"},
     { header: "Action", accessor: "action" },
   ];
 

@@ -24,13 +24,49 @@ const UpiStatement = () => {
 
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
-        sqno: index + 1,
+        sqno: (
+          <div className="flex flex-col text-left">
+            <span>
+              <b>{index + 1}</b>
+            </span>
+            <span>
+              {new Date(item.created_at).getDate()}{" "}
+              {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
+              {new Date(item.created_at).getFullYear()} <br/>{" "}
+              {new Date(item.created_at).toLocaleTimeString()}
+            </span>
+          </div>
+        ),
         id: item.id,
         user_id: item.user_id,
         product_type: item.product ?? "N/A",
-        merchant_details: item.user.name ?? "N/A",
-        txnid: item.txnid ?? "N/A",
-        amount: item.amount ?? "N/A",
+        merchant_details: item.user.name ?? "N/A" ,
+        // txnid: item.txnid ?? "N/A",
+        txnid: (
+         <div className="flex flex-col text-left">
+          <span>
+          Payee VPA : <b>{item.payee_vpa ?? "null"} </b>
+        </span>
+          <span>
+           Payee Name : <b>{item.payer_name ?? "null"}</b>
+        </span>
+         <span>
+          Payee Txnid : <b>{item.mytxnid}</b>
+        </span>
+        <span>
+        TxnId : <b>{item.txnid}</b>
+        </span>
+        </div>
+        ),
+        // amount: item.amount ?? "N/A",
+        amount:(
+          <div className="flex flex-col text-left">
+            <span>Amount :<b> {item.amount}</b></span>
+            <span>GST :<b>{item.gst} </b></span>
+            <span>Charges :<b>{item.charge} </b></span>   
+             <span>Payin Rolling Amount :<b>{item.payin_rolling_amount} </b></span>                    
+          </div>
+        ),
         date:
           new Date(item.created_at).getDate() +
           " " +
@@ -58,12 +94,12 @@ const UpiStatement = () => {
 
   const upiColumn = [
     { header: "SQ NO", accessor: "sqno" },
-    { header: "Product Type", accessor: "product_type" },
+    // { header: "Type", accessor: "product_type" },
     { header: "Merchant Details", accessor: "merchant_details" },
-    { header: "Transaction Id", accessor: "txnid" },
-    { header: "Amount", accessor: "amount" },
+    { header: "Payer-Payee Details", accessor: "txnid" },
+    { header: "Amount/ Commission", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
-    { header: "Date", accessor: "date" },
+    // { header: "Date", accessor: "date" },
   ];
 
   return (
