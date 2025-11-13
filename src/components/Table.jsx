@@ -6,7 +6,9 @@ import { useToast } from "../contexts/ToastContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { CustomSelect } from "./CustomSelect";
-import nodatafound from "../images/nodatafound.jpeg";
+// import nodatafound from "../images/nodatafound.jpeg";
+import nodatafound from "../images/placeholder.jpeg";
+
 
 const Table = ({
   columns,
