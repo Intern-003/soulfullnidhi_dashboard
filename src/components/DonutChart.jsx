@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from "react";
-// import nodatapie from "../images/pienodata.jpeg";
+import nodatapie from "../images/pienodata.jpeg";
 
 
-import nodatapie from "../images/placeholder.jpeg";
 export const DonutChart = ({ data }) => {
   const chartRef = useRef(null);
 const total =

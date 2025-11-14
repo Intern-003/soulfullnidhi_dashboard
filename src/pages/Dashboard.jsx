@@ -5,8 +5,8 @@ import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { MONTH_NAMES } from "../constants/Constants";
 import DashboardSkeleton from "../components/DashboardSkeleton";
-// import nodatafound from "../images/largesttxn.jpg";
-import nodatafound from "../images/placeholder.jpeg";
+// import nodataline from "../images/Nodataline.jpg/";
+import nodatafound from "../images/nodatafound.jpeg";
 
 
 export const Dashboard = () => {

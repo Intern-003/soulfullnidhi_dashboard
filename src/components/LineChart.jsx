@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-// import nodatafound from "../images/nodataLine.jpg";
-import nodatafound from "../images/placeholder.jpeg";
+import Nodatafound from "../images/NodataLine.jpg";
 export const LineChart = ({ data }) => {
   const chartRef = useRef(null);
   const [amount, setAmount] = useState([1]);
   const [months, setMonths] = useState([]);
-  const total =
-  (data?.pending || 0) + (data?.success || 0) + (data?.failed || 0);
+  // const total = 12;
+  // (data?.pending || 0) + (data?.success || 0) + (data?.failed || 0);
 
   useEffect(() => {
     const fetchedAmount = data?.map((item) => item.total);
@@ -52,7 +51,7 @@ export const LineChart = ({ data }) => {
           {
             name: "Transactions",
             data: amount,
-            color: "#1A56DB",
+            color: "#1ab4dbff",
           },
         ],
         xaxis: {
@@ -87,28 +86,26 @@ export const LineChart = ({ data }) => {
       </div>
 
       {/* <div ref={chartRef}></div> */}
-      {total > 0 ? (
-  <div className="py-6" ref={chartRef}></div>
-) : (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "320px",
-      flexDirection: "column",
-    }}
-  >
-    <img
-      src={nodatafound}
-      alt="No data found"
-      style={{ width: "350px" }}
-    />
-    {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
-  </div>
-)}
-
-
+      {months.length > 0 && amount.length > 0 ? (
+        <div className="py-6" ref={chartRef}></div>
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "320px",
+            flexDirection: "column",
+          }}
+        >
+          <img
+            src={Nodatafound}
+            alt="No data found"
+            style={{ width: "350px" }}
+          />
+          {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
+        </div>
+      )}
     </div>
   );
 };
