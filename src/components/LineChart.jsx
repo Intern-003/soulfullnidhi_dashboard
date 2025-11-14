@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import Nodatafound from "../images/linedata.png";
+// import Nodatafound from "../images/linedata.png";
+import Nodatafound from "../images/NodataLine.jpg";
+
 export const LineChart = ({ data }) => {
   const chartRef = useRef(null);
   const [amount, setAmount] = useState([1]);
