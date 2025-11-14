@@ -25,33 +25,38 @@ export const Profile = () => {
 
   const initialMerchantData = merchantData?.data;
   useEffect(() => {
-    const formattedData = () => {
-      return {
-        id: initialMerchantData?.id,
-        name: initialMerchantData?.name,
-        email: initialMerchantData?.email,
-        mobile_no: initialMerchantData?.mobile_no,
-        company_type: initialMerchantData?.company_type,
-        company_pan_no: initialMerchantData?.company_pan_no,
-        company_gst_no: initialMerchantData?.company_gst_no,
-        cin_llpin: initialMerchantData?.cin_llpin,
-        date_of_incorporation:
-          initialMerchantData?.date_of_incorporation.split("T")[0],
-        account_holder_name: initialMerchantData?.account_holder_name,
-        bank_account_no: initialMerchantData?.bank_account_no,
-        ifsc_code: initialMerchantData?.ifsc_code,
-        address: initialMerchantData?.address,
-        city: initialMerchantData?.city,
-        district: initialMerchantData?.district,
-        state: initialMerchantData?.state,
-        pin_code: initialMerchantData?.pin_code,
-        director_info: initialMerchantData?.director_info,
-        website_url: initialMerchantData?.website_url,
-      };
-    };
+  if (!initialMerchantData) return; // prevent crashing
 
-    setUserData(formattedData);
-  }, [initialMerchantData]);
+  const formattedData = () => {
+    return {
+      id: initialMerchantData?.id,
+      name: initialMerchantData?.name,
+      email: initialMerchantData?.email,
+      mobile_no: initialMerchantData?.mobile_no,
+      company_type: initialMerchantData?.company_type,
+      company_pan_no: initialMerchantData?.company_pan_no,
+      company_gst_no: initialMerchantData?.company_gst_no,
+      cin_llpin: initialMerchantData?.cin_llpin,
+      date_of_incorporation:
+        initialMerchantData?.date_of_incorporation
+          ? initialMerchantData.date_of_incorporation.split("T")[0]
+          : "",
+      account_holder_name: initialMerchantData?.account_holder_name,
+      bank_account_no: initialMerchantData?.bank_account_no,
+      ifsc_code: initialMerchantData?.ifsc_code,
+      address: initialMerchantData?.address,
+      city: initialMerchantData?.city,
+      district: initialMerchantData?.district,
+      state: initialMerchantData?.state,
+      pin_code: initialMerchantData?.pin_code,
+      director_info: initialMerchantData?.director_info || [],
+      website_url: initialMerchantData?.website_url,
+    };
+  };
+
+  setUserData(formattedData()||[]);
+}, [initialMerchantData]);
+
 
   //Change Password
   const { execute: changePassword, loading: passwordLoading } =
@@ -212,7 +217,7 @@ export const Profile = () => {
                       disabled={role !== "admin"}
                     />
                     <label
-                      for="floating_outlined_name"
+                      htmlFor="floating_outlined_name"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                         role !== "admin" ? "bg-gray-100" : "bg-white"
                       }`}
@@ -236,7 +241,7 @@ export const Profile = () => {
                       disabled={role !== "admin"}
                     />
                     <label
-                      for="floating_outlined_name"
+                      htmlFor="floating_outlined_name"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                         role !== "admin" ? "bg-gray-100" : "bg-white"
                       }`}
@@ -260,7 +265,7 @@ export const Profile = () => {
                       disabled={role !== "admin"}
                     />
                     <label
-                      for="floating_outlined_mobile_no"
+                      htmlFor="floating_outlined_mobile_no"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                         role !== "admin" ? "bg-gray-100" : "bg-white"
                       }`}
@@ -284,7 +289,7 @@ export const Profile = () => {
                       disabled={role !== "admin"}
                     />
                     <label
-                      for="floating_outlined_address"
+                      htmlFor="floating_outlined_address"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                         role !== "admin" ? "bg-gray-100" : "bg-white"
                       }`}
@@ -308,7 +313,7 @@ export const Profile = () => {
                       disabled={role !== "admin"}
                     />
                     <label
-                      for="floating_outlined_city"
+                      htmlFor="floating_outlined_city"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                         role !== "admin" ? "bg-gray-100" : "bg-white"
                       }`}
@@ -332,7 +337,7 @@ export const Profile = () => {
                       disabled={role !== "admin"}
                     />
                     <label
-                      for="floating_outlined_district"
+                      htmlFor="floating_outlined_district"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                         role !== "admin" ? "bg-gray-100" : "bg-white"
                       }`}
@@ -356,7 +361,7 @@ export const Profile = () => {
                       disabled={role !== "admin"}
                     />
                     <label
-                      for="floating_outlined_state"
+                      htmlFor="floating_outlined_state"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                         role !== "admin" ? "bg-gray-100" : "bg-white"
                       }`}
@@ -380,7 +385,7 @@ export const Profile = () => {
                       disabled={role !== "admin"}
                     />
                     <label
-                      for="floating_outlined_pin"
+                      htmlFor="floating_outlined_pin"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                         role !== "admin" ? "bg-gray-100" : "bg-white"
                       }`}
@@ -431,7 +436,7 @@ export const Profile = () => {
                         disabled={role !== "admin"}
                       />
                       <label
-                        for="floating_outlined_director_name"
+                        htmlFor="floating_outlined_director_name"
                         className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                           role !== "admin" ? "bg-gray-100" : "bg-white"
                         }`}
@@ -457,7 +462,7 @@ export const Profile = () => {
                         disabled={role !== "admin"}
                       />
                       <label
-                        for="floating_outlined_director_pan"
+                        htmlFor="floating_outlined_director_pan"
                         className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                           role !== "admin" ? "bg-gray-100" : "bg-white"
                         }`}
@@ -483,7 +488,7 @@ export const Profile = () => {
                         disabled={role !== "admin"}
                       />
                       <label
-                        for="floating_outlined_director_aadhar"
+                        htmlFor="floating_outlined_director_aadhar"
                         className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                           role !== "admin" ? "bg-gray-100" : "bg-white"
                         }`}
@@ -512,7 +517,7 @@ export const Profile = () => {
                         disabled={role !== "admin"}
                       />
                       <label
-                        for="floating_outlined_director_gender"
+                        htmlFor="floating_outlined_director_gender"
                         className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                           role !== "admin" ? "bg-gray-100" : "bg-white"
                         }`}
@@ -542,7 +547,7 @@ export const Profile = () => {
                         disabled={role !== "admin"}
                       />
                       <label
-                        for="floating_outlined_director_dob"
+                        htmlFor="floating_outlined_director_dob"
                         className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                           role !== "admin" ? "bg-gray-100" : "bg-white"
                         }`}
@@ -585,7 +590,7 @@ export const Profile = () => {
                     disabled={role !== "admin"}
                   />
                   <label
-                    for="floating_outlined_company_pan_no"
+                    htmlFor="floating_outlined_company_pan_no"
                     className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                       role !== "admin" ? "bg-gray-100" : "bg-white"
                     }`}
@@ -607,7 +612,7 @@ export const Profile = () => {
                     disabled={role !== "admin"}
                   />
                   <label
-                    for="floating_outlined_company_gst_no"
+                    htmlFor="floating_outlined_company_gst_no"
                     className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                       role !== "admin" ? "bg-gray-100" : "bg-white"
                     }`}
@@ -629,7 +634,7 @@ export const Profile = () => {
                     disabled={role !== "admin"}
                   />
                   <label
-                    for="floating_outlined_cin_llpin"
+                    htmlFor="floating_outlined_cin_llpin"
                     className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                       role !== "admin" ? "bg-gray-100" : "bg-white"
                     }`}
@@ -651,7 +656,7 @@ export const Profile = () => {
                     disabled={role !== "admin"}
                   />
                   <label
-                    for="floating_outlined_date_of_incorporation"
+                    htmlFor="floating_outlined_date_of_incorporation"
                     className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                       role !== "admin" ? "bg-gray-100" : "bg-white"
                     }`}
@@ -673,7 +678,7 @@ export const Profile = () => {
                     disabled={role !== "admin"}
                   />
                   <label
-                    for="floating_outlined_website_url"
+                    htmlFor="floating_outlined_website_url"
                     className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ${
                       role !== "admin" ? "bg-gray-100" : "bg-white"
                     }`}
@@ -712,7 +717,7 @@ export const Profile = () => {
                       onChange={handleInputChange}
                     />
                     <label
-                      for="floating_outlined_account_holder_name"
+                      htmlFor="floating_outlined_account_holder_name"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
                     >
                       Account Holder Name
@@ -729,7 +734,7 @@ export const Profile = () => {
                       onChange={handleInputChange}
                     />
                     <label
-                      for="floating_outlined_bank_account_no"
+                      htmlFor="floating_outlined_bank_account_no"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
                     >
                       Bank Account Number
@@ -746,7 +751,7 @@ export const Profile = () => {
                       onChange={handleInputChange}
                     />
                     <label
-                      for="floating_outlined_ifsc_code"
+                      htmlFor="floating_outlined_ifsc_code"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
                     >
                       IFSC Code
@@ -787,7 +792,7 @@ export const Profile = () => {
                       }
                     />
                     <label
-                      for="floating_outlined_old_password"
+                      htmlFor="floating_outlined_old_password"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
                     >
                       Old Password
@@ -809,7 +814,7 @@ export const Profile = () => {
                       }
                     />
                     <label
-                      for="floating_outlined_new_password"
+                      htmlFor="floating_outlined_new_password"
                       className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
                     >
                       New Password
