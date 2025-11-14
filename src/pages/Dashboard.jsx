@@ -5,8 +5,7 @@ import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { MONTH_NAMES } from "../constants/Constants";
 import DashboardSkeleton from "../components/DashboardSkeleton";
-// import nodataline from "../images/Nodataline.jpg/";
-import nodatafound from "../images/nodatafound.jpeg";
+import largesttxn from "../images/largesttxn.jpg";
 
 
 export const Dashboard = () => {
@@ -268,7 +267,7 @@ export const Dashboard = () => {
                   ) : (
                     <div className="flex flex-col justify-center items-center " >
                       <img
-                        src={nodatafound}
+                        src={largesttxn}
                         alt="No data found"
                         className="opacity-80 "
                         style={{ width: "350px" }}
