@@ -5,7 +5,8 @@ import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { MONTH_NAMES } from "../constants/Constants";
 import DashboardSkeleton from "../components/DashboardSkeleton";
-import nodatafound from "../images/largesttxn.jpg";
+import largesttxn from "../images/largesttxn.jpg";
+
 
 export const Dashboard = () => {
   const [transactionData, setTransactionData] = useState([]);
@@ -266,7 +267,7 @@ export const Dashboard = () => {
                   ) : (
                     <div className="flex flex-col justify-center items-center " >
                       <img
-                        src={nodatafound}
+                        src={largesttxn}
                         alt="No data found"
                         className="opacity-80 "
                         style={{ width: "350px" }}

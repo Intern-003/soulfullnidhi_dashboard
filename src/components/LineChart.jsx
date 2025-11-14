@@ -1,65 +1,59 @@
 import { useEffect, useRef, useState } from "react";
-import nodatafound from "../images/nodataLine.jpg";
-
+import Nodatafound from "../images/NodataLine.jpg";
 export const LineChart = ({ data }) => {
   const chartRef = useRef(null);
-  const [amount, setAmount] = useState([]);
+  const [amount, setAmount] = useState([1]);
   const [months, setMonths] = useState([]);
-
-  const total = Array.isArray(data)
-    ? data.reduce((sum, item) => sum + (Number(item.total) || 0), 0)
-    : 0;
+  // const total = 12;
+  // (data?.pending || 0) + (data?.success || 0) + (data?.failed || 0);
 
   useEffect(() => {
-    if (Array.isArray(data)) {
-      setAmount(data.map((item) => Number(item.total)));
-      setMonths(data.map((item) => item.month_name));
-    }
+    const fetchedAmount = data?.map((item) => item.total);
+    const fetchedMonths = data?.map((item) => item.month_name);
+
+    setAmount(fetchedAmount);
+    setMonths(fetchedMonths);
   }, [data]);
 
   useEffect(() => {
-    if (window.ApexCharts && chartRef.current && amount.length > 0) {
+    if (window.ApexCharts && chartRef.current) {
       const options = {
         chart: {
+          height: "100%",
+          maxWidth: "100%",
           type: "area",
-          height: 300,
+          fontFamily: "Inter, sans-serif",
+          dropShadow: { enabled: false },
           toolbar: { show: false },
-          zoom: { enabled: false },
-          sparkline: { enabled: true },
-          animations: {
-            enabled: true,
-            easing: "easeinout",
-            speed: 900,
-          },
+          animations: { enabled: false },
         },
-        stroke: {
-          curve: "smooth",
-          width: 6,
-          colors: ["#2563EB"], // main blue line
-          lineCap: "round",
+        tooltip: {
+          enabled: true,
+          x: { show: false },
         },
         fill: {
           type: "gradient",
           gradient: {
-            shadeIntensity: 1,
-            gradientToColors: ["#60A5FA"], // lighter blue
-            opacityFrom: 0.5,
+            opacityFrom: 0.55,
             opacityTo: 0,
-            stops: [0, 100],
+            shade: "#1C64F2",
+            gradientToColors: ["#1C64F2"],
           },
         },
-        markers: {
-          size: 0,
-          hover: { size: 7 },
-        },
-        grid: { show: false },
         dataLabels: { enabled: false },
-        tooltip: {
-          theme: "light",
-          y: { formatter: (val) => `₹${val}` },
-          style: { fontSize: "14px", fontFamily: "Inter, sans-serif" },
+        stroke: { width: 6 },
+        grid: {
+          show: false,
+          strokeDashArray: 4,
+          padding: { left: 2, right: 2, top: 0 },
         },
-        series: [{ name: "Transactions", data: amount }],
+        series: [
+          {
+            name: "Transactions",
+            data: amount,
+            color: "#1ab4dbff",
+          },
+        ],
         xaxis: {
           categories: months,
           labels: { show: false },
@@ -71,16 +65,19 @@ export const LineChart = ({ data }) => {
 
       const chart = new window.ApexCharts(chartRef.current, options);
       chart.render();
+
       return () => chart.destroy();
     }
-  }, [amount, months]);
+  }, [data, amount, months]);
 
   return (
     <div className="max-w-3xl w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
       <div className="flex justify-between">
         <div>
           <h5 className="leading-none text-3xl font-bold text-gray-900 pb-2">
-            {total}
+            {Array.isArray(amount)
+              ? amount.reduce((a, b) => (Number(a) || 0) + (Number(b) || 0), 0)
+              : 0}
           </h5>
           <p className="text-base font-normal text-gray-500">
             Transactions this year
@@ -88,8 +85,9 @@ export const LineChart = ({ data }) => {
         </div>
       </div>
 
-      {total > 0 ? (
-        <div className="py-4" ref={chartRef}></div>
+      {/* <div ref={chartRef}></div> */}
+      {months.length > 0 && amount.length > 0 ? (
+        <div className="py-6" ref={chartRef}></div>
       ) : (
         <div
           style={{
@@ -101,10 +99,11 @@ export const LineChart = ({ data }) => {
           }}
         >
           <img
-            src={nodatafound}
+            src={Nodatafound}
             alt="No data found"
             style={{ width: "350px" }}
           />
+          {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
         </div>
       )}
     </div>
