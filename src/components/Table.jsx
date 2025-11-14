@@ -406,7 +406,7 @@ const Table = ({
                 background: "linear-gradient(90deg, #007BFF, #00C8FF)",
                 color: "white",
               }}
-              className="uppercase tracking-wide text-center"
+              className="uppercase tracking-wide text-left"
             >
               <tr>
                 {columns.map((column, index) => (

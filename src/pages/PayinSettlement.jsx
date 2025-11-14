@@ -28,7 +28,7 @@ const PayinSettlement = () => {
       name: item.name,
       payin_wallet: item.payin_wallet,
     }));
-    setPayinSettlementData(formattedData);
+    setPayinSettlementData(formattedData || []);
   }, [initialDataOfPayinWallet]);
 
   const membercolumn = [
