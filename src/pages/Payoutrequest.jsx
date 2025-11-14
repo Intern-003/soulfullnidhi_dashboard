@@ -224,7 +224,7 @@ const Payoutrequest = () => {
       {showModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
-          onClick={() => setShowModal(false)}
+          // onClick={() => setShowModal(false)}
         >
           <div
             className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 transform transition-all scale-100"
@@ -339,7 +339,7 @@ const Payoutrequest = () => {
                 <Button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-5 py-2.5 text-sm font-medium rounded-lg border border-gray-300 text-white bg-gray-500 hover:bg-gray-100 transition"
+                  className="px-5 py-2.5 text-sm font-medium rounded-lg border border-gray-300 text-white bg-gray-600 hover:bg-red-400 transition"
                 >
                   Close
                 </Button>
@@ -382,7 +382,7 @@ const Payoutrequest = () => {
       {showFormModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
-          onClick={() => setShowFormModal(false)}
+          // onClick={() => setShowFormModal(false)}
         >
           <div
             className="bg-white border rounded-lg shadow-lg max-w-3xl w-full mx-2 p-6 transform transition-all scale-100"
