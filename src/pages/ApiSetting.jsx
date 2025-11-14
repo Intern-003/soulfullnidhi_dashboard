@@ -33,7 +33,7 @@ const ApiSetting = () => {
         " " +
         new Date(item.created_at).getFullYear(),
     }));
-    setApiToken(formattedMerchantData);
+    setApiToken(formattedMerchantData || []);
   }, [initialDataOfTokens]);
 
   const tokenTableColumns = [

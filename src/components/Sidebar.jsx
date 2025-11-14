@@ -71,8 +71,8 @@ export const Sidebar = ({ open, setOpen }) => {
           </div>
         </div>
 
-        <div class="sidebar flex-1 overflow-y-auto py-4 custom-scrollbar ">
-          <ul class="space-y-2 font-medium">
+        <div className="sidebar flex-1 overflow-y-auto py-4 custom-scrollbar ">
+          <ul className="space-y-2 font-medium">
             <li>
               <Link
                 to={"/dashboard"}
@@ -103,14 +103,14 @@ export const Sidebar = ({ open, setOpen }) => {
                   }}
                 >
                   <div>
-                    <i class="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <i className="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                     <span className="ms-3 group-hover:text-sm">
                       Scheme Manager
                     </span>
                   </div>
 
                   <svg
-                    class="w-2.5 h-2.5 ms-3"
+                    className="w-2.5 h-2.5 ms-3"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -118,9 +118,9 @@ export const Sidebar = ({ open, setOpen }) => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -138,7 +138,7 @@ export const Sidebar = ({ open, setOpen }) => {
             >
               <Link to={"/scheme"}>
                 <ul>
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                     <span className="ms-3">Scheme</span>
                   </li>
                 </ul>
@@ -163,12 +163,12 @@ export const Sidebar = ({ open, setOpen }) => {
                   }}
                 >
                   <div>
-                    <i class="fa-solid fa-user-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <i className="fa-solid fa-user-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                     <span className="ms-3 group-hover:text-sm">Member</span>
                   </div>
 
                   <svg
-                    class="w-2.5 h-2.5 ms-3"
+                    className="w-2.5 h-2.5 ms-3"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -176,9 +176,9 @@ export const Sidebar = ({ open, setOpen }) => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -196,7 +196,7 @@ export const Sidebar = ({ open, setOpen }) => {
             >
               <Link to={"/member-list"}>
                 <ul>
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                     Merchant Onboarding
                   </li>
                 </ul>
@@ -221,11 +221,11 @@ export const Sidebar = ({ open, setOpen }) => {
                   }}
                 >
                   <div>
-                    <i class="fa-solid fa-piggy-bank fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <i className="fa-solid fa-piggy-bank fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                     <span className="ms-3 group-hover:text-sm">Fund</span>
                   </div>
                   <svg
-                    class="w-2.5 h-2.5 ms-3"
+                    className="w-2.5 h-2.5 ms-3"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -233,9 +233,9 @@ export const Sidebar = ({ open, setOpen }) => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -254,12 +254,12 @@ export const Sidebar = ({ open, setOpen }) => {
               >
                 <ul>
                   <Link to="/load-wallet">
-                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    <li Name="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                       Load Wallet
                     </li>
                   </Link>
                   <Link to="/payin-settlement">
-                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    <li Name="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                       Payin Settlement
                     </li>
                   </Link>
@@ -282,11 +282,11 @@ export const Sidebar = ({ open, setOpen }) => {
                 }}
               >
                 <div>
-                  <i class="fa-solid fa-credit-card fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                  <i className="fa-solid fa-credit-card fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                   <span className="ms-3 group-hover:text-sm">Payout</span>
                 </div>
                 <svg
-                  class="w-2.5 h-2.5 ms-3"
+                  className="w-2.5 h-2.5 ms-3"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -294,9 +294,9 @@ export const Sidebar = ({ open, setOpen }) => {
                 >
                   <path
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="m1 1 4 4 4-4"
                   />
                 </svg>
@@ -313,7 +313,7 @@ export const Sidebar = ({ open, setOpen }) => {
             >
               <ul>
                 <Link to="/payout-request">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                     Request
                   </li>
                 </Link>
@@ -335,11 +335,11 @@ export const Sidebar = ({ open, setOpen }) => {
                 }}
               >
                 <div>
-                  <i class="fa-solid fa-money-bill-transfer fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                  <i className="fa-solid fa-money-bill-transfer fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                   <span className="ms-3 group-hover:text-sm">Payin</span>
                 </div>
                 <svg
-                  class="w-2.5 h-2.5 ms-3"
+                  className="w-2.5 h-2.5 ms-3"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -347,9 +347,9 @@ export const Sidebar = ({ open, setOpen }) => {
                 >
                   <path
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="m1 1 4 4 4-4"
                   />
                 </svg>
@@ -366,7 +366,7 @@ export const Sidebar = ({ open, setOpen }) => {
             >
               <ul>
                 <Link to="/payin-request">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                     Request
                   </li>
                 </Link>
@@ -388,13 +388,13 @@ export const Sidebar = ({ open, setOpen }) => {
                 }}
               >
                 <div>
-                  <i class="fa-solid fa-clock-rotate-left fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                  <i className="fa-solid fa-clock-rotate-left fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                   <span className="ms-3 group-hover:text-sm">
                     Transaction History
                   </span>
                 </div>
                 <svg
-                  class="w-2.5 h-2.5 ms-3"
+                  className="w-2.5 h-2.5 ms-3"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -402,9 +402,9 @@ export const Sidebar = ({ open, setOpen }) => {
                 >
                   <path
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="m1 1 4 4 4-4"
                   />
                 </svg>
@@ -421,12 +421,12 @@ export const Sidebar = ({ open, setOpen }) => {
             >
               <ul>
                 <Link to="/upi-statement">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                     UPI Statement
                   </li>
                 </Link>
                 <Link to="/payout-statement">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                     Payout Statement
                   </li>
                 </Link>
@@ -448,11 +448,11 @@ export const Sidebar = ({ open, setOpen }) => {
                 }}
               >
                 <div>
-                  <i class="fa-solid fa-layer-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                  <i className="fa-solid fa-layer-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                   <span className="ms-3">Account Statement</span>
                 </div>
                 <svg
-                  class="w-2.5 h-2.5 ms-3"
+                  className="w-2.5 h-2.5 ms-3"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -460,9 +460,9 @@ export const Sidebar = ({ open, setOpen }) => {
                 >
                   <path
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="m1 1 4 4 4-4"
                   />
                 </svg>
@@ -479,12 +479,12 @@ export const Sidebar = ({ open, setOpen }) => {
             >
               <ul>
                 <Link to="/topup-statement">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                     Topup Statement
                   </li>
                 </Link>
                 <Link to="/settlement-payin-statement">
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                     Settlement Payin Statement
                   </li>
                 </Link>
@@ -509,13 +509,13 @@ export const Sidebar = ({ open, setOpen }) => {
                   }}
                 >
                   <div>
-                    <i class="fa-solid fa-building-columns fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <i className="fa-solid fa-building-columns fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                     <span className="ms-3 group-hover:text-sm">
                       Onboard Bank
                     </span>
                   </div>
                   <svg
-                    class="w-2.5 h-2.5 ms-3"
+                    className="w-2.5 h-2.5 ms-3"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -523,9 +523,9 @@ export const Sidebar = ({ open, setOpen }) => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -544,7 +544,7 @@ export const Sidebar = ({ open, setOpen }) => {
               >
                 <ul>
                   <Link to="/onboard-bank">
-                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                       Bank
                     </li>
                   </Link>
@@ -568,13 +568,13 @@ export const Sidebar = ({ open, setOpen }) => {
                   }}
                 >
                   <div>
-                    <i class="fa-solid fa-gears fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <i className="fa-solid fa-gears fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                     <span className="ms-2 group-hover:text-sm">
                       Api Settings
                     </span>
                   </div>
                   <svg
-                    class="w-2.5 h-2.5 ms-3"
+                    className="w-2.5 h-2.5 ms-3"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -582,9 +582,9 @@ export const Sidebar = ({ open, setOpen }) => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -602,7 +602,7 @@ export const Sidebar = ({ open, setOpen }) => {
                 }`}
               >
                 <ul>
-                  <li class="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
+                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
                     <Link to={"/api-settings"}>Callback and Token</Link>
                   </li>
                 </ul>
@@ -625,14 +625,14 @@ export const Sidebar = ({ open, setOpen }) => {
                   }}
                 >
                   <div>
-                    <i class="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                    <i className="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                     <span className="ms-3 group-hover:text-sm">
                       API Documents
                     </span>
                   </div>
 
                   <svg
-                    class="w-2.5 h-2.5 ms-3"
+                    className="w-2.5 h-2.5 ms-3"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -640,9 +640,9 @@ export const Sidebar = ({ open, setOpen }) => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -661,12 +661,12 @@ export const Sidebar = ({ open, setOpen }) => {
               >
                 <ul>
                   <Link to="/payin-doc">
-                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                       <span className="ms-3">Payin Documents</span>
                     </li>
                   </Link>
                   <Link to="/payout-doc">
-                    <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                    <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                       <span className="ms-3">Payout Documents</span>
                     </li>
                   </Link>
@@ -679,7 +679,7 @@ export const Sidebar = ({ open, setOpen }) => {
              */}
             <li>
               <a
-                class="flex items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
+                className="flex items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
                 type="button"
                 onClick={() => {
                   closeAllDropdowns();
@@ -687,11 +687,11 @@ export const Sidebar = ({ open, setOpen }) => {
                 }}
               >
                 <div>
-                  <i class="fa-solid fa-comment fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
+                  <i className="fa-solid fa-comment fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
                   <span className="ms-3 group-hover:text-sm">Complaints</span>
                 </div>
                 <svg
-                  class="w-2.5 h-2.5 ms-3"
+                  className="w-2.5 h-2.5 ms-3"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -699,9 +699,9 @@ export const Sidebar = ({ open, setOpen }) => {
                 >
                   <path
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="m1 1 4 4 4-4"
                   />
                 </svg>
@@ -717,7 +717,7 @@ export const Sidebar = ({ open, setOpen }) => {
               }`}
             >
               <ul>
-                <li class="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
+                <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
                   <Link to={"/view-complain"}>View Complain</Link>
                 </li>
               </ul>

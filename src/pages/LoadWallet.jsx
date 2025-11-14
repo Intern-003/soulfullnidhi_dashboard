@@ -31,7 +31,7 @@ const LoadWallet = () => {
       name: item.name,
       payout_wallet: item.payout_wallet,
     }));
-    setWalletData(formattedTableData);
+    setWalletData(formattedTableData || []);
   }, [initialDataOfWallet]);
 
   const handleChange = (e) => {

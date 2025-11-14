@@ -42,11 +42,12 @@ const Acc_topup_settlement = () => {
           new Date(item.created_at).toLocaleTimeString(),
         amount: item.amount ?? "N/A",
         status: item.status,
+         payout_closing_balance: item.payout_closing_balance?? "0.0",
+        payout_opening_balance: item.payout_opening_balance?? "0.0",
         showstatus: (
           <span
-            className={`px-2 py-1 rounded-full text-sm font-medium ${
-              statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-            }`}
+            className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+              }`}
           >
             {item?.status
               ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
@@ -60,14 +61,18 @@ const Acc_topup_settlement = () => {
 
   const topupPayoutColumn = [
     { header: "SQ NO", accessor: "sqno" },
+    { header: "Id", accessor: "id" },
+    { header: "User Id", accessor: "user_id" },
     { header: "Product Type", accessor: "product_type" },
     { header: "Merchant Details", accessor: "merchant_details" },
     { header: "Transaction Id", accessor: "txnid" },
     { header: "Amount", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
     { header: "Date", accessor: "date" },
+    { header: "Opening Bal", accessor: "payout_opening_balance" },
+    { header: "Closing Bal", accessor: "payout_closing_balance" }
   ];
-
+  // console.log(topupPayoutData);
   return (
     <div>
       <div

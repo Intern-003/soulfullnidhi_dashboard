@@ -12,6 +12,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.9.0",
     "@tailwindcss/vite": "^4.1.13",
+    "apexcharts": "^5.3.6",
     "axios": "^1.12.2",
     "date-fns": "^4.1.0",
     "html2canvas": "^1.4.1",

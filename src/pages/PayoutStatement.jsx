@@ -24,13 +24,83 @@ const PayoutStatement = () => {
 
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
-        sqno: index + 1,
+        sqno: (
+          <div className="flex flex-col text-left">
+            <span>
+              <b>{index + 1}</b>
+            </span>
+            <span>
+              {new Date(item.created_at).getDate()}{" "}
+              {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
+              {new Date(item.created_at).getFullYear()} -{" "}
+              {new Date(item.created_at).toLocaleTimeString()}
+            </span>
+          </div>
+        ),
         id: item.id,
         user_id: item.user_id,
         product_type: item.product ?? "N/A",
         merchant_details: item.user.name ?? "N/A",
-        txnid: item.txnid ?? "N/A",
-        amount: item.amount ?? "N/A",
+        // txnid: item.txnid ?? "N/A",
+        txnid: (
+          <div className="flex flex-col text-left">
+            <span>
+              Payment Mode : <b>{item.payout_mode ?? "null"} </b>
+            </span>
+            <span>
+              Account : <b>{item.payer_acc_no}</b>
+            </span>
+            <span>
+              Holder : <b>{item.payer_name}</b>
+            </span>
+            <span>
+              IFSC : <b>{item.payer_ifsc}</b>
+            </span>
+            <span>
+              UPI Id : <b>{item.payer_ifsc}</b>
+            </span>
+            <span>
+              Mobile : <b>{item.payer_mobile}</b>
+            </span>
+          </div>
+        ),
+        reference_details: (
+          <div className="flex flex-col text-left">
+            <span>
+              Ref No : <b>{item.refno ?? "null"} </b>
+            </span>
+            <span>
+              orderid : <b>{item.mytxnid}</b>
+            </span>
+            <span>
+              Txnid:<br/><b>{item.txnid}</b>
+            </span>
+          </div>
+        ),
+        // amount: item.amount ?? "N/A",
+        amount: (
+          <div className="flex flex-col text-left">
+            <span>
+              Opening Wallet Amount :{" "}
+              <b>{item.payout_opening_balance ?? "null"} </b>
+            </span>
+            <span>
+              Pay Amount : <b>{item.payout_amount}</b>
+            </span>
+            <span>
+              Total Charges : <b>{item.payer_name}</b>
+            </span>
+            <span>
+              Total Debited Amount : <b>{item.payer_ifsc}</b>
+            </span>
+            <span>
+              Closing Wallet Amount : <b>{item.payer_mobile}</b>
+            </span>
+            <span>
+              Note : <b>{item.payer_mobile}</b>
+            </span>
+          </div>
+        ),
         date:
           new Date(item.created_at).getDate() +
           " " +
@@ -39,7 +109,7 @@ const PayoutStatement = () => {
           new Date(item.created_at).getFullYear() +
           " - " +
           new Date(item.created_at).toLocaleTimeString(),
-        status: item.status,  
+        status: item.status,
         showstatus: (
           <span
             className={`px-2 py-1 rounded-full text-sm font-medium ${
@@ -57,13 +127,14 @@ const PayoutStatement = () => {
   }, [data]);
 
   const upiColumn = [
-    { header: "SQ NO", accessor: "sqno" },
-    { header: "Product Type", accessor: "product_type" },
-    { header: "Merchant Details", accessor: "merchant_details" },
-    { header: "Transaction Id", accessor: "txnid" },
-    { header: "Amount", accessor: "amount" },
+    { header: "Order ID", accessor: "sqno" },
+    // { header: "Type", accessor: "product_type" },
+    { header: "User Details", accessor: "merchant_details" },
+    { header: "Bank Details", accessor: "txnid" },
+    { header: "Reference Details", accessor: "reference_details" },
+    { header: "Amount/commission", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
-    { header: "Date", accessor: "date" },
+    // { header: "Date", accessor: "date" },
   ];
 
   return (
