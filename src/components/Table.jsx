@@ -8,6 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { CustomSelect } from "./CustomSelect";
 import nodatafound from "../images/nodatafound.jpeg";
 
+
 const Table = ({
   columns,
   data,
