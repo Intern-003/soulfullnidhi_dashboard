@@ -83,215 +83,355 @@ export const Dashboard = () => {
     { header: "Time", accessor: "time" },
   ];
 
-  return (
-    <>
-      {initialLoad ? (
-        <DashboardSkeleton />
-      ) : (
-        <>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-2 gap-y-2">
-              <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
-                <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
-                  <div className="bg-white rounded-full p-3">
-                    <i className="fa-solid fa-wallet text-blue-500 fa-lg"></i>
-                  </div>
-                  <h5 className="text-lg font-semibold tracking-tight">
-                    Total Pay-IN Collection
-                  </h5>
-                </div>
+//   return (
+//     <>
+//       {initialLoad ? (
+//         <DashboardSkeleton />
+//       ) : (
+//         <>
+//           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+//             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-2 gap-y-2">
+//               <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
+//                 <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
+//                   <div className="bg-white rounded-full p-3">
+//                     <i className="fa-solid fa-wallet text-blue-500 fa-lg"></i>
+//                   </div>
+//                   <h5 className="text-lg font-semibold tracking-tight">
+//                     Total Pay-IN Collection
+//                   </h5>
+//                 </div>
 
-                <svg
-                  className="absolute bottom-0 w-full"
-                  viewBox="0 0 500 50"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
-                    className="fill-gray-400"
-                  />
-                </svg>
+//                 <svg
+//                   className="absolute bottom-0 w-full"
+//                   viewBox="0 0 500 50"
+//                   preserveAspectRatio="none"
+//                 >
+//                   <path
+//                     d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
+//                     className="fill-gray-400"
+//                   />
+//                 </svg>
 
-                <div className="flex justify-between items-center p-6 relative z-10">
-                  <h6 className="text-2xl font-bold text-gray-800">
-                    ₹ {cardData?.total_payin_amount ?? 0}
-                  </h6>
-                  <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
-                    <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
-                    3.2%
-                  </div>
-                </div>
-              </div>
+//                 <div className="flex justify-between items-center p-6 relative z-10">
+//                   <h6 className="text-2xl font-bold text-gray-800">
+//                     ₹ {cardData?.total_payin_amount ?? 0}
+//                   </h6>
+//                   <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
+//                     <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
+//                     3.2%
+//                   </div>
+//                 </div>
+//               </div>
 
-              <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
-                <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
-                  <div className="bg-white rounded-full p-3">
-                    <i className="fa-solid fa-wallet text-blue-500 fa-lg"></i>
-                  </div>
-                  <h5 className="text-lg font-semibold tracking-tight">
-                    Total Pay-OUT
-                  </h5>
-                </div>
+//               <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
+//                 <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
+//                   <div className="bg-white rounded-full p-3">
+//                     <i className="fa-solid fa-wallet text-blue-500 fa-lg"></i>
+//                   </div>
+//                   <h5 className="text-lg font-semibold tracking-tight">
+//                     Total Pay-OUT
+//                   </h5>
+//                 </div>
 
-                <svg
-                  className="absolute bottom-0 w-full"
-                  viewBox="0 0 500 50"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
-                    className="fill-gray-400"
-                  />
-                </svg>
+//                 <svg
+//                   className="absolute bottom-0 w-full"
+//                   viewBox="0 0 500 50"
+//                   preserveAspectRatio="none"
+//                 >
+//                   <path
+//                     d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
+//                     className="fill-gray-400"
+//                   />
+//                 </svg>
 
-                <div className="flex justify-between items-center p-6 relative z-10">
-                  <h6 className="text-2xl font-bold text-gray-800">
-                    ₹ {cardData?.total_payout_amount ?? 0}
-                  </h6>
-                  <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
-                    <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
-                    3.2%
-                  </div>
-                </div>
-              </div>
+//                 <div className="flex justify-between items-center p-6 relative z-10">
+//                   <h6 className="text-2xl font-bold text-gray-800">
+//                     ₹ {cardData?.total_payout_amount ?? 0}
+//                   </h6>
+//                   <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
+//                     <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
+//                     3.2%
+//                   </div>
+//                 </div>
+//               </div>
 
-              <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
-                <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
-                  <div className="bg-white rounded-full p-3">
-                    <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
-                  </div>
-                  <h5 className="text-lg font-semibold tracking-tight">
-                    Today Pay-IN Collection
-                  </h5>
-                </div>
+//               <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
+//                 <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
+//                   <div className="bg-white rounded-full p-3">
+//                     <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
+//                   </div>
+//                   <h5 className="text-lg font-semibold tracking-tight">
+//                     Today Pay-IN Collection
+//                   </h5>
+//                 </div>
 
-                <svg
-                  className="absolute bottom-0 w-full"
-                  viewBox="0 0 500 50"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
-                    className="fill-gray-400"
-                  />
-                </svg>
+//                 <svg
+//                   className="absolute bottom-0 w-full"
+//                   viewBox="0 0 500 50"
+//                   preserveAspectRatio="none"
+//                 >
+//                   <path
+//                     d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
+//                     className="fill-gray-400"
+//                   />
+//                 </svg>
 
-                <div className="flex justify-between items-center p-6 relative z-10">
-                  <h6 className="text-2xl font-bold text-gray-800">
-                    ₹ {cardData?.today_payin ?? 0}
-                  </h6>
-                  <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
-                    <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
-                    3.2%
-                  </div>
-                </div>
-              </div>
+//                 <div className="flex justify-between items-center p-6 relative z-10">
+//                   <h6 className="text-2xl font-bold text-gray-800">
+//                     ₹ {cardData?.today_payin ?? 0}
+//                   </h6>
+//                   <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
+//                     <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
+//                     3.2%
+//                   </div>
+//                 </div>
+//               </div>
 
-              <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
-                <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
-                  <div className="bg-white rounded-full p-3">
-                    <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
-                  </div>
-                  <h5 className="text-lg font-semibold tracking-tight">
-                    Today Pay-OUT
-                  </h5>
-                </div>
+//               <div className="m-5 relative bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden">
+//                 <div className="flex justify-between items-center p-6 bg-blue-500 text-white relative z-10 rounded-b-xl">
+//                   <div className="bg-white rounded-full p-3">
+//                     <i className="fa-solid fa-arrow-trend-up text-blue-500 fa-lg"></i>
+//                   </div>
+//                   <h5 className="text-lg font-semibold tracking-tight">
+//                     Today Pay-OUT
+//                   </h5>
+//                 </div>
 
-                <svg
-                  className="absolute bottom-0 w-full"
-                  viewBox="0 0 500 50"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
-                    className="fill-gray-400"
-                  />
-                </svg>
+//                 <svg
+//                   className="absolute bottom-0 w-full"
+//                   viewBox="0 0 500 50"
+//                   preserveAspectRatio="none"
+//                 >
+//                   <path
+//                     d="M0,0 C250,50 250,50 500,0 L500,50 L0,50 Z"
+//                     className="fill-gray-400"
+//                   />
+//                 </svg>
 
-                <div className="flex justify-between items-center p-6 relative z-10">
-                  <h6 className="text-2xl font-bold text-gray-800">
-                    ₹ {cardData?.today_payout ?? 0}
-                  </h6>
-                  <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
-                    <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
-                    3.2%
-                  </div>
-                </div>
-              </div>
-            </div>
+//                 <div className="flex justify-between items-center p-6 relative z-10">
+//                   <h6 className="text-2xl font-bold text-gray-800">
+//                     ₹ {cardData?.today_payout ?? 0}
+//                   </h6>
+//                   <div className="bg-green-100 outline outline-green-500 font-small text-xs rounded-full px-1 py-1 text-green-500 flex items-center">
+//                     <i className="fa-solid fa-arrow-up fa-sm mr-1"></i>
+//                     3.2%
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
 
-            <div className="flex justify-center items-center">
-              <div className="w-full">
-                <DonutChart data={cardData?.transactionStatusCounts} />
-              </div>
-            </div>
-          </div>
+//             <div className="flex justify-center items-center">
+//               <div className="w-full">
+//                 <DonutChart data={cardData?.transactionStatusCounts} />
+//               </div>
+//             </div>
+//           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-5">
-            <div className="lg:col-span-7">
-              <LineChart data={cardData?.monthWiseStatusCounts} />
-            </div>
+//           <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 mb-5">
+//             <div className="lg:col-span-7">
+//               <LineChart data={cardData?.monthWiseStatusCounts} />
+//             </div>
 
-            <div className="lg:col-span-3 flex justify-center">
-              <div className="w-full max-w-lg p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h5 className="text-lg font-bold leading-none text-gray-900">
-                    Large Transactions
-                  </h5>
-                  {/* <a
-                href="#"
-                className="text-sm font-medium text-blue-600 hover:underline"
+//             <div className="lg:col-span-3 flex justify-center">
+//               <div className="w-full max-w-lg p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-8">
+//                 <div className="flex items-center justify-between mb-4">
+//                   <h5 className="text-lg font-bold leading-none text-gray-900">
+//                     Large Transactions
+//                   </h5>
+//                   {/* <a
+//                 href="#"
+//                 className="text-sm font-medium text-blue-600 hover:underline"
+//               >
+//                 View all
+//               </a> */}
+//                 </div>
+
+//                 <div className="flow-root">
+//                   {largeTransactionData && largeTransactionData.length > 0 ? (
+//                     <ul role="list" className="divide-y divide-gray-200">
+//                       {largeTransactionData.map((item, index) => (
+//                         <li key={index} className="py-3 sm:py-4">
+//                           <div className="flex items-center">
+//                             <div className="flex-1 min-w-0 ms-4">
+//                               <p className="text-sm font-medium text-gray-900 truncate">
+//                                 {item.name}
+//                               </p>
+//                             </div>
+//                             <div className="inline-flex items-center text-base font-semibold text-gray-900">
+//                               ₹{item.amount}
+//                             </div>
+//                           </div>
+//                         </li>
+//                       ))}
+//                     </ul>
+//                   ) : (
+//                     <div className="flex flex-col justify-center items-center " >
+//                       <img
+//                         src={largesttxn}
+//                         alt="No data found"
+//                         className="opacity-80 "
+//                         style={{ width: "350px" }}
+//                       />
+
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+//           <Table
+//             columns={transactioncolumn}
+//             data={transactionData}
+//             showSearch={false}
+//             showPagination={true}
+//             showExport={false}
+//             showStatusFilter={false}
+//             showDeleteColumn={false}
+//             showDateFilter={false}
+//           />
+//         </>
+//       )}
+//     </>
+//   );
+// };
+
+return (
+<>
+  {initialLoad ? (
+    <DashboardSkeleton />
+  ) : (
+    <div className="w-full flex justify-center py-8"> {/* Top & bottom spacing */}
+      {/* Wrapper to match top cards + donut chart width */}
+      <div className="w-full max-w-[1140px] px-4 lg:px-6">
+
+        {/* -------- TOP CARDS + DONUT CHART -------- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Left Cards */}
+          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {[
+              { title: "Total Pay-IN Collection", icon: "fa-wallet", value: cardData?.total_payin_amount ?? 0 },
+              { title: "Total Pay-OUT", icon: "fa-wallet", value: cardData?.total_payout_amount ?? 0 },
+              { title: "Today Pay-IN Collection", icon: "fa-arrow-trend-up", value: cardData?.today_payin ?? 0 },
+              { title: "Today Pay-OUT", icon: "fa-arrow-trend-up", value: cardData?.today_payout ?? 0 },
+            ].map((card, i) => (
+              <div
+                key={i}
+                className="relative bg-white border border-gray-300 rounded-xl shadow-lg flex flex-col h-full" // increased shadow
               >
-                View all
-              </a> */}
+                {/* Header */}
+                <div className="flex items-center px-5 py-4 bg-blue-500 text-white relative z-10 gap-4 rounded-t-xl">
+                  <div className="bg-white rounded-full p-3 flex items-center justify-center shrink-0">
+                    <i className={`fa-solid ${card.icon} text-blue-500 text-xl`}></i>
+                  </div>
+                  <h5 className="text-base sm:text-lg font-semibold text-white truncate whitespace-nowrap">
+                    {card.title}
+                  </h5>
                 </div>
 
-                <div className="flow-root">
-                  {largeTransactionData && largeTransactionData.length > 0 ? (
-                    <ul role="list" className="divide-y divide-gray-200">
-                      {largeTransactionData.map((item, index) => (
-                        <li key={index} className="py-3 sm:py-4">
-                          <div className="flex items-center">
-                            <div className="flex-1 min-w-0 ms-4">
-                              <p className="text-sm font-medium text-gray-900 truncate">
-                                {item.name}
-                              </p>
-                            </div>
-                            <div className="inline-flex items-center text-base font-semibold text-gray-900">
-                              ₹{item.amount}
-                            </div>
+                {/* SVG Wave */}
+                <svg
+                  className="absolute bottom-0 w-full"
+                  viewBox="0 0 500 40"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M0,0 C250,40 250,40 500,0 L500,40 L0,40 Z"
+                    className="fill-gray-300"
+                  />
+                </svg>
+
+                {/* Value Section */}
+                <div className="flex justify-between items-center px-5 py-6 relative z-10 flex-1">
+                  <h6 className="text-2xl font-bold text-gray-800 leading-none">
+                    ₹ {card.value}
+                  </h6>
+                  <div className="bg-green-100 outline outline-green-500 text-xs rounded-full px-3 py-1 text-green-600 flex items-center">
+                    <i className="fa-solid fa-arrow-up fa-xs mr-1"></i>
+                    3.2%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Donut Chart */}
+          <div className="flex justify-center items-start">
+            <div className="w-full max-w-[380px]">
+              <DonutChart data={cardData?.transactionStatusCounts} />
+            </div>
+          </div>
+        </div>
+
+        {/* -------- LINE CHART + LARGE TRANSACTIONS -------- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"> {/* increased bottom margin for spacing to table */}
+          {/* Line Chart */}
+          <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 border border-gray-200"> {/* stronger shadow */}
+            <LineChart data={cardData?.monthWiseStatusCounts} className="h-[260px]" />
+          </div>
+
+          {/* Large Transactions */}
+          <div className="flex justify-center">
+            <div className="w-full max-w-[380px] p-6 bg-white border border-gray-200 rounded-xl shadow-lg"> {/* stronger shadow */}
+              <div className="flex items-center justify-between mb-4">
+                <h5 className="text-lg font-bold text-gray-900">
+                  Large Transactions
+                </h5>
+              </div>
+
+              <div className="flow-root">
+                {largeTransactionData?.length > 0 ? (
+                  <ul role="list" className="divide-y divide-gray-200">
+                    {largeTransactionData.map((item, index) => (
+                      <li key={index} className="py-3 sm:py-4">
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {item.name}
+                            </p>
                           </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="flex flex-col justify-center items-center " >
-                      <img
-                        src={largesttxn}
-                        alt="No data found"
-                        className="opacity-80 "
-                        style={{ width: "350px" }}
-                      />
-
-                    </div>
-                  )}
-                </div>
+                          <div className="inline-flex items-center text-base font-semibold text-gray-900">
+                            ₹{item.amount}
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="flex flex-col justify-center items-center py-8">
+                    <img
+                      src={largesttxn}
+                      alt="No data"
+                      className="opacity-80"
+                      style={{ width: "300px" }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
+        </div>
 
-          <Table
-            columns={transactioncolumn}
-            data={transactionData}
-            showSearch={false}
-            showPagination={true}
-            showExport={false}
-            showStatusFilter={false}
-            showDeleteColumn={false}
-            showDateFilter={false}
-          />
-        </>
-      )}
-    </>
-  );
+        {/* -------- TABLE -------- */}
+        <div className="mt-8 mb-4"> {/* spacing from line chart */}
+          {/* <div className="bg-white rounded-lg border border-sky-00 shadow-lg w-full">  */}
+            <Table
+              columns={transactioncolumn}
+              data={transactionData}
+              showSearch={false}
+              showPagination={true}
+              showExport={false}
+              showStatusFilter={false}
+              showDeleteColumn={false}
+              showDateFilter={false}
+            />
+          {/* </div> */}
+        </div>
+      </div>
+    </div>
+  )}
+</>
+
+
+);
 };
