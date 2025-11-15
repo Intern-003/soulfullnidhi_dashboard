@@ -7,10 +7,10 @@ import { TableSkeleton } from "../components/TableSkeleton";
 const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
 
-  // ✅ Use your hook to fetch schemes
+
   const { data, loading, error } = useGet("/reportrecords-List?product=payout");
 
-  // ✅ Format data whenever "data" changes
+
   useEffect(() => {
     const statusClasses = {
       pending: "bg-yellow-100 text-yellow-800",
@@ -41,64 +41,33 @@ const PayoutStatement = () => {
         user_id: item.user_id,
         product_type: item.product ?? "N/A",
         merchant_details: item.user.name ?? "N/A",
-        // txnid: item.txnid ?? "N/A",
+
         txnid: (
           <div className="flex flex-col text-left">
-            <span>
-              Payment Mode : <b>{item.payout_mode ?? "null"} </b>
-            </span>
-            <span>
-              Account : <b>{item.payer_acc_no}</b>
-            </span>
-            <span>
-              Holder : <b>{item.payer_name}</b>
-            </span>
-            <span>
-              IFSC : <b>{item.payer_ifsc}</b>
-            </span>
-            <span>
-              UPI Id : <b>{item.payer_ifsc}</b>
-            </span>
-            <span>
-              Mobile : <b>{item.payer_mobile}</b>
-            </span>
+            <span>Payment Mode: <b>{item.payout_mode ?? "null"}</b></span>
+            <span>Account: <b>{item.payer_acc_no}</b></span>
+            <span>Holder: <b>{item.payer_name}</b></span>
+            <span>IFSC: <b>{item.payer_ifsc}</b></span>
+            <span>UPI Id: <b>{item.payer_ifsc}</b></span>
+            <span>Mobile: <b>{item.payer_mobile}</b></span>
           </div>
         ),
         reference_details: (
           <div className="flex flex-col text-left">
-            <span>
-              Ref No : <b>{item.refno ?? "null"} </b>
-            </span>
-            <span>
-              orderid : <b>{item.mytxnid}</b>
-            </span>
-            <span>
-              Txnid:<br/><b>{item.txnid}</b>
-            </span>
+            <span>Ref No: <b>{item.refno ?? "null"}</b></span>
+            <span>Order ID: <b>{item.mytxnid}</b></span>
+            <span>Txnid: <br/><b>{item.txnid}</b></span>
           </div>
         ),
-        // amount: item.amount ?? "N/A",
+
         amount: (
           <div className="flex flex-col text-left">
-            <span>
-              Opening Wallet Amount :{" "}
-              <b>{item.payout_opening_balance ?? "null"} </b>
-            </span>
-            <span>
-              Pay Amount : <b>{item.payout_amount}</b>
-            </span>
-            <span>
-              Total Charges : <b>{item.payer_name}</b>
-            </span>
-            <span>
-              Total Debited Amount : <b>{item.payer_ifsc}</b>
-            </span>
-            <span>
-              Closing Wallet Amount : <b>{item.payer_mobile}</b>
-            </span>
-            <span>
-              Note : <b>{item.payer_mobile}</b>
-            </span>
+            <span>Opening Wallet Amount: <b>{item.payout_opening_balance ?? "null"}</b></span>
+            <span>Pay Amount: <b>{item.payout_amount}</b></span>
+            <span>Total Charges: <b>{item.payer_name}</b></span>
+            <span>Total Debited Amount: <b>{item.payer_ifsc}</b></span>
+            <span>Closing Wallet Amount: <b>{item.payer_mobile}</b></span>
+            <span>Note: <b>{item.payer_mobile}</b></span>
           </div>
         ),
         date:
@@ -128,24 +97,23 @@ const PayoutStatement = () => {
 
   const upiColumn = [
     { header: "Order ID", accessor: "sqno" },
-    // { header: "Type", accessor: "product_type" },
+
     { header: "User Details", accessor: "merchant_details" },
     { header: "Bank Details", accessor: "txnid" },
     { header: "Reference Details", accessor: "reference_details" },
     { header: "Amount/commission", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
-    // { header: "Date", accessor: "date" },
+    
   ];
 
   return (
-    <div>
-      <div
-        className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center"
-        style={{ margin: "0 0 20px 0", padding: "10px" }}
-      >
-        <h4 className="font-bold text-white text-lg py-2">Payout Statement</h4>
+    <div className="p-4 space-y-4">
+      {/* Header */}
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
+        <h4 className="font-bold text-white text-xl">Payout Statement</h4>
       </div>
 
+      {/* Table */}
       {loading ? (
         <TableSkeleton />
       ) : error ? (
@@ -160,6 +128,7 @@ const PayoutStatement = () => {
           showSelectUserFilter={true}
           showDeleteColumn={false}
           statusList={REPORT_STATUSES}
+          className="shadow-lg rounded-lg overflow-hidden"
         />
       )}
     </div>

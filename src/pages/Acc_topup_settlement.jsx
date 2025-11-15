@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import Table from "../components/Table";
-import { useGet } from "../hooks/useGet"; // <-- import your hook
+import { useGet } from "../hooks/useGet";
 import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 
 const Acc_topup_settlement = () => {
   const [topupPayoutData, setTopupPayoutData] = useState([]);
 
-  // ✅ Use your hook to fetch schemes
+
   const { data, loading, error } = useGet(
     "/reportrecords-List?product[]=topup_payout&product[]=take_back_from_wallet"
   );
 
-  // ✅ Format data whenever "data" changes
+
   useEffect(() => {
     const statusClasses = {
       pending: "bg-yellow-100 text-yellow-800",
@@ -42,12 +42,13 @@ const Acc_topup_settlement = () => {
           new Date(item.created_at).toLocaleTimeString(),
         amount: item.amount ?? "N/A",
         status: item.status,
-         payout_closing_balance: item.payout_closing_balance?? "0.0",
-        payout_opening_balance: item.payout_opening_balance?? "0.0",
+        payout_closing_balance: item.payout_closing_balance ?? "0.0",
+        payout_opening_balance: item.payout_opening_balance ?? "0.0",
         showstatus: (
           <span
-            className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-              }`}
+            className={`px-2 py-1 rounded-full text-sm font-medium ${
+              statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+            }`}
           >
             {item?.status
               ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
@@ -70,20 +71,19 @@ const Acc_topup_settlement = () => {
     { header: "Status", accessor: "showstatus" },
     { header: "Date", accessor: "date" },
     { header: "Opening Bal", accessor: "payout_opening_balance" },
-    { header: "Closing Bal", accessor: "payout_closing_balance" }
+    { header: "Closing Bal", accessor: "payout_closing_balance" },
   ];
-  // console.log(topupPayoutData);
+
   return (
-    <div>
-      <div
-        className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center"
-        style={{ margin: "0 0 20px 0", padding: "10px" }}
-      >
-        <h4 className="font-bold text-white text-lg py-2">
+    <div className="p-4 space-y-4">
+      {/* Header */}
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
+        <h4 className="font-bold text-white text-xl">
           Topup Settlement Statement
         </h4>
       </div>
 
+      {/* Table */}
       {loading ? (
         <TableSkeleton />
       ) : error ? (
@@ -98,6 +98,7 @@ const Acc_topup_settlement = () => {
           showSelectUserFilter={true}
           showDeleteColumn={false}
           statusList={REPORT_STATUSES}
+          className="shadow-lg rounded-lg overflow-hidden"
         />
       )}
     </div>

@@ -90,14 +90,14 @@ const LoadWallet = () => {
   const tableDataWithActions = walletData?.map((row) => ({
     ...row,
     action: (
-      <div className="flex justify-evenly">
+      <div className="flex justify-center gap-2">
         <Button
           onClick={() => {
             setSelectedUser(row);
             setModalType("load");
             setShowModal(true);
           }}
-          className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
         >
           Load Wallet
         </Button>
@@ -107,7 +107,7 @@ const LoadWallet = () => {
             setModalType("reverse");
             setShowModal(true);
           }}
-          className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md cursor-pointer"
+          className="bg-blue-400 hover:bg-blue-500 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
         >
           Reverse Top-up
         </Button>
@@ -116,12 +116,13 @@ const LoadWallet = () => {
   }));
 
   return (
-    <div>
-      {/* ✅ Header above table */}
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
-        <h4 className="font-bold text-white text-lg py-2">Load Wallet</h4>
+    <div className="p-4 space-y-4">
+      {/* Header */}
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
+        <h4 className="font-bold text-white text-xl">Load Wallet</h4>
       </div>
 
+      {/* Table */}
       {loading ? (
         <TableSkeleton />
       ) : (
@@ -131,45 +132,48 @@ const LoadWallet = () => {
           showStatusFilter={false}
           showDateFilter={false}
           showDeleteColumn={false}
+          className="shadow-lg rounded-lg overflow-hidden"
         />
       )}
 
-      {/* ✅ Modal with background blur */}
+      {/* Modal */}
       {showModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
-          onClick={() => setShowModal(false)} // click outside to close
+          onClick={() => setShowModal(false)}
         >
           <div
             className="bg-white border rounded-lg shadow-lg max-w-md w-full mx-2 transform transition-all scale-100"
-            onClick={(e) => e.stopPropagation()} // prevent close on content click
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div
-              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
-              font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
-            >
-              {modalType === "load" ? (
-                <h3 className="text-lg font-semibold">
-                  Wallet Topup for {selectedUser?.name}
-                </h3>
-              ) : (
-                <h3 className="text-lg font-semibold">
-                  Reverse Topup for {selectedUser?.name}
-                </h3>
-              )}
+            <div className="flex justify-between items-center bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white rounded-t-lg px-5 py-3">
+              <h3 className="text-lg font-semibold">
+                {modalType === "load"
+                  ? `Wallet Topup for ${selectedUser?.name}`
+                  : `Reverse Topup for ${selectedUser?.name}`}
+              </h3>
               <Button
                 onClick={() => setShowModal(false)}
                 className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
               >
-                <i class="fa-solid fa-xmark fa-lg"></i>
+                <i className="fa-solid fa-xmark fa-lg"></i>
               </Button>
             </div>
 
             {/* Modal Body */}
-            <form className="p-6" onSubmit={modalType === "load" ? handleSubmitLoadWallet : handleSubmitReverseTopup}>
-              <div className="mb-3">
-                <label className="block mb-1 text-sm font-medium">Amount</label>
+            <form
+              className="p-6 space-y-4"
+              onSubmit={
+                modalType === "load"
+                  ? handleSubmitLoadWallet
+                  : handleSubmitReverseTopup
+              }
+            >
+              <div>
+                <label className="block mb-1 text-sm font-medium">
+                  Amount
+                </label>
                 <input
                   name="payout_wallet"
                   type="number"
@@ -180,7 +184,7 @@ const LoadWallet = () => {
                 />
               </div>
 
-              <div className="mb-3">
+              <div>
                 <label className="block mb-1 text-sm font-medium">Remark</label>
                 <textarea
                   rows="3"
@@ -194,8 +198,12 @@ const LoadWallet = () => {
 
               <Button
                 type="submit"
-                onClick={modalType === "load" ? handleSubmitLoadWallet : handleSubmitReverseTopup}
-                className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg w-full"
+                onClick={
+                  modalType === "load"
+                    ? handleSubmitLoadWallet
+                    : handleSubmitReverseTopup
+                }
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg shadow-md transition"
               >
                 Submit
               </Button>

@@ -6,7 +6,7 @@ import Button from "../components/Button";
 import { SchemeModal } from "../components/SchemeModal";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { usePut } from "../hooks/usePut";
-import { MONTH_NAMES, TOGGLE_STATUSES } from "../constants/Constants";
+import { MONTH_NAMES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 import { useGet } from "../hooks/useGet";
 import { usePost } from "../hooks/usePost";
@@ -20,49 +20,32 @@ export const Member = () => {
   const navigate = useNavigate();
   const [merchantData, setMerchantData] = useState([]);
   const [initialLoad, setInitialLoad] = useState(true);
-  // const [credentials,setCredentials] = useState([]);
+
 
   const { executePut: updateSingle } = usePut("/update-user-statuses");
   const { executePut: updateAll } = usePut("/payin-payout-statuses");
-const { execute: updateCredential } = usePost("/update-credential");
+  const { execute: updateCredential } = usePost("/update-credential");
 
-const handleCredentialChange = async (merchantId, credentialId) => {
-  try {
-    // FIRST: Call the API
-    const res = await updateCredential({
-      id: merchantId,
-      credentials_id: Number(credentialId),
-    });
+  const handleCredentialChange = async (merchantId, credentialId) => {
+    try {
+      const res = await updateCredential({
+        id: merchantId,
+        credentials_id: Number(credentialId),
+      });
+      toast.success("MID Updated Successfully!");
+      refetchOfMerchants();
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating MID");
+    }
+  };
 
-    console.log("API Response:", res);
-
-    // AFTER API success
-    toast.success("MID Updated Successfully!");
-    refetchOfMerchants();
-  } catch (err) {
-    console.error(err);
-    toast.error("Error updating MID");
-  }
-};
-
-  const {
-    data: dataOfMerchants,
-    refetch: refetchOfMerchants,
-    loading: merchantLoading,
-  } = useAutoFetch("/get-merchants", 20000);
+  const { data: dataOfMerchants, refetch: refetchOfMerchants, loading: merchantLoading } =
+    useAutoFetch("/get-merchants", 20000);
   const { data: credentialsData } = useGet("/credentials");
-  // useEffect(()=>{
-  //   if(credentialsData){
 
-  //     console.log("api hitted");
-  //     console.log(credentialsData);
-  //   }
-  // },[credentialsData]);
 
-  const initialDataOfMerchants = useMemo(
-    () => dataOfMerchants?.data ?? [],
-    [dataOfMerchants]
-  );
+  const initialDataOfMerchants = useMemo(() => dataOfMerchants?.data ?? [], [dataOfMerchants]);
 
   useEffect(() => {
     if (!merchantLoading && dataOfMerchants) setInitialLoad(false);
@@ -70,9 +53,7 @@ const handleCredentialChange = async (merchantId, credentialId) => {
 
   const handlePayinToggle = async (v, rowId, accountStatus) => {
     try {
-      if (accountStatus) {
-        await updateSingle({ user_id: rowId, payin_status: v });
-      }
+      if (accountStatus) await updateSingle({ user_id: rowId, payin_status: v });
     } catch (err) {
       console.log("Payin Toggle Failed: ", err);
     }
@@ -80,9 +61,7 @@ const handleCredentialChange = async (merchantId, credentialId) => {
 
   const handlePayoutToggle = async (v, rowId, accountStatus) => {
     try {
-      if (accountStatus) {
-        await updateSingle({ user_id: rowId, payout_status: v });
-      }
+      if (accountStatus) await updateSingle({ user_id: rowId, payout_status: v });
     } catch (err) {
       console.log("Payout Toggle Failed: ", err);
     }
@@ -103,18 +82,14 @@ const handleCredentialChange = async (merchantId, credentialId) => {
   };
 
   const handleAllPayinToggle = async (v) => {
-    console.log("All Payin: " + v);
-    let x = v ? 1 : 0;
+    
     try {
+      const x = v ? 1 : 0;
       const response = await updateAll({ payin_status: x });
-      console.log(response);
-
+    
       if (response) {
         setMerchantData((prev) =>
-          prev.map((item) => ({
-            ...item,
-            payin: item.account ? v : false,
-          }))
+          prev.map((item) => ({ ...item, payin: item.account ? v : false }))
         );
       }
     } catch (err) {
@@ -123,18 +98,14 @@ const handleCredentialChange = async (merchantId, credentialId) => {
   };
 
   const handleAllPayoutToggle = async (v) => {
-    console.log("All Payout: " + v);
-    let x = v ? 1 : 0;
-    try {
-      const response = await updateAll({ payout_status: x });
-      console.log(response);
 
+    try {
+      const x = v ? 1 : 0;
+      const response = await updateAll({ payout_status: x });
+    
       if (response) {
         setMerchantData((prev) =>
-          prev.map((item) => ({
-            ...item,
-            payout: item.account ? v : false,
-          }))
+          prev.map((item) => ({ ...item, payout: item.account ? v : false }))
         );
       }
     } catch (err) {
@@ -142,47 +113,15 @@ const handleCredentialChange = async (merchantId, credentialId) => {
     }
   };
 
-  // useEffect(() => {
-  //   const formattedMerchantData = initialDataOfMerchants.map((item, index) => ({
-  //     sqno: index + 1,
-  //     id: item.id,
-  //     name: item.name,
-  //     payin_bank:item.payin_at_onboard === "Airpay" ? `airpay (${item.credentials_id})` : item.payin_at_onboard,
-  //     payin: item.payin_status,
-  //     payout: item.payout_status,
-  //     account: item.account_status,
-  //     status: item.account_status ? "Active" : "Inactive",
-  //     walletpayin: item.payin_wallet,
-  //     walletpayout: item.payout_wallet,
-  //     date:
-  //       new Date(item.created_at).getDate() +
-  //       " " +
-  //       MONTH_NAMES[new Date(item.created_at).getMonth()] +
-  //       " " +
-  //       new Date(item.created_at).getFullYear(),
-  //   }));
-  //   setMerchantData(formattedMerchantData);
-  // }, [initialDataOfMerchants]);
+  
 
   useEffect(() => {
     if (!initialDataOfMerchants || !credentialsData) return;
 
-    // Support both response types (array or { data: [] })
-    const credentialsList = Array.isArray(credentialsData)
-      ? credentialsData
-      : credentialsData.data || [];
+    const credentialsList = Array.isArray(credentialsData) ? credentialsData : credentialsData.data || [];
 
     const formattedMerchantData = initialDataOfMerchants.map((item, index) => {
-      // Find credential by ID
-      const credential = credentialsList.find(
-        (cred) => cred.id === item.credentials_id
-      );
-
-      // Build the Payin Bank name dynamically
-      // const payinBank =
-      //   item.payin_at_onboard === "Airpay"
-      //     ? `Airpay (${credential ? credential.name : "N/A"})`
-      //     : item.payin_at_onboard;
+      const credential = credentialsList.find((cred) => cred.id === item.credentials_id);
 
       const payinBank =
         item.payin_at_onboard === "Airpay" ? (
@@ -213,7 +152,7 @@ const handleCredentialChange = async (merchantId, credentialId) => {
         payin: item.payin_status,
         payout: item.payout_status,
         account: item.account_status,
-        status: item.account_status ? "Active" : "Inactive",
+
         walletpayin: item.payin_wallet,
         walletpayout: item.payout_wallet,
         date:
@@ -228,19 +167,14 @@ const handleCredentialChange = async (merchantId, credentialId) => {
     setMerchantData(formattedMerchantData);
   }, [initialDataOfMerchants, credentialsData]);
 
-  const handleModal = () => {
-    setShowModal(!showModal);
-  };
-
-  const membercolumn = [
-    { header: "SQ No.", accessor: "sqno" },
+  const memberColumns = [
+    { header: "SQNo", accessor: "sqno" },
     { header: "Name", accessor: "name" },
     { header: "Payin", accessor: "payin" },
     { header: "Payout", accessor: "payout" },
     { header: "Payin Wallet", accessor: "walletpayin" },
     { header: "Payout Wallet", accessor: "walletpayout" },
-    { header: "Payin_onboarded_Bank", accessor: "payin_bank" },
-    { header: "Action", accessor: "action" },
+    { header: "Payin Onboarded Bank", accessor: "payin_bank" },
   ];
 
   const tableDataWithActions = merchantData?.map((row) => ({
@@ -249,89 +183,70 @@ const handleCredentialChange = async (merchantId, credentialId) => {
       <Toggle
         defaultChecked={row.payin}
         onChange={(v) => handlePayinToggle(v, row.id, row.account)}
-        disabled={!row.account ? true : false}
+        disabled={!row.account}
       />
     ),
     payout: (
       <Toggle
         defaultChecked={row.payout}
         onChange={(v) => handlePayoutToggle(v, row.id, row.account)}
-        disabled={!row.account ? true : false}
+        disabled={!row.account}
       />
     ),
     sqno: (
-      <>
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-semibold">{row.sqno}</span>
-          <Toggle
-            defaultChecked={row.account}
-            onChange={(v) => handleAccountToggle(v, row.id)}
-          />
-        </div>
-        <div>
-          <span className="text-xs text-blue-400 font-semibold">
-            {row.date}
-          </span>
-        </div>
-      </>
-    ),
-    action: (
-      <select
-        className="border border-sky-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-sky-400 focus:outline-none hover:border-sky-400 transition cursor-pointer"
-        onChange={(e) => {
-          const value = e.target.value;
-          if (value === "manage") {
-            navigate("/profile", { state: { id: row.id } });
-          } else if (value === "scheme") {
-            handleModal();
-          }
-          e.target.value = "actions";
-        }}
-      >
-        <option value="actions">Actions</option>
-        <option value="manage">Manage Profile</option>
-        <option value="scheme">View Scheme</option>
-      </select>
+      <div className="flex flex-col">
+        <span className="text-sm font-semibold">{row.sqno}</span>
+        <Toggle
+          defaultChecked={row.account}
+          onChange={(v) => handleAccountToggle(v, row.id)}
+          className="mt-1"
+        />
+        <span className="text-xs text-blue-400 font-semibold mt-1">{row.date}</span>
+      </div>
     ),
   }));
 
   return (
-    <div>
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
-        <h4 className="font-bold text-white text-lg py-2">Member List</h4>
-
+    <div className="p-4 space-y-4">
+      {/* Header */}
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
+        <h4 className="font-bold text-white text-xl">Member List</h4>
         <div className="flex items-center space-x-2">
           <span className="font-bold text-white">All Payin ON/OFF</span>
-          <Toggle onChange={(v) => handleAllPayinToggle(v)} />
+          <Toggle onChange={handleAllPayinToggle} />
         </div>
 
         <div className="flex items-center space-x-2">
           <span className="font-bold text-white">All Payout ON/OFF</span>
-          <Toggle onChange={(v) => handleAllPayoutToggle(v)} />
+          <Toggle onChange={handleAllPayoutToggle} />
         </div>
 
         <Button
           onClick={() => navigate("/member-create")}
-          className="cursor-pointer"
-          variant="AddNewBtn"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition"
         >
           + Create New
         </Button>
       </div>
 
+      {/* Table */}
       {initialLoad ? (
         <TableSkeleton />
       ) : (
         <Table
-          columns={membercolumn}
+          columns={memberColumns}
           data={tableDataWithActions}
-          endPoint="/delete-merchant"
-          refreshTable={refetchOfMerchants}
-          statusList={TOGGLE_STATUSES}
+          className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
+          rowClassName={(rowIndex) =>
+            rowIndex % 2 === 0 ? "bg-white hover:bg-blue-50" : "bg-gray-50 hover:bg-blue-50"
+          }
+          paginationClassName="flex justify-end gap-2 mt-4"
+          previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+          nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
         />
       )}
 
-      <SchemeModal showModal={showModal} handleModal={handleModal} />
+      <SchemeModal showModal={showModal} handleModal={() => setShowModal(!showModal)} />
     </div>
   );
 };
