@@ -3,30 +3,27 @@ import Table from "../components/Table";
 import { SchemeModal } from "../components/SchemeModal";
 import Toggle from "../components/Toggle";
 import Button from "../components/Button";
-import { useGet } from "../hooks/useGet"; // <-- import your hook
+import { useGet } from "../hooks/useGet";
 import { usePost } from "../hooks/usePost";
-import { TOGGLE_STATUSES } from "../constants/Constants"
+import { TOGGLE_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 
 const Scheme = () => {
   const [showModal, setShowModal] = useState(false);
   const [schemedata, setSchemeData] = useState([]);
   const [editData, setEditData] = useState(null);
+
+  const { data, loading, error, refetch } = useGet("/get-scheme");
+  const { execute: updateStatus } = usePost("/update-scheme-status");
+
   const StatusToggle = ({ id, value, sqno, onToggle }) => {
     const handleChange = (checked) => {
       if (onToggle) onToggle(id, sqno, checked);
     };
-
-    return (
-      <Toggle defaultChecked={value === "Active"} onChange={handleChange} />
-    );
+    return <Toggle defaultChecked={value === "Active"} onChange={handleChange} />;
   };
 
-  // ✅ Use your hook to fetch schemes
-  const { data, loading, error, refetch } = useGet("/get-scheme"); // replace endpoint with your actual API endpoint
-  const { execute: updateStatus } = usePost("/update-scheme-status");
-
-  // ✅ Format data whenever "data" changes
+  
   useEffect(() => {
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
@@ -37,7 +34,7 @@ const Scheme = () => {
         action: (
           <Button
             onClick={() => handleEdit(item)}
-            className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md"
+            className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md shadow-md transition"
           >
             Edit
           </Button>
@@ -53,7 +50,6 @@ const Scheme = () => {
   };
 
   const handleEdit = (scheme) => {
-    console.log("Editing:", scheme);
     setEditData(scheme);
     setShowModal(true);
   };
@@ -72,7 +68,7 @@ const Scheme = () => {
   };
 
   const schemecolumn = [
-    { header: "SQ NO", accessor: "sqno" },
+    { header: "SQ No", accessor: "sqno" },
     { header: "Name", accessor: "name" },
     {
       header: "Status",
@@ -90,28 +86,26 @@ const Scheme = () => {
   ];
 
   return (
-    <div>
-      <div
-        className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center"
-        style={{ margin: "0 0 20px 0", padding: "10px" }}
-      >
-        <h4 className="font-bold text-white text-lg py-2">Scheme Manager</h4>
+    <div className="p-4 space-y-4">
+      {/* Header */}
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
+        <h4 className="font-bold text-white text-xl">Scheme Manager</h4>
         <Button
-          className="cursor-pointer"
-          type="button"
-          variant="AddNewBtn"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition"
           onClick={handleModal}
         >
           ADD NEW
         </Button>
-        <SchemeModal
-          showModal={showModal}
-          handleModal={handleModal}
-          editData={editData}
-          refreshTable={refetch}
-        />
       </div>
 
+      <SchemeModal
+        showModal={showModal}
+        handleModal={handleModal}
+        editData={editData}
+        refreshTable={refetch}
+      />
+
+      {/* Table */}
       {loading ? (
         <TableSkeleton />
       ) : error ? (
@@ -120,6 +114,13 @@ const Scheme = () => {
         <Table
           columns={schemecolumn}
           data={schemedata}
+          className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
+          rowClassName={(rowIndex) =>
+            rowIndex % 2 === 0 ? "bg-white hover:bg-blue-50" : "bg-gray-50 hover:bg-blue-50"
+          }
+          paginationClassName="flex justify-end gap-2 mt-4"
+          previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+          nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
           showDateFilter={false}
           endPoint="/delete-scheme"
           refreshTable={refetch}

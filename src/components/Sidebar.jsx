@@ -1,69 +1,146 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "../css/sidebar.css";
 import Logo from "../images/logo.png";
 
 export const Sidebar = ({ open, setOpen }) => {
-  const [schemeDropDown, setSchemeDropDown] = useState(false);
-  const [memberDropDown, setMemberDropDown] = useState(false);
-  const [fundDropDown, setFundDropDown] = useState(false);
-  const [payoutDropDown, setPayoutDropDown] = useState(false);
-  const [transactionDropDown, setTransactionDropDown] = useState(false);
-  const [accountDropDown, setAccountDropDown] = useState(false);
-  const [rolesDropDown, setRolesDropDown] = useState(false);
-  const [ticketsDropDown, setTicketsDropDown] = useState(false);
-  const [payinDropDown, setPayinDropDown] = useState(false);
-  const [BankDropDown, setBankDropDown] = useState(false);
-  const [ApiDocDropDown, setApiDocDropDown] = useState(false);
+  const role = atob(localStorage.getItem("role")); // admin / user
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  const closeAllDropdowns = () => {
-  setSchemeDropDown(false);
-  setMemberDropDown(false);
-  setFundDropDown(false);
-  setPayoutDropDown(false);
-  setTransactionDropDown(false);
-  setAccountDropDown(false);
-  setRolesDropDown(false);
-  setTicketsDropDown(false);
-  setPayinDropDown(false);
-  setBankDropDown(false);
-  setApiDocDropDown(false);
-};
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const toggleDropdown = (name) => {
+    setActiveDropdown((prev) => (prev === name ? null : name));
+  };
+
+  // -----------------------------------------
+  // MENU CONFIG
+  // -----------------------------------------
+  const menu = [
+    { label: "Dashboard", icon: "fa-chart-pie", link: "/dashboard" },
+
+    ...(role === "admin"
+      ? [
+          {
+            label: "Scheme Manager",
+            icon: "fa-money-check",
+            dropdown: "scheme",
+            items: [{ label: "Scheme", link: "/scheme" }],
+          },
+          {
+            label: "Member",
+            icon: "fa-user-group",
+            dropdown: "member",
+            items: [{ label: "Merchant Onboarding", link: "/member-list" }],
+          },
+          {
+            label: "Fund",
+            icon: "fa-piggy-bank",
+            dropdown: "fund",
+            items: [
+              { label: "Load Wallet", link: "/load-wallet" },
+              { label: "Payin Settlement", link: "/payin-settlement" },
+            ],
+          },
+          {
+            label: "Onboard Bank",
+            icon: "fa-building-columns",
+            dropdown: "bank",
+            items: [{ label: "Bank", link: "/onboard-bank" }],
+          },
+        ]
+      : []),
+
+    {
+      label: "Payout",
+      icon: "fa-credit-card",
+      dropdown: "payout",
+      items: [{ label: "Request", link: "/payout-request" }],
+    },
+
+    {
+      label: "Payin",
+      icon: "fa-money-bill-transfer",
+      dropdown: "payin",
+      items: [{ label: "Request", link: "/payin-request" }],
+    },
+
+    {
+      label: "Transaction History",
+      icon: "fa-clock-rotate-left",
+      dropdown: "txn",
+      items: [
+        { label: "UPI Statement", link: "/upi-statement" },
+        { label: "Payout Statement", link: "/payout-statement" },
+      ],
+    },
+
+    {
+      label: "Account Statement",
+      icon: "fa-layer-group",
+      dropdown: "account",
+      items: [
+        { label: "Topup Statement", link: "/topup-statement" },
+        { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
+      ],
+    },
+
+    ...(role === "user"
+      ? [
+          {
+            label: "Api Settings",
+            icon: "fa-gears",
+            dropdown: "api",
+            items: [{ label: "Callback & Token", link: "/api-settings" }],
+          },
+          {
+            label: "API Documents",
+            icon: "fa-money-check",
+            dropdown: "apidoc",
+            items: [
+              { label: "Payin Documents", link: "/payin-doc" },
+              { label: "Payout Documents", link: "/payout-doc" },
+            ],
+          },
+        ]
+      : []),
+
+    {
+      label: "Complaints",
+      icon: "fa-comment",
+      dropdown: "tickets",
+      items: [{ label: "View Complain", link: "/view-complain" }],
+    },
+  ];
 
   return (
     <>
-      {/* <div
-  id="drawer-navigation"
-  className={`w-62 h-screen flex flex-col p-4 transition-transform translate-x-0 
-  bg-blue-500 bg-[url('https://upload.wikimedia.org/wikipedia/commons/5/53/Designsz.png')] 
-  bg-cover bg-no-repeat bg-center bg-blend-multiply`}
-  tabIndex="-1"
-  aria-labelledby="drawer-navigation-label"
-  bg-[url('https://upload.wikimedia.org/wikipedia/commons/5/53/Designsz.png')]
-> */}
+      {/* Overlay */}
       <div
         className={`fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300 ${
           open ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
         onClick={() => setOpen(false)}
       />
+
+      {/* Sidebar */}
       <div
-        id="drawer-navigation"
-        className={`fixed top-0 left-0 h-full w-64 md:w-64 p-4 flex flex-col
-        bg-blue-500 bg-cover bg-no-repeat bg-center bg-blend-soft-light shadow-xl
-        z-40 transform transition-transform duration-300 ease-in-out
+        className={`fixed top-0 left-0 h-full w-64 p-4 flex flex-col
+        bg-blue-500 bg-cover bg-no-repeat bg-center bg-blend-soft-light 
+        shadow-xl z-40 transform transition-transform duration-300 ease-in-out
         md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
-        tabIndex="-1"
-        aria-labelledby="drawer-navigation-label"
       >
+        {/* Close button mobile */}
         <button
           className="absolute top-4 right-4 text-2xl md:hidden"
           onClick={() => setOpen(false)}
         >
-          {" "}
-          <i className="fa-solid fa-xmark text-red-600"></i>{" "}
+          <i className="fa-solid fa-xmark text-red-600"></i>
         </button>
-        <div className="flex-shrink-0 p-4 justify-center items-center">
+
+        {/* Logo */}
+        <div className="flex-shrink-0 p-4 ml-5">
           <div className="ml-6 rounded-full h-24 w-24 bg-white flex items-center justify-center">
             <Link to={"/dashboard"}>
               <img src={Logo} className="w-20" alt="Spay Logo" />
@@ -71,659 +148,97 @@ export const Sidebar = ({ open, setOpen }) => {
           </div>
         </div>
 
-        <div className="sidebar flex-1 overflow-y-auto py-4 custom-scrollbar ">
-          <ul className="space-y-2 font-medium">
-            <li>
-              <Link
-                to={"/dashboard"}
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-              >
-                <i className="fa-solid fa-chart-pie fa-lg text-white transition-all duration-300 ease-in-out group-hover:text-blue-900 group-hover:scale-125"></i>
-                <span className="ms-3 transition-colors duration-300 group-hover:text-blue-900 group-hover:text-sm">
-                  Dashboard
-                </span>
-              </Link>
-            </li>
+        {/* MENU LIST */}
+        <ul className="space-y-2 font-medium sidebar flex-1 overflow-y-auto custom-scrollbar">
+          {menu.map((item, i) => {
+            const isParentActive =
+              item.items?.some((sub) => sub.link === currentPath) ?? false;
 
-            {/** Dropdown button of scheme */}
-            {atob(localStorage.getItem("role")) === "admin" && (
-              <li>
-                <a
-                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                  onMouseUp={(e) =>
-                    e.currentTarget.classList.remove("scale-95")
-                  }
-                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                  type="button"
-                  onClick={() => {
-                    closeAllDropdowns();
-                    setSchemeDropDown(!schemeDropDown)
-                  }}
-                >
-                  <div>
-                    <i className="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                    <span className="ms-3 group-hover:text-sm">
-                      Scheme Manager
-                    </span>
-                  </div>
-
-                  <svg
-                    className="w-2.5 h-2.5 ms-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
+            return (
+              <li key={i}>
+                {/* SIMPLE MENU */}
+                {!item.dropdown ? (
+                  <Link
+                    to={item.link}
+                    className={`flex items-center w-full p-3 rounded-xl transition-all duration-300
+                    ${
+                      currentPath === item.link
+                        ? "bg-blue-600 text-white shadow-md"
+                        : "text-white hover:bg-blue-600 hover:text-white hover:shadow-md"
+                    }`}
                   >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </a>
-              </li>
-            )}
-
-            {/*
-            Dropdown body of scheme
-            */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                schemeDropDown ? "" : "hidden"
-              }`}
-            >
-              <Link to={"/scheme"}>
-                <ul>
-                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                    <span className="ms-3">Scheme</span>
-                  </li>
-                </ul>
-              </Link>
-            </div>
-
-            {/**
-             * Dropdown button of member
-             */}
-            {atob(localStorage.getItem("role")) === "admin" && (
-              <li>
-                <a
-                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                  onMouseUp={(e) =>
-                    e.currentTarget.classList.remove("scale-95")
-                  }
-                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                  type="button"
-                  onClick={() => {
-                    closeAllDropdowns();
-                    setMemberDropDown(!memberDropDown)
-                  }}
-                >
-                  <div>
-                    <i className="fa-solid fa-user-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                    <span className="ms-3 group-hover:text-sm">Member</span>
-                  </div>
-
-                  <svg
-                    className="w-2.5 h-2.5 ms-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </a>
-              </li>
-            )}
-
-            {/**
-             * Dropdown body of member
-             */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                memberDropDown ? "" : "hidden"
-              }`}
-            >
-              <Link to={"/member-list"}>
-                <ul>
-                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                    Merchant Onboarding
-                  </li>
-                </ul>
-              </Link>
-            </div>
-
-            {/**
-             * Dropdown button of fund
-             */}
-            {atob(localStorage.getItem("role")) === "admin" && (
-              <li>
-                <a
-                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                  onMouseUp={(e) =>
-                    e.currentTarget.classList.remove("scale-95")
-                  }
-                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                  type="button"
-                  onClick={() => {
-                    closeAllDropdowns();
-                    setFundDropDown(!fundDropDown)
-                  }}
-                >
-                  <div>
-                    <i className="fa-solid fa-piggy-bank fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                    <span className="ms-3 group-hover:text-sm">Fund</span>
-                  </div>
-                  <svg
-                    className="w-2.5 h-2.5 ms-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </a>
-              </li>
-            )}
-
-            {/**
-             * Dropdown body of fund
-             */}
-            {atob(localStorage.getItem("role")) === "admin" && (
-              <div
-                className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                  fundDropDown ? "" : "hidden"
-                }`}
-              >
-                <ul>
-                  <Link to="/load-wallet">
-                    <li Name="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                      Load Wallet
-                    </li>
+                    <i className={`fa-solid ${item.icon} mr-3`}></i>
+                    <span>{item.label}</span>
                   </Link>
-                  <Link to="/payin-settlement">
-                    <li Name="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                      Payin Settlement
-                    </li>
-                  </Link>
-                </ul>
-              </div>
-            )}
+                ) : (
+                  <>
+                    {/* DROPDOWN BUTTON */}
+                    <button
+                      className={`flex items-center w-full p-3 rounded-xl transition-all duration-300
+                      ${
+                        isParentActive
+                          ? "bg-blue-600 text-white shadow-md"
+                          : "text-white hover:bg-blue-600 hover:text-white hover:shadow-md"
+                      }`}
+                      onClick={() => toggleDropdown(item.dropdown)}
+                    >
+                      <i className={`fa-solid ${item.icon} mr-3`}></i>
+                      <span>{item.label}</span>
 
-            {/**
-             * Dropdown button of payout
-             */}
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => {
-                  closeAllDropdowns();
-                  setPayoutDropDown(!payoutDropDown)
-                }}
-              >
-                <div>
-                  <i className="fa-solid fa-credit-card fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm">Payout</span>
-                </div>
-                <svg
-                  className="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
+                      <svg
+                        className={`w-2.5 h-2.5 ml-auto transition-transform duration-300 ${
+                          activeDropdown === item.dropdown ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        viewBox="0 0 10 6"
+                      >
+                        <path
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          d="m1 1 4 4 4-4"
+                        />
+                      </svg>
+                    </button>
 
-            {/**
-             * Dropdown body of payout
-             */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                payoutDropDown ? "" : "hidden"
-              }`}
-            >
-              <ul>
-                <Link to="/payout-request">
-                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                    Request
-                  </li>
-                </Link>
-              </ul>
-            </div>
+                    {/* DROPDOWN MENU */}
+                    <div
+                      className={`ml-4 mt-1 rounded-lg p-2 transition-all duration-300 ease-in-out overflow-hidden ${
+                        activeDropdown === item.dropdown
+                          ? "max-h-40 opacity-100"
+                          : "max-h-0 opacity-0"
+                      }`}
+                    >
+                      {item.items.map((sub, j) => {
+                        const isActive = currentPath === sub.link;
 
-            {/**
-             * Dropdown button of payin
-             */}
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => {
-                  closeAllDropdowns();
-                  setPayinDropDown(!payinDropDown)
-                }}
-              >
-                <div>
-                  <i className="fa-solid fa-money-bill-transfer fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm">Payin</span>
-                </div>
-                <svg
-                  className="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
+                        return (
+                          <Link key={j} to={sub.link}>
+                            <div
+                              className={`flex items-center gap-2 p-2 rounded-lg transition-all duration-300
+                              ${
+                                isActive
+                                  ? "bg-blue-600 text-white shadow-sm scale-[1.01]"
+                                  : "bg-transparent text-gray-800 hover:bg-blue-600 hover:text-white hover:shadow-sm hover:scale-[1.01]"
+                              }`}
+                            >
+                              <i
+                                className={`fa-solid fa-circle text-[6px] ${
+                                  isActive ? "text-white" : ""
+                                }`}
+                              ></i>
 
-            {/**
-             * Dropdown body of payin
-             */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                payinDropDown ? "" : "hidden"
-              }`}
-            >
-              <ul>
-                <Link to="/payin-request">
-                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                    Request
-                  </li>
-                </Link>
-              </ul>
-            </div>
-
-            {/**
-             * Dropdown button of transaction
-             */}
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => {
-                  closeAllDropdowns();
-                  setTransactionDropDown(!transactionDropDown)
-                }}
-              >
-                <div>
-                  <i className="fa-solid fa-clock-rotate-left fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm">
-                    Transaction History
-                  </span>
-                </div>
-                <svg
-                  className="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
-
-            {/**
-             * Dropdown body of transaction
-             */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                transactionDropDown ? "" : "hidden"
-              }`}
-            >
-              <ul>
-                <Link to="/upi-statement">
-                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                    UPI Statement
-                  </li>
-                </Link>
-                <Link to="/payout-statement">
-                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                    Payout Statement
-                  </li>
-                </Link>
-              </ul>
-            </div>
-
-            {/**
-             * Dropdown button of account
-             */}
-            <li>
-              <a
-                onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                onMouseUp={(e) => e.currentTarget.classList.remove("scale-95")}
-                className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                type="button"
-                onClick={() => {
-                  closeAllDropdowns();
-                  setAccountDropDown(!accountDropDown)
-                }}
-              >
-                <div>
-                  <i className="fa-solid fa-layer-group fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3">Account Statement</span>
-                </div>
-                <svg
-                  className="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
-
-            {/**
-             * Dropdown body of account
-             */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                accountDropDown ? "" : "hidden"
-              }`}
-            >
-              <ul>
-                <Link to="/topup-statement">
-                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                    Topup Statement
-                  </li>
-                </Link>
-                <Link to="/settlement-payin-statement">
-                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                    Settlement Payin Statement
-                  </li>
-                </Link>
-              </ul>
-            </div>
-
-            {/**
-             * Dropdown button of Bank
-             */}
-            {atob(localStorage.getItem("role")) === "admin" && (
-              <li>
-                <a
-                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                  onMouseUp={(e) =>
-                    e.currentTarget.classList.remove("scale-95")
-                  }
-                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                  type="button"
-                  onClick={() => {
-                    closeAllDropdowns();
-                    setBankDropDown(!BankDropDown)
-                  }}
-                >
-                  <div>
-                    <i className="fa-solid fa-building-columns fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                    <span className="ms-3 group-hover:text-sm">
-                      Onboard Bank
-                    </span>
-                  </div>
-                  <svg
-                    className="w-2.5 h-2.5 ms-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </a>
+                              {sub.label}
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </li>
-            )}
-
-            {/**
-             * Dropdown body of Bank
-             */}
-            {atob(localStorage.getItem("role")) === "admin" && (
-              <div
-                className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                  BankDropDown ? "" : "hidden"
-                }`}
-              >
-                <ul>
-                  <Link to="/onboard-bank">
-                    <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                      Bank
-                    </li>
-                  </Link>
-                </ul>
-              </div>
-            )}
-
-            {/**Dropdown button of Api Settings */}
-            {atob(localStorage.getItem("role")) === "user" && (
-              <li>
-                <a
-                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                  onMouseUp={(e) =>
-                    e.currentTarget.classList.remove("scale-95")
-                  }
-                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                  type="button"
-                  onClick={() => {
-                    closeAllDropdowns();
-                    setRolesDropDown(!rolesDropDown)
-                  }}
-                >
-                  <div>
-                    <i className="fa-solid fa-gears fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                    <span className="ms-2 group-hover:text-sm">
-                      Api Settings
-                    </span>
-                  </div>
-                  <svg
-                    className="w-2.5 h-2.5 ms-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </a>
-              </li>
-            )}
-
-            {/**
-             * Dropdown body of Api Settings
-             */}
-            {atob(localStorage.getItem("role")) === "user" && (
-              <div
-                className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                  rolesDropDown ? "" : "hidden"
-                }`}
-              >
-                <ul>
-                  <li className="text-gray-900 hover:text-white hover:bg-blue-900 mb-1 p-1">
-                    <Link to={"/api-settings"}>Callback and Token</Link>
-                  </li>
-                </ul>
-              </div>
-            )}
-
-            {/**Dropdown button of ApiDoc */}
-            {atob(localStorage.getItem("role")) === "user" && (
-              <li>
-                <a
-                  onMouseDown={(e) => e.currentTarget.classList.add("scale-95")}
-                  onMouseUp={(e) =>
-                    e.currentTarget.classList.remove("scale-95")
-                  }
-                  className="flex items-center p-2 text-white rounded-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-blue-300/40 hover:bg-blue-200 hover:text-blue-900 group cursor-pointer"
-                  type="button"
-                  onClick={() => {
-                    closeAllDropdowns();
-                    setApiDocDropDown(!ApiDocDropDown)
-                  }}
-                >
-                  <div>
-                    <i className="fa-solid fa-money-check fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                    <span className="ms-3 group-hover:text-sm">
-                      API Documents
-                    </span>
-                  </div>
-
-                  <svg
-                    className="w-2.5 h-2.5 ms-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </a>
-              </li>
-            )}
-
-            {/*
-            Dropdown body of ApiDoc
-            */}
-            {atob(localStorage.getItem("role")) === "user" && (
-              <div
-                className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                  ApiDocDropDown ? "" : "hidden"
-                }`}
-              >
-                <ul>
-                  <Link to="/payin-doc">
-                    <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                      <span className="ms-3">Payin Documents</span>
-                    </li>
-                  </Link>
-                  <Link to="/payout-doc">
-                    <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                      <span className="ms-3">Payout Documents</span>
-                    </li>
-                  </Link>
-                </ul>
-              </div>
-            )}
-
-            {/**
-             * Dropdown button of tickets
-             */}
-            <li>
-              <a
-                className="flex items-center p-2 text-white rounded-lg hover:bg-blue-200 group hover:text-blue-900 cursor-pointer"
-                type="button"
-                onClick={() => {
-                  closeAllDropdowns();
-                  setTicketsDropDown(!ticketsDropDown)
-                }}
-              >
-                <div>
-                  <i className="fa-solid fa-comment fa-lg text-white transition duration-75 group-hover:text-blue-900"></i>
-                  <span className="ms-3 group-hover:text-sm">Complaints</span>
-                </div>
-                <svg
-                  className="w-2.5 h-2.5 ms-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </a>
-            </li>
-
-            {/**
-             * Dropdown body of tickets
-             */}
-            <div
-              className={`divide-y rounded-lg p-2 ml-3 bg-blue-200 ${
-                ticketsDropDown ? "" : "hidden"
-              }`}
-            >
-              <ul>
-                <li className="text-gray-900 hover:text-white hover:bg-blue-900 p-1">
-                  <Link to={"/view-complain"}>View Complain</Link>
-                </li>
-              </ul>
-            </div>
-          </ul>
-        </div>
+            );
+          })}
+        </ul>
       </div>
     </>
   );
