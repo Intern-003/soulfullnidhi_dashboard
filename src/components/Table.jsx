@@ -8,7 +8,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import { CustomSelect } from "./CustomSelect";
 import nodatafound from "../images/nodatafound.jpeg";
 
-
 const Table = ({
   columns,
   data,
@@ -300,7 +299,10 @@ const Table = ({
 
               {/* Export Dropdown */}
               {showExport && (
-                <div ref={exportRef} className="relative border border-sky-300 rounded-lg mr-2">
+                <div
+                  ref={exportRef}
+                  className="relative border border-sky-300 rounded-lg mr-2"
+                >
                   <button
                     onClick={() => setOpenExport(!openExport)}
                     className="flex items-center justify-center rounded-lg bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-sky-400 focus:outline-none"
@@ -371,7 +373,7 @@ const Table = ({
             </div>
           )}
 
-          <div>
+          <div className="mb-8">
             <Button
               className="mr-2 cursor-pointer bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md flex justify-self-end"
               onClick={() => {
@@ -387,170 +389,147 @@ const Table = ({
           </div>
         </>
       )}
-
-      {/* Table */}
-      <div className="bg-white-600 rounded-lg mx-4 my-4 border border-sky-300">
-        <div
-          className="overflow-x-scroll"
-          style={{ scrollbarWidth: "thin", scrollbarColor: "#9ca3af #e5e7eb" }}
-        >
-          <table
-            className="w-full text-sm text-left text-gray-700 bg-gray-300 rounded-lg overflow-hidden  inset-shadow-sm inset-shadow-indigo-500/100"
-            style={{
-              borderCollapse: "collapse",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-            }}
+{/* Generic Table Component */}
+<div className="bg-white rounded-lg shadow-lg w-full overflow-x-auto border border-sky-300">
+  <table className="min-w-full table-fixed text-sm text-left text-gray-700 border-collapse">
+    <thead
+      className="uppercase text-white tracking-wide"
+      style={{ background: "linear-gradient(90deg, #007BFF, #00C8FF)" }}
+    >
+      <tr>
+        {columns.map((column, index) => (
+          <th
+            key={index}
+            className="font-semibold text-md px-4 py-3 text-left whitespace-nowrap border-b border-white/30"
           >
-            <thead
-              style={{
-                background: "linear-gradient(90deg, #007BFF, #00C8FF)",
-                color: "white",
-              }}
-              className="uppercase tracking-wide text-left"
-            >
-              <tr>
-                {columns.map((column, index) => (
-                  <th
-                    key={index}
-                    className="font-semibold text-md px-4 py-3 border-b border-white/30"
-                  >
-                    {column.header}
-                  </th>
-                ))}
-                {showDeleteColumn && (
-                  <th className="font-semibold text-md px-4 py-3 border-b border-white/30">
-                    Delete
-                  </th>
-                )}
-              </tr>
-            </thead>
-
-            <tbody className="text-center">
-              {filteredData.length > 0 ? (
-                filteredData
-                  .slice(
-                    (currentPage - 1) * entriesPerPage,
-                    currentPage * entriesPerPage
-                  )
-                  .map((row, rowIndex) => (
-                    <tr
-                      key={row.id}
-                      className={`${
-                        rowIndex % 2 === 0 ? "bg-[#f8fbff]" : "bg-white"
-                      } hover:bg-[#dbeafe] transition-colors duration-200`}
-                    >
-                      {columns.map((column, colIndex) => (
-                        <td key={colIndex} className="px-4 py-2 text-gray-800">
-                          {column.Cell
-                            ? column.Cell({ value: row[column.accessor], row })
-                            : row[column.accessor]}
-                        </td>
-                      ))}
-                      {showDeleteColumn && (
-                        <td className="px-4 py-2">
-                          <Button
-                            type="button"
-                            onClick={() => handleConfirmModal(row.id)}
-                            className="text-red-800 p-3 rounded-xl cursor-pointer"
-                          >
-                            <i class="fa-solid fa-trash fa-lg"></i>
-                          </Button>
-                        </td>
-                      )}
-                    </tr>
-                  ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={columns.length}
-                    className="text-center  text-gray-500 bg-white"
-                  >
-                 <div style={{textAlign:"center",padding:"0px",justifyContent:"center",display: "flex",
-        flexDirection: "column",alignItems:"center"}}>
-        <img src={nodatafound}
-        alt ="no data found"
-        style={{width:"300px", opacity:0.8}} />
-      </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <ConfirmModal
-          showConfirmModal={showConfirmModal}
-          handleConfirmModal={handleConfirmModal}
-          heading={"Are you sure you want to delete?"}
-          body={"If you delete the record it will be not recovered."}
-          action={handleDelete}
-        />
-
-        {showPagination && (
-          <div
-            className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-3 rounded-b-lg border border-sky-200"
-            style={{}}
-          >
-            {/* Left - Entries per page */}
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <span>Show</span>
-              <select
-                value={entriesPerPage}
-                onChange={(e) => {
-                  setEntriesPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="border border-gray-300 rounded-md px-2 py-1 focus:ring-1 focus:ring-sky-400 focus:outline-none"
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
-              <span>entries</span>
-            </div>
-
-            {/* Right - Pagination controls */}
-            <div className="flex items-center gap-2 mt-3 md:mt-0">
-              <Button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`px-3 py-1 text-sm rounded-md border ${
-                  currentPage === 1
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
-                }`}
-              >
-                Prev
-              </Button>
-              <span className="text-sm text-gray-600">
-                Page <span className="font-semibold">{currentPage}</span>
-              </span>
-              <Button
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    prev < Math.ceil(filteredData.length / entriesPerPage)
-                      ? prev + 1
-                      : prev
-                  )
-                }
-                disabled={
-                  currentPage ===
-                  Math.ceil(filteredData.length / entriesPerPage)
-                }
-                className={`px-3 py-1 text-sm rounded-md border ${
-                  currentPage ===
-                  Math.ceil(filteredData.length / entriesPerPage)
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
-                }`}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+            {column.header}
+          </th>
+        ))}
+        {showDeleteColumn && (
+          <th className="font-semibold text-md px-4 py-3 text-left whitespace-nowrap border-b border-white/30">
+            Delete
+          </th>
         )}
+      </tr>
+    </thead>
+
+    <tbody>
+      {filteredData.length > 0 ? (
+        filteredData
+          .slice(
+            (currentPage - 1) * entriesPerPage,
+            currentPage * entriesPerPage
+          )
+          .map((row, rowIndex) => (
+            <tr
+              key={row.id}
+              className={`${
+                rowIndex % 2 === 0 ? "bg-[#f8fbff]" : "bg-white"
+              } hover:bg-[#dbeafe] transition-colors duration-200`}
+            >
+              {columns.map((column, colIndex) => (
+                <td
+                  key={colIndex}
+                  className="px-4 py-2 text-gray-800 text-left truncate"
+                >
+                  {column.Cell
+                    ? column.Cell({ value: row[column.accessor], row })
+                    : row[column.accessor]}
+                </td>
+              ))}
+              {showDeleteColumn && (
+                <td className="px-4 py-2">
+                  <Button
+                    type="button"
+                    onClick={() => handleConfirmModal(row.id)}
+                    className="text-red-800 p-3 rounded-xl cursor-pointer"
+                  >
+                    <i className="fa-solid fa-trash fa-lg"></i>
+                  </Button>
+                </td>
+              )}
+            </tr>
+          ))
+      ) : (
+        <tr>
+          <td
+            colSpan={columns.length}
+            className="text-center text-gray-500 bg-white p-4"
+          >
+            <div className="flex flex-col items-center justify-center">
+              <img
+                src={nodatafound}
+                alt="no data found"
+                style={{ width: "300px", opacity: 0.8 }}
+              />
+            </div>
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+
+  {/* Pagination */}
+  {showPagination && (
+    <div className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-2 rounded-b-lg border-t border-sky-200 mt-2">
+      {/* Left - Entries per page */}
+      <div className="flex items-center gap-2 text-sm text-gray-700">
+        <span>Show</span>
+        <select
+          value={entriesPerPage}
+          onChange={(e) => {
+            setEntriesPerPage(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+          className="border border-gray-300 rounded-md px-2 py-0.5 focus:ring-1 focus:ring-sky-400 focus:outline-none text-xs"
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+        <span>entries</span>
       </div>
+
+      {/* Right - Pagination controls */}
+      <div className="flex items-center gap-2 mt-2 md:mt-0">
+        <Button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-2 py-1 text-xs rounded-md border ${
+            currentPage === 1
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
+          }`}
+        >
+          Prev
+        </Button>
+        <span className="text-xs text-gray-600">
+          Page <span className="font-semibold">{currentPage}</span>
+        </span>
+        <Button
+          onClick={() =>
+            setCurrentPage((prev) =>
+              prev < Math.ceil(filteredData.length / entriesPerPage)
+                ? prev + 1
+                : prev
+            )
+          }
+          disabled={currentPage === Math.ceil(filteredData.length / entriesPerPage)}
+          className={`px-2 py-1 text-xs rounded-md border ${
+            currentPage === Math.ceil(filteredData.length / entriesPerPage)
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
+          }`}
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  )}
+</div>
+
+
     </div>
   );
 };
