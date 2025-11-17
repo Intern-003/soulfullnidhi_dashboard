@@ -53,7 +53,7 @@ export const PayinRequest = () => {
 
 
   }, [showSuccess, showFailed]);
-  
+    
 
   const handlePayinSubmit = async () => {
     if (Number(amount) < 10) {
@@ -136,55 +136,94 @@ export const PayinRequest = () => {
                 Payer Name
               </label>
             </div>
-            <div className="relative w-full">
-              <input
-                type="number"
 
-                value={amount}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setAmount(val);
-                  setAmountError(Number(val) < 10 ? "Amount must be at least ₹10" : "");
-                }}
-                className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-blue-600 focus:outline-none"
-                placeholder=" "
-              />
-              {/* <label className="absolute left-0 top-2 text-gray-500 text-sm peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-focus:-top-3 peer-focus:text-blue-600"> */}
-              <label className="absolute left-0 top-2 text-gray-500 text-sm peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-focus:-top-3 peer-focus:text-blue-600">
-                Amount
-              </label>
-              {amountError && <p className="text-red-600 text-sm mt-1">{amountError}</p>}
-            </div>
+            <div className="relative w-full">
+            <input
+              type="number"
+              required
+              value={amount}
+              onChange={(e) => {
+                const val = e.target.value;
+                setAmount(val);
+                setAmountError(Number(val) < 10 ? "Amount must be at least ₹10" : "");
+              }}
+              className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-blue-600 focus:outline-none placeholder-transparent"
+              placeholder=" "
+            />
+            <label
+              className="
+                absolute left-0 text-gray-500 text-sm 
+                transition-all duration-200
+                peer-placeholder-shown:top-2
+                peer-placeholder-shown:text-gray-400
+                peer-focus:-top-3
+                peer-focus:text-blue-600
+                peer-valid:-top-3
+                peer-valid:text-blue-600
+              "
+            >
+              Amount
+            </label>
+            {amountError && <p className="text-red-600 text-sm mt-1">{amountError}</p>}
+          </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="relative w-full">
-              <input
-                type="tel"
-                value={payerMobile}
-                onChange={(e) => setPayerMobile(e.target.value)}
-                className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-blue-600 focus:outline-none"
-                placeholder=" "
-              />
-              <label className="absolute left-0 top-2 text-gray-500 text-sm peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-focus:-top-3 peer-focus:text-blue-600"
-              >
-                Mobile Number
-              </label>
-            </div>
+          {/* Mobile Number */}
+          <div className="relative w-full">
+            <input
+              type="tel"
+              required
+              value={payerMobile}
+              onChange={(e) => setPayerMobile(e.target.value)}
+              className="peer block w-full border-b-2 border-gray-300 py-2 px-0
+                        text-gray-900 focus:border-blue-600 focus:outline-none 
+                        placeholder-transparent"
+              placeholder=" "
+            />
+            <label
+              className="
+                absolute left-0 text-gray-500 text-sm transition-all duration-200
 
+                peer-placeholder-shown:top-2
+                peer-placeholder-shown:text-gray-400
+                
+                peer-focus:-top-3
+                peer-focus:text-blue-600
+
+                peer-valid:-top-3
+                peer-valid:text-blue-600
+              "
+            >
+              Mobile Number
+            </label>
+          </div>
+
+          {/* Email */}
             <div className="relative w-full">
               <input
                 type="email"
+                required
                 value={payerEmail}
                 onChange={(e) => setPayerEmail(e.target.value)}
-                className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-blue-600 focus:outline-none"
+                className="peer block w-full border-b-2 border-gray-300 py-2 px-0
+                          text-gray-900 focus:border-blue-600 focus:outline-none 
+                          placeholder-transparent"
                 placeholder=" "
               />
-              <label className="absolute left-0 top-2 text-gray-500 text-sm peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-focus:-top-3 peer-focus:text-blue-600">
+
+              <label
+                className={`
+                  absolute left-0 text-gray-500 text-sm transition-all duration-200
+                  
+                  ${payerEmail ? "-top-3 text-blue-600" : "top-2 text-gray-400"}
+                  peer-focus:-top-3 peer-focus:text-blue-600
+                `}
+              >
                 Email
               </label>
             </div>
-          </div>
+        </div>
 
           <div className="flex justify-center mt-4">
             <Button

@@ -218,7 +218,7 @@ export const Sidebar = ({ open, setOpen }) => {
                               ${
                                 isActive
                                   ? "bg-blue-600 text-white shadow-sm scale-[1.01]"
-                                  : "bg-transparent text-gray-800 hover:bg-blue-600 hover:text-white hover:shadow-sm hover:scale-[1.01]"
+                                  : "bg-transparent text-gray-100 hover:bg-blue-600 hover:text-white hover:shadow-sm hover:scale-[1.01]"
                               }`}
                             >
                               <i
