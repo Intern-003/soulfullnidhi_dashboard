@@ -272,16 +272,19 @@ export const ViewComplain = () => {
           {/* -------- HEADER: View Complain -------- */}
           <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center rounded-lg p-4 shadow-md">
             <h4 className="font-bold text-white text-lg">View Complain</h4>
-            <Button
-              type="button"
-              onClick={() => {
-                setEditData(null);
-                setShowModal(true);
-              }}
-              className="bg-blue-600 text-white font-medium px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:via-blue-700 hover:to-indigo-700 transition"
-            >
-              Raise Complain
-            </Button>
+          <Button
+  type="button"
+  onClick={() => {
+    setEditData(null);
+    setShowModal(true);
+  }}
+  className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+>
+  Raise Complain
+</Button>
+
+
+
           </div>
 
           {/* -------- TABLE (No wrapper) -------- */}
