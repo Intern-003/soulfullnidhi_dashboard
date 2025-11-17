@@ -259,57 +259,7 @@ const Table = ({
                 </div>
               )}
 
-              {/* Date Picker*/}
-              {/* {showDateFilter && (
-                <div className="flex items-center">
-                  <div className="relative">
-                    <div className="absolute z-10 inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                      <svg
-                        className="w-4 h-4 text-gray-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                      </svg>
-                    </div>
-                    <DatePicker
-                      selected={startDate}
-                      onChange={(date) => setStartDate(date)}
-                      selectsStart
-                      startDate={startDate}
-                      endDate={endDate}
-                      placeholderText="Select start date"
-                      className="border border-sky-500 text-gray-900 text-sm rounded-lg w-40 ps-10 p-2.5 focus:ring-2 focus:ring-sky-400 focus:outline-none"
-                    />
-                  </div>
 
-                  <span className="mx-2 text-gray-500">to</span>
-
-                  <div className="relative">
-                    <div className="absolute z-10 inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                      <svg
-                        className="w-4 h-4 text-gray-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                      </svg>
-                    </div>
-                    <DatePicker
-                      selected={endDate}
-                      onChange={(date) => setEndDate(date)}
-                      selectsEnd
-                      startDate={startDate}
-                      endDate={endDate}
-                      minDate={startDate}
-                      placeholderText="Select end date"
-                      className="border border-sky-500 text-gray-900 text-sm rounded-lg block w-40 ps-10 p-2.5 focus:ring-2 focus:ring-sky-400 focus:outline-none"
-                    />
-                  </div>
-                </div>
-              )} */}
 
               {/* Date Picker */}
               {showDateFilter && (
@@ -359,7 +309,7 @@ const Table = ({
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="border border-sky-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-sky-400 focus:outline-none hover:border-sky-400 transition"
+                    className="border border-blue-400 bg-white text-gray-700 rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-300 focus:outline-none hover:border-blue-500 transition"
                   >
                     <option value="all">All</option>
                     {statusList?.map((item, index) => (
@@ -372,72 +322,58 @@ const Table = ({
 
                 {/* Export Dropdown */}
                 {showExport && (
-                  <div
-                    ref={exportRef}
-                    className="relative border border-sky-300 rounded-lg mr-2"
-                  >
+                  <div ref={exportRef} className="relative">
                     <button
                       onClick={() => setOpenExport(!openExport)}
-                      className="flex items-center justify-center rounded-lg bg-white px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-sky-400 focus:outline-none"
+                      className="flex items-center justify-center gap-2 rounded-lg bg-blue-400 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 focus:ring-2 focus:ring-blue-300 focus:outline-none transition"
                     >
                       Export as
                       <svg
-                        className="ml-2 h-4 w-4"
+                        className="h-4 w-4"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
                         strokeWidth={2}
                         stroke="currentColor"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m19 9-7 7-7-7"
-                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
                       </svg>
                     </button>
 
                     {openExport && (
-                      <div className="absolute right-0 mt-2 w-30 bg-white border shadow-lg text-sm text-gray-700 z-50">
-                        <ul className="py-2">
-                          <li>
-                            <button
-                              onClick={exportCSV}
-                              className="block w-full text-left px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                            >
-                              CSV
-                            </button>
-                          </li>
-                          <li>
-                            <button
-                              onClick={exportJSON}
-                              className="block w-full text-left px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                            >
-                              JSON
-                            </button>
-                          </li>
-                          <li>
-                            <button
-                              onClick={exportTXT}
-                              className="block w-full text-left px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                            >
-                              TXT
-                            </button>
-                          </li>
-                          <li>
-                            <button
-                              onClick={exportSQL}
-                              className="block w-full text-left px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                            >
-                              SQL
-                            </button>
-                          </li>
+                      <div className="absolute right-0 mt-2 mr-2 w-25 bg-white border border-blue-200 shadow-lg rounded-lg text-sm text-gray-700 z-50 overflow-hidden">
+                        <ul>
+                          {[
+                            { label: "CSV", action: exportCSV, icon: (
+                                <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M4 12v-1a2 2 0 012-2h12a2 2 0 012 2v1M4 8V7a2 2 0 012-2h12a2 2 0 012 2v1"/></svg>
+                              ) },
+                            { label: "JSON", action: exportJSON, icon: (
+                                <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                              ) },
+                            { label: "TXT", action: exportTXT, icon: (
+                                <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
+                              ) },
+                            { label: "SQL", action: exportSQL, icon: (
+                                <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                              ) },
+                          ].map((item, idx) => (
+                            <li key={idx}>
+                              <button
+                                onClick={item.action}
+                                className="flex items-center gap-2 w-full px-4 py-2 hover:bg-blue-50 transition"
+                              >
+                                {item.icon}
+                                <span className="font-medium text-gray-800">{item.label}</span>
+                              </button>
+                            </li>
+                          ))}
                         </ul>
                       </div>
                     )}
                   </div>
                 )}
               </div>
+
             </div>
 
             {showSelectUserFilter && (
@@ -462,200 +398,7 @@ const Table = ({
             </div>
           </>
         )}
-      {/* Generic Table Component */}
-      {/* <div className="bg-white rounded-lg shadow-lg w-full overflow-x-auto border border-sky-300">
-        <table className="min-w-full table-fixed text-sm text-left text-gray-700 border-collapse">
-          <thead
-            className="uppercase text-white tracking-wide"
-            style={{ background: "linear-gradient(90deg, #007BFF, #00C8FF)" }}
-          >
-            <tr>
-              {columns.map((column, index) => (
-                <th
-                  key={index}
-                  className="font-semibold text-md px-4 py-3 text-left whitespace-nowrap border-b border-white/30"
-                >
-                  {column.header}
-                </th>
-              ))}
-              {showDeleteColumn && (
-                <th className="font-semibold text-md px-4 py-3 text-left whitespace-nowrap border-b border-white/30">
-                  Delete
-                </th>
-              )}
-            </tr>
-          </thead> */}
 
-          {/* <tbody>
-            {filteredData.length > 0 ? (
-              filteredData
-                .slice(
-                  (currentPage - 1) * entriesPerPage,
-                  currentPage * entriesPerPage
-                )
-                .map((row, rowIndex) => (
-                  <tr
-                    key={row.id}
-                    className={`${rowIndex % 2 === 0 ? "bg-[#f8fbff]" : "bg-white"
-                      } hover:bg-[#dbeafe] transition-colors duration-200`}
-                  >
-                    {columns.map((column, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className="px-4 py-2 text-gray-800 text-left truncate"
-                      >
-                        {column.Cell
-                          ? column.Cell({ value: row[column.accessor], row })
-                          : row[column.accessor]}
-                      </td>
-                    ))}
-                    {showDeleteColumn && (
-                      <td className="px-4 py-2">
-                        <Button
-                          type="button"
-                          onClick={() => handleConfirmModal(row.id)}
-                          className="text-red-800 p-3 rounded-xl cursor-pointer"
-                        >
-                          <i className="fa-solid fa-trash fa-lg"></i>
-                        </Button>
-                      </td>
-                    )}
-                  </tr>
-                ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="text-center text-gray-500 bg-white p-4"
-                >
-                  <div className="flex flex-col items-center justify-center">
-                    <img
-                      src={nodatafound}
-                      alt="no data found"
-                      style={{ width: "300px", opacity: 0.8 }}
-                    />
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody> */}
-          {/* <tbody>
-            {filteredData.length > 0 ? (
-              filteredData
-                .slice(
-                  (currentPage - 1) * entriesPerPage,
-                  currentPage * entriesPerPage
-                )
-                .map((row, rowIndex) => (
-                  <tr
-                    key={row.id}
-                    className={`
-            ${rowIndex % 2 === 0 ? "bg-[#f1f7ff]" : "bg-white"} 
-            hover:bg-[#e0f0ff] 
-            transition-all duration-150 
-            border-b border-gray-200
-          `}
-                  >
-                    {columns.map((column, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className="px-4 py-3 text-gray-800 text-left truncate"
-                      >
-                        {column.Cell
-                          ? column.Cell({ value: row[column.accessor], row })
-                          : row[column.accessor]}
-                      </td>
-                    ))}
-
-                    {showDeleteColumn && (
-                      <td className="px-4 py-3">
-                        <Button
-                          type="button"
-                          onClick={() => handleConfirmModal(row.id)}
-                          className="text-red-800 p-3 rounded-xl cursor-pointer"
-                        >
-                          <i className="fa-solid fa-trash fa-lg"></i>
-                        </Button>
-                      </td>
-                    )}
-                  </tr>
-                ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="text-center text-gray-500 bg-white p-4"
-                >
-                  <div className="flex flex-col items-center justify-center">
-                    <img
-                      src={nodatafound}
-                      alt="no data found"
-                      style={{ width: "300px", opacity: 0.8 }}
-                    />
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-
-        </table>
-
-        {/* Pagination */}
-        {/* {showPagination && (
-          <div className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-2 rounded-b-lg border-t border-sky-200 mt-2">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <span>Show</span>
-              <select
-                value={entriesPerPage}
-                onChange={(e) => {
-                  setEntriesPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="border border-gray-300 rounded-md px-2 py-0.5 focus:ring-1 focus:ring-sky-400 focus:outline-none text-xs"
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
-              <span>entries</span>
-            </div> */}
-
-            {/* Right - Pagination controls */}
-            {/* <div className="flex items-center gap-2 mt-2 md:mt-0">
-              <Button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`px-2 py-1 text-xs rounded-md border ${currentPage === 1
-                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
-                  }`}
-              >
-                Prev
-              </Button>
-              <span className="text-xs text-gray-600">
-                Page <span className="font-semibold">{currentPage}</span>
-              </span>
-              <Button
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    prev < Math.ceil(filteredData.length / entriesPerPage)
-                      ? prev + 1
-                      : prev
-                  )
-                }
-                disabled={currentPage === Math.ceil(filteredData.length / entriesPerPage)}
-                className={`px-2 py-1 text-xs rounded-md border ${currentPage === Math.ceil(filteredData.length / entriesPerPage)
-                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
-                  }`}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
-    </div>  */}
     {/* Generic Table Component */}
 <div className="bg-white rounded-lg shadow-lg w-full overflow-x-auto border border-sky-300">
   <table className="min-w-full table-fixed text-sm text-left text-gray-700 border-collapse">
