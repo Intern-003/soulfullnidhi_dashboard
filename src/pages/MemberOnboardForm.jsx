@@ -23,7 +23,7 @@ export const MemberOnboardForm = () => {
   const [memberFormData, setMemberFormData] = useState({
     name: "",
     mobile_no: "",
-    email: "",
+    email: "",  
     business_mcc: "",
     city: "",
     district: "",
@@ -258,10 +258,9 @@ export const MemberOnboardForm = () => {
 
   return (
     <>
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
-        <h4 className="font-bold text-white text-lg py-2">
-          Add New Merchant Details
-        </h4>
+
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg p-4 shadow-md">
+        <h4 className="text-white font-bold text-xl">Add New Merchant Details</h4>
       </div>
 
       <Stepper currentStep={currentStep} />
@@ -1295,7 +1294,7 @@ export const MemberOnboardForm = () => {
 
       <ConfirmModal
         showConfirmModal={showConfirmModal}
-        heading={"Are you sure you want to go back?"}
+        heading={"Are you sure you want to go back? "}
         body={"If you go back then you will lose your filled data in form."}
         handleConfirmModal={setShowConfirmModal}
         action={() => navigate("/member-list")}
