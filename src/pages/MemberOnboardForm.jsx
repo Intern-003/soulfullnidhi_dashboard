@@ -23,7 +23,7 @@ export const MemberOnboardForm = () => {
   const [memberFormData, setMemberFormData] = useState({
     name: "",
     mobile_no: "",
-    email: "",  
+    email: "",
     business_mcc: "",
     city: "",
     district: "",
@@ -164,9 +164,9 @@ export const MemberOnboardForm = () => {
 
   const handleNext = () => {
     if (validateStep()) {
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
-    }
+      if (currentStep < 4) {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
   useEffect(() => {
@@ -259,257 +259,66 @@ export const MemberOnboardForm = () => {
   return (
     <>
 
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg p-4 shadow-md">
+      {/* <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg p-4 shadow-md">
         <h4 className="text-white font-bold text-xl">Add New Merchant Details</h4>
+      </div> */}
+      <div className="p-4 space-y-4">
+        {/* Header Container */}
+        <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg shadow-md">
+          <div className="px-6 py-4">
+            <h4 className="text-white font-bold text-xl">
+              Add New Merchant Details
+            </h4>
+          </div>
+        </div>
       </div>
+
+
 
       <Stepper currentStep={currentStep} />
 
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         {currentStep === 1 && (
-          <div className="grid gap-6 mb-6 md:grid-cols-2">
-            <div className="relative">
-              <input
-                type="text"
-                name="name"
-                id="floating_outlined_name"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 appearance-none peer ${
-                  errors?.name ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.name}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_name"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.name
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Business Name <span className="text-red-600">*</span>
-              </label>
-              {errors?.name && (
-                <span className="mt-1 text-sm text-red-500">
-                  {errors?.name}
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="number"
-                name="mobile_no"
-                id="floating_outlined_mobile"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 appearance-none peer ${
-                  errors?.mobile_no ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.mobile_no}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_mobile"
-                className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.mobile_no
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Business Mobile <span className="text-red-600">*</span>
-              </label>
-              {errors?.mobile_no && (
-                <span className="text-sm text-red-500">
-                  {errors?.mobile_no}
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="email"
-                name="email"
-                id="floating_outlined_email"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.email ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.email}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_email"
-                className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.email
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Business Email <span className="text-red-600">*</span>
-              </label>
-              {errors?.email && (
-                <span className="text-sm text-red-500">{errors?.email}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="number"
-                name="business_mcc"
-                id="floating_outlined_mcc"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.business_mcc ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.business_mcc}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_mcc"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.business_mcc
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Business MCC <span className="text-red-600">*</span>
-              </label>
-              {errors?.business_mcc && (
-                <span className="text-sm text-red-500">
-                  {errors?.business_mcc}
-                </span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="city"
-                id="floating_outlined_city"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.city ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.city}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_city"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.city
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                City <span className="text-red-600">*</span>
-              </label>
-              {errors?.city && (
-                <span className="text-sm text-red-500">{errors?.city}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="state"
-                id="floating_outlined_state"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.state ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.state}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_state"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.state
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                State <span className="text-red-600">*</span>
-              </label>
-              {errors?.state && (
-                <span className="text-sm text-red-500">{errors?.state}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="district"
-                id="floating_outlined_district"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.district ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.district}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_district"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.district
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                District <span className="text-red-600">*</span>
-              </label>
-              {errors?.district && (
-                <span className="text-sm text-red-500">{errors?.district}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="number"
-                name="pin_code"
-                id="floating_outlined_pin"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.pin_code ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.pin_code}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_pin"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.pin_code
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Pincode <span className="text-red-600">*</span>
-              </label>
-              {errors?.pin_code && (
-                <span className="text-sm text-red-500">{errors?.pin_code}</span>
-              )}
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="address"
-                id="floating_outlined_address"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.address ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.address}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_address"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.address
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Address <span className="text-red-600">*</span>
-              </label>
-              {errors?.address && (
-                <span className="text-sm text-red-500">{errors?.address}</span>
-              )}
-            </div>
+          <div className="grid gap-6 mb-6 md:grid-cols-2 p-4 bg-white rounded-lg shadow-md">
+            {[
+              { name: "name", label: "Business Name", type: "text" },
+              { name: "mobile_no", label: "Business Mobile", type: "number" },
+              { name: "email", label: "Business Email", type: "email" },
+              { name: "business_mcc", label: "Business MCC", type: "number" },
+              { name: "city", label: "City", type: "text" },
+              { name: "state", label: "State", type: "text" },
+              { name: "district", label: "District", type: "text" },
+              { name: "pin_code", label: "Pincode", type: "number" },
+              { name: "address", label: "Address", type: "text" },
+            ].map((field) => (
+              <div key={field.name} className="relative mb-4">
+                <input
+                  type={field.type}
+                  name={field.name}
+                  id={`floating_outlined_${field.name}`}
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 appearance-none peer ${errors?.[field.name] ? "border-red-500" : ""
+                    }`}
+                  placeholder=" "
+                  value={memberFormData[field.name]}
+                  onChange={handleChange}
+                />
+                <label
+                  htmlFor={`floating_outlined_${field.name}`}
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.[field.name]
+                      ? "peer-focus:text-red-600"
+                      : "peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
+                    }`}
+                >
+                  {field.label} <span className="text-red-600">*</span>
+                </label>
+                {errors?.[field.name] && (
+                  <span className="text-sm text-red-500">{errors[field.name]}</span>
+                )}
+              </div>
+            ))}
           </div>
         )}
+
 
         {currentStep === 2 && (
           <div className="grid gap-6 mb-5 md:grid-cols-2">
@@ -518,20 +327,18 @@ export const MemberOnboardForm = () => {
                 type="text"
                 name="company_pan_no"
                 id="floating_outlined_pan"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.company_pan_no ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.company_pan_no ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder=""
                 value={memberFormData.company_pan_no}
                 onChange={handleChange}
               />
               <label
                 for="floating_outlined_pan"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.company_pan_no
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.company_pan_no
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
+                  }`}
               >
                 Company Pan Number <span className="text-red-600">*</span>
               </label>
@@ -567,20 +374,18 @@ export const MemberOnboardForm = () => {
                 type="text"
                 name="company_gst_no"
                 id="floating_outlined_gst"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.company_gst_no ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.company_gst_no ? "border-red-500" : "border-gray-300"
+                  }`}
                 value={memberFormData.company_gst_no}
                 onChange={handleChange}
                 placeholder=""
               />
               <label
                 for="floating_outlined_gst"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.company_gst_no
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.company_gst_no
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
+                  }`}
               >
                 GST Number <span className="text-red-600">*</span>
               </label>
@@ -610,20 +415,18 @@ export const MemberOnboardForm = () => {
                 type="text"
                 name="cin_llpin"
                 id="floating_outlined_cin"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.cin_llpin ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.cin_llpin ? "border-red-500" : "border-gray-300"
+                  }`}
                 value={memberFormData.cin_llpin}
                 onChange={handleChange}
                 placeholder=""
               />
               <label
                 for="floating_outlined_cin"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.cin_llpin
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.cin_llpin
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
+                  }`}
               >
                 CIN Number <span className="text-red-600">*</span>
               </label>
@@ -636,11 +439,10 @@ export const MemberOnboardForm = () => {
             <div className="relative">
               <label
                 for="company_type"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.company_type
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.company_type
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
+                  }`}
               >
                 Company Type <span className="text-red-600">*</span>
               </label>
@@ -649,9 +451,8 @@ export const MemberOnboardForm = () => {
                 name="company_type"
                 onChange={handleChange}
                 value={memberFormData.company_type}
-                className={`bg-gray-50 border  text-gray-900 text-sm rounded-lg w-full p-2.5 ${
-                  errors?.company_type ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`bg-gray-50 border  text-gray-900 text-sm rounded-lg w-full p-2.5 ${errors?.company_type ? "border-red-500" : "border-gray-300"
+                  }`}
               >
                 <option selected>Choose company type</option>
                 <option value="proprietary">Proprietary</option>
@@ -678,22 +479,20 @@ export const MemberOnboardForm = () => {
                 type="date"
                 name="date_of_incorporation"
                 id="floating_outlined_date"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.date_of_incorporation
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.date_of_incorporation
                     ? "border-red-500"
                     : "border-gray-300"
-                }`}
+                  }`}
                 value={memberFormData.date_of_incorporation}
                 onChange={handleChange}
                 placeholder=""
               />
               <label
                 for="floating_outlined_date"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.date_of_incorporation
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.date_of_incorporation
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
+                  }`}
               >
                 Date Of Incorporation <span className="text-red-600">*</span>
               </label>
@@ -708,22 +507,20 @@ export const MemberOnboardForm = () => {
                 type="text"
                 name="account_holder_name"
                 id="floating_outlined_account_holder_name"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.account_holder_name
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.account_holder_name
                     ? "border-red-500"
                     : "border-gray-300"
-                }`}
+                  }`}
                 value={memberFormData.account_holder_name}
                 onChange={handleChange}
                 placeholder=""
               />
               <label
                 for="floating_outlined_account_holder_name"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.account_holder_name
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.account_holder_name
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
+                  }`}
               >
                 Account Holder Name <span className="text-red-600">*</span>
               </label>
@@ -738,20 +535,18 @@ export const MemberOnboardForm = () => {
                 type="number"
                 name="bank_account_no"
                 id="floating_outlined_account_number"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.bank_account_no ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.bank_account_no ? "border-red-500" : "border-gray-300"
+                  }`}
                 value={memberFormData.bank_account_no}
                 onChange={handleChange}
                 placeholder=""
               />
               <label
                 for="floating_outlined_account_number"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.bank_account_no
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.bank_account_no
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
+                  }`}
               >
                 Bank Account Number <span className="text-red-600">*</span>
               </label>
@@ -766,20 +561,18 @@ export const MemberOnboardForm = () => {
                 type="text"
                 name="ifsc_code"
                 id="floating_outlined_ifsc"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.ifsc_code ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.ifsc_code ? "border-red-500" : "border-gray-300"
+                  }`}
                 value={memberFormData.ifsc_code}
                 onChange={handleChange}
                 placeholder=""
               />
               <label
                 for="floating_outlined_ifsc"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.ifsc_code
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.ifsc_code
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
+                  }`}
               >
                 IFSC Code <span className="text-red-600">*</span>
               </label>
@@ -810,20 +603,18 @@ export const MemberOnboardForm = () => {
                 type="text"
                 name="website_url"
                 id="floating_outlined_web"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                  errors?.website_url ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.website_url ? "border-red-500" : "border-gray-300"
+                  }`}
                 value={memberFormData.website_url}
                 onChange={handleChange}
                 placeholder=""
               />
               <label
                 for="floating_outlined_web"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                  errors?.website_url
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.website_url
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
+                  }`}
               >
                 Website Url <span className="text-red-600">*</span>
               </label>
@@ -844,11 +635,10 @@ export const MemberOnboardForm = () => {
                   type="text"
                   id="floating_outlined_director_name"
                   name="director_name"
-                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                    errors?.director?.[index]?.director_name
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.director?.[index]?.director_name
                       ? "border-red-500"
                       : "border-gray-300"
-                  }`}
+                    }`}
                   value={director.director_name}
                   onChange={(e) => handleDirectorChange(index, e)}
                   placeholder=""
@@ -856,11 +646,10 @@ export const MemberOnboardForm = () => {
                 />
                 <label
                   for="floating_outlined_director_name"
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.[index]?.director_name
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.director?.[index]?.director_name
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                  }`}
+                    }`}
                 >
                   Name <span className="text-red-600">*</span>
                 </label>
@@ -873,22 +662,20 @@ export const MemberOnboardForm = () => {
               <div className="relative">
                 <label
                   for="default"
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.[index]?.director_gender
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.director?.[index]?.director_gender
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                  }`}
+                    }`}
                 >
                   Gender
                 </label>
                 <select
                   id="default"
                   name="director_gender"
-                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
-                    errors?.director?.[index]?.director_gender
+                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${errors?.director?.[index]?.director_gender
                       ? "border-red-500"
                       : " border-gray-300"
-                  }`}
+                    }`}
                   value={director.director_gender}
                   onChange={(e) => handleDirectorChange(index, e)}
                   required
@@ -910,21 +697,19 @@ export const MemberOnboardForm = () => {
                   name="director_pan_no"
                   value={director.director_pan_no}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                    errors?.director?.[index]?.director_pan_no
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.director?.[index]?.director_pan_no
                       ? "border-red-500"
                       : "border-gray-300"
-                  }`}
+                    }`}
                   placeholder=""
                   required
                 />
                 <label
                   for="floating_outlined_director_pan"
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.[index]?.director_pan_no
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.director?.[index]?.director_pan_no
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                  }`}
+                    }`}
                 >
                   Pan Number <span className="text-red-600">*</span>
                 </label>
@@ -956,21 +741,19 @@ export const MemberOnboardForm = () => {
                   name="director_aadhar_no"
                   value={director.director_aadhar_no}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                    errors?.director?.[index]?.director_aadhar_no
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.director?.[index]?.director_aadhar_no
                       ? "border-red-500"
                       : "border-gray-300"
-                  }`}
+                    }`}
                   placeholder=""
                   required
                 />
                 <label
                   for="floating_outlined_director_aadhar_no"
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.[index]?.director_aadhar_no
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.director?.[index]?.director_aadhar_no
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                  }`}
+                    }`}
                 >
                   Aadhar Number <span className="text-red-600">*</span>
                 </label>
@@ -1003,21 +786,19 @@ export const MemberOnboardForm = () => {
                   name="director_dob"
                   value={director.director_dob}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
-                    errors?.director?.[index]?.director_dob
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${errors?.director?.[index]?.director_dob
                       ? "border-red-500"
                       : "border-gray-300"
-                  }`}
+                    }`}
                   placeholder=""
                   required
                 />
                 <label
                   for="floating_outlined_director_dob"
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.director?.[index]?.director_dob
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.director?.[index]?.director_dob
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                  }`}
+                    }`}
                 >
                   DOB <span className="text-red-600">*</span>
                 </label>
@@ -1047,11 +828,10 @@ export const MemberOnboardForm = () => {
               <div className="relative flex-1">
                 <label
                   htmlFor="payin_at_onboard"
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.payin_at_onboard
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.payin_at_onboard
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600"
-                  }`}
+                    }`}
                 >
                   Payin at Onboard
                 </label>
@@ -1059,11 +839,10 @@ export const MemberOnboardForm = () => {
                 <select
                   id="payin_at_onboard"
                   name="payin_at_onboard"
-                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
-                    errors?.payin_at_onboard
+                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${errors?.payin_at_onboard
                       ? "border-red-500"
                       : "border-gray-300"
-                  }`}
+                    }`}
                   value={memberFormData.payin_at_onboard}
                   onChange={handleChange}
                   required
@@ -1123,22 +902,20 @@ export const MemberOnboardForm = () => {
               <div className="relative flex-1">
                 <label
                   for="default"
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.payout_at_onboard
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.payout_at_onboard
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                  }`}
+                    }`}
                 >
                   Payout at Onboard
                 </label>
                 <select
                   id="default"
                   name="payout_at_onboard"
-                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
-                    errors?.payout_at_onboard
+                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${errors?.payout_at_onboard
                       ? "border-red-500"
                       : " border-gray-300"
-                  }`}
+                    }`}
                   value={memberFormData.payout_at_onboard}
                   onChange={handleChange}
                   required
@@ -1172,20 +949,18 @@ export const MemberOnboardForm = () => {
               <div className="relative flex-1">
                 <label
                   htmlFor="default"
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
-                    errors?.scheme_id
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.scheme_id
                       ? "peer-focus:text-red-600"
                       : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                  }`}
+                    }`}
                 >
                   Scheme
                 </label>
                 <select
                   id="default"
                   name="scheme_id"
-                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
-                    errors?.scheme_id ? "border-red-500" : " border-gray-300"
-                  }`}
+                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${errors?.scheme_id ? "border-red-500" : " border-gray-300"
+                    }`}
                   value={memberFormData.scheme_id}
                   onChange={handleChange}
                 >
@@ -1220,11 +995,10 @@ export const MemberOnboardForm = () => {
           <div>
             <button
               type="button"
-              className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-3 ${
-                currentStep === 1
+              className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-3 ${currentStep === 1
                   ? "disabled bg-gray-500 cursor-not-allowed"
                   : "bg-blue-500 hover:bg-blue-800 cursor-pointer"
-              }`}
+                }`}
               onClick={handlePrev}
             >
               &lt; Prev

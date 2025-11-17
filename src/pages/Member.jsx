@@ -82,11 +82,11 @@ export const Member = () => {
   };
 
   const handleAllPayinToggle = async (v) => {
-    
+
     try {
       const x = v ? 1 : 0;
       const response = await updateAll({ payin_status: x });
-    
+
       if (response) {
         setMerchantData((prev) =>
           prev.map((item) => ({ ...item, payin: item.account ? v : false }))
@@ -102,7 +102,7 @@ export const Member = () => {
     try {
       const x = v ? 1 : 0;
       const response = await updateAll({ payout_status: x });
-    
+
       if (response) {
         setMerchantData((prev) =>
           prev.map((item) => ({ ...item, payout: item.account ? v : false }))
@@ -113,7 +113,7 @@ export const Member = () => {
     }
   };
 
-  
+
 
   useEffect(() => {
     if (!initialDataOfMerchants || !credentialsData) return;
@@ -221,12 +221,12 @@ export const Member = () => {
           <Toggle onChange={handleAllPayoutToggle} />
         </div>
 
-      <Button
-  onClick={() => navigate("/member-create")}
-  className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
->
-  + Create New
-</Button>
+        <Button
+          onClick={() => navigate("/member-create")}
+          className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+        >
+          + Create New
+        </Button>
 
       </div>
 

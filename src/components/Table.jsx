@@ -328,7 +328,8 @@ const Table = ({
                         ? "text-red-500 font-semibold" // weekends
                         : "text-sky-900 font-medium"
                     }
-                    className="border border-sky-500 text-sky-900 font-medium text-sm rounded-lg w-44 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-1 hover:bg-sky-100 transition"
+                    className="border border-sky-500 text-sky-900 font-medium text-sm rounded-lg w-44 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-0 hover:bg-sky-100 transition"
+
                   />
 
                   <span className="text-gray-500">to</span>
@@ -348,7 +349,8 @@ const Table = ({
                         ? "text-red-500 font-semibold"
                         : "text-sky-900 font-medium"
                     }
-                    className="border border-sky-500 text-sky-900 font-medium text-sm rounded-lg w-44 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-1 hover:bg-sky-100 transition"
+                    className="border border-sky-500 text-sky-900 font-medium text-sm rounded-lg w-44 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-0 hover:bg-sky-100 transition"
+
                   />
                 </div>
               )}
@@ -486,7 +488,7 @@ const Table = ({
             </tr>
           </thead> */}
 
-          {/* <tbody>
+      {/* <tbody>
             {filteredData.length > 0 ? (
               filteredData
                 .slice(
@@ -539,7 +541,7 @@ const Table = ({
               </tr>
             )}
           </tbody> */}
-          {/* <tbody>
+      {/* <tbody>
             {filteredData.length > 0 ? (
               filteredData
                 .slice(
@@ -601,7 +603,7 @@ const Table = ({
         </table>
 
         {/* Pagination */}
-        {/* {showPagination && (
+      {/* {showPagination && (
           <div className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-2 rounded-b-lg border-t border-sky-200 mt-2">
             <div className="flex items-center gap-2 text-sm text-gray-700">
               <span>Show</span>
@@ -621,8 +623,8 @@ const Table = ({
               <span>entries</span>
             </div> */}
 
-            {/* Right - Pagination controls */}
-            {/* <div className="flex items-center gap-2 mt-2 md:mt-0">
+      {/* Right - Pagination controls */}
+      {/* <div className="flex items-center gap-2 mt-2 md:mt-0">
               <Button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
@@ -656,138 +658,135 @@ const Table = ({
           </div>
         )}
     </div>  */}
-    {/* Generic Table Component */}
-<div className="bg-white rounded-lg shadow-lg w-full overflow-x-auto border border-sky-300">
-  <table className="min-w-full table-fixed text-sm text-left text-gray-700 border-collapse">
-    <thead
-      className="uppercase text-white tracking-wide"
-      style={{ background: "linear-gradient(90deg, #007BFF, #00C8FF)" }}
-    >
-      <tr>
-        {columns.map((column, index) => (
-          <th
-            key={index}
-            className="font-semibold text-md px-4 py-3 text-left whitespace-nowrap border-b border-white/30"
+      {/* Generic Table Component */}
+      <div className="bg-white rounded-lg shadow-lg w-full overflow-x-auto border border-sky-300">
+        <table className="min-w-full table-fixed text-sm text-left text-gray-700 border-collapse">
+          <thead
+            className="uppercase text-white tracking-wide"
+            style={{ background: "linear-gradient(90deg, #007BFF, #00C8FF)" }}
           >
-            {column.header}
-          </th>
-        ))}
-        {showDeleteColumn && (
-          <th className="font-semibold text-md px-4 py-3 text-left whitespace-nowrap border-b border-white/30">
-            Delete
-          </th>
-        )}
-      </tr>
-    </thead>
+            <tr>
+              {columns.map((column, index) => (
+                <th
+                  key={index}
+                  className="font-semibold text-md px-4 py-3 text-left whitespace-nowrap border-b border-white/30"
+                >
+                  {column.header}
+                </th>
+              ))}
+              {showDeleteColumn && (
+                <th className="font-semibold text-md px-4 py-3 text-left whitespace-nowrap border-b border-white/30">
+                  Delete
+                </th>
+              )}
+            </tr>
+          </thead>
 
-    <tbody>
-  {filteredData.length > 0 ? (
-    filteredData
-      .slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage)
-      .map((row, rowIndex) => (
-        <tr
-          key={row.id}
-          className={`${
-            rowIndex % 2 === 0 ? "bg-[#f1f7ff]" : "bg-white"
-          } hover:bg-[#e0f0ff] transition-all duration-150 border-b border-gray-200`}
-        >
-          {columns.map((column, colIndex) => (
-            <td
-              key={colIndex}
-              className="px-4 py-3 text-gray-800 text-left truncate text-sm md:text-base font-normal"
-            >
-              {column.Cell
-                ? column.Cell({ value: row[column.accessor], row })
-                : row[column.accessor]}
-            </td>
-          ))}
-          {showDeleteColumn && (
-            <td className="px-4 py-3">
-              <Button
-                type="button"
-                onClick={() => handleConfirmModal(row.id)}
-                className="text-red-800 p-3 rounded-xl cursor-pointer"
+          <tbody>
+            {filteredData.length > 0 ? (
+              filteredData
+                .slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage)
+                .map((row, rowIndex) => (
+                  <tr
+                    key={row.id}
+                    className={`${rowIndex % 2 === 0 ? "bg-[#f1f7ff]" : "bg-white"
+                      } hover:bg-[#e0f0ff] transition-all duration-150 border-b border-gray-200`}
+                  >
+                    {columns.map((column, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className="px-4 py-3 text-gray-800 text-left truncate text-sm md:text-base font-normal"
+                      >
+                        {column.Cell
+                          ? column.Cell({ value: row[column.accessor], row })
+                          : row[column.accessor]}
+                      </td>
+                    ))}
+                    {showDeleteColumn && (
+                      <td className="px-4 py-3">
+                        <Button
+                          type="button"
+                          onClick={() => handleConfirmModal(row.id)}
+                          className="text-red-800 p-3 rounded-xl cursor-pointer"
+                        >
+                          <i className="fa-solid fa-trash fa-lg"></i>
+                        </Button>
+                      </td>
+                    )}
+                  </tr>
+                ))
+            ) : (
+              <tr>
+                <td colSpan={columns.length} className="text-center text-gray-500 bg-white p-4">
+                  <div className="flex flex-col items-center justify-center">
+                    <img
+                      src={nodatafound}
+                      alt="no data found"
+                      style={{ width: "300px", opacity: 0.8 }}
+                    />
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+
+        </table>
+
+        {/* Pagination */}
+        {showPagination && (
+          <div className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-3 rounded-b-lg border-t border-sky-200 mt-3">
+            {/* Left - Entries per page */}
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <span>Show</span>
+              <select
+                value={entriesPerPage}
+                onChange={(e) => {
+                  setEntriesPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-1 focus:ring-sky-400 focus:outline-none"
               >
-                <i className="fa-solid fa-trash fa-lg"></i>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+              <span>entries</span>
+            </div>
+
+            {/* Right - Pagination controls */}
+            <div className="flex items-center gap-2 mt-2 md:mt-0">
+              <Button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 text-sm rounded-md font-medium transition ${currentPage === 1
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-sky-200 to-indigo-200 text-sky-900 hover:from-sky-300 hover:to-indigo-300"
+                  }`}
+              >
+                Prev
               </Button>
-            </td>
-          )}
-        </tr>
-      ))
-  ) : (
-    <tr>
-      <td colSpan={columns.length} className="text-center text-gray-500 bg-white p-4">
-        <div className="flex flex-col items-center justify-center">
-          <img
-            src={nodatafound}
-            alt="no data found"
-            style={{ width: "300px", opacity: 0.8 }}
-          />
-        </div>
-      </td>
-    </tr>
-  )}
-</tbody>
-
-  </table>
-
-  {/* Pagination */}
-  {showPagination && (
-    <div className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-3 rounded-b-lg border-t border-sky-200 mt-3">
-      {/* Left - Entries per page */}
-      <div className="flex items-center gap-2 text-sm text-gray-700">
-        <span>Show</span>
-        <select
-          value={entriesPerPage}
-          onChange={(e) => {
-            setEntriesPerPage(Number(e.target.value));
-            setCurrentPage(1);
-          }}
-          className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-1 focus:ring-sky-400 focus:outline-none"
-        >
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-        </select>
-        <span>entries</span>
+              <span className="text-sm text-gray-700">
+                Page <span className="font-semibold">{currentPage}</span>
+              </span>
+              <Button
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    prev < Math.ceil(filteredData.length / entriesPerPage) ? prev + 1 : prev
+                  )
+                }
+                disabled={currentPage === Math.ceil(filteredData.length / entriesPerPage)}
+                className={`px-3 py-1 text-sm rounded-md font-medium transition ${currentPage === Math.ceil(filteredData.length / entriesPerPage)
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-sky-200 to-indigo-200 text-sky-900 hover:from-sky-300 hover:to-indigo-300"
+                  }`}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Right - Pagination controls */}
-      <div className="flex items-center gap-2 mt-2 md:mt-0">
-        <Button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className={`px-3 py-1 text-sm rounded-md font-medium transition ${
-            currentPage === 1
-              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-sky-200 to-indigo-200 text-sky-900 hover:from-sky-300 hover:to-indigo-300"
-          }`}
-        >
-          Prev
-        </Button>
-        <span className="text-sm text-gray-700">
-          Page <span className="font-semibold">{currentPage}</span>
-        </span>
-        <Button
-          onClick={() =>
-            setCurrentPage((prev) =>
-              prev < Math.ceil(filteredData.length / entriesPerPage) ? prev + 1 : prev
-            )
-          }
-          disabled={currentPage === Math.ceil(filteredData.length / entriesPerPage)}
-          className={`px-3 py-1 text-sm rounded-md font-medium transition ${
-            currentPage === Math.ceil(filteredData.length / entriesPerPage)
-              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-sky-200 to-indigo-200 text-sky-900 hover:from-sky-300 hover:to-indigo-300"
-          }`}
-        >
-          Next
-        </Button>
-      </div>
-    </div>
-  )}
-</div>
 
 
 
