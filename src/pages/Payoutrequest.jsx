@@ -143,6 +143,9 @@ const Payoutrequest = () => {
   //   },
   // ];
 
+
+
+
   const tableDataWithActions = beneficiary.map((row, index) => ({
     id: row.id,
     sqno: index + 1,
@@ -195,36 +198,46 @@ const Payoutrequest = () => {
 
   return (
     <>
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
-        <h4 className="font-bold text-white text-lg py-2">Beneficiary List</h4>
-        <Button
-          type="button"
-          className="cursor-pointer"
-          variant="AddNewBtn"
-          onClick={() => setShowFormModal(true)}
+
+      {/* <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
+        <h4 className="font-bold text-white text-lg py-2">Beneficiary List</h4> */}
+      <div className="p-4">
+        <div
+          className="bg-gradient-to-t from-sky-500 to-indigo-500 
+               flex justify-between items-center 
+               rounded-lg p-4 mb-4"
         >
-          + Add New Beneficiary
-        </Button>
+          <h4 className="font-bold text-white text-lg">Beneficiary List</h4>
+
+        <Button
+  type="button"
+  className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200 cursor-pointer"
+  onClick={() => setShowFormModal(true)}
+>
+  + Add New Beneficiary
+</Button>
+
+        </div>
+
+        <div className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
+          {loading ? <TableSkeleton /> : (
+            <Table
+              columns={membercolumn}
+              data={tableDataWithActions}
+              showExport={false}
+              showStatusFilter={false}
+              endPoint="/delete-Beneficiary"
+              refreshTable={refetch}
+            />
+          )}
+        </div>
       </div>
-      
-      {loading ? (
-        <TableSkeleton />
-      ) : (
-        <Table
-          columns={membercolumn}
-          data={tableDataWithActions}
-          showExport={false}
-          showStatusFilter={false}
-          endPoint="/delete-Beneficiary"
-          refreshTable={refetch}
-        />
-      )}
 
       {/* ✅ Modal with background blur */}
       {showModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
-          // onClick={() => setShowModal(false)}
+        // onClick={() => setShowModal(false)}
         >
           <div
             className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 transform transition-all scale-100"
@@ -243,6 +256,7 @@ const Payoutrequest = () => {
 
             {/* Beneficiary Table */}
             <div className="overflow-x-auto p-4">
+
               <table className="w-full text-sm text-left border-collapse">
                 <thead>
                   <tr
@@ -281,6 +295,13 @@ const Payoutrequest = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* <Table
+              columns={columns}
+              data={filteredData}
+              showDeleteColumn={false}
+            /> */}
+
 
             {/* Scroll bar (if table overflows) */}
             {/* <div className="overflow-x-scroll px-4 mb-2">
@@ -346,11 +367,10 @@ const Payoutrequest = () => {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className={`${
-                    isLoading
-                      ? "bg-blue-700 cursor-not-allowed opacity-80"
-                      : "bg-blue-600 hover:bg-blue-700"
-                  } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
+                  className={`${isLoading
+                    ? "bg-blue-700 cursor-not-allowed opacity-80"
+                    : "bg-blue-600 hover:bg-blue-700"
+                    } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
                 >
                   {isLoading && (
                     <svg
@@ -382,7 +402,7 @@ const Payoutrequest = () => {
       {showFormModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
-          // onClick={() => setShowFormModal(false)}
+        // onClick={() => setShowFormModal(false)}
         >
           <div
             className="bg-white border rounded-lg shadow-lg max-w-3xl w-full mx-2 p-6 transform transition-all scale-100"
@@ -544,7 +564,7 @@ const Payoutrequest = () => {
                     id="floating_first_name"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" "
-                    // required
+                  // required
                   />
                   <label
                     for="floating_first_name"
@@ -627,12 +647,11 @@ const Payoutrequest = () => {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className={`${
-                    isLoading
-                      ? "bg-blue-700 cursor-not-allowed opacity-80"
-                      : "bg-blue-600 hover:bg-blue-700"
-                  } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
-                  // className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                  className={`${isLoading
+                    ? "bg-blue-700 cursor-not-allowed opacity-80"
+                    : "bg-blue-600 hover:bg-blue-700"
+                    } text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center`}
+                // className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 >
                   {/* Submit */}
                   {isLoading && (
@@ -656,7 +675,7 @@ const Payoutrequest = () => {
                   {isLoading ? "Processing..." : "Submit"}
                 </Button>
               </div>
-            </form> 
+            </form>
           </div>
         </div>
       )}

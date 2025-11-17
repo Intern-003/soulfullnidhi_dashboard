@@ -105,31 +105,30 @@ const OnboardBank = () => {
       <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
         <h4 className="font-bold text-white text-xl">Onboard Bank</h4>
         <Button
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition"
+          className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
           onClick={handleModal}
         >
           ADD BANK
         </Button>
+
       </div>
 
       {/* Tabs */}
       <div className="flex gap-4">
         <Button
-          className={`px-4 py-2 rounded-lg font-medium ${
-            activeTab === "payin"
+          className={`px-4 py-2 rounded-lg font-medium ${activeTab === "payin"
               ? "bg-blue-100 text-blue-600 shadow-md"
               : "bg-white text-gray-600 hover:bg-blue-50 transition"
-          }`}
+            }`}
           onClick={() => setActiveTab("payin")}
         >
           Payin Bank List
         </Button>
         <Button
-          className={`px-4 py-2 rounded-lg font-medium ${
-            activeTab === "payout"
+          className={`px-4 py-2 rounded-lg font-medium ${activeTab === "payout"
               ? "bg-blue-100 text-blue-600 shadow-md"
               : "bg-white text-gray-600 hover:bg-blue-50 transition"
-          }`}
+            }`}
           onClick={() => setActiveTab("payout")}
         >
           Payout Bank List

@@ -23,7 +23,7 @@ const Scheme = () => {
     return <Toggle defaultChecked={value === "Active"} onChange={handleChange} />;
   };
 
-  
+
   useEffect(() => {
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
@@ -90,12 +90,14 @@ const Scheme = () => {
       {/* Header */}
       <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
         <h4 className="font-bold text-white text-xl">Scheme Manager</h4>
-        <Button
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition"
-          onClick={handleModal}
-        >
-          ADD NEW
-        </Button>
+      <Button
+  className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+  onClick={handleModal}
+>
+  ADD NEW
+</Button>
+
+
       </div>
 
       <SchemeModal
