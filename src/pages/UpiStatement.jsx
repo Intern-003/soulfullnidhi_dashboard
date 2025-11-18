@@ -12,7 +12,7 @@ const UpiStatement = () => {
 
 
 
-  
+
   useEffect(() => {
     const statusClasses = {
       pending: "bg-yellow-100 text-yellow-800",
@@ -23,7 +23,6 @@ const UpiStatement = () => {
       reversed: "bg-red-100 text-red-800",
       refunded: "bg-gray-100 text-gray-800",
     };
-
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
         sqno: (
@@ -32,7 +31,7 @@ const UpiStatement = () => {
             <span>
               {new Date(item.created_at).getDate()}{" "}
               {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
-              {new Date(item.created_at).getFullYear()} <br />{" "}
+              {new Date(item.created_at).getFullYear()} <br />
               {new Date(item.created_at).toLocaleTimeString()}
             </span>
           </div>
@@ -57,20 +56,16 @@ const UpiStatement = () => {
             <span>Payin Rolling Amount: <b>{item.payin_rolling_amount}</b></span>
           </div>
         ),
-        date:
-          new Date(item.created_at).getDate() +
-          " " +
-          MONTH_NAMES[new Date(item.created_at).getMonth()] +
-          " " +
-          new Date(item.created_at).getFullYear() +
-          " - " +
-          new Date(item.created_at).toLocaleTimeString(),
+
+        // ✅ Numeric value for calculations
+        numericAmount: parseFloat(item.amount) || 0,
+
+        date: new Date(item.created_at).toISOString(),
         status: item.status,
         showstatus: (
           <span
-            className={`px-2 py-1 rounded-full text-sm font-medium ${
-              statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-            }`}
+            className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+              }`}
           >
             {item?.status
               ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
@@ -79,8 +74,7 @@ const UpiStatement = () => {
         ),
       }));
       setUpiData(formattedData);
-    }
-  }, [data]);
+    }},[data]);
 
   const upiColumn = [
     { header: "SQ NO", accessor: "sqno" },

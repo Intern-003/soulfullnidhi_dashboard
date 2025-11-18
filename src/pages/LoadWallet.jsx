@@ -89,31 +89,30 @@ const LoadWallet = () => {
 
   const tableDataWithActions = walletData?.map((row) => ({
     ...row,
-    action: (
-      <div className="flex justify-center gap-2">
-        <Button
-          onClick={() => {
-            setSelectedUser(row);
-            setModalType("load");
-            setShowModal(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
-        >
-          Load Wallet
-        </Button>
-        <Button
-          onClick={() => {
-            setSelectedUser(row);
-            setModalType("reverse");
-            setShowModal(true);
-          }}
-          className="bg-blue-400 hover:bg-blue-500 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
-        >
-          Reverse Top-up
-        </Button>
-      </div>
-    ),
-  }));
+   action: (
+  <div className="flex items-center justify-start gap-2">
+    <Button
+      onClick={() => {
+        setSelectedUser(row);
+        setModalType("load");
+        setShowModal(true);
+      }}
+      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+    >
+      Load Wallet
+    </Button>
+    <Button
+      onClick={() => {
+        setSelectedUser(row);
+        setModalType("reverse");
+        setShowModal(true);
+      }}
+      className="bg-blue-400 hover:bg-blue-500 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+    >
+      Reverse Top-up
+    </Button>
+  </div>
+),}));
 
   return (
     <div className="p-4 space-y-4">

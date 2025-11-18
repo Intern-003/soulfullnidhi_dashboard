@@ -41,14 +41,14 @@ const Acc_topup_settlement = () => {
           " - " +
           new Date(item.created_at).toLocaleTimeString(),
         amount: item.amount ?? "N/A",
+        numericAmount: parseFloat(item.amount) || 0, // ✅ for calculations
         status: item.status,
         payout_closing_balance: item.payout_closing_balance ?? "0.0",
         payout_opening_balance: item.payout_opening_balance ?? "0.0",
         showstatus: (
           <span
-            className={`px-2 py-1 rounded-full text-sm font-medium ${
-              statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-            }`}
+            className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+              }`}
           >
             {item?.status
               ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
@@ -58,6 +58,7 @@ const Acc_topup_settlement = () => {
       }));
       setTopupPayoutData(formattedData);
     }
+
   }, [data]);
 
   const topupPayoutColumn = [

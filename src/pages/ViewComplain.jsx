@@ -272,27 +272,28 @@ export const ViewComplain = () => {
           {/* -------- HEADER: View Complain -------- */}
           <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center rounded-lg p-4 shadow-md">
             <h4 className="font-bold text-white text-lg">View Complain</h4>
-          <Button
-  type="button"
-  onClick={() => {
-    setEditData(null);
-    setShowModal(true);
-  }}
-  className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
->
-  Raise Complain
-</Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setEditData(null);
+                setShowModal(true);
+              }}
+              className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+            >
+              Raise Complain
+            </Button>
 
 
 
           </div>
 
-          {/* -------- TABLE (No wrapper) -------- */}
           <Table
             columns={complainColumns}
             data={complainsWithModifications}
             showStatusFilter={false}
           />
+
+
         </div>
       </div>
 
@@ -331,9 +332,8 @@ export const ViewComplain = () => {
                     value={ticketFormData.user_id}
                     onChange={handleChange}
                     placeholder="User Id"
-                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${
-                      errors?.user_id ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.user_id ? "border-red-500" : "border-gray-300"
+                      }`}
                     required
                   />
                 </div>
@@ -346,9 +346,8 @@ export const ViewComplain = () => {
                     value={ticketFormData.subject}
                     onChange={handleChange}
                     placeholder="Subject"
-                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${
-                      errors?.subject ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.subject ? "border-red-500" : "border-gray-300"
+                      }`}
                     required
                   />
                 </div>
@@ -360,9 +359,8 @@ export const ViewComplain = () => {
                     value={ticketFormData.description}
                     onChange={handleChange}
                     placeholder="Description"
-                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${
-                      errors?.description ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.description ? "border-red-500" : "border-gray-300"
+                      }`}
                     rows={4}
                     required
                   />
@@ -374,9 +372,8 @@ export const ViewComplain = () => {
                     type="file"
                     name="attachment"
                     onChange={handleChange}
-                    className={`block px-2.5 pb-2.5 pt-2 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${
-                      errors?.attachment ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`block px-2.5 pb-2.5 pt-2 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.attachment ? "border-red-500" : "border-gray-300"
+                      }`}
                   />
                 </div>
 
@@ -388,9 +385,8 @@ export const ViewComplain = () => {
                     value={ticketFormData.assigned_to}
                     onChange={handleChange}
                     placeholder="Assigned To"
-                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${
-                      errors?.assigned_to ? "border-red-500" : "border-gray-300"
-                    }`}
+                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.assigned_to ? "border-red-500" : "border-gray-300"
+                      }`}
                     required
                   />
                 </div>
@@ -407,8 +403,8 @@ export const ViewComplain = () => {
                       ? "Updating..."
                       : "Update"
                     : creating
-                    ? "Submitting..."
-                    : "Submit"}
+                      ? "Submitting..."
+                      : "Submit"}
                 </Button>
               </div>
             </form>
