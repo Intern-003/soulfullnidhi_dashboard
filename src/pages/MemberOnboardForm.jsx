@@ -231,6 +231,42 @@ export const MemberOnboardForm = () => {
     }
   }, [memberFormData.payin_at_onboard, midCredentials, isLoading]);
 
+
+  // Auto-select single bank if only one available
+useEffect(() => {
+  if (payinBanks?.data?.length === 1 && !memberFormData.payin_at_onboard) {
+    setMemberFormData((prev) => ({
+      ...prev,
+      payin_at_onboard: payinBanks.data[0].onboard_payin_bank,
+    }));
+  }
+
+  if (payoutBanks?.data?.length === 1 && !memberFormData.payout_at_onboard) {
+    setMemberFormData((prev) => ({
+      ...prev,
+      payout_at_onboard: payoutBanks.data[0].onboard_payout_bank,
+    }));
+  }
+}, [payinBanks, payoutBanks, setMemberFormData, memberFormData.payin_at_onboard, memberFormData.payout_at_onboard]);
+
+// When Payin = Airpay -> auto-select first Airpay MID (credentials_id).
+// When Payin != Airpay -> clear credentials_id.
+useEffect(() => {
+  if (memberFormData.payin_at_onboard === "Airpay") {
+    if (airpayMids?.length > 0 && !memberFormData.credentials_id) {
+      setMemberFormData((prev) => ({
+        ...prev,
+        credentials_id: airpayMids[0].id,
+      }));
+    }
+  } else {
+    // clear MID if switching away from Airpay
+    if (memberFormData.credentials_id) {
+      setMemberFormData((prev) => ({ ...prev, credentials_id: "" }));
+    }
+  }
+}, [memberFormData.payin_at_onboard, airpayMids, setMemberFormData, memberFormData.credentials_id]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     // Convert credentials_id to integer
@@ -290,27 +326,66 @@ export const MemberOnboardForm = () => {
     }));
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (validateStep()) {
+  //     try {
+  //       const res = await executeMember(memberFormData);
+  //       if (res) {
+  //         toast.success("Form submitted successfully!");
+  //         navigate("/member-list");
+  //       }
+  //     } catch (err) {
+  //       toast.error(Object.values(err?.errors)[0][0]);
+  //     }
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (validateStep()) {
-      try {
-        const res = await executeMember(memberFormData);
-        if (res) {
-          toast.success("Form submitted successfully!");
-          navigate("/member-list");
-        }
-      } catch (err) {
-        toast.error(Object.values(err?.errors)[0][0]);
+  e.preventDefault();
+
+  if (!validateStep()) return;
+
+  try {
+    const formData = new FormData();
+
+    // Step 2 & 4: flat fields
+    Object.entries(memberFormData).forEach(([key, value]) => {
+      if (key === "director_info") return; // handle separately
+      if (value instanceof File) {
+        formData.append(key, value);
+      } else if (value !== undefined && value !== null) {
+        formData.append(key, value);
       }
+    });
+
+    // Step 3: Director info (array)
+    memberFormData.director_info.forEach((director, index) => {
+      Object.entries(director).forEach(([key, value]) => {
+        if (value instanceof File) {
+          formData.append(`director_info[${index}][${key}]`, value);
+        } else {
+          formData.append(`director_info[${index}][${key}]`, value ?? "");
+        }
+      });
+    });
+
+    // Call your existing executeMember function
+    const res = await executeMember(formData);
+
+    if (res) {
+      toast.success("Form submitted successfully!");
+      navigate("/member-list");
     }
-  };
+
+  } catch (err) {
+    toast.error(Object.values(err?.errors)[0][0]);
+  }
+};
+
 
   return (
     <>
-
-      {/* <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg p-4 shadow-md">
-        <h4 className="text-white font-bold text-xl">Add New Merchant Details</h4>
-      </div> */}
       <div className="p-4 space-y-4">
         {/* Header Container */}
         <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg shadow-md">
@@ -732,66 +807,188 @@ export const MemberOnboardForm = () => {
           ))}
 
         {/* Step 4: Bank & Scheme */}
-        {currentStep === 4 && (
-          <div className="grid gap-6 mb-6 md:grid-cols-2 p-4 bg-white rounded-lg shadow-sm">
+        {/* Step 4: Bank & Scheme */}
+{currentStep === 4 && (
+  <div className="grid gap-6 mb-6 md:grid-cols-2 p-4 bg-white rounded-lg shadow-sm">
 
-            {/* Payin Bank */}
-            <div className="relative w-full">
-              <select
-                id="payin_at_onboard"
-                name="payin_at_onboard"
-                value={memberFormData.payin_at_onboard}
-                onChange={handleChange}
-                className="block w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg px-4 py-3"
-                required
-              >
-                <option value="">Select Payin Bank</option>
-                {payinBanks?.data.map((item) => (
-                  <option key={item.id} value={item.onboard_payin_bank}>
-                    {item.onboard_payin_bank}
-                  </option>
-                ))}
-              </select>
-            </div>
+    {/* Payin Bank + Add Button */}
+    <div className="flex items-center gap-2 w-full">
+      <div className="relative flex-1">
+        <label
+          htmlFor="payin_at_onboard"
+          className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 bg-white px-2 ${
+            errors?.payin_at_onboard ? "peer-focus:text-red-600" : "peer-focus:text-blue-600"
+          }`}
+        >
+          Payin Bank
+        </label>
 
-            {/* Payout Bank */}
-            <div className="relative w-full">
-              <select
-                id="payout_at_onboard"
-                name="payout_at_onboard"
-                value={memberFormData.payout_at_onboard}
-                onChange={handleChange}
-                className="block w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg px-4 py-3"
-                required
-              >
-                <option value="">Select Payout Bank</option>
-                {payoutBanks?.data.map((item) => (
-                  <option key={item.id} value={item.onboard_payout_bank}>
-                    {item.onboard_payout_bank}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <select
+          id="payin_at_onboard"
+          name="payin_at_onboard"
+          value={memberFormData.payin_at_onboard}
+          onChange={(e) => {
+            // call your generic handler first
+            handleChange(e);
+            // if switching away from Airpay, clear credentials_id immediately
+            if (e.target.value !== "Airpay") {
+              setMemberFormData((prev) => ({ ...prev, credentials_id: "" }));
+            }
+          }}
+          className={`block w-full text-sm text-gray-900 bg-gray-50 border rounded-lg px-4 py-3 ${
+            errors?.payin_at_onboard ? "border-red-500" : "border-gray-300"
+          }`}
+          required
+        >
+          <option value="">Select Payin Bank</option>
+          {payinBanks?.data?.map((item) => (
+            <option key={item.id} value={item.onboard_payin_bank}>
+              {item.onboard_payin_bank}
+            </option>
+          ))}
+        </select>
 
-            {/* Scheme */}
-            <div className="relative w-full">
-              <select
-                id="scheme_id"
-                name="scheme_id"
-                value={memberFormData.scheme_id}
-                onChange={handleChange}
-                className="block w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg px-4 py-3"
-              >
-                <option value="">Select Scheme</option>
-                {schemes?.data.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+        {errors?.payin_at_onboard && (
+          <span className="text-sm text-red-500">{errors?.payin_at_onboard}</span>
         )}
+      </div>
+
+      {/* + Button */}
+      <button
+        type="button"
+        onClick={handlePayinModal}
+        className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+      >
+        +
+      </button>
+    </div>
+
+    {/* Show Airpay MID only when Payin bank = Airpay */}
+    {memberFormData.payin_at_onboard === "Airpay" && (
+      <div className="relative w-full">
+        <label
+          htmlFor="credentials_id"
+          className="absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 bg-white px-2"
+        >
+          Airpay MID
+        </label>
+
+        <select
+          id="credentials_id"
+          name="credentials_id"
+          value={memberFormData.credentials_id || ""}
+          onChange={(e) => {
+            // keep consistent naming: credentials_id is what backend expects
+            handleChange(e);
+          }}
+          className={`block w-full text-sm text-gray-900 bg-gray-50 border rounded-lg px-4 py-3 ${
+            errors?.credentials_id ? "border-red-500" : "border-gray-300"
+          }`}
+          required
+        >
+          <option value="">Select Airpay MID</option>
+          {airpayMids?.map((mid) => (
+            <option key={mid.id} value={mid.id}>
+              {mid.name}
+            </option>
+          ))}
+        </select>
+
+        {errors?.credentials_id && (
+          <span className="text-sm text-red-500">{errors?.credentials_id}</span>
+        )}
+      </div>
+    )}
+
+    {/* Payout Bank + Add Button */}
+    <div className="relative w-full">
+      <label
+        htmlFor="payout_at_onboard"
+        className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 bg-white px-2 ${
+          errors?.payout_at_onboard ? "peer-focus:text-red-600" : "peer-focus:text-blue-600"
+        }`}
+      >
+        Payout Bank
+      </label>
+
+      <div className="flex items-center gap-2">
+        <select
+          id="payout_at_onboard"
+          name="payout_at_onboard"
+          value={memberFormData.payout_at_onboard}
+          onChange={handleChange}
+          className={`block flex-1 text-sm text-gray-900 bg-gray-50 border rounded-lg px-4 py-3 ${
+            errors?.payout_at_onboard ? "border-red-500" : "border-gray-300"
+          }`}
+          required
+        >
+          <option value="">Select Payout Bank</option>
+          {payoutBanks?.data?.map((item) => (
+            <option key={item.id} value={item.onboard_payout_bank}>
+              {item.onboard_payout_bank}
+            </option>
+          ))}
+        </select>
+
+        <button
+          type="button"
+          onClick={handlePayoutModal}
+          className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+        >
+          +
+        </button>
+      </div>
+
+      {errors?.payout_at_onboard && (
+        <span className="text-sm text-red-500">{errors?.payout_at_onboard}</span>
+      )}
+    </div>
+
+    {/* Scheme + Add Button */}
+    <div className="relative w-full">
+      <label
+        htmlFor="scheme_id"
+        className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 bg-white px-2 ${
+          errors?.scheme_id ? "peer-focus:text-red-600" : "peer-focus:text-blue-600"
+        }`}
+      >
+        Scheme
+      </label>
+
+      <div className="flex items-center gap-2">
+        <select
+          id="scheme_id"
+          name="scheme_id"
+          value={memberFormData.scheme_id}
+          onChange={handleChange}
+          className={`block flex-1 text-sm text-gray-900 bg-gray-50 border rounded-lg px-4 py-3 ${
+            errors?.scheme_id ? "border-red-500" : "border-gray-300"
+          }`}
+        >
+          <option value="">Select Scheme</option>
+          {schemes?.data?.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+
+        <button
+          type="button"
+          onClick={handleSchemeModal}
+          className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+        >
+          +
+        </button>
+      </div>
+
+      {errors?.scheme_id && (
+        <span className="text-sm text-red-500">{errors?.scheme_id}</span>
+      )}
+    </div>
+  </div>
+)}
+
 
 
 

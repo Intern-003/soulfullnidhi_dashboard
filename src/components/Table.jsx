@@ -264,6 +264,36 @@ const Table = ({
                 </div>
               )}
 
+              {/* Date Picker */}
+          {showDateFilter && (
+            <div className="flex items-center gap-2">
+              <DatePicker
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                selectsStart
+                startDate={startDate}
+                endDate={endDate}
+                placeholderText="Select start date"
+                renderCustomHeader={customHeader}
+                className="border border-sky-500 text-sky-900 font-medium text-sm rounded-lg w-44 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 hover:bg-sky-100 transition"
+              />
+              <span className="text-gray-500">to</span>
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                selectsEnd
+                startDate={startDate}
+                endDate={endDate}
+                minDate={startDate}
+                placeholderText="Select end date"
+                renderCustomHeader={customHeader}
+                className="border border-sky-500 text-sky-900 font-medium text-sm rounded-lg w-44 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 hover:bg-sky-100 transition"
+              />
+            </div>
+          )}
+
+
+
               {showStatusFilter && (
                 <select
                   value={statusFilter}

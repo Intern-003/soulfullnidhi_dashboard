@@ -27,8 +27,8 @@ import SpayGlidePGWidget from "../pages/SpayGlidePGWidget";
 const AppRoutes = () => {
     return(
         <Routes>
-            <Route path="/" element={<LoginForm />} />
             <Route path="/spay-glide-pgwidget" element={ <SpayGlidePGWidget/> } />
+            <Route path="/" element={<LoginForm />} />
             <Route element={<Layout />}>
                 <Route 
                     path="/profile" 
