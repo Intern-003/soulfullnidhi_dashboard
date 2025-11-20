@@ -1,22 +1,28 @@
 import React, { useEffect, useState } from "react";
 import "../css/documents.css";
+import { useGet } from "../hooks/useGet";
 
 const PayinDoc = () => {
   const [activeSection, setActiveSection] = useState("payin-request");
-  const [provider, setProvider] = useState("spay"); // default until backend loads
+  const [provider, setProvider] = useState("airpay"); // default until backend loads
   const [apiSections, setApiSections] = useState([]);
 
   // -----------------------------------------
   // 👉 LOAD PROVIDER FROM BACKEND
   // -----------------------------------------
-  useEffect(() => {
-    fetch("https://your-backend.com/api/provider")
-      .then((res) => res.json())
-      .then((data) => {
-        setProvider(data.provider); // "airpay" | "cashfree" | "busybox"
-      })
-      .catch(() => setProvider("cashfree"));
-  }, []);
+  
+  const { data: getmerchant } = useGet("/show-merchant/${id}");
+  const [payinGateway, setpayinGateway] = useState(null);
+  
+    useEffect(() => {
+      // Fetch selected payin provider
+      if (getmerchant?.data ) {
+        setpayinGateway(getmerchant.data.payin_at_onboard);
+      }
+    }, [getmerchant]);
+
+  console.log(getmerchant);
+  console.log(payinGateway);
 
   // -----------------------------------------
   // 👉 AIRPAY API DATA
@@ -234,12 +240,12 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
 
 
   // -----------------------------------------
-  // 👉 CASHFREE API
+  // 👉 PAYU API
   // -----------------------------------------
 
-  const CASHFREE_SECTIONS = [
+  const PAYU_SECTIONS = [
   {
-    id: "cashfree-request",
+    id: "payu-request",
     title: "Create Payin Payment Request",
     type: "api",
 
@@ -295,7 +301,7 @@ curl--location 'https://live.spay.live/api/CF/payin/request'
   },
 
   {
-    id: "cashfree-status",
+    id: "payu-status",
     title: "Check Payment Status",
     type: "api",
 
@@ -385,7 +391,7 @@ curl--location "https://live.spay.live/api/CF/payin/status”
   },
 
   {
-    id: "cashfree-callback",
+    id: "payu-callback",
     title: "Callback Response",
     type: "callback",
 
@@ -682,18 +688,21 @@ curl--location 'POST https://live.spay.live/api/bb/payin/status'
   // -----------------------------------------
   // 👉 APPLY PROVIDER DATA
   // -----------------------------------------
+
   useEffect(() => {
-    if (provider === "airpay") {
-      setApiSections(AIRPAY_SECTIONS);
-      setActiveSection("airpay-request");
-    } else if (provider === "cashfree") {
-      setApiSections(CASHFREE_SECTIONS);
-      setActiveSection("cashfree-request");
-    } else if (provider === "busybox") {
-      setApiSections(BUSYBOX_SECTIONS);
-      setActiveSection("busybox-request");
-    }
-  }, [provider]);
+  if (payinGateway === "Airpay") {
+    setApiSections(AIRPAY_SECTIONS);
+    setActiveSection("airpay-request");
+
+  } else if (payinGateway === "pay_u") {
+    setApiSections(PAYU_SECTIONS);
+    setActiveSection("payu-request");
+
+  } else if (payinGateway === "Glide") {
+    setApiSections(BUSYBOX_SECTIONS);
+    setActiveSection("busybox-request");
+  }
+}, [payinGateway]);
 
   const activeApi = apiSections.find((s) => s.id === activeSection);
 
@@ -905,9 +914,7 @@ curl--location 'POST https://live.spay.live/api/bb/payin/status'
       <div className="api-doc-sidebar">
         <div className="sidebar-header">
           <h2>API Documentation</h2>
-          {/* <p style={{ fontSize: "12px", marginTop: "-8px" }}>
-            Provider: <b style={{ color: "green" }}>{provider.toUpperCase()}</b>
-          </p> */}
+
         </div>
 
         <nav className="sidebar-nav">
@@ -932,3 +939,4 @@ curl--location 'POST https://live.spay.live/api/bb/payin/status'
 };
 
 export default PayinDoc;
+
