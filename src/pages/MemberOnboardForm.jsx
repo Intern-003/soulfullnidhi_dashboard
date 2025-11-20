@@ -19,8 +19,6 @@ export const MemberOnboardForm = () => {
   const [activeTab, setActiveTab] = useState("payin");
   const toast = useToast();
   const [airpayMids, setAirpayMids] = useState([]);
-  const [uploadProgress, setUploadProgress] = useState({});
-
 
   const [memberFormData, setMemberFormData] = useState({
     name: "",
@@ -131,53 +129,6 @@ export const MemberOnboardForm = () => {
     }
   };
 
-  const handleFileUpload = (field, file) => {
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "File size should not exceed 5 MB",
-      }));
-      return;
-    }
-
-    if (!["image/png", "image/jpeg", "application/pdf"].includes(file.type)) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "Only JPG, PNG or PDF allowed",
-      }));
-      return;
-    }
-
-    setErrors((prev) => ({ ...prev, [field]: "" }));
-
-    // Simulate progress
-    setUploadProgress((prev) => ({ ...prev, [field]: 0 }));
-
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 15;
-      setUploadProgress((prev) => ({ ...prev, [field]: progress }));
-
-      if (progress >= 100) {
-        clearInterval(interval);
-
-        setMemberFormData((prev) => ({
-          ...prev,
-          [field]: file,
-        }));
-      }
-    }, 100);
-  };
-
-
-  const removeFile = (field) => {
-    setMemberFormData((prev) => ({ ...prev, [field]: null }));
-    setUploadProgress((prev) => ({ ...prev, [field]: 0 }));
-  };
-
-
   const validateStep = () => {
     const requiredFields = stepRequiredFields[currentStep];
     const newErrors = {};
@@ -212,11 +163,11 @@ export const MemberOnboardForm = () => {
   };
 
   const handleNext = () => {
-    if (validateStep()) {
-      if (currentStep < 4) {
-        setCurrentStep(currentStep + 1);
-      }
+    // if (validateStep()) {
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1);
     }
+    // }
   };
   useEffect(() => {
     if (memberFormData.payin_at_onboard !== "Airpay") return; // only run for Airpay
@@ -230,42 +181,6 @@ export const MemberOnboardForm = () => {
       setAirpayMids([]);
     }
   }, [memberFormData.payin_at_onboard, midCredentials, isLoading]);
-
-
-  // Auto-select single bank if only one available
-useEffect(() => {
-  if (payinBanks?.data?.length === 1 && !memberFormData.payin_at_onboard) {
-    setMemberFormData((prev) => ({
-      ...prev,
-      payin_at_onboard: payinBanks.data[0].onboard_payin_bank,
-    }));
-  }
-
-  if (payoutBanks?.data?.length === 1 && !memberFormData.payout_at_onboard) {
-    setMemberFormData((prev) => ({
-      ...prev,
-      payout_at_onboard: payoutBanks.data[0].onboard_payout_bank,
-    }));
-  }
-}, [payinBanks, payoutBanks, setMemberFormData, memberFormData.payin_at_onboard, memberFormData.payout_at_onboard]);
-
-// When Payin = Airpay -> auto-select first Airpay MID (credentials_id).
-// When Payin != Airpay -> clear credentials_id.
-useEffect(() => {
-  if (memberFormData.payin_at_onboard === "Airpay") {
-    if (airpayMids?.length > 0 && !memberFormData.credentials_id) {
-      setMemberFormData((prev) => ({
-        ...prev,
-        credentials_id: airpayMids[0].id,
-      }));
-    }
-  } else {
-    // clear MID if switching away from Airpay
-    if (memberFormData.credentials_id) {
-      setMemberFormData((prev) => ({ ...prev, credentials_id: "" }));
-    }
-  }
-}, [memberFormData.payin_at_onboard, airpayMids, setMemberFormData, memberFormData.credentials_id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -326,278 +241,420 @@ useEffect(() => {
     }));
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (validateStep()) {
-  //     try {
-  //       const res = await executeMember(memberFormData);
-  //       if (res) {
-  //         toast.success("Form submitted successfully!");
-  //         navigate("/member-list");
-  //       }
-  //     } catch (err) {
-  //       toast.error(Object.values(err?.errors)[0][0]);
-  //     }
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  if (!validateStep()) return;
-
-  try {
-    const formData = new FormData();
-
-    // Step 2 & 4: flat fields
-    Object.entries(memberFormData).forEach(([key, value]) => {
-      if (key === "director_info") return; // handle separately
-      if (value instanceof File) {
-        formData.append(key, value);
-      } else if (value !== undefined && value !== null) {
-        formData.append(key, value);
-      }
-    });
-
-    // Step 3: Director info (array)
-    memberFormData.director_info.forEach((director, index) => {
-      Object.entries(director).forEach(([key, value]) => {
-        if (value instanceof File) {
-          formData.append(`director_info[${index}][${key}]`, value);
-        } else {
-          formData.append(`director_info[${index}][${key}]`, value ?? "");
+    e.preventDefault();
+    if (validateStep()) {
+      try {
+        const res = await executeMember(memberFormData);
+        if (res) {
+          toast.success("Form submitted successfully!");
+          navigate("/member-list");
         }
-      });
-    });
-
-    // Call your existing executeMember function
-    const res = await executeMember(formData);
-
-    if (res) {
-      toast.success("Form submitted successfully!");
-      navigate("/member-list");
+      } catch (err) {
+        toast.error(Object.values(err?.errors)[0][0]);
+      }
     }
-
-  } catch (err) {
-    toast.error(Object.values(err?.errors)[0][0]);
-  }
-};
-
+  };
 
   return (
     <>
-      <div className="p-4 space-y-4">
-        {/* Header Container */}
-        <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg shadow-md">
-          <div className="px-6 py-4">
-            <h4 className="text-white font-bold text-xl">
-              Add New Merchant Details
-            </h4>
-          </div>
-        </div>
+      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
+        <h4 className="font-bold text-white text-lg py-2">
+          Add New Merchant Details
+        </h4>
       </div>
-
-
 
       <Stepper currentStep={currentStep} />
 
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         {currentStep === 1 && (
-          <div className="grid gap-6 mb-6 md:grid-cols-2 p-4 bg-white rounded-lg shadow-md">
-            {[
-              { name: "name", label: "Business Name", type: "text" },
-              { name: "mobile_no", label: "Business Mobile", type: "number" },
-              { name: "email", label: "Business Email", type: "email" },
-              { name: "business_mcc", label: "Business MCC", type: "number" },
-              { name: "city", label: "City", type: "text" },
-              { name: "state", label: "State", type: "text" },
-              { name: "district", label: "District", type: "text" },
-              { name: "pin_code", label: "Pincode", type: "number" },
-              { name: "address", label: "Address", type: "text" },
-            ].map((field) => (
-              <div key={field.name} className="relative mb-4">
-                <input
-                  type={field.type}
-                  name={field.name}
-                  id={`floating_outlined_${field.name}`}
-                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 appearance-none peer ${errors?.[field.name] ? "border-red-500" : ""
-                    }`}
-                  placeholder=" "
-                  value={memberFormData[field.name]}
-                  onChange={handleChange}
-                />
-                <label
-                  htmlFor={`floating_outlined_${field.name}`}
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${errors?.[field.name]
+          <div className="grid gap-6 mb-6 md:grid-cols-2">
+            <div className="relative">
+              <input
+                type="text"
+                name="name"
+                id="floating_outlined_name"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 appearance-none peer ${
+                  errors?.name ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.name}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_name"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.name
                     ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4"
-                    }`}
-                >
-                  {field.label} <span className="text-red-600">*</span>
-                </label>
-                {errors?.[field.name] && (
-                  <span className="text-sm text-red-500">{errors[field.name]}</span>
-                )}
-              </div>
-            ))}
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Business Name <span className="text-red-600">*</span>
+              </label>
+              {errors?.name && (
+                <span className="mt-1 text-sm text-red-500">
+                  {errors?.name}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                name="mobile_no"
+                id="floating_outlined_mobile"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 appearance-none peer ${
+                  errors?.mobile_no ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.mobile_no}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_mobile"
+                className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.mobile_no
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Business Mobile <span className="text-red-600">*</span>
+              </label>
+              {errors?.mobile_no && (
+                <span className="text-sm text-red-500">
+                  {errors?.mobile_no}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="email"
+                name="email"
+                id="floating_outlined_email"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.email ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.email}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_email"
+                className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.email
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Business Email <span className="text-red-600">*</span>
+              </label>
+              {errors?.email && (
+                <span className="text-sm text-red-500">{errors?.email}</span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                name="business_mcc"
+                id="floating_outlined_mcc"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.business_mcc ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.business_mcc}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_mcc"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.business_mcc
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Business MCC <span className="text-red-600">*</span>
+              </label>
+              {errors?.business_mcc && (
+                <span className="text-sm text-red-500">
+                  {errors?.business_mcc}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="city"
+                id="floating_outlined_city"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.city ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.city}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_city"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.city
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                City <span className="text-red-600">*</span>
+              </label>
+              {errors?.city && (
+                <span className="text-sm text-red-500">{errors?.city}</span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="state"
+                id="floating_outlined_state"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.state ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.state}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_state"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.state
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                State <span className="text-red-600">*</span>
+              </label>
+              {errors?.state && (
+                <span className="text-sm text-red-500">{errors?.state}</span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="district"
+                id="floating_outlined_district"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.district ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.district}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_district"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.district
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                District <span className="text-red-600">*</span>
+              </label>
+              {errors?.district && (
+                <span className="text-sm text-red-500">{errors?.district}</span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                name="pin_code"
+                id="floating_outlined_pin"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.pin_code ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.pin_code}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_pin"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.pin_code
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Pincode <span className="text-red-600">*</span>
+              </label>
+              {errors?.pin_code && (
+                <span className="text-sm text-red-500">{errors?.pin_code}</span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="address"
+                id="floating_outlined_address"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.address ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.address}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_address"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.address
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Address <span className="text-red-600">*</span>
+              </label>
+              {errors?.address && (
+                <span className="text-sm text-red-500">{errors?.address}</span>
+              )}
+            </div>
           </div>
         )}
+
         {currentStep === 2 && (
-          <div className="grid gap-6 mb-5 md:grid-cols-2 p-4 bg-white rounded-lg shadow-md">
-
-            {/* ================= SMALL FLOATING LABEL INPUTS ================= */}
-            {[
-              { name: "company_pan_no", label: "Company PAN Number", type: "text", info: "Enter valid PAN" },
-              { name: "company_gst_no", label: "GST Number", type: "text", info: "Enter GSTIN" },
-              { name: "cin_llpin", label: "CIN LLPIN", type: "text", info: "Enter CIN No." },
-              { name: "date_of_incorporation", label: "Date of Incorporation", type: "date" },
-              { name: "account_holder_name", label: "Account Holder Name", type: "text" },
-              { name: "bank_account_no", label: "Bank Account Number", type: "number" },
-              { name: "ifsc_code", label: "IFSC Code", type: "text" },
-              { name: "website_url", label: "Website URL", type: "text" },
-            ].map((field) => (
-              <div key={field.name} className="relative p-2">
-
-                {/* Input */}
-                <input
-                  type={field.type}
-                  name={field.name}
-                  id={field.name}
-                  placeholder=" "
-                  value={memberFormData[field.name]}
-                  onChange={handleChange}
-                  className={`block w-full px-3 pt-4 pb-1 text-sm h-11
-            bg-white border rounded-lg appearance-none peer
-            focus:border-blue-600 focus:ring-0
-            ${errors?.[field.name] ? "border-red-500" : "border-gray-300"}`}
-                />
-
-                {/* Floating label */}
-                <label
-                  htmlFor={field.name}
-                  className={`absolute text-sm px-1 left-3 bg-white transition-all 
-            duration-200 text-gray-500 z-10 pointer-events-none
-            peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2
-            peer-focus:top-1 peer-focus:scale-75 peer-focus:-translate-y-0
-            peer-focus:text-blue-600`}
-                  style={{ top: "4px" }}
-                >
-                  {field.label} <span className="text-red-600">*</span>
-                </label>
-
-                {/* Tooltip */}
-                {field.info && (
-                  <div className="absolute right-4 top-3 text-lg text-gray-400 cursor-pointer group">
-                    ℹ️
-                    <span className="absolute hidden group-hover:block bg-black text-white text-xs p-1 rounded left-[-120px] top-[-5px] min-w-[110px]">
-                      {field.info}
-                    </span>
-                  </div>
-                )}
-
-                {/* Error */}
-                {errors?.[field.name] && (
-                  <p className="text-sm text-red-500 mt-1">{errors[field.name]}</p>
-                )}
-              </div>
-            ))}
-
-            {/* ================= FILE UPLOAD WITH PREVIEW + PROGRESS ================= */}
-            {[
-              { name: "company_pan_no_doc", label: "Document of PAN Card" },
-              { name: "company_gst_no_doc", label: "Document of GST Number" },
-              { name: "cancel_cheque_doc", label: "Document of Cancel Cheque" },
-            ].map((fileField) => (
-              <div key={fileField.name} className="p-2">
-
-                <label className="text-sm text-gray-700 mb-1 block">
-                  {fileField.label} <span className="text-red-600">*</span>
-                </label>
-
-                {/* Drag area */}
-                <div
-                  className={`w-full border rounded-lg p-3 h-11 flex items-center justify-center cursor-pointer bg-gray-50
-            ${errors?.[fileField.name] ? "border-red-500" : "border-gray-300"}`}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    handleFileUpload(fileField.name, e.dataTransfer.files[0]);
-                  }}
-                >
-                  <input
-                    type="file"
-                    id={fileField.name}
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(fileField.name, e.target.files[0])}
-                  />
-
-                  <label htmlFor={fileField.name} className="cursor-pointer text-gray-600 text-sm">
-                    Drag & drop or <span className="text-blue-600">browse</span>
-                  </label>
-                </div>
-
-                {/* Upload Progress */}
-                {uploadProgress[fileField.name] > 0 &&
-                  uploadProgress[fileField.name] < 100 && (
-                    <div className="w-full bg-gray-200 rounded mt-2 h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded"
-                        style={{ width: `${uploadProgress[fileField.name]}%` }}
-                      ></div>
-                    </div>
-                  )}
-
-                {/* Preview */}
-                {memberFormData[fileField.name] && (
-                  <div className="mt-2 flex items-center gap-3">
-
-                    {/* IMAGE */}
-                    {memberFormData[fileField.name].type.startsWith("image/") && (
-                      <img
-                        src={URL.createObjectURL(memberFormData[fileField.name])}
-                        className="h-12 w-12 object-cover rounded border"
-                      />
-                    )}
-
-                    {/* PDF */}
-                    {memberFormData[fileField.name].type === "application/pdf" && (
-                      <div className="text-sm flex items-center gap-2">
-                        📄 {memberFormData[fileField.name].name}
-                      </div>
-                    )}
-
-                    {/* Remove Button */}
-                    <button
-                      className="text-red-600 text-xs underline"
-                      onClick={() => removeFile(fileField.name)}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )}
-
-                {/* Error */}
-                {errors?.[fileField.name] && (
-                  <p className="text-sm text-red-500 mt-1">{errors[fileField.name]}</p>
-                )}
-              </div>
-            ))}
-
-            {/* Company Type */}
-            <div className="p-2">
-              <label className="text-sm text-gray-700 mb-1 block">
+          <div className="grid gap-6 mb-5 md:grid-cols-2">
+            <div className="relative">
+              <input
+                type="text"
+                name="company_pan_no"
+                id="floating_outlined_pan"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.company_pan_no ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder=""
+                value={memberFormData.company_pan_no}
+                onChange={handleChange}
+              />
+              <label
+                for="floating_outlined_pan"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.company_pan_no
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Company Pan Number <span className="text-red-600">*</span>
+              </label>
+              {errors?.company_pan_no && (
+                <span className="text-sm text-red-500">
+                  {errors?.company_pan_no}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="file"
+                id="company_pan_no_doc"
+                onChange={(e) =>
+                  setMemberFormData((prev) => ({
+                    ...prev,
+                    company_pan_no_doc: e.target.files[0],
+                  }))
+                }
+              />
+              {memberFormData.company_pan_no_doc && (
+                <p>Selected file: {memberFormData.company_pan_no_doc.name}</p>
+              )}
+              <label
+                for="floating_outlined_pan_doc"
+                className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+              >
+                Document Of Pan Card <span className="text-red-600">*</span>
+              </label>
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="company_gst_no"
+                id="floating_outlined_gst"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.company_gst_no ? "border-red-500" : "border-gray-300"
+                }`}
+                value={memberFormData.company_gst_no}
+                onChange={handleChange}
+                placeholder=""
+              />
+              <label
+                for="floating_outlined_gst"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.company_gst_no
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                GST Number <span className="text-red-600">*</span>
+              </label>
+              {errors?.company_gst_no && (
+                <span className="text-sm text-red-500">
+                  {errors?.company_gst_no}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="file"
+                name="company_gst_no_doc"
+                id="floating_outlined_gst_doc"
+                className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
+                placeholder=""
+              />
+              <label
+                for="floating_outlined_gst_doc"
+                className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+              >
+                Document Of GST Number <span className="text-red-600">*</span>
+              </label>
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="cin_llpin"
+                id="floating_outlined_cin"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.cin_llpin ? "border-red-500" : "border-gray-300"
+                }`}
+                value={memberFormData.cin_llpin}
+                onChange={handleChange}
+                placeholder=""
+              />
+              <label
+                for="floating_outlined_cin"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.cin_llpin
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                CIN Number <span className="text-red-600">*</span>
+              </label>
+              {errors?.cin_llpin && (
+                <span className="text-sm text-red-500">
+                  {errors?.cin_llpin}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <label
+                for="company_type"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.company_type
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
                 Company Type <span className="text-red-600">*</span>
               </label>
-
               <select
+                id="company_type"
                 name="company_type"
-                value={memberFormData.company_type}
                 onChange={handleChange}
-                className={`block w-full px-3 h-11 text-sm bg-white border rounded-lg
-          focus:border-blue-600
-          ${errors?.company_type ? "border-red-500" : "border-gray-300"}`}
+                value={memberFormData.company_type}
+                className={`bg-gray-50 border  text-gray-900 text-sm rounded-lg w-full p-2.5 ${
+                  errors?.company_type ? "border-red-500" : "border-gray-300"
+                }`}
               >
-                <option value="">Choose company type</option>
+                <option selected>Choose company type</option>
                 <option value="proprietary">Proprietary</option>
                 <option value="partnership">Partnership</option>
                 <option value="private">Private</option>
@@ -611,396 +668,564 @@ useEffect(() => {
                 <option value="aop">AOP</option>
                 <option value="ajp">AJP</option>
               </select>
+              {errors?.company_type && (
+                <span className="text-sm text-red-500">
+                  {errors?.company_type}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="date"
+                name="date_of_incorporation"
+                id="floating_outlined_date"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.date_of_incorporation
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
+                value={memberFormData.date_of_incorporation}
+                onChange={handleChange}
+                placeholder=""
+              />
+              <label
+                for="floating_outlined_date"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.date_of_incorporation
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Date Of Incorporation <span className="text-red-600">*</span>
+              </label>
+              {errors?.date_of_incorporation && (
+                <span className="text-sm text-red-500">
+                  {errors?.date_of_incorporation}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="account_holder_name"
+                id="floating_outlined_account_holder_name"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.account_holder_name
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
+                value={memberFormData.account_holder_name}
+                onChange={handleChange}
+                placeholder=""
+              />
+              <label
+                for="floating_outlined_account_holder_name"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.account_holder_name
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Account Holder Name <span className="text-red-600">*</span>
+              </label>
+              {errors?.account_holder_name && (
+                <span className="text-sm text-red-500">
+                  {errors?.account_holder_name}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                name="bank_account_no"
+                id="floating_outlined_account_number"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.bank_account_no ? "border-red-500" : "border-gray-300"
+                }`}
+                value={memberFormData.bank_account_no}
+                onChange={handleChange}
+                placeholder=""
+              />
+              <label
+                for="floating_outlined_account_number"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.bank_account_no
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Bank Account Number <span className="text-red-600">*</span>
+              </label>
+              {errors?.bank_account_no && (
+                <span className="text-sm text-red-500">
+                  {errors?.bank_account_no}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="ifsc_code"
+                id="floating_outlined_ifsc"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.ifsc_code ? "border-red-500" : "border-gray-300"
+                }`}
+                value={memberFormData.ifsc_code}
+                onChange={handleChange}
+                placeholder=""
+              />
+              <label
+                for="floating_outlined_ifsc"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.ifsc_code
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                IFSC Code <span className="text-red-600">*</span>
+              </label>
+              {errors?.ifsc_code && (
+                <span className="text-sm text-red-500">
+                  {errors?.ifsc_code}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="file"
+                name="cancel_cheque_doc"
+                id="floating_outlined_cancel_doc"
+                className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
+                placeholder=""
+              />
+              <label
+                for="floating_outlined_cancel_doc"
+                className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+              >
+                Document Of Cancel Cheque{" "}
+                <span className="text-red-600">*</span>
+              </label>
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                name="website_url"
+                id="floating_outlined_web"
+                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                  errors?.website_url ? "border-red-500" : "border-gray-300"
+                }`}
+                value={memberFormData.website_url}
+                onChange={handleChange}
+                placeholder=""
+              />
+              <label
+                for="floating_outlined_web"
+                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                  errors?.website_url
+                    ? "peer-focus:text-red-600"
+                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                }`}
+              >
+                Website Url <span className="text-red-600">*</span>
+              </label>
+              {errors?.website_url && (
+                <span className="text-sm text-red-500">
+                  {errors?.website_url}
+                </span>
+              )}
             </div>
           </div>
         )}
 
-
-
-
-        {/* Step 3: Director Information */}
         {currentStep === 3 &&
           memberFormData.director_info.map((director, index) => (
-            <div key={index} className="grid gap-6 mb-6 md:grid-cols-2 p-4 bg-white rounded-lg shadow-sm">
-
-              {/* Director Name */}
-              <div className="relative w-full">
+            <div key={index} className="grid gap-6 mb-6 md:grid-cols-2">
+              <div className="relative">
                 <input
                   type="text"
-                  id={`director_name_${index}`}
+                  id="floating_outlined_director_name"
                   name="director_name"
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                    errors?.director?.[index]?.director_name
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
                   value={director.director_name}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  placeholder=" "
-                  className={`block w-full text-sm text-gray-900 bg-transparent border border-gray-300 rounded-lg px-4 pt-5 pb-2 appearance-none peer ${errors?.director?.[index]?.director_name ? "border-red-500" : ""
-                    }`}
+                  placeholder=""
                   required
                 />
                 <label
-                  htmlFor={`director_name_${index}`}
-                  className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 bg-white px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 peer-focus:text-blue-600"
+                  for="floating_outlined_director_name"
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                    errors?.director?.[index]?.director_name
+                      ? "peer-focus:text-red-600"
+                      : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                  }`}
                 >
                   Name <span className="text-red-600">*</span>
                 </label>
+                {errors?.director?.[index]?.director_name && (
+                  <span className="text-sm text-red-500">
+                    {errors?.director?.[index]?.director_name}
+                  </span>
+                )}
               </div>
-
-              {/* Gender */}
-              <div className="relative w-full">
-                <select
-                  id={`director_gender_${index}`}
-                  name="director_gender"
-                  value={director.director_gender}
-                  onChange={(e) => handleDirectorChange(index, e)}
-                  className="block w-full p-3 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg"
-                  required
-                >
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
+              <div className="relative">
                 <label
-                  htmlFor={`director_gender_${index}`}
-                  className="absolute text-sm text-gray-500 -translate-y-4 scale-75 top-2 z-10 bg-white px-2"
+                  for="default"
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                    errors?.director?.[index]?.director_gender
+                      ? "peer-focus:text-red-600"
+                      : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                  }`}
                 >
                   Gender
                 </label>
+                <select
+                  id="default"
+                  name="director_gender"
+                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
+                    errors?.director?.[index]?.director_gender
+                      ? "border-red-500"
+                      : " border-gray-300"
+                  }`}
+                  value={director.director_gender}
+                  onChange={(e) => handleDirectorChange(index, e)}
+                  required
+                >
+                  <option selected>Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+                {errors?.director?.[index]?.director_gender && (
+                  <span className="text-sm text-red-500">
+                    {errors?.director?.[index]?.director_gender}
+                  </span>
+                )}
               </div>
-
-              {/* PAN Number */}
-              <div className="relative w-full">
+              <div className="relative">
                 <input
                   type="text"
-                  id={`director_pan_no_${index}`}
+                  id="floating_outlined_director_pan"
                   name="director_pan_no"
                   value={director.director_pan_no}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  placeholder=" "
-                  className={`block w-full text-sm text-gray-900 bg-transparent border border-gray-300 rounded-lg px-4 pt-5 pb-2 peer ${errors?.director?.[index]?.director_pan_no ? "border-red-500" : ""
-                    }`}
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                    errors?.director?.[index]?.director_pan_no
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                  placeholder=""
                   required
                 />
                 <label
-                  htmlFor={`director_pan_no_${index}`}
-                  className="absolute text-sm text-gray-500 -translate-y-4 scale-75 top-2 z-10 bg-white px-2 peer-focus:text-blue-600"
+                  for="floating_outlined_director_pan"
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                    errors?.director?.[index]?.director_pan_no
+                      ? "peer-focus:text-red-600"
+                      : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                  }`}
                 >
-                  PAN Number <span className="text-red-600">*</span>
+                  Pan Number <span className="text-red-600">*</span>
                 </label>
-              </div>
-
-              {/* PAN Document Upload */}
-              <div className="relative w-full">
-                <input
-                  type="file"
-                  id={`director_pan_doc_${index}`}
-                  name="director_pan_doc"
-                  onChange={(e) => handleFileUpload(`director_pan_doc_${index}`, e.target.files[0])}
-                  className="block w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg px-4 pt-5 pb-2 cursor-pointer peer"
-                />
-                <label
-                  htmlFor={`director_pan_doc_${index}`}
-                  className="absolute text-sm text-gray-500 -translate-y-4 scale-75 top-2 z-10 bg-white px-2 peer-focus:text-blue-600"
-                >
-                  Upload PAN Card <span className="text-red-600">*</span>
-                </label>
-                {memberFormData[`director_pan_doc_${index}`] && (
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-sm text-gray-700 truncate">
-                      {memberFormData[`director_pan_doc_${index}`].name}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-red-600 text-sm font-medium"
-                      onClick={() => removeFile(`director_pan_doc_${index}`)}
-                    >
-                      Remove
-                    </button>
-                  </div>
+                {errors?.director?.[index]?.director_pan_no && (
+                  <span className="text-sm text-red-500">
+                    {errors?.director?.[index]?.director_pan_no}
+                  </span>
                 )}
               </div>
-
-
-
-
-              {/* Aadhar Number */}
-              <div className="relative w-full">
+              <div className="relative">
+                <input
+                  type="file"
+                  id="floating_outlined_director_pan_doc"
+                  name="director_pan_doc"
+                  className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
+                  placeholder=""
+                />
+                <label
+                  for="floating_outlined_director_pan_doc"
+                  className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                >
+                  Document Of Pan Card <span className="text-red-600">*</span>
+                </label>
+              </div>
+              <div className="relative">
                 <input
                   type="number"
-                  id={`director_aadhar_no_${index}`}
+                  id="floating_outlined_director_aadhar_no"
                   name="director_aadhar_no"
                   value={director.director_aadhar_no}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  placeholder=" "
-                  className={`block w-full text-sm text-gray-900 bg-transparent border border-gray-300 rounded-lg px-4 pt-5 pb-2 peer ${errors?.director?.[index]?.director_aadhar_no ? "border-red-500" : ""
-                    }`}
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                    errors?.director?.[index]?.director_aadhar_no
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                  placeholder=""
                   required
                 />
                 <label
-                  htmlFor={`director_aadhar_no_${index}`}
-                  className="absolute text-sm text-gray-500 -translate-y-4 scale-75 top-2 z-10 bg-white px-2 peer-focus:text-blue-600"
+                  for="floating_outlined_director_aadhar_no"
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                    errors?.director?.[index]?.director_aadhar_no
+                      ? "peer-focus:text-red-600"
+                      : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                  }`}
                 >
                   Aadhar Number <span className="text-red-600">*</span>
                 </label>
-              </div>
-
-              {/* Aadhar Document Upload */}
-              <div className="relative w-full">
-                <input
-                  type="file"
-                  id={`director_aadhar_doc_${index}`}
-                  name="director_aadhar_doc"
-                  onChange={(e) => handleFileUpload(`director_aadhar_doc_${index}`, e.target.files[0])}
-                  className="block w-full text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg px-4 pt-5 pb-2 cursor-pointer"
-                />
-                <label
-                  htmlFor={`director_aadhar_doc_${index}`}
-                  className="absolute text-sm text-gray-500 -translate-y-4 scale-75 top-2 z-10 bg-white px-2 peer-focus:text-blue-600"
-                >
-                  Upload AADHAR Card <span className="text-red-600">*</span>
-                </label>
-                {memberFormData[`director_aadhar_doc_${index}`] && (
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-sm text-gray-700 truncate">
-                      {memberFormData[`director_aadhar_doc_${index}`].name}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-red-600 text-sm font-medium"
-                      onClick={() => removeFile(`director_aadhar_doc_${index}`)}
-                    >
-                      Remove
-                    </button>
-                  </div>
+                {errors?.director?.[index]?.director_aadhar_no && (
+                  <span className="text-sm text-red-500">
+                    {errors?.director?.[index]?.director_aadhar_no}
+                  </span>
                 )}
               </div>
-
-              {/* DOB */}
-              <div className="relative w-full">
+              <div className="relative">
+                <input
+                  type="file"
+                  id="floating_outlined_director_aadhar_doc"
+                  name="director_aadhar_doc"
+                  className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer"
+                  placeholder=""
+                />
+                <label
+                  for="floating_outlined_director_aadhar_doc"
+                  className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                >
+                  Document Of Aadhar Card{" "}
+                  <span className="text-red-600">*</span>
+                </label>
+              </div>
+              <div className="relative">
                 <input
                   type="date"
-                  id={`director_dob_${index}`}
+                  id="floating_outlined_director_dob"
                   name="director_dob"
                   value={director.director_dob}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  className={`block w-full text-sm text-gray-900 bg-transparent border border-gray-300 rounded-lg px-4 pt-5 pb-2 peer ${errors?.director?.[index]?.director_dob ? "border-red-500" : ""
-                    }`}
+                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none peer ${
+                    errors?.director?.[index]?.director_dob
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                  placeholder=""
                   required
                 />
                 <label
-                  htmlFor={`director_dob_${index}`}
-                  className="absolute text-sm text-gray-500 -translate-y-4 scale-75 top-2 z-10 bg-white px-2 peer-focus:text-blue-600"
+                  for="floating_outlined_director_dob"
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                    errors?.director?.[index]?.director_dob
+                      ? "peer-focus:text-red-600"
+                      : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                  }`}
                 >
                   DOB <span className="text-red-600">*</span>
                 </label>
+                {errors?.director?.[index]?.director_dob && (
+                  <span className="text-sm text-red-500">
+                    {errors?.director?.[index]?.director_dob}
+                  </span>
+                )}
               </div>
-
-              {/* Remove Director */}
-              <div className="flex items-center justify-center">
+              <div>
                 <Button
                   type="button"
                   onClick={() => removeDirector(index)}
                   className="text-red-800 p-3 rounded-xl cursor-pointer"
                 >
-                  <i className="fa-solid fa-trash fa-lg"></i>
+                  <i class="fa-solid fa-trash fa-lg"></i>
                 </Button>
               </div>
             </div>
           ))}
 
-        {/* Step 4: Bank & Scheme */}
-        {/* Step 4: Bank & Scheme */}
-{currentStep === 4 && (
-  <div className="grid gap-6 mb-6 md:grid-cols-2 p-4 bg-white rounded-lg shadow-sm">
+        {currentStep === 4 && (
+          <div className="grid gap-6 mb-6 md:grid-cols-2 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              {/* <div className="flex gap-3 items-start"> */}
+              {/* 🏦 Bank Select */}
+              <div className="relative flex-1">
+                <label
+                  htmlFor="payin_at_onboard"
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                    errors?.payin_at_onboard
+                      ? "peer-focus:text-red-600"
+                      : "peer-focus:text-blue-600"
+                  }`}
+                >
+                  Payin at Onboard
+                </label>
 
-    {/* Payin Bank + Add Button */}
-    <div className="flex items-center gap-2 w-full">
-      <div className="relative flex-1">
-        <label
-          htmlFor="payin_at_onboard"
-          className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 bg-white px-2 ${
-            errors?.payin_at_onboard ? "peer-focus:text-red-600" : "peer-focus:text-blue-600"
-          }`}
-        >
-          Payin Bank
-        </label>
+                <select
+                  id="payin_at_onboard"
+                  name="payin_at_onboard"
+                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
+                    errors?.payin_at_onboard
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                  value={memberFormData.payin_at_onboard}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Bank</option>
+                  {payinBanks?.data.map((item) => (
+                    <option key={item.id} value={item.onboard_payin_bank}>
+                      {item.onboard_payin_bank}
+                    </option>
+                  ))}
+                </select>
 
-        <select
-          id="payin_at_onboard"
-          name="payin_at_onboard"
-          value={memberFormData.payin_at_onboard}
-          onChange={(e) => {
-            // call your generic handler first
-            handleChange(e);
-            // if switching away from Airpay, clear credentials_id immediately
-            if (e.target.value !== "Airpay") {
-              setMemberFormData((prev) => ({ ...prev, credentials_id: "" }));
-            }
-          }}
-          className={`block w-full text-sm text-gray-900 bg-gray-50 border rounded-lg px-4 py-3 ${
-            errors?.payin_at_onboard ? "border-red-500" : "border-gray-300"
-          }`}
-          required
-        >
-          <option value="">Select Payin Bank</option>
-          {payinBanks?.data?.map((item) => (
-            <option key={item.id} value={item.onboard_payin_bank}>
-              {item.onboard_payin_bank}
-            </option>
-          ))}
-        </select>
+                {errors?.payin_at_onboard && (
+                  <span className="text-sm text-red-500">
+                    {errors?.payin_at_onboard}
+                  </span>
+                )}
+              </div>
+              <Button
+                type="button"
+                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                onClick={handlePayinModal}
+              >
+                +
+              </Button>
+              {/* 💳 Airpay MID Select — only show when Airpay is selected */}
+              {memberFormData.payin_at_onboard === "Airpay" && (
+                <div className="relative flex-1">
+                  <label
+                    htmlFor="airpay_mid"
+                    className="absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2"
+                  >
+                    Airpay MID
+                  </label>
 
-        {errors?.payin_at_onboard && (
-          <span className="text-sm text-red-500">{errors?.payin_at_onboard}</span>
+                  <select
+                    id="airpay_mid"
+                    name="credentials_id"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
+                    value={memberFormData.airpay_mid}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Airpay MID</option>
+                    {airpayMids.map((mid) => (
+                      <option key={mid.id} value={mid.id}>
+                        {mid.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {/* </div> */}
+            </div>
+
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative flex-1">
+                <label
+                  for="default"
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                    errors?.payout_at_onboard
+                      ? "peer-focus:text-red-600"
+                      : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                  }`}
+                >
+                  Payout at Onboard
+                </label>
+                <select
+                  id="default"
+                  name="payout_at_onboard"
+                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
+                    errors?.payout_at_onboard
+                      ? "border-red-500"
+                      : " border-gray-300"
+                  }`}
+                  value={memberFormData.payout_at_onboard}
+                  onChange={handleChange}
+                  required
+                >
+                  <option selected>Select Bank</option>
+                  {payoutBanks?.data.map((item) => {
+                    return (
+                      <option key={item.id} value={item.onboard_payout_bank}>
+                        {item.onboard_payout_bank}
+                      </option>
+                    );
+                  })}
+                </select>
+                {errors?.payout_at_onboard && (
+                  <span className="text-sm text-red-500">
+                    {errors?.payout_at_onboard}
+                  </span>
+                )}
+              </div>
+
+              <Button
+                type="button"
+                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                onClick={handlePayoutModal}
+              >
+                +
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative flex-1">
+                <label
+                  htmlFor="default"
+                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 ${
+                    errors?.scheme_id
+                      ? "peer-focus:text-red-600"
+                      : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+                  }`}
+                >
+                  Scheme
+                </label>
+                <select
+                  id="default"
+                  name="scheme_id"
+                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
+                    errors?.scheme_id ? "border-red-500" : " border-gray-300"
+                  }`}
+                  value={memberFormData.scheme_id}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Scheme</option>
+                  {schemes?.data.map((item) => {
+                    return (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    );
+                  })}
+                </select>
+                {errors?.scheme_id && (
+                  <span className="text-sm text-red-500">
+                    {errors?.scheme_id}
+                  </span>
+                )}
+              </div>
+
+              <Button
+                type="button"
+                className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
+                onClick={handleSchemeModal}
+              >
+                +
+              </Button>
+            </div>
+          </div>
         )}
-      </div>
 
-      {/* + Button */}
-      <button
-        type="button"
-        onClick={handlePayinModal}
-        className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
-      >
-        +
-      </button>
-    </div>
-
-    {/* Show Airpay MID only when Payin bank = Airpay */}
-    {memberFormData.payin_at_onboard === "Airpay" && (
-      <div className="relative w-full">
-        <label
-          htmlFor="credentials_id"
-          className="absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 bg-white px-2"
-        >
-          Airpay MID
-        </label>
-
-        <select
-          id="credentials_id"
-          name="credentials_id"
-          value={memberFormData.credentials_id || ""}
-          onChange={(e) => {
-            // keep consistent naming: credentials_id is what backend expects
-            handleChange(e);
-          }}
-          className={`block w-full text-sm text-gray-900 bg-gray-50 border rounded-lg px-4 py-3 ${
-            errors?.credentials_id ? "border-red-500" : "border-gray-300"
-          }`}
-          required
-        >
-          <option value="">Select Airpay MID</option>
-          {airpayMids?.map((mid) => (
-            <option key={mid.id} value={mid.id}>
-              {mid.name}
-            </option>
-          ))}
-        </select>
-
-        {errors?.credentials_id && (
-          <span className="text-sm text-red-500">{errors?.credentials_id}</span>
-        )}
-      </div>
-    )}
-
-    {/* Payout Bank + Add Button */}
-    <div className="relative w-full">
-      <label
-        htmlFor="payout_at_onboard"
-        className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 bg-white px-2 ${
-          errors?.payout_at_onboard ? "peer-focus:text-red-600" : "peer-focus:text-blue-600"
-        }`}
-      >
-        Payout Bank
-      </label>
-
-      <div className="flex items-center gap-2">
-        <select
-          id="payout_at_onboard"
-          name="payout_at_onboard"
-          value={memberFormData.payout_at_onboard}
-          onChange={handleChange}
-          className={`block flex-1 text-sm text-gray-900 bg-gray-50 border rounded-lg px-4 py-3 ${
-            errors?.payout_at_onboard ? "border-red-500" : "border-gray-300"
-          }`}
-          required
-        >
-          <option value="">Select Payout Bank</option>
-          {payoutBanks?.data?.map((item) => (
-            <option key={item.id} value={item.onboard_payout_bank}>
-              {item.onboard_payout_bank}
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="button"
-          onClick={handlePayoutModal}
-          className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
-        >
-          +
-        </button>
-      </div>
-
-      {errors?.payout_at_onboard && (
-        <span className="text-sm text-red-500">{errors?.payout_at_onboard}</span>
-      )}
-    </div>
-
-    {/* Scheme + Add Button */}
-    <div className="relative w-full">
-      <label
-        htmlFor="scheme_id"
-        className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 bg-white px-2 ${
-          errors?.scheme_id ? "peer-focus:text-red-600" : "peer-focus:text-blue-600"
-        }`}
-      >
-        Scheme
-      </label>
-
-      <div className="flex items-center gap-2">
-        <select
-          id="scheme_id"
-          name="scheme_id"
-          value={memberFormData.scheme_id}
-          onChange={handleChange}
-          className={`block flex-1 text-sm text-gray-900 bg-gray-50 border rounded-lg px-4 py-3 ${
-            errors?.scheme_id ? "border-red-500" : "border-gray-300"
-          }`}
-        >
-          <option value="">Select Scheme</option>
-          {schemes?.data?.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="button"
-          onClick={handleSchemeModal}
-          className="cursor-pointer text-white font-medium rounded-full w-10 h-10 text-lg flex items-center justify-center bg-blue-500 hover:bg-blue-800"
-        >
-          +
-        </button>
-      </div>
-
-      {errors?.scheme_id && (
-        <span className="text-sm text-red-500">{errors?.scheme_id}</span>
-      )}
-    </div>
-  </div>
-)}
-
-
-
-
-        <div className="flex justify-between p-4 gap-4 bg-white rounded-lg shadow-sm">
-          {/* Left buttons: Prev / Next / Submit */}
-          <div className="flex flex-wrap gap-3">
+        <div className="flex justify-between">
+          <div>
             <button
               type="button"
-              className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center ${currentStep === 1
-                ? "disabled bg-gray-500 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-800 cursor-pointer"
-                }`}
+              className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-3 ${
+                currentStep === 1
+                  ? "disabled bg-gray-500 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-800 cursor-pointer"
+              }`}
               onClick={handlePrev}
             >
               &lt; Prev
@@ -1025,14 +1250,12 @@ useEffect(() => {
               </button>
             )}
           </div>
-
-          {/* Right buttons: Add Director / Go Back */}
-          <div className="flex flex-wrap gap-3">
+          <div className="flex justify-between">
             {currentStep === 3 && (
               <Button
                 type="button"
                 onClick={addDirector}
-                className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-800"
+                className="cursor-pointer px-4 py-2 mr-2 bg-blue-600 text-white rounded-lg hover:bg-blue-800"
               >
                 + Add Director
               </Button>
@@ -1046,7 +1269,6 @@ useEffect(() => {
             </Button>
           </div>
         </div>
-
       </form>
 
       <SchemeModal
@@ -1073,7 +1295,7 @@ useEffect(() => {
 
       <ConfirmModal
         showConfirmModal={showConfirmModal}
-        heading={"Are you sure you want to go back? "}
+        heading={"Are you sure you want to go back?"}
         body={"If you go back then you will lose your filled data in form."}
         handleConfirmModal={setShowConfirmModal}
         action={() => navigate("/member-list")}
