@@ -26,9 +26,7 @@ const PayoutStatement = () => {
       const formattedData = data.data.map((item, index) => ({
         sqno: (
           <div className="flex flex-col text-left">
-            <span>
-              <b>{index + 1}</b>
-            </span>
+            <span><b>{index + 1}</b></span>
             <span>
               {new Date(item.created_at).getDate()}{" "}
               {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
@@ -48,49 +46,46 @@ const PayoutStatement = () => {
             <span>Account: <b>{item.payer_acc_no}</b></span>
             <span>Holder: <b>{item.payer_name}</b></span>
             <span>IFSC: <b>{item.payer_ifsc}</b></span>
-            <span>UPI Id: <b>{item.payer_ifsc}</b></span>
+            <span>UPI Id: <b>{item.payer_upi ?? "N/A"}</b></span>
             <span>Mobile: <b>{item.payer_mobile}</b></span>
           </div>
         ),
+
         reference_details: (
           <div className="flex flex-col text-left">
             <span>Ref No: <b>{item.refno ?? "null"}</b></span>
             <span>Order ID: <b>{item.mytxnid}</b></span>
-            <span>Txnid: <br/><b>{item.txnid}</b></span>
+            <span>Txnid: <br /><b>{item.txnid}</b></span>
           </div>
         ),
 
+        // JSX for table
         amount: (
           <div className="flex flex-col text-left">
-            <span>Opening Wallet Amount: <b>{item.payout_opening_balance ?? "null"}</b></span>
+            <span>Opening Wallet Amount: <b>{item.payout_opening_balance ?? "0"}</b></span>
             <span>Pay Amount: <b>{item.payout_amount}</b></span>
-            <span>Total Charges: <b>{item.payer_name}</b></span>
-            <span>Total Debited Amount: <b>{item.payer_ifsc}</b></span>
-            <span>Closing Wallet Amount: <b>{item.payer_mobile}</b></span>
-            <span>Note: <b>{item.payer_mobile}</b></span>
+            <span>Total Charges: <b>{item.payer_charges ?? 0}</b></span>
+            <span>Total Debited Amount: <b>{item.total_debit ?? 0}</b></span>
+            <span>Closing Wallet Amount: <b>{item.payout_closing_balance ?? 0}</b></span>
+            <span>Note: <b>{item.note ?? "-"}</b></span>
           </div>
         ),
-        date:
-          new Date(item.created_at).getDate() +
-          " " +
-          MONTH_NAMES[new Date(item.created_at).getMonth()] +
-          " " +
-          new Date(item.created_at).getFullYear() +
-          " - " +
-          new Date(item.created_at).toLocaleTimeString(),
+
+        // Numeric value for calculations
+        numericAmount: parseFloat(item.payout_amount) || 0,
+
+        date: new Date(item.created_at).toISOString(),
         status: item.status,
         showstatus: (
           <span
-            className={`px-2 py-1 rounded-full text-sm font-medium ${
-              statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-            }`}
+            className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+              }`}
           >
-            {item?.status
-              ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
-              : "N/A"}
+            {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "N/A"}
           </span>
         ),
       }));
+
       setPayoutData(formattedData);
     }
   }, [data]);
@@ -103,7 +98,7 @@ const PayoutStatement = () => {
     { header: "Reference Details", accessor: "reference_details" },
     { header: "Amount/commission", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
-    
+
   ];
 
   return (

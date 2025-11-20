@@ -25,38 +25,41 @@ const Acc_upi_setlement = () => {
     };
 
     if (data?.data) {
-      const formattedData = data.data.map((item, index) => ({
-        sqno: index + 1,
-        id: item.id,
-        user_id: item.user_id,
-        product_type: item.product ?? "N/A",
-        merchant_details: item.user.name ?? "N/A",
-        txnid: item.txnid ?? "N/A",
-        amount: item.amount ?? "N/A",
-        date:
-          new Date(item.created_at).getDate() +
-          " " +
-          MONTH_NAMES[new Date(item.created_at).getMonth()] +
-          " " +
-          new Date(item.created_at).getFullYear() +
-          " - " +
-          new Date(item.created_at).toLocaleTimeString(),
-        status: item.status,
-        showstatus: (
-          <span
-            className={`px-2 py-1 rounded-full text-sm font-medium ${
-              statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-            }`}
-          >
-            {item?.status
-              ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
-              : "N/A"}
-          </span>
-        ),
-      }));
-      setPayinSettlementData(formattedData);
-    }
-  }, [data]);
+  const formattedData = data.data.map((item, index) => ({
+    sqno: index + 1,
+    id: item.id,
+    user_id: item.user_id,
+    product_type: item.product ?? "N/A",
+    merchant_details: item.user.name ?? "N/A",
+    txnid: item.txnid ?? "N/A",
+    amount: item.amount ?? "N/A",
+
+    // ✅ Numeric value for calculations
+    numericAmount: parseFloat(item.amount) || 0,
+
+    date:
+      new Date(item.created_at).getDate() +
+      " " +
+      MONTH_NAMES[new Date(item.created_at).getMonth()] +
+      " " +
+      new Date(item.created_at).getFullYear() +
+      " - " +
+      new Date(item.created_at).toLocaleTimeString(),
+    status: item.status,
+    showstatus: (
+      <span
+        className={`px-2 py-1 rounded-full text-sm font-medium ${
+          statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+        }`}
+      >
+        {item?.status
+          ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+          : "N/A"}
+      </span>
+    ),
+  }));
+  setPayinSettlementData(formattedData);
+} }, [data]);
 
   const payinSettlementColumn = [
     { header: "SQ NO", accessor: "sqno" },
