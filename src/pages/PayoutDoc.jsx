@@ -32,7 +32,7 @@ const PayoutDoc = () => {
   {
     id: "airpay-request",
     title: "Create Payin Payment Request",
-    type: "api",
+    type: "api1",
     endpoint: "POST https://live.spay.live/api/AP/payin/request",
     headers: "Content-Type: application/json",
     parameters: [
@@ -79,7 +79,7 @@ efda516e&am=10.00&mam=10.00&mc=5999&mode=04&tr=XXXX 377960382&ver=1"
   {
     id: "airpay-status",
     title: "Check Payment Status",
-    type: "api",
+    type: "api1",
     endpoint: "POST https://live.spay.live/api/AP/payin/status",
     headers: "Content-Type: multipart/form-data; boundary=",
     parameters: [
@@ -158,7 +158,7 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
           message: "Payment is in process and pending confirmation",
         },
       ],     
-    type: "api",
+    type: "api1",
   },
 
   {
@@ -247,7 +247,7 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
   {
     id: "payu-request",
     title: "Create Payin Payment Request",
-    type: "api",
+    type: "api1",
 
     endpoint: "POST https://live.spay.live/api/CF/payin/request",
     headers: "Content-Type: application/x-www-form-urlencoded",
@@ -303,7 +303,7 @@ curl--location 'https://live.spay.live/api/CF/payin/request'
   {
     id: "payu-status",
     title: "Check Payment Status",
-    type: "api",
+    type: "api1",
 
     endpoint: "POST https://live.spay.live/api/CF/payin/status",
     headers: "Content-Type: multipart/form-data; boundary=",
@@ -480,7 +480,7 @@ const BUSYBOX_SECTIONS = [
   {
     id: "busybox-request",
     title: "Create Payin Payment Request",
-    type: "api",
+    type: "api1",
     endpoint: "POST https://live.spay.live/api/bb/payin/request",
     headers: "Content-Type: application/json",
     parameters: [
@@ -526,7 +526,7 @@ curl--location 'https://live.spay.live/api/bb/payin/request'
   {
     id: "busybox-status",
     title: "Check Payment Status",
-    type: "api",
+    type: "api1",
     endpoint: "POST https://live.spay.live/api/bb/payin/status",
     headers: "Content-Type: multipart/form-data; boundary=",
     parameters: [
@@ -713,7 +713,7 @@ curl--location 'POST https://live.spay.live/api/bb/payin/status'
     if (!activeApi) return <p>Loading...</p>;
 
     switch (activeApi.type) {
-      case "api":
+      case "api1":
         return (
           <>
             <div className="content-header">
