@@ -100,6 +100,7 @@ const Acc_upi_setlement = () => {
             showExport={true}
             showSearch={false}
             showSelectUserFilter={true}
+            showDateFilter={true}
             showDeleteColumn={false}
             statusList={REPORT_STATUSES}
             className="shadow-lg rounded-lg overflow-hidden min-w-[700px] sm:min-w-full"
