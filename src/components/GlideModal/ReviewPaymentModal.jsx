@@ -61,7 +61,7 @@ export default function ReviewPaymentModal({
             <div>
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-5">
-                    <img src={merchantLogo} className="w-12 h-12 rounded-lg" alt="merchant" />
+                    {/* <img src={merchantLogo} className="w-12 h-12 rounded-lg" alt="merchant" /> */}
                     <div>
                         <p className="text-xl font-semibold">{merchantName}</p>
                         <p className="text-sm text-gray-500">Payment Request</p>
@@ -89,8 +89,8 @@ export default function ReviewPaymentModal({
 
                     {/* Session ID */}
                     <div className="p-4 bg-gray-100 rounded-xl">
-                        <p className="text-sm text-gray-500">Session ID</p>
-                        <p>{sessionId}</p>
+                        {/* <p className="text-sm text-gray-500">Session ID</p>
+                        <p>{sessionId}</p> */}
                         <p className="text-xs text-orange-600 mt-1">
                             Valid for 10 minutes
                         </p>
@@ -112,7 +112,7 @@ export default function ReviewPaymentModal({
                 </button>
 
                 <p className="text-center text-xs text-gray-400 mt-6">
-                Secured by <span className="font-semibold">SpayPG</span>
+                Secured by <span className="font-semibold">Spay Fintech pvt ltd</span>
                 </p>
             </div>
         </Modal>
