@@ -20,7 +20,7 @@ export const Dashboard = () => {
   );
   const initialDataOfTransactions = tableData?.data;
 
-  const processTableData = useMemo(() => {
+  const processTableData = useMemo(() => { 
     if (!initialDataOfTransactions) return [];
 
     return [...initialDataOfTransactions].sort(
