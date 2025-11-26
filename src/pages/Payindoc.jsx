@@ -158,7 +158,7 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
           message: "Payment is in process and pending confirmation",
         },
       ],     
-    type: "api",
+    
   },
 
   {
@@ -387,7 +387,7 @@ curl--location "https://live.spay.live/api/CF/payin/status”
           message: "Payment is in process and pending confirmation",
         },
       ],     
-    type: "api",
+    
   },
 
   {
@@ -605,7 +605,7 @@ curl--location 'POST https://live.spay.live/api/bb/payin/status'
         },
 
       ],
-    type: "api",
+    
   },
   {
     id: "busybox-callback",

@@ -3,7 +3,7 @@ import "../css/documents.css";
 import { useGet } from "../hooks/useGet";
 
 const PayoutDoc = () => {
-  const [activeSection, setActiveSection] = useState("payin-request");
+  const [activeSection, setActiveSection] = useState("payout-request");
   const [provider, setProvider] = useState("airpay"); // default until backend loads
   const [apiSections, setApiSections] = useState([]);
 
@@ -12,106 +12,118 @@ const PayoutDoc = () => {
   // -----------------------------------------
   
   const { data: getmerchant } = useGet("/show-merchant/${id}");
-  const [payinGateway, setpayinGateway] = useState(null);
+  const [payoutGateway, setpayoutGateway] = useState(null);
   
     useEffect(() => {
-      // Fetch selected payin provider
+      // Fetch selected Payout provider
       if (getmerchant?.data ) {
-        setpayinGateway(getmerchant.data.payout_at_onboard);
+        setpayoutGateway(getmerchant.data.payout_at_onboard);
       }
     }, [getmerchant]);
 
-  console.log(getmerchant);
-  console.log(payinGateway);
+  // console.log(getmerchant);
+  console.log(payoutGateway);
 
-  // -----------------------------------------
-  // 👉 AIRPAY API DATA
-  // -----------------------------------------
-
-  const AIRPAY_SECTIONS = [
+// -----------------------------------------
+// 👉 AIRPAY API DATA
+// -----------------------------------------
+  const CASHFREE_SECTIONS = [
   {
-    id: "airpay-request",
-    title: "Create Payin Payment Request",
+    id: "cashfree-request",
+    title: "Create Payout Payment Request",
     type: "api1",
-    endpoint: "POST https://live.spay.live/api/AP/payin/request",
+    endpoint: "POST https://live.spay.live/api/CF/payout/payment/request",
     headers: "Content-Type: application/json",
     parameters: [
-      { field: "token", type: "String", required: "Yes", description: "API key/token provided by Spay" },
+      { field: "token", type: "String", required: "Yes", description: "API key/token provided by Spay for authentication" },
       { field: "orderid", type: "String", required: "Yes", description: "Unique transaction ID (merchant side) Maximum 20 Characters" },
-      { field: "amount", type: "String", required: "Yes", description: "Transaction amount in INR" },
-      { field: "buyer_email", type: "String", required: "Yes", description: "Customer's email address" },
-      { field: "buyer_phone", type: "String", required: "Yes", description: "Customer's 10-digit mobile number" },
+      { field: "beneficiary_name", type: "String", required: "Yes", description: "Beneficiary account holder's full name" },
+      { field: "beneficiary_email", type: "String", required: "Yes", description: "Beneficiary's email address (for communication/receipt)" },
+      { field: "beneficiary_phone", type: "String", required: "Yes", description: "Beneficiary's 10-digit mobile number" },
+      { field: "amount", type: "String", required: "Yes", description: "Payout amount in INR" },
+      { field: "beneficiary_account_number", type: "String", required: "Yes", description: "Beneficiary's bank account number" },
+      { field: "beneficiary_ifsc", type: "String", required: "Yes", description: "Beneficiary's bank IFSC code" },
     ],
     request: {
       curl: `
-curl--location "https://live.spay.live/api/AP/payin/request"
---form 'token="Sha6Nplm0pXXXXXxp8ABGQKUE6g"
---form 'orderid="TESTXXXX3117xX"
---form 'amount="10.00"
---form 'buyer_email="tXXX@gmail.com"
---form 'buyer_phone="1122XXXXX"
+curl --location https://live.spay.live/api/CF/payout/payment/request
+--form 'token="Q9xRwseKPkXXXXXXXXtygT78wnHPji"
+--form 'orderid="AKXXXXX"
+--form "beneficiary_email=customer / enduser mail_id"
+--form "beneficiary_phone=customer / enduser mobile no"
+--form 'amount=10XX.00'
+--form 'beneficiary_account_number="17459XXXXX"
+--form 'beneficiary_ifsc="KKBK00XXXXX"
+--form 'beneficiary_name=customer / enduser name'
       `,
     },
     successResponse: {
       curl: `
 {
-"status_code": "200",
-"status": "success",
+"status": "pending",
+"statuscode": 200,
+"message": "✅ Payout status: Pending,
 "data": {
-"qrcode_string": "upi://pay?
-pa=XXXXXXX@ypbiz&pn=f59d23ac19020c989cd8566a4ea16646ad4e02f67516cedc3bd7d833
-efdaXXXx&cu=INR&tn=Pay+to+f59d23ac19020c9XXXXXea16646ad4e02f67516cedc3bd7d833
-efda516e&am=10.00&mam=10.00&mc=5999&mode=04&tr=XXXX 377960382&ver=1"
-"txnid": "SPAY2025101711XXXX45"
+"message": "Transfer Initiated",
+"bene_name": "name",
+"customer_account": "xxxxxxx7325",
+"amount": "1.00",
+"client_ref_no": "AK00XXXXX1",
+"txn_date": "2025-XX-1X 16:XX:49"
+"rrn": "null"
 }
       `,
     },
     errorExamples: [
-      { code: "400", message: "Missing required fields: name,mobile, etc", cause: "Required fields are not included" },
-      { code: "403", message: "Your PayIN account is deactivated. Please contact the administrator.", cause: "Payin deactivated by Spay" },
-      { code: "409", message: "Transaction ID already exists", cause: "Duplicate apitxnid used" },
+      { code: "403", message: "Your Payout account is deactivated. Please contact the administrator.", cause: "Payout deactivated by Spay" },
       { code: "401", message: "Unauthorized", cause: "Invalid or expired token or Authorization header" },
-      { code: "422", message: "Amount must be a positive numeric value", cause: "Invalid or zero amount" },
+      { code: "422", message: "Validator Error", cause: "Occurs when required fields (orderid, amount, beneficiary_name, beneficiary_phone, beneficiary_email) are missing or invalid. Example: {\"errors\":{\"orderid\":[\"The orderid has already been taken.\"],\"amount\":[\"The amount must be at least 1.\"],\"beneficiary_name\":[\"The name field is required.\"],\"beneficiary_phone\":[\"The beneficiary_phone field is required.\"],\"beneficiary_email\":[\"The beneficiary_email field is required.\"]}} " },
       { code: "500", message: "Internal Server Error", cause: "Unexpected server-side error" }
     ],
   },
 
   {
-    id: "airpay-status",
+    id: "cashfree-status",
     title: "Check Payment Status",
     type: "api1",
-    endpoint: "POST https://live.spay.live/api/AP/payin/status",
-    headers: "Content-Type: multipart/form-data; boundary=",
+    endpoint: 'GET https://live.spay.live/api/CF/payout/status',
+    headers: "Content-Type: application/json",
     parameters: [
       { field: "token", type: "String", required: "Yes", description: "API key/token provided by SPay Dashboard" },
-      { field: "order_id", type: "String", required: "Yes", description: "Unique transaction identifier returned in the request api response" },
+      { field: "orderid", type: "String", required: "Yes", description: "Unique ID Enter by Merchant(order id)" },
     ],
     request: {
       curl: `
-curl--location POST "https://live.spay.live/api/AP/payin/status"
---form token="Q9xRwseKPkXXXMWw6iseUtygT78wnHPji"
---form orderid="xi2TpoHXXXX0mSQU"
+curl --location GET "https://dashboard.spay.live/api/CF/payout/status?
+token = "Q9xRwseKPkMWXXXXXT78wnHPji&apitxnid=AK0XXXX"
       `
     },
     successResponse: {
       curl: `
 {
-"message" : "Transaction Successfully done",
-"success": "true",
 "status": "success",
-"Amount": "1.00",
-"txnid" : "SPAY2025101XXXXXXX,
+"statuscode": 200,
+"data": {
+"status": "SUCCESS",
+"message": "Transaction Status Fetched",
+"amount": "1XX.00",
+"rrn": "522XXXX286",
+"account_number": "xxxxxxx7325",
+"ifsc_code": "KKBK0XXXX"
 }
       `
     },
     failedResponse: {
       curl: `
 {
-"Message": "Transaction failed",
-"success": "false",
-"Status": "FAILED",
-"Amount": "1.00",
-"txnid" : "SPAY2025101XXXXXXX,
+"statuscode": 400,
+"data": {
+"status": "FAILED",
+"message": "Transaction Status failed",
+"amount": "null",
+"rrn": "null",
+"account_number": "null",
+"ifsc_code": "null"
 }
       `
     },
@@ -124,8 +136,8 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
         },
         {
           code: "404",
-          message: "Payin method not found",
-          cause: "Incorrect or non-existent orderid", 
+          message: "payout method not found",
+          cause: "Incorrect or non-existent apitxnid", 
         },
         {
           code: "401",
@@ -135,7 +147,7 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
         {
           code: "422",
           message: "Validation failed",
-          cause: "orderid format is invalid",
+          cause: "payment_id format is invalid",
         },
         {
           code: "500",
@@ -145,6 +157,10 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
       ],
 
     errorStatus:[
+        {
+          code: "initiated",
+          message: "Payment has been initiated but not completed",
+        },
         {
           code: "success",
           message: "Payment was completed successfully",
@@ -158,22 +174,22 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
           message: "Payment is in process and pending confirmation",
         },
       ],     
-    type: "api1",
+
   },
 
   {
-    id: "airpay-callback",
+    id: "cashfree-callback",
     title: "Callback Response",
     type: "callback",
     content: {
-      endpoint: "https://soulfuloverseas.com/airpayipn",
+      endpoint: "https://dashboard.spay.live/api/cronjob/payoutcall_back",
       successResponse: `
 {
 "status": "success",
 "txnid": "SPAYXXX0004",
-"clienttxnid": "YUVXXXXX",
+"clienttxnid": "AKXXXXX",
 "amount": "1.00",
-"transactionid": "6408204XXX"
+"UTR": "6408204XXX"
 "timestamp":"2025-XX-XX 15:27:47"
 }
       `,
@@ -183,7 +199,7 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
 "txnid":"SPAY2025XXXX",
 "clienttxnid":"TXN0XXX59",
 "amount":1.00,
-"transactionid":"6544XXX39",
+"UTR":"null",
 "timestamp":"2025-XX-XX 15:27:47"
 }
       `
@@ -191,285 +207,50 @@ curl--location POST "https://live.spay.live/api/AP/payin/status"
   },
   {
       id: "important-notes",
-      title: "Payin Integration Guidelines",
+      title: "Payout Integration Guidelines",
       type: "notes",
       content: [
         {
           title: "1. API Key & Credentials",
           description:
-            "token, Mid and Key: Ensure that these values are securely stored and never shared in public forums or repositories. These credentials are sensitive and must be treated with high security to prevent unauthorized access.",
+            "token, MID, and Key: Ensure that these values are securely stored and never shared in public forums or repositories. These credentials are sensitive and must be treated with high security to prevent unauthorized access during payout operations.",
         },
         {
           title: "2. Consistency in Identifiers",
           description:
-            "apitxnid (for request API): This is the unique identifier you provide for each transaction. It should be unique for every transaction request and should not be reused. Reusing an apitxnid for multiple transactions can lead to erroneous results in the payin flow and in status checks.",
+            "apitxnid (for request API): This is the unique identifier you provide for each payout transaction. It must be unique for every payout request and should not be reused. Reusing an apitxnid can lead to incorrect payout processing or status reporting.",
         },
         {
           title: "3. Polling & Cron Jobs",
           description:
-            "If you have high transaction volumes, consider implementing polling or using a cron job to check the transaction status periodically after the initial request. This ensures that the system remains responsive and reduces manual intervention.",
+            "For high payout volumes, consider implementing polling or cron jobs to periodically check the payout status after the initial request. This ensures timely updates and reduces manual follow-ups.",
         },
         {
           title: "4. Error Handling & Retry Logic",
           description:
-            "Always implement proper error handling when calling the APIs. Ensure that you have logic in place to gracefully handle any errors that may arise, such as network issues or server downtime.",
+            "Always implement proper error handling when calling payout APIs. Include retry logic for transient errors like network issues or server downtime to ensure payouts are not missed or delayed.",
         },
         {
-          title: "5. Transaction Amount (INR)",
+          title: "5. Payout Amount (INR)",
           description:
-            "Ensure that the amount parameter is provided accurately in INR (Indian Rupees) and does not exceed the allowable limits specified by SPay. Double-check the transaction amounts before initiating the request.",
+            "Ensure that the amount parameter is accurate in INR (Indian Rupees) and adheres to the limits set by SPay for payouts. Double-check the payout amounts before initiating the request to avoid failures.",
         },
         {
-          title: "6. Customer Data Validation",
+          title: "6. Beneficiary Data Validation",
           description:
-            "Always validate and sanitize customer input such as name, email, and mobile to ensure no invalid or harmful data is sent. Invalid or incomplete customer data may result in transaction failures or status errors.",
+            "Validate and sanitize beneficiary details such as name, account number, IFSC, email, and mobile. Invalid or incomplete beneficiary data can result in payout failures or delays.",
         },
         {
           title: "7. Security",
           description:
-            "Always use HTTPS for secure communication to protect sensitive data like API keys, customer information, and transaction details.",
+            "Always use HTTPS for secure communication to protect sensitive data such as API keys, beneficiary information, and payout details.",
         },
         {
-          title: "8. PayIN Account Deactivated",
+          title: "8. PayOUT Account Deactivated",
           description:
-            "This means your PayIN account has been deactivated by Spay. Please contact support or the system administrator to reactivate your account.",
+            "This means your PayOUT account has been deactivated by SPay. Contact support or your system administrator to reactivate your account before initiating any payouts.",
         },
-      ],
-    },
-];
-
-
-  // -----------------------------------------
-  // 👉 PAYU API
-  // -----------------------------------------
-
-  const PAYU_SECTIONS = [
-  {
-    id: "payu-request",
-    title: "Create Payin Payment Request",
-    type: "api1",
-
-    endpoint: "POST https://live.spay.live/api/CF/payin/request",
-    headers: "Content-Type: application/x-www-form-urlencoded",
-
-    parameters: [
-      { field: "token", type: "String", required: "Yes", description: "API key/token provided by Spay" },
-      { field: "apitxnid", type: "String", required: "Yes", description: "Unique transaction ID (merchant side) Maximum 20 Characters" },
-      { field: "amount", type: "String", required: "Yes", description: "Transaction amount in INR" },
-      { field: "firstname", type: "String", required: "Yes", description: "Customer first Name" },
-      { field: "email", type: "String", required: "Yes", description: "Customer email address" },
-      { field: "phone", type: "String", required: "Yes", description: "Customer Mobile number" },
-      { field: "r_url", type: "String", required: "Yes", description: "Return url to redirect after payment" },
-    ],
-
-    request: {
-      curl: `
-curl--location 'https://live.spay.live/api/CF/payin/request' 
---form 'token="Sha6Nplm0pXXXXXxp8ABGQKUE6g"
---form 'amount="10.00"
---form 'apitxnid="TESTXXXX3117xX"
---form 'firstname="Username"
---form 'email="tXXX@gmail.com"
---form 'phone="1122XXXXX"
---form 'r_url="example.live"
-      `,
-    },
-
-    successResponse: {
-      curl: `
-{
-  "status": "success",
-  "message": "Payment initialized successfully",
-  "order_id": "XXXX",
-  "redirect_url": "uXXXXXy?
-  pa=XXXXXXX@ypbiz&pn=f59d23ac19020c989cd8566a4ea16646ad4e02f67516cedc3bd7d833
-  efdaXXXx&cu=INR&tn=Pay+to+f59d23ac19020c9XXXXXea16646ad4e02f67516cedc3bd7d833
-  efda516e&am=10.00&mam=10.00&mc=5999&mode=04&tr=XXXX 377960382&ver=1"
-  "txnid": "SPAY2025101711XXXX45"
-}
-      `,
-    },
-
-    errorExamples: [
-      { code: "400", message: "Missing required fields: firstname,mobile,email etc", cause: "Required fields are not included" },
-      { code: "403", message: "Your PayIN account is deactivated. Please contact the administrator.", cause: "Payin deactivated by Spay" },
-      { code: "409", message: "Transaction ID already exists", cause: "Duplicate apitxnid used" },
-      { code: "401", message: "Unauthorized", cause: "Invalid or expired token or Authorization header" },
-      { code: "422", message: "Amount must be a positive numeric value", cause: "Invalid or zero amount" },
-      { code: "500", message: "Internal Server Error", cause: "Unexpected server-side error" },
-    ],
-  },
-
-  {
-    id: "payu-status",
-    title: "Check Payment Status",
-    type: "api1",
-
-    endpoint: "POST https://live.spay.live/api/CF/payin/status",
-    headers: "Content-Type: multipart/form-data; boundary=",
-
-    parameters: [
-      { field: "token", type: "String", required: "Yes", description: "API key/token provided by SPay Dashboard" },
-      { field: "apitxnid", type: "String", required: "Yes", description: "Unique transaction identifier returned in the request api response" },
-    ],
-
-    request: {
-      curl: `
-curl--location "https://live.spay.live/api/CF/payin/status”
---form token="Q9xRwseKPkXXXMWw6iseUtygT78wnHPji"
---form orderid="xi2TpoHXXXX0mSQU"'
-      `,
-    },
-
-    successResponse: {
-      curl: `
-{
-"message" : "Transaction Successfully done",
-"success": "true",
-"status": "success",
-"Amount": "1.00",
-"txnid" : "SPAY2025101XXXXXXX,
-}
-      `,
-    },
-
-    failedResponse: {
-      curl: `
-{
-"Message": "Transaction failed",
-"success": "false",
-"Status": "FAILED",
-"Amount": "1.00",
-"txnid" : "SPAY2025101XXXXXXX,
-}
-      `,
-    },
-
-    errorExamples: [
-        {
-          code: "400",
-          message: "Missing required fields:apitxnid",
-          cause: "Required query parameter not provided",
-        },
-        {
-          code: "404",
-          message: "Payin method not found",
-          cause: "Incorrect or non-existent orderid", 
-        },
-        {
-          code: "401",
-          message: "Unauthorized",
-          cause: "Invalid or expired token or Authorization header",
-        },
-        {
-          code: "422",
-          message: "Validation failed",
-          cause: "orderid format is invalid",
-        },
-        {
-          code: "500",
-          message: "Internal Server Error",
-          cause: "Unexpected server-side or cURL exception",
-        },
-      ],
-
-    errorStatus:[
-        {
-          code: "success",
-          message: "Payment was completed successfully",
-        },
-        {
-          code: "failed",
-          message: "Payment failed",
-        },
-        {
-          code: "pending",
-          message: "Payment is in process and pending confirmation",
-        },
-      ],     
-    type: "api",
-  },
-
-  {
-    id: "payu-callback",
-    title: "Callback Response",
-    type: "callback",
-
-    content: {
-      endpoint: "https://soulfuloverseas.com/airpayipn",
-
-      successResponse: `
-{
-"status": "success",
-"txnid": "SPAYXXX0004",
-"clienttxnid": "YUVXXXXX",
-"amount": "1.00",
-"UTR": "6408204XXX"
-"timestamp":"2025-XX-XX 15:27:47"
-"http_code":"200"
-}
-      `,
-
-      failedResponse: `
-{
-"status":"failed",
-"txnid":"SPAY2025XXXX",
-"clienttxnid":"TXN0XXX59",
-"amount":1.00,
-"UTR": "6408204XXX"
-"timestamp":"2025-XX-XX 15:27:47"
-"http_code":"500"
-}
-      `,
-    },
-  },
-
-  {
-      id: "important-notes",
-      title: "Payin Integration Guidelines",
-      type: "notes",
-      content: [
-        {
-          title: "1. API Key & Credentials",
-          description:
-            "token, Mid and Key: Ensure that these values are securely stored and never shared in public forums or repositories. These credentials are sensitive and must be treated with high security to prevent unauthorized access.",
-        },
-        {
-          title: "2. Consistency in Identifiers",
-          description:
-            "apitxnid (for request API): This is the unique identifier you provide for each transaction. It should be unique for every transaction request and should not be reused. Reusing an apitxnid for multiple transactions can lead to erroneous results in the payin flow and in status checks.",
-        },
-        {
-          title: "3. Polling & Cron Jobs",
-          description:
-            "If you have high transaction volumes, consider implementing polling or using a cron job to check the transaction status periodically after the initial request. This ensures that the system remains responsive and reduces manual intervention.",
-        },
-        {
-          title: "4. Error Handling & Retry Logic",
-          description:
-            "Always implement proper error handling when calling the APIs. Ensure that you have logic in place to gracefully handle any errors that may arise, such as network issues or server downtime.",
-        },
-        {
-          title: "5. Transaction Amount (INR)",
-          description:
-            "Ensure that the amount parameter is provided accurately in INR (Indian Rupees) and does not exceed the allowable limits specified by SPay. Double-check the transaction amounts before initiating the request.",
-        },
-        {
-          title: "6. Customer Data Validation",
-          description:
-            "Always validate and sanitize customer input such as name, email, and mobile to ensure no invalid or harmful data is sent. Invalid or incomplete customer data may result in transaction failures or status errors.",
-        },
-        {
-          title: "7. Security",
-          description:
-            "Always use HTTPS for secure communication to protect sensitive data like API keys, customer information, and transaction details.",
-        },
-        {
-          title: "8. PayIN Account Deactivated",
-          description:
-            "This means your PayIN account has been deactivated by Spay. Please contact support or the system administrator to reactivate your account.",
-        },
-      ],
+      ]
     },
 ];
 
@@ -479,99 +260,114 @@ curl--location "https://live.spay.live/api/CF/payin/status”
 const BUSYBOX_SECTIONS = [
   {
     id: "busybox-request",
-    title: "Create Payin Payment Request",
+    title: "Create Payout Payment Request",
     type: "api1",
-    endpoint: "POST https://live.spay.live/api/bb/payin/request",
+    endpoint: "POST https://live.spay.live/api/bb/payout/payment/request",
     headers: "Content-Type: application/json",
     parameters: [
-      { field: "token", type: "String", required: "Yes", description: "API key/token provided by Spay" },
-      { field: "order_id", type: "String", required: "Yes", description: "Unique transaction ID (merchant side) Maximum 20 Characters"},
-      { field: "amount", type: "String", required: "Yes", description: "Transaction amount in INR"},
-      { field: "buyer_email", type: "String", required: "Yes", description: "Customer's email address"},
-      { field: "buyer_phone", type: "String", required: "Yes", description: "Customer's 10-digit mobile number" },
-      { field: "buyer_name", type: "String", required: "Yes", description: "Customer's name"},
+      { field: "token", type: "String", required: "Yes", description: "API key/token provided by Spay for authentication" },
+      { field: "orderid", type: "String", required: "Yes", description: "Unique transaction ID (merchant side) Maximum 20 Characters" },
+      { field: "beneficiary_name", type: "String", required: "Yes", description: "Beneficiary account holder's full name" },
+      { field: "beneficiary_email", type: "String", required: "Yes", description: "Beneficiary's email address (for communication/receipt)" },
+      { field: "beneficiary_phone", type: "String", required: "Yes", description: "Beneficiary's 10-digit mobile number" },
+      { field: "amount", type: "String", required: "Yes", description: "Payout amount in INR" },
+      { field: "beneficiary_account_number", type: "String", required: "Yes", description: "Beneficiary's bank account number" },
+      { field: "beneficiary_ifsc", type: "String", required: "Yes", description: "Beneficiary's bank IFSC code" },
     ],
     request: {
       curl: `
-curl--location 'https://live.spay.live/api/bb/payin/request' 
---form 'token="Sha6Nplm0pXXXXXxp8ABGQKUE6g"'
---form 'orderid="TESTXXXX3117xX"'
---form 'amount="10.00"'
---form 'buyer_email="tXXX@gmail.com"'
---form 'buyer_phone="1122XXXXX"'
---form 'buyer_name="test"'
+curl --location https://live.spay.live/api/bb/payout/payment/request
+--form 'token="Q9xRwseKPkXXXXXXXXtygT78wnHPji"
+--form 'orderid="AKXXXXX"
+--form "beneficiary_email=customer / enduser mail_id"
+--form "beneficiary_phone=customer / enduser mobile no"
+--form 'amount=10XX.00'
+--form 'beneficiary_account_number="17459XXXXX"
+--form 'beneficiary_ifsc="KKBK00XXXXX"
+--form 'beneficiary_name=customer / enduser name'
       `,
     },
     successResponse: {
       curl: `
 {
-  "status": "success",
-  "txnid": "SPXX009854XXXX",
-  "upi_link": "upi://pay?
-  pa=XXXXXXX@ypbiz&pn=f59d23ac19020c989cd8566a4ea16646ad4e02f67516cedc3bd7d833
-  efdaXXXx&cu=INR&tn=Pay+to+f59d23ac19020c9XXXXXea16646ad4e02f67516cedc3bd7d833
-  efda516e&am=10.00&mam=10.00&mc=5999&mode=04&tr=XXXX 377960382&ver=1"
+"status": "pending",
+"statuscode": 200,
+"message": "✅ Payout status: Pending,
+"data": {
+"message": "Transfer Initiated",
+"bene_name": "name",
+"customer_account": "xxxxxxx7325",
+"amount": "1.00",
+"client_ref_no": "AK00XXXXX1",
+"txn_date": "2025-XX-1X 16:XX:49"
+"rrn": "null"
 }
       `,
     },
     errorExamples: [
-      { code: "400", message: "Missing required fields: name,mobile, etc", cause: "Required fields are not included"},
-      { code: "403", message: "Your PayIN account is deactivated. Please contact the administrator.", cause: "Payin deactivated by Spay" },
-      { code: "409", message: "Transaction ID already exists", cause: "Duplicate apitxnid used"},
+      { code: "403", message: "Your Payout account is deactivated. Please contact the administrator.", cause: "Payout deactivated by Spay" },
       { code: "401", message: "Unauthorized", cause: "Invalid or expired token or Authorization header" },
-      { code: "422", message: "Amount must be a positive numeric value", cause: "Invalid or zero amount" },
-      { code: "500", message: "Internal Server Error", cause: "Unexpected server-side error" },
+      { code: "422", message: "Validator Error", cause: "Occurs when required fields (orderid, amount, beneficiary_name, beneficiary_phone, beneficiary_email) are missing or invalid. Example: {\"errors\":{\"orderid\":[\"The orderid has already been taken.\"],\"amount\":[\"The amount must be at least 1.\"],\"beneficiary_name\":[\"The name field is required.\"],\"beneficiary_phone\":[\"The beneficiary_phone field is required.\"],\"beneficiary_email\":[\"The beneficiary_email field is required.\"]}} " },
+      { code: "500", message: "Internal Server Error", cause: "Unexpected server-side error" }
     ],
   },
+
   {
-    id: "busybox-status",
+    id: "cashfree-status",
     title: "Check Payment Status",
     type: "api1",
-    endpoint: "POST https://live.spay.live/api/bb/payin/status",
-    headers: "Content-Type: multipart/form-data; boundary=",
+    endpoint: 'GET https://live.spay.live/api/bb/payout/status',
+    headers: "Content-Type: application/json",
     parameters: [
-      { field: "token", type: "String", required: "Yes", description: "API key/token provided by SPay Dashboard"},
-      { field: "order_id", type: "String", required: "Yes", description: "Unique transaction identifier returned in the request api response"},
+      { field: "token", type: "String", required: "Yes", description: "API key/token provided by SPay Dashboard" },
+      { field: "orderid", type: "String", required: "Yes", description: "Unique ID Enter by Merchant(order id)" },
     ],
     request: {
       curl: `
-curl--location 'POST https://live.spay.live/api/bb/payin/status' 
---form token="Q9xRwseKPkXXXMWw6iseUtygT78wnHPji"
---form order_id="xi2TpoHXXXX0mSQU"
-      `,
+curl --location GET "https://dashboard.spay.live/api/bb/payout/status?
+token = "Q9xRwseKPkMWXXXXXT78wnHPji&apitxnid=AK0XXXX"
+      `
     },
     successResponse: {
       curl: `
 {
-"message" : "Transaction Successfully done",
-"success": "true",
 "status": "success",
-"Amount": "1.00",
-"txnid" : "SPAY2025101XXXXXXX,
+"statuscode": 200,
+"data": {
+"status": "SUCCESS",
+"message": "Transaction Status Fetched",
+"amount": "1XX.00",
+"rrn": "522XXXX286",
+"account_number": "xxxxxxx7325",
+"ifsc_code": "KKBK0XXXX"
 }
-      `,
+      `
     },
     failedResponse: {
       curl: `
 {
-"Message": "Transaction failed",
-"success": "false",
-"Status": "FAILED",
-"Amount": "1.00",
-"txnid" : "SPAY2025101XXXXXXX,
+"statuscode": 400,
+"data": {
+"status": "FAILED",
+"message": "Transaction Status failed",
+"amount": "null",
+"rrn": "null",
+"account_number": "null",
+"ifsc_code": "null"
 }
-      `,
+      `
     },
+
     errorExamples: [
-     {
+        {
           code: "400",
           message: "Missing required fields:MID",
           cause: "Required query parameter not provided",
         },
         {
           code: "404",
-          message:"Payin method not found",
-          cause: "Incorrect or non-existent orderid",
+          message: "payout method not found",
+          cause: "Incorrect or non-existent apitxnid", 
         },
         {
           code: "401",
@@ -581,15 +377,20 @@ curl--location 'POST https://live.spay.live/api/bb/payin/status'
         {
           code: "422",
           message: "Validation failed",
-          cause: "orderid format is invalid",
+          cause: "payment_id format is invalid",
         },
         {
           code: "500",
           message: "Internal Server Error",
           cause: "Unexpected server-side or cURL exception",
         },
-      ],      
-       errorStatus:[
+      ],
+
+    errorStatus:[
+        {
+          code: "initiated",
+          message: "Payment has been initiated but not completed",
+        },
         {
           code: "success",
           message: "Payment was completed successfully",
@@ -601,25 +402,23 @@ curl--location 'POST https://live.spay.live/api/bb/payin/status'
         {
           code: "pending",
           message: "Payment is in process and pending confirmation",
-        
         },
-
       ],
-    type: "api",
+    
   },
   {
     id: "busybox-callback",
     title: "Callback Response",
     type: "callback",
     content: {
-      endpoint: "https://soulfuloverseas.com/airpayipn",
+      endpoint: "https://dashboard.spay.live/api/cronjob/payoutcall_back",
       successResponse: `
 {
 "status": "success",
 "txnid": "SPAYXXX0004",
-"clienttxnid": "YUVXXXXX",
+"clienttxnid": "AKXXXXX",
 "amount": "1.00",
-"transactionid": "6408204XXX"
+"UTR": "6408204XXX"
 "timestamp":"2025-XX-XX 15:27:47"
 }
       `,
@@ -629,80 +428,75 @@ curl--location 'POST https://live.spay.live/api/bb/payin/status'
 "txnid":"SPAY2025XXXX",
 "clienttxnid":"TXN0XXX59",
 "amount":1.00,
-"transactionid":"6544XXX39",
+"UTR":"null",
 "timestamp":"2025-XX-XX 15:27:47"
 }
-      `,
-    },
+      `
+    }
   },
   {
-   id: "important-notes",
-      title: "Payin Integration Guidelines",
-      type: "notes",
-      content: [
+    id: "important-notes",
+    title: "Payout Integration Guidelines",
+    type: "notes",
+    content: [
       {
-          title: "1. API Key & Credentials",
-          description:
-            "token, Mid and Key: Ensure that these values are securely stored and never shared in public forums or repositories. These credentials are sensitive and must be treated with high security to prevent unauthorized access.",
-        },
-        {
-          title: "2. Consistency in Identifiers",
-          description:
-            "apitxnid (for request API): This is the unique identifier you provide for each transaction. It should be unique for every transaction request and should not be reused. Reusing an apitxnid for multiple transactions can lead to erroneous results in the payin flow and in status checks.",
-        },
-        {
-          title: "3. Polling & Cron Jobs",
-          description:
-            "If you have high transaction volumes, consider implementing polling or using a cron job to check the transaction status periodically after the initial request. This ensures that the system remains responsive and reduces manual intervention.",
-        },
-        {
-          title: "4. Error Handling & Retry Logic",
-          description:
-            "Always implement proper error handling when calling the APIs. Ensure that you have logic in place to gracefully handle any errors that may arise, such as network issues or server downtime.",
-        },
-        {
-          title: "5. Transaction Amount (INR)",
-          description:
-            "Ensure that the amount parameter is provided accurately in INR (Indian Rupees) and does not exceed the allowable limits specified by SPay. Double-check the transaction amounts before initiating the request.",
-        },
-        {
-          title: "6. Customer Data Validation",
-          description:
-            "Always validate and sanitize customer input such as name, email, and mobile to ensure no invalid or harmful data is sent. Invalid or incomplete customer data may result in transaction failures or status errors.",
-        },
-        {
-          title: "7. Security",
-          description:
-            "Always use HTTPS for secure communication to protect sensitive data like API keys, customer information, and transaction details.",
-        },
-        {
-          title: "8. PayIN Account Deactivated",
-          description:
-            "This means your PayIN account has been deactivated by Spay. Please contact support or the system administrator to reactivate your account.",
+        title: "1. API Key & Credentials",
+        description:
+          "token, MID, and Key: Ensure that these values are securely stored and never shared in public forums or repositories. These credentials are sensitive and must be treated with high security to prevent unauthorized access during payout operations.",
       },
-    ],
+      {
+        title: "2. Consistency in Identifiers",
+        description:
+          "apitxnid (for request API): This is the unique identifier you provide for each payout transaction. It must be unique for every payout request and should not be reused. Reusing an apitxnid can lead to incorrect payout processing or status reporting.",
+      },
+      {
+        title: "3. Polling & Cron Jobs",
+        description:
+          "For high payout volumes, consider implementing polling or cron jobs to periodically check the payout status after the initial request. This ensures timely updates and reduces manual follow-ups.",
+      },
+      {
+        title: "4. Error Handling & Retry Logic",
+        description:
+          "Always implement proper error handling when calling payout APIs. Include retry logic for transient errors like network issues or server downtime to ensure payouts are not missed or delayed.",
+      },
+      {
+        title: "5. Payout Amount (INR)",
+        description:
+          "Ensure that the amount parameter is accurate in INR (Indian Rupees) and adheres to the limits set by SPay for payouts. Double-check the payout amounts before initiating the request to avoid failures.",
+      },
+      {
+        title: "6. Beneficiary Data Validation",
+        description:
+          "Validate and sanitize beneficiary details such as name, account number, IFSC, email, and mobile. Invalid or incomplete beneficiary data can result in payout failures or delays.",
+      },
+      {
+        title: "7. Security",
+        description:
+          "Always use HTTPS for secure communication to protect sensitive data such as API keys, beneficiary information, and payout details.",
+      },
+      {
+        title: "8. PayOUT Account Deactivated",
+        description:
+          "This means your PayOUT account has been deactivated by SPay. Contact support or your system administrator to reactivate your account before initiating any payouts.",
+      },
+    ]
   },
 ];
-
 
   // -----------------------------------------
   // 👉 APPLY PROVIDER DATA
   // -----------------------------------------
 
   useEffect(() => {
-  if (payinGateway === "bulk_pe") {
-    setApiSections(AIRPAY_SECTIONS);
-    setActiveSection("airpay-request");
+  if (payoutGateway === "cashfree") {
+    setApiSections(CASHFREE_SECTIONS);
+    setActiveSection("cashfree-request");
 
-  } else if (payinGateway === "pay_u") {
-    setApiSections(PAYU_SECTIONS);
-    setActiveSection("payu-request");
-
-  } else if (payinGateway === "Glide") {
+  } else if (payoutGateway === "busybox") {
     setApiSections(BUSYBOX_SECTIONS);
     setActiveSection("busybox-request");
   }
-}, [payinGateway]);
+}, [payoutGateway]);
 
   const activeApi = apiSections.find((s) => s.id === activeSection);
 
