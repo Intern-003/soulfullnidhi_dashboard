@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import Modal from "../GlideModal/UI/Modal";
 import { PaymentContext } from "../../contexts/PaymentContext";
-import { fetchReviewPayment } from "../../services/paymentService";
+import { paymentService } from "../../services/paymentService";
 
 export default function ReviewPaymentModal({
     open,
@@ -9,6 +9,7 @@ export default function ReviewPaymentModal({
     onConfirm,
     onClose,
     onDecryptedSession,
+    loading: glideLoading = false, // receive loading from parent
 }) {
     const { token } = useContext(PaymentContext);
     const [loading, setLoading] = useState(true);
@@ -18,7 +19,7 @@ export default function ReviewPaymentModal({
         if (!pgSessionId) return;
         
         (async () => {
-            const res = await fetchReviewPayment(pgSessionId, token);
+            const res = await paymentService.fetchReviewPayment(pgSessionId, token);
             if (res?.data) {
                 const decryptedSessionId = res.data.session_id;
 
@@ -37,16 +38,7 @@ export default function ReviewPaymentModal({
         })();
     }, [pgSessionId, token, onDecryptedSession]);
 
-    // // Static values for testing
-    // const details = {
-    //     merchantName: "Demo Merchant",
-    //     merchantLogo: "https://via.placeholder.com/48",
-    //     amount: 500,
-    //     total: 500,
-    //     sessionId: "ABC123XYZ",
-    // };
-
-    if (!details) {
+    if (!details || loading) {
         return (
             <Modal open={open}>
                 <div className="py-10 text-center">Loading...</div>
@@ -100,9 +92,12 @@ export default function ReviewPaymentModal({
                 {/* Buttons */}
                 <button
                     onClick={onConfirm}
-                    className="w-full bg-blue-600 text-white py-3 rounded-xl mt-6 text-lg font-semibold"
+                    disabled={glideLoading} // disable while Glide is opening
+                    className={`w-full py-3 rounded-xl mt-6 text-lg font-semibold ${
+                        glideLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 text-white"
+                    }`}
                 >
-                Confirm & Continue
+                    {glideLoading ? "Opening Payment..." : "Confirm & Continue"}
                 </button>
                 <button
                     onClick={onClose}
