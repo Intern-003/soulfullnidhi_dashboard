@@ -92,7 +92,7 @@ export const LineChart = ({ data }) => {
         <div className="py-6" ref={chartRef}></div>
       ) : (
         <div
-          style={{
+          style={{  
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
