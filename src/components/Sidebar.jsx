@@ -4,7 +4,7 @@ import "../css/sidebar.css";
 import Logo from "../images/logo.png";
 
 export const Sidebar = ({ open, setOpen }) => {
-  const role = atob(localStorage.getItem("role")); // admin / user
+  const role = atob(localStorage.getItem("role")); // admin / user / crypto
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const location = useLocation();
@@ -15,11 +15,13 @@ export const Sidebar = ({ open, setOpen }) => {
   };
 
   // -----------------------------------------
-  // MENU CONFIG
+  // MENU CONFIG WITH CRYPTO ROLE SUPPORT
   // -----------------------------------------
   const menu = [
+    // DASHBOARD (visible to all)
     { label: "Dashboard", icon: "fa-chart-pie", link: "/dashboard" },
 
+    // ---------------------- ADMIN MENUS ----------------------
     ...(role === "admin"
       ? [
           {
@@ -49,45 +51,65 @@ export const Sidebar = ({ open, setOpen }) => {
             dropdown: "bank",
             items: [{ label: "Bank", link: "/onboard-bank" }],
           },
+
+          // ADMIN transaction history
+          {
+            label: "Transaction History",
+            icon: "fa-clock-rotate-left",
+            dropdown: "txn",
+            items: [
+              { label: "UPI Statement", link: "/upi-statement" },
+              { label: "Payout Statement", link: "/payout-statement" },
+             
+            ],
+          },
+
+          // ADMIN account statement
+          {
+            label: "Account Statement",
+            icon: "fa-layer-group",
+            dropdown: "account",
+            items: [
+              { label: "Topup Statement", link: "/topup-statement" },
+              { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
+            ],
+          },
         ]
       : []),
 
-    {
-      label: "Payout",
-      icon: "fa-credit-card",
-      dropdown: "payout",
-      items: [{ label: "Request", link: "/payout-request" }],
-    },
-
-    {
-      label: "Payin",
-      icon: "fa-money-bill-transfer",
-      dropdown: "payin",
-      items: [{ label: "Request", link: "/payin-request" }],
-    },
-
-    {
-      label: "Transaction History",
-      icon: "fa-clock-rotate-left",
-      dropdown: "txn",
-      items: [
-        { label: "UPI Statement", link: "/upi-statement" },
-        { label: "Payout Statement", link: "/payout-statement" },
-      ],
-    },
-
-    {
-      label: "Account Statement",
-      icon: "fa-layer-group",
-      dropdown: "account",
-      items: [
-        { label: "Topup Statement", link: "/topup-statement" },
-        { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
-      ],
-    },
-
+    // ---------------------- USER MENUS ----------------------
     ...(role === "user"
       ? [
+          {
+            label: "Payout",
+            icon: "fa-credit-card",
+            dropdown: "payout",
+            items: [{ label: "Request", link: "/payout-request" }],
+          },
+          {
+            label: "Payin",
+            icon: "fa-money-bill-transfer",
+            dropdown: "payin",
+            items: [{ label: "Request", link: "/payin-request" }],
+          },
+          {
+            label: "Transaction History",
+            icon: "fa-clock-rotate-left",
+            dropdown: "txn",
+            items: [
+              { label: "UPI Statement", link: "/upi-statement" },
+              { label: "Payout Statement", link: "/payout-statement" },
+            ],
+          },
+          {
+            label: "Account Statement",
+            icon: "fa-layer-group",
+            dropdown: "account",
+            items: [
+              { label: "Topup Statement", link: "/topup-statement" },
+              { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
+            ],
+          },
           {
             label: "Api Settings",
             icon: "fa-gears",
@@ -106,6 +128,21 @@ export const Sidebar = ({ open, setOpen }) => {
         ]
       : []),
 
+    // ---------------------- CRYPTO ROLE ----------------------
+    ...(role === "crypto"
+      ? [
+          {
+            label: "Transaction History",
+            icon: "fa-clock-rotate-left",
+            dropdown: "txn",
+            items: [
+              { label: "Crypto Statement", link: "/crypto-statement" },
+            ],
+          },
+        ]
+      : []),
+
+    // ---------------------- COMPLAINTS (all roles) ----------------------
     {
       label: "Complaints",
       icon: "fa-comment",
@@ -127,9 +164,9 @@ export const Sidebar = ({ open, setOpen }) => {
       {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-full w-64 p-4 flex flex-col
-        bg-blue-500 bg-cover bg-no-repeat bg-center bg-blend-soft-light 
-        shadow-xl z-40 transform transition-transform duration-300 ease-in-out
-        md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+          bg-blue-500 bg-cover bg-no-repeat bg-center bg-blend-soft-light 
+          shadow-xl z-40 transform transition-transform duration-300 ease-in-out
+          md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* Close button mobile */}
         <button
@@ -161,11 +198,11 @@ export const Sidebar = ({ open, setOpen }) => {
                   <Link
                     to={item.link}
                     className={`flex items-center w-full p-3 rounded-xl transition-all duration-300
-                    ${
-                      currentPath === item.link
-                        ? "bg-blue-600 text-white shadow-md"
-                        : "text-white hover:bg-blue-600 hover:text-white hover:shadow-md"
-                    }`}
+                      ${
+                        currentPath === item.link
+                          ? "bg-blue-600 text-white shadow-md"
+                          : "text-white hover:bg-blue-600 hover:text-white hover:shadow-md"
+                      }`}
                   >
                     <i className={`fa-solid ${item.icon} mr-3`}></i>
                     <span>{item.label}</span>
@@ -175,11 +212,11 @@ export const Sidebar = ({ open, setOpen }) => {
                     {/* DROPDOWN BUTTON */}
                     <button
                       className={`flex items-center w-full p-3 rounded-xl transition-all duration-300
-                      ${
-                        isParentActive
-                          ? "bg-blue-600 text-white shadow-md"
-                          : "text-white hover:bg-blue-600 hover:text-white hover:shadow-md"
-                      }`}
+                        ${
+                          isParentActive
+                            ? "bg-blue-600 text-white shadow-md"
+                            : "text-white hover:bg-blue-600 hover:text-white hover:shadow-md"
+                        }`}
                       onClick={() => toggleDropdown(item.dropdown)}
                     >
                       <i className={`fa-solid ${item.icon} mr-3`}></i>
@@ -215,11 +252,11 @@ export const Sidebar = ({ open, setOpen }) => {
                           <Link key={j} to={sub.link}>
                             <div
                               className={`flex items-center gap-2 p-2 rounded-lg transition-all duration-300
-                              ${
-                                isActive
-                                  ? "bg-blue-600 text-white shadow-sm scale-[1.01]"
-                                  : "bg-transparent text-gray-100 hover:bg-blue-600 hover:text-white hover:shadow-sm hover:scale-[1.01]"
-                              }`}
+                                ${
+                                  isActive
+                                    ? "bg-blue-600 text-white shadow-sm scale-[1.01]"
+                                    : "bg-transparent text-gray-100 hover:bg-blue-600 hover:text-white hover:shadow-sm hover:scale-[1.01]"
+                                }`}
                             >
                               <i
                                 className={`fa-solid fa-circle text-[6px] ${
