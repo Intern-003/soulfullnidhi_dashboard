@@ -1,24 +1,25 @@
 import React, { useEffect, useRef } from "react";
-import nodatapie from "../images/pienodata.jpeg";
+
 
 
 export const DonutChart = ({ data }) => {
   const chartRef = useRef(null);
-const total =
-  (data?.pending || 0) + (data?.success || 0) + (data?.failed || 0);
+
+  // Ensure fallback 0 values
+  const pending = data?.pending || 0;
+  const success = data?.success || 0;
+  const failed = data?.failed || 0;
 
   useEffect(() => {
     if (chartRef.current && typeof ApexCharts !== "undefined") {
       const getChartOptions = () => ({
-        series: [data?.pending, data?.success, data?.failed],
+        series: [pending, success, failed],
         colors: ["#FDBA8C", "#1C64F2", "#16BDCA"],
         chart: {
           height: 320,
           width: "100%",
           type: "donut",
-          animations: {
-            enabled: false,
-          },
+          animations: { enabled: false },
         },
         stroke: { colors: ["transparent"] },
         plotOptions: {
@@ -27,10 +28,12 @@ const total =
               size: "80%",
               labels: {
                 show: true,
-                name: {
+                name: { show: true, fontFamily: "Inter, sans-serif", offsetY: 20 },
+                value: {
                   show: true,
                   fontFamily: "Inter, sans-serif",
-                  offsetY: 20,
+                  offsetY: -20,
+                  formatter: (val) => val,
                 },
                 total: {
                   showAlways: true,
@@ -38,19 +41,10 @@ const total =
                   label: "Transactions",
                   fontFamily: "Inter, sans-serif",
                   formatter: function (w) {
-                    const sum = w.globals.seriesTotals.reduce(
-                      (a, b) => a + b,
-                      0
-                    );
-                    return sum;
+                    return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
                   },
                 },
-                value: {
-                  show: true,
-                  fontFamily: "Inter, sans-serif",
-                  offsetY: -20,
-                  formatter: (value) => value,
-                },
+                
               },
             },
           },
@@ -64,11 +58,9 @@ const total =
       const chart = new ApexCharts(chartRef.current, getChartOptions());
       chart.render();
 
-      return () => {
-        chart.destroy();
-      };
+      return () => chart.destroy();
     }
-  }, [data]);
+  }, [pending, success, failed]);
 
   return (
     <div className="max-w-sm w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
@@ -77,30 +69,9 @@ const total =
           Transactions
         </h5>
       </div>
-
-      {/* <div className="py-6" ref={chartRef}></div> */}
-
-
-      {total > 0 ? (
-  <div className="py-6" ref={chartRef}></div>
-) : (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "320px",
-      flexDirection: "column",
-    }}
-  >
-    <img
-      src={nodatapie}
-      alt="No data found"
-      style={{ width: "250px" }}
-    />
-    {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
-  </div>
-)}
+      {/* Always render chart even if 0 */}
+      <div className="py-6" ref={chartRef}></div>
     </div>
   );
 };
+
