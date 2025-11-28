@@ -1,21 +1,27 @@
-import { useEffect, useRef, useState } from "react";
-// import Nodatafound from "../images/linedata.png";
-import Nodatafound from "../images/NodataLine.jpg";
+import { useEffect, useRef, useState, useMemo } from "react";
 
 export const LineChart = ({ data }) => {
   const chartRef = useRef(null);
-  const [amount, setAmount] = useState([1]);
-  const [months, setMonths] = useState([]);
-  // const total = 12;
-  // (data?.pending || 0) + (data?.success || 0) + (data?.failed || 0);
 
-  useEffect(() => {
-    const fetchedAmount = data?.map((item) => item.total);
-    const fetchedMonths = data?.map((item) => item.month_name);
-
-    setAmount(fetchedAmount);
-    setMonths(fetchedMonths);
+  // Prepare data safely, fallback 0 values if missing
+  const chartData = useMemo(() => {
+    // If data exists, map month names and totals
+    if (Array.isArray(data) && data.length > 0) {
+      return data.map((item) => ({
+        month_name: item.month_name || "Month",
+        total: Number(item.total) || 0,
+      }));
+    }
+    // Fallback for empty data: 12 months with 0 totals
+    const months = [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+    return months.map((month) => ({ month_name: month, total: 0 }));
   }, [data]);
+
+  const amount = chartData.map((item) => item.total);
+  const months = chartData.map((item) => item.month_name);
 
   useEffect(() => {
     if (window.ApexCharts && chartRef.current) {
@@ -58,11 +64,11 @@ export const LineChart = ({ data }) => {
         ],
         xaxis: {
           categories: months,
-          labels: { show: false },
-          axisBorder: { show: false },
-          axisTicks: { show: false },
+          labels: { show: true },
+          axisBorder: { show: true },
+          axisTicks: { show: true },
         },
-        yaxis: { show: false },
+        yaxis: { show: true },
       };
 
       const chart = new window.ApexCharts(chartRef.current, options);
@@ -70,44 +76,22 @@ export const LineChart = ({ data }) => {
 
       return () => chart.destroy();
     }
-  }, [data, amount, months]);
+  }, [amount, months]);
 
   return (
     <div className="max-w-3xl w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
       <div className="flex justify-between">
         <div>
           <h5 className="leading-none text-3xl font-bold text-gray-900 pb-2">
-            {Array.isArray(amount)
-              ? amount.reduce((a, b) => (Number(a) || 0) + (Number(b) || 0), 0)
-              : 0}
+            {amount.reduce((a, b) => a + b, 0)}
           </h5>
           <p className="text-base font-normal text-gray-500">
             Transactions this year
           </p>
         </div>
       </div>
-
-      {/* <div ref={chartRef}></div> */}
-      {months.length > 0 && amount.length > 0 ? (
-        <div className="py-6" ref={chartRef}></div>
-      ) : (
-        <div
-          style={{  
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "320px",
-            flexDirection: "column",
-          }}
-        >
-          <img
-            src={Nodatafound}
-            alt="No data found"
-            style={{ width: "350px" }}
-          />
-          {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
-        </div>
-      )}
+      {/* Always render chart */}
+      <div className="py-6" ref={chartRef}></div>
     </div>
   );
 };
