@@ -23,12 +23,16 @@ import Layout from "../components/Layout";
 import PrivateRoute from "../components/PrivateRoute";
 import SpayGlidePGWidget from "../pages/SpayGlidePGWidget";
 import SpayGlidePGCancel from "../pages/SpayGlidePGCancel";
+import SpayGlidePGSuccess from "../pages/SpayGlidePGSuccess";
+import SpayGlidePGError from "../pages/SpayGlidePGError";
 
 const AppRoutes = () => {
     return(
         <Routes>
             <Route path="/spay-glide-pgwidget" element={ <SpayGlidePGWidget/> } />
+            <Route path="/spay-glide-pgsuccess" element={ <SpayGlidePGSuccess/> } />
             <Route path="/spay-glide-pgcancel" element={ <SpayGlidePGCancel/> } />
+            <Route path="/spay-glide-pgerror" element={ <SpayGlidePGError/> } />
             <Route path="/" element={<LoginForm />} />
             <Route element={<Layout />}>
                 <Route 

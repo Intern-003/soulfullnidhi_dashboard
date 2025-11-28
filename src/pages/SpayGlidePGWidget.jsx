@@ -45,7 +45,7 @@ function SpayGlidePGWidget() {
             }
 
             // Redirect back to review page
-            navigate("/spay-glide-pgcancel");
+            navigate("/spay-glide-pgsuccess");
         },
 
         // Payment failed or error
@@ -62,7 +62,7 @@ function SpayGlidePGWidget() {
                 console.error("Error calling error API:", err);
             }
 
-            navigate("/spay-glide-pgcancel");
+            navigate("/spay-glide-pgerror");
         },
 
         // Payment cancelled by user
