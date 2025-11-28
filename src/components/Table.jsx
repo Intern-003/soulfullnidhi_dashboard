@@ -6,7 +6,7 @@ import { useToast } from "../contexts/ToastContext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { CustomSelect } from "./CustomSelect";
-import nodatafound from "../images/nodatafound.jpeg";
+// import nodatafound from "../images/nodatafound.jpeg";
 
 const Table = ({
   columns,
@@ -388,54 +388,54 @@ const Table = ({
               )}
             </tr>
           </thead>
+<tbody>
+  {filteredData.length > 0 ? (
+    filteredData
+      .slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage)
+      .map((row, rowIndex) => (
+        <tr
+          key={row.id}
+          className={`${
+            rowIndex % 2 === 0 ? "bg-[#f1f7ff]" : "bg-white"
+          } hover:bg-[#e0f0ff] transition-all duration-150 border-b border-gray-200`}
+        >
+          {columns.map((column, colIndex) => (
+            <td
+              key={colIndex}
+              className="px-4 py-3 text-gray-800 text-left truncate text-sm md:text-base font-normal"
+            >
+              {column.Cell
+                ? column.Cell({ value: row[column.accessor], row })
+                : row[column.accessor]}
+            </td>
+          ))}
 
-          <tbody>
-            {filteredData.length > 0 ? (
-              filteredData
-                .slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage)
-                .map((row, rowIndex) => (
-                  <tr
-                    key={row.id}
-                    className={`${rowIndex % 2 === 0 ? "bg-[#f1f7ff]" : "bg-white"
-                      } hover:bg-[#e0f0ff] transition-all duration-150 border-b border-gray-200`}
-                  >
-                    {columns.map((column, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className="px-4 py-3 text-gray-800 text-left truncate text-sm md:text-base font-normal"
-                      >
-                        {column.Cell
-                          ? column.Cell({ value: row[column.accessor], row })
-                          : row[column.accessor]}
-                      </td>
-                    ))}
-                    {showDeleteColumn && (
-                      <td className="px-4 py-3">
-                        <Button
-                          type="button"
-                          onClick={() => handleConfirmModal(row.id)}
-                          className="text-red-800 p-3 rounded-xl cursor-pointer"
-                        >
-                          <i className="fa-solid fa-trash fa-lg"></i>
-                        </Button>
-                      </td>
-                    )}
-                  </tr>
-                ))
-            ) : (
-              <tr>
-                <td colSpan={columns.length} className="text-center text-gray-500 bg-white p-4">
-                  <div className="flex flex-col items-center justify-center">
-                    <img
-                      src={nodatafound}
-                      alt="no data found"
-                      style={{ width: "300px", opacity: 0.8 }}
-                    />
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
+          {showDeleteColumn && (
+            <td className="px-4 py-3">
+              <Button
+                type="button"
+                onClick={() => handleConfirmModal(row.id)}
+                className="text-red-800 p-3 rounded-xl cursor-pointer"
+              >
+                <i className="fa-solid fa-trash fa-lg"></i>
+              </Button>
+            </td>
+          )}
+        </tr>
+      ))
+  ) : (
+    <tr>
+      <td
+        colSpan={showDeleteColumn ? columns.length + 1 : columns.length}
+        className="text-center text-gray-600 py-6 bg-white font-medium"
+      >
+        No data found
+      </td>
+    </tr>
+  )}
+</tbody>
+
+
 
         </table>
 

@@ -5,7 +5,7 @@ import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { MONTH_NAMES } from "../constants/Constants";
 import DashboardSkeleton from "../components/DashboardSkeleton";
-import largesttxn from "../images/largesttxn.jpg";
+// import largesttxn from "../images/largesttxn.jpg";
 
 export const Dashboard = () => {
   // Get role from localStorage
@@ -140,7 +140,7 @@ export const Dashboard = () => {
   if (role === "admin") cardsToShow = [...normalCards];
   else if (role === "crypto") cardsToShow = [...cryptoCard];
   else cardsToShow = [...normalCards]; // normal users
-
+console.log(cardData?.transactionStatusCounts);
   return (
     <>
       {initialLoad ? (
@@ -178,18 +178,32 @@ export const Dashboard = () => {
               </div>
 
               {/* Charts */}
-              {(role === "admin" || role === "normal") && (
-                <>
-                  <div className="flex justify-center items-start">
-                    <div className="w-full max-w-[380px] p-6 rounded-xl backdrop-blur-xl shadow-[0_4px_20px_rgba(255,192,203,0.25)]">
-                      <DonutChart data={cardData?.transactionStatusCounts} />
-                    </div>
-                  </div>
-                  <div className="lg:col-span-2 p-6 rounded-xl backdrop-blur-xl shadow-[0_4px_20px_rgba(144,238,144,0.25)]">
-                    <LineChart data={cardData?.monthWiseStatusCounts} className="h-[260px]" />
-                  </div>
-                </>
-              )}
+            {(role === "admin" || role === "user") && (
+  <>
+    <div className="flex justify-center items-start">
+      <div className="w-full max-w-[380px] p-6 rounded-xl backdrop-blur-xl shadow-[0_4px_20px_rgba(255,192,203,0.25)]">
+        <DonutChart data={cardData?.transactionStatusCounts} />
+      </div>
+    </div>
+
+    <div className="lg:col-span-2 p-6 rounded-xl backdrop-blur-xl shadow-[0_4px_20px_rgba(144,238,144,0.25)]">
+      <LineChart
+        data={
+          cardData?.monthWiseStatusCounts?.length > 0
+            ? cardData.monthWiseStatusCounts
+            : [
+                { month: "Jan", count: 0 },
+                { month: "Feb", count: 0 },
+                { month: "Mar", count: 0 },
+                { month: "Apr", count: 0 }
+              ]
+        }
+        className="h-[260px]"
+      />
+    </div>
+  </>
+)}
+
 
               {role === "crypto" && (
                 <>
@@ -205,29 +219,38 @@ export const Dashboard = () => {
               )}
 
               {/* Large Transactions */}
-              <div className="flex justify-center">
-                <div className="w-full max-w-[380px] p-6 rounded-xl bg-white/30 backdrop-blur-xl shadow-[0_4px_25px_rgba(255,182,193,0.25)]">
-                  <h5 className="text-lg font-bold mb-4">
-                    {role === "crypto" ? "Crypto Large Transactions" : "Large Transactions"}
-                  </h5>
-                  {largeTransactionData.length > 0 ? (
-                    <ul className="divide-y divide-white/10">
-                      {largeTransactionData.map((item, index) => (
-                        <li key={index} className="py-3 sm:py-4 rounded-lg bg-[rgba(255,255,255,0.1)]">
-                          <div className="flex justify-between">
-                            <p className="text-sm font-medium text-black truncate">{item.name}</p>
-                            <div className="text-base font-semibold text-black">₹{item.amount}</div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="flex justify-center py-8">
-                      <img src={largesttxn} alt="No data" style={{ width: "300px" }} />
-                    </div>
-                  )}
-                </div>
-              </div>
+             
+            <div className="flex justify-center">
+  <div className="w-full max-w-[380px] p-6 rounded-xl bg-white/30 backdrop-blur-xl shadow-[0_4px_25px_rgba(255,182,193,0.25)]">
+    <h5 className="text-lg font-bold mb-4">
+      {role === "crypto" ? "Crypto Large Transactions" : "Large Transactions"}
+    </h5>
+
+    <ul className="divide-y divide-white/10">
+      {largeTransactionData.length > 0 ? (
+        largeTransactionData.map((item, index) => (
+          <li
+            key={index}
+            className="py-3 sm:py-4 rounded-lg bg-[rgba(255,255,255,0.1)]"
+          >
+            <div className="flex justify-between">
+              <p className="text-sm font-medium text-black truncate">{item.name}</p>
+              <div className="text-base font-semibold text-black">₹{item.amount}</div>
+            </div>
+          </li>
+        ))
+      ) : (
+        <li className="py-3 sm:py-4 rounded-lg bg-[rgba(255,255,255,0.1)]">
+          <div className="flex justify-between">
+            <p className="text-sm font-medium text-black truncate">No Transactions</p>
+            <div className="text-base font-semibold text-black">₹0</div>
+          </div>
+        </li>
+      )}
+    </ul>
+  </div>
+</div>
+
             </div>
 
             {/* -------- TABLE -------- */}

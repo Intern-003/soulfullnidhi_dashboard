@@ -1,22 +1,27 @@
 import React, { useEffect, useRef } from "react";
-import nodatapie from "../images/pienodata.jpeg";
 
 export const DonutChart = ({ data }) => {
   const chartRef = useRef(null);
+  const chartInstance = useRef(null);
 
-  // Convert values to numbers safely
-  const pending = Number(data?.pending || 0);
-  const success = Number(data?.success || 0);
-  const failed = Number(data?.failed || 0);
+  const pending = Number(data?.pending) || 0;
+  const success = Number(data?.success) || 0;
+  const failed = Number(data?.failed) || 0;
   const total = pending + success + failed;
 
   useEffect(() => {
-    // ❌ STOP if no data or invalid data
-    if (!data || total <= 0) return;
     if (!chartRef.current || typeof ApexCharts === "undefined") return;
 
+    // Destroy previous chart before creating a new one
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+      chartInstance.current = null;
+    }
+
+    const seriesData = total > 0 ? [pending, success, failed] : [0, 0, 0];
+
     const options = {
-      series: [pending, success, failed],
+      series: seriesData,
       colors: ["#FDBA8C", "#1C64F2", "#16BDCA"],
       chart: {
         height: 320,
@@ -49,11 +54,15 @@ export const DonutChart = ({ data }) => {
     };
 
     // eslint-disable-next-line no-undef
-    const chart = new ApexCharts(chartRef.current, options);
-    chart.render();
+    chartInstance.current = new ApexCharts(chartRef.current, options);
+    chartInstance.current.render();
 
-    return () => chart.destroy();
-  }, [data, total]);
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+    };
+  }, [pending, success, failed, total]);
 
   return (
     <div className="max-w-sm w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
@@ -63,21 +72,7 @@ export const DonutChart = ({ data }) => {
         </h5>
       </div>
 
-      {total > 0 ? (
-        <div className="py-6" ref={chartRef}></div>
-      ) : (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "320px",
-            flexDirection: "column",
-          }}
-        >
-          <img src={nodatapie} alt="No data" style={{ width: "250px" }} />
-        </div>
-      )}
+      <div className="py-6" ref={chartRef}></div>
     </div>
   );
 };
