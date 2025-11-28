@@ -23,6 +23,8 @@ export const Profile = () => {
     role === "admin" ? `/show-merchant/${id}` : "/show-merchant";
   const { data: merchantData, loading } = useGet(apiEndpoint);
 
+  
+  
   const initialMerchantData = merchantData?.data;
   useEffect(() => {
   if (!initialMerchantData) return; // prevent crashing
