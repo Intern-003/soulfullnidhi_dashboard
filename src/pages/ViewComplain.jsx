@@ -277,7 +277,7 @@ export const ViewComplain = () => {
               onClick={() => {
                 setEditData(null);
                 setShowModal(true);
-              }}
+              }}  
               className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
             >
               Raise Complain
@@ -291,6 +291,7 @@ export const ViewComplain = () => {
             columns={complainColumns}
             data={complainsWithModifications}
             showStatusFilter={false}
+            endPoint="/delete-ticket"
           />
 
 

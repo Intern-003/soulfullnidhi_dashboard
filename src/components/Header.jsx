@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom"; // ✅ add useLocation
 import { usePost } from "../hooks/usePost";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { useGet } from "../hooks/useGet";
 
 export const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ get current route
   const { execute: logout } = usePost("/logout");
   const { data } = useAutoFetch("/collection-record");
   const { data: merchantData } = useGet("/show-merchant");
@@ -16,10 +17,11 @@ export const Header = ({ onMenuClick }) => {
 
   // State for role
   const [role, setRole] = useState(atob(localStorage.getItem("role"))); // admin / user / crypto
-const email = localStorage.getItem("email");
-const showButton = email === "saad.sayyed@example.com";
+  const email = localStorage.getItem("email");
 
-console.log(email); 
+  // ✅ Show button only for specific email AND only on dashboard page
+  const showButton = email === "saad.sayyed@example.com" && location.pathname === "/dashboard";
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -30,9 +32,6 @@ console.log(email);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ----------------------------------------
-  // Stats configuration
-  // ----------------------------------------
   const userStats = [
     { id: 1, icon: "fa-solid fa-arrow-trend-up text-green-400", label: "Payin Rolling Amount", value: `${Number(data?.PayinRollingAmount ?? 0).toFixed(2)}` },
     { id: 2, icon: "fa-solid fa-arrow-trend-up text-green-400", label: "Payin Total Charges", value: `${Number(data?.PayinProfitAmount ?? 0).toFixed(2)}` },
@@ -56,38 +55,31 @@ console.log(email);
     }
   };
 
-  // ----------------------------
-  // Role Toggle Button
-  // ----------------------------
   const handleToggleRole = () => {
     const newRole = role === "admin" ? "crypto" : "admin";
     localStorage.setItem("role", btoa(newRole));
     setRole(newRole);
-    // Optional: refresh page if needed
     window.location.reload();
   };
 
   return (
     <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-indigo-500/50">
       <div className="flex items-center gap-4">
-        {/* Mobile menu button */}
         <button onClick={onMenuClick} className="md:hidden text-2xl text-blue-600">☰</button>
 
-        {/* Role Toggle button */}
-       {showButton && (
-  <button
-    onClick={handleToggleRole}
-    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-medium"
-  >
-    Switch Role: {role === "admin" ? "admin" : "crypto"}
-  </button>
-)}
+        {/* Role Toggle button: ✅ only on dashboard page */}
+        {showButton && (
+          <button
+            onClick={handleToggleRole}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-medium"
+          >
+            Switch Role: {role === "admin" ? "admin" : "crypto"}
+          </button>
+        )}
 
-
-        {/* Show stats for non-admin roles */}
+        {/* Stats */}
         {role !== "admin" && (
           <>
-            {/* Desktop Stats */}
             <div className="hidden md:flex items-center gap-6">
               {(role === "crypto" ? cryptoStats : userStats).map((item) => (
                 <div key={item.id}>
@@ -97,8 +89,6 @@ console.log(email);
                 </div>
               ))}
             </div>
-
-            {/* Mobile Stats */}
             <div className="flex items-center gap-6 md:hidden relative">
               {(role === "crypto" ? cryptoStats : userStats).map((item) => (
                 <div key={item.id} className="relative"
@@ -110,7 +100,6 @@ console.log(email);
                     <i className={`${item.icon} fa-xl`}></i>
                   </button>
 
-                  {/* Tooltip */}
                   {activeStat === item.id && (
                     <div className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white shadow-lg rounded-lg p-2 text-sm text-gray-700 w-40 text-center z-50">
                       <div>{item.label}</div>
