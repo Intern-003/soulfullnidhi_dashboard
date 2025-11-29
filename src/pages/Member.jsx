@@ -263,6 +263,8 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
           paginationClassName="flex justify-end gap-2 mt-4"
           previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
           nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+          endPoint="/delete-merchant"
+          setData={setMerchantData}
         />
       )}
 

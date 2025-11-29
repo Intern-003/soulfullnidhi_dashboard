@@ -361,7 +361,7 @@ const Table = ({
                       type="button"
                       onClick={() =>
                         handleConfirmModal(
-                          row.id || row.ticket_id || row.complain_id || row.record_id
+                          row.id
                         )
                       }
                       className="text-red-800 p-3 rounded-xl cursor-pointer"

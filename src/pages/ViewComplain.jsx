@@ -16,6 +16,7 @@ export const ViewComplain = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [ticketData, setTicketData] = useState([]);
   const [editData, setEditData] = useState(null);
+ 
   const toast = useToast();
   const navigate = useNavigate();
   const { execute: executeTicket, loading: creating } =
@@ -53,6 +54,7 @@ export const ViewComplain = () => {
   useEffect(() => {
     if (data?.data) {
       const formattedData = data.data.map((item) => ({
+        id:item.id ?? "N/A",
         ticket_id: item.ticket_id ?? "N/A",
         user_name: item.user?.name ?? "N/A",
         subject: item.subject ?? "N/A",
@@ -292,6 +294,7 @@ export const ViewComplain = () => {
             data={complainsWithModifications}
             showStatusFilter={false}
             endPoint="/delete-ticket"
+            setData={setTicketData}
           />
 
 
