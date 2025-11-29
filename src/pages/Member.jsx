@@ -42,6 +42,8 @@ export const Member = () => {
 
   const { data: dataOfMerchants, refetch: refetchOfMerchants, loading: merchantLoading } =
     useAutoFetch("/get-merchants", 20000);
+
+    console.log("payoutdata", dataOfMerchants);
   const { data: credentialsData } = useGet("/credentials");
 
 
@@ -150,7 +152,15 @@ export const Member = () => {
         name: item.name,
         payin_bank: payinBank,
         payin: item.payin_status,
+       
         payout: item.payout_status,
+     payincharge: Number(item.total_charge?.UPI || 0).toFixed(2),
+payoutcharge: Number(item.total_charge?.payout || 0).toFixed(2),
+cryptocharge: Number(item.total_charge?.CRYPTO || 0).toFixed(2),
+
+  totalwalletpayin: Number(item.total_amount?.UPI || 0).toFixed(2),
+totalwalletpayout: Number(item.total_amount?.payout || 0).toFixed(2),
+totalwallet: Number(item.total_payout || 0).toFixed(2),
         account: item.account_status,
 
         walletpayin: item.payin_wallet,
@@ -171,9 +181,18 @@ export const Member = () => {
     { header: "SQNo", accessor: "sqno" },
     { header: "Name", accessor: "name" },
     { header: "Payin", accessor: "payin" },
+ 
     { header: "Payout", accessor: "payout" },
+    
     { header: "Payin Wallet", accessor: "walletpayin" },
     { header: "Payout Wallet", accessor: "walletpayout" },
+    { header: "Total Payin Wallet", accessor: "totalwalletpayin" },
+         { header: "Payin Charge", accessor: "payincharge" },
+      { header: "Total Payout Wallet", accessor: "totalwalletpayout" },
+         { header: "Payout Charge", accessor: "payoutcharge" },
+      { header: "Total Wallet", accessor: "totalwallet" },
+
+
     { header: "Payin Onboarded Bank", accessor: "payin_bank" },
   ];
 

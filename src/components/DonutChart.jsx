@@ -1,74 +1,68 @@
 import React, { useEffect, useRef } from "react";
-import nodatapie from "../images/pienodata.jpeg";
-
 
 export const DonutChart = ({ data }) => {
   const chartRef = useRef(null);
-const total =
-  (data?.pending || 0) + (data?.success || 0) + (data?.failed || 0);
+  const chartInstance = useRef(null);
+
+  const pending = Number(data?.pending) || 0;
+  const success = Number(data?.success) || 0;
+  const failed = Number(data?.failed) || 0;
+  const total = pending + success + failed;
 
   useEffect(() => {
-    if (chartRef.current && typeof ApexCharts !== "undefined") {
-      const getChartOptions = () => ({
-        series: [data?.pending, data?.success, data?.failed],
-        colors: ["#FDBA8C", "#1C64F2", "#16BDCA"],
-        chart: {
-          height: 320,
-          width: "100%",
-          type: "donut",
-          animations: {
-            enabled: false,
-          },
-        },
-        stroke: { colors: ["transparent"] },
-        plotOptions: {
-          pie: {
-            donut: {
-              size: "80%",
-              labels: {
+    if (!chartRef.current || typeof ApexCharts === "undefined") return;
+
+    // Destroy previous chart before creating a new one
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+      chartInstance.current = null;
+    }
+
+    const seriesData = total > 0 ? [pending, success, failed] : [0, 0, 0];
+
+    const options = {
+      series: seriesData,
+      colors: ["#FDBA8C", "#1C64F2", "#16BDCA"],
+      chart: {
+        height: 320,
+        width: "100%",
+        type: "donut",
+        animations: { enabled: false },
+      },
+      stroke: { colors: ["transparent"] },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: "80%",
+            labels: {
+              show: true,
+              name: { show: true, offsetY: 20 },
+              total: {
+                showAlways: true,
                 show: true,
-                name: {
-                  show: true,
-                  fontFamily: "Inter, sans-serif",
-                  offsetY: 20,
-                },
-                total: {
-                  showAlways: true,
-                  show: true,
-                  label: "Transactions",
-                  fontFamily: "Inter, sans-serif",
-                  formatter: function (w) {
-                    const sum = w.globals.seriesTotals.reduce(
-                      (a, b) => a + b,
-                      0
-                    );
-                    return sum;
-                  },
-                },
-                value: {
-                  show: true,
-                  fontFamily: "Inter, sans-serif",
-                  offsetY: -20,
-                  formatter: (value) => value,
-                },
+                label: "Transactions",
+                formatter: () => total,
               },
+              value: { show: true, offsetY: -20 },
             },
           },
         },
-        grid: { padding: { top: -2 } },
-        labels: ["Pending", "Success", "Failed"],
-        dataLabels: { enabled: false },
-        legend: { position: "bottom", fontFamily: "Inter, sans-serif" },
-      });
+      },
+      labels: ["Pending", "Success", "Failed"],
+      dataLabels: { enabled: false },
+      legend: { position: "bottom" },
+    };
 
-      const chart = new ApexCharts(chartRef.current, getChartOptions());
-      chart.render();
+    // eslint-disable-next-line no-undef
+    chartInstance.current = new ApexCharts(chartRef.current, options);
+    chartInstance.current.render();
 
-      return () => {
-        chart.destroy();
-      };
-    }
-  }, [data]);
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+    };
+  }, [pending, success, failed, total]);
 
   return (
     <div className="max-w-sm w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
@@ -78,29 +72,7 @@ const total =
         </h5>
       </div>
 
-      {/* <div className="py-6" ref={chartRef}></div> */}
-
-
-      {total > 0 ? (
-  <div className="py-6" ref={chartRef}></div>
-) : (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "320px",
-      flexDirection: "column",
-    }}
-  >
-    <img
-      src={nodatapie}
-      alt="No data found"
-      style={{ width: "250px" }}
-    />
-    {/* <p style={{ color: "#777", marginTop: "10px" }}>No transactions yet</p> */}
-  </div>
-)}
+      <div className="py-6" ref={chartRef}></div>
     </div>
   );
 };

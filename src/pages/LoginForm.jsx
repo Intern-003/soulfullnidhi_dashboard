@@ -23,7 +23,9 @@ function LoginForm() {
 
       if (response) {
         localStorage.setItem("token", response.token);
+        localStorage.setItem("email", response.user.email);
         localStorage.setItem("role", btoa(response.user.role_type));
+              localStorage.setItem("user", JSON.stringify(response.user));
         navigate("/dashboard", { replace: true });
       }
     } catch (err) {

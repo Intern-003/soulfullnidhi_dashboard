@@ -8,33 +8,32 @@ export function usePost(endpoint) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const execute = async (body) => {
+  const execute = async (body, options = {}) => {
     setLoading(true);
     setError(null);
 
     try {
-      let response;
-      if (endpoint === "/login") {
-        response = await axios.post(`${BASE_URL}${endpoint}`, body, {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        });
-      } else {
-        response = await axios.post(`${BASE_URL}${endpoint}`, body, {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        });
+      const headers = {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        ...options.headers,
+      };
+
+      // If body is FormData, do NOT set Content-Type manually
+      if (!(body instanceof FormData)) {
+        headers["Content-Type"] = "application/json";
       }
 
-      setData(response.data); // store in state for UI if needed
-      return response.data;   // ✅ return actual response immediately
+      const response = await axios.post(`${BASE_URL}${endpoint}`, body, {
+        withCredentials: true,
+        headers,
+      });
+
+      setData(response.data);
+      return response.data;
     } catch (err) {
       const errData = err.response?.data || "Something went wrong";
       setError(errData);
-      throw errData; // important to propagate the error
+      throw errData;
     } finally {
       setLoading(false);
     }
