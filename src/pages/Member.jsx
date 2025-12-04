@@ -18,6 +18,7 @@ export const Member = () => {
   const toast = useToast();
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const memberDetails = useNavigate();
   const [merchantData, setMerchantData] = useState([]);
   const [initialLoad, setInitialLoad] = useState(true);
 
@@ -149,7 +150,18 @@ export const Member = () => {
       return {
         sqno: index + 1,
         id: item.id,
-        name: item.name,
+        // name: item.name,
+        name:(
+        <span className="text-blue-600 cursor-pointer" 
+        
+        onClick={() => {
+          localStorage.setItem("merchantId", item.id);
+          memberDetails(`/MerchantDetails/${item.id}`) 
+        }}>
+        
+          {item.name}
+        </span>
+        ),
         payin_bank: payinBank,
         payin: item.payin_status,
        
