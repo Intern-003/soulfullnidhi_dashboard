@@ -49,13 +49,13 @@ const Payoutrequest = () => {
     try {
       const payload = {
         // token: "Pq4mPdo9AkdT2NkEw4MANTy5fw7kBY",
-        apitxnid: "DASH" + Date.now(),
+        orderid: "DASH" + Date.now(),
         email: selectedUser.beneficiary_email_id,
         mobile: selectedUser.beneficiary_mobile_no,
         amount,
-        account_number: selectedUser.account_no,
-        ifsc_code: selectedUser.ifsc_code,
-        bene_name: selectedUser.beneficiary_name,
+        account: selectedUser.account_no,
+        ifsc: selectedUser.ifsc_code,
+        name: selectedUser.beneficiary_name,
         mode: paymentMode,
       };
 

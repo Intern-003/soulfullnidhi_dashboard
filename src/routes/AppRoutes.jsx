@@ -27,6 +27,7 @@ import SpayGlidePGWidget from "../pages/SpayGlidePGWidget";
 import SpayGlidePGCancel from "../pages/SpayGlidePGCancel";
 import SpayGlidePGSuccess from "../pages/SpayGlidePGSuccess";
 import SpayGlidePGError from "../pages/SpayGlidePGError";
+import MerchantDetails from "../pages/MerchantDetails";
 
 const AppRoutes = () => {
     return(
@@ -108,6 +109,14 @@ const AppRoutes = () => {
                         <MemberOnboardForm />
                     </PrivateRoute>
                     }
+                />
+                <Route
+                path = "/MerchantDetails/:id"
+                element = {
+                    <PrivateRoute role = {"admin"}>
+                        <MerchantDetails />
+                    </PrivateRoute>
+                }
                 />
                 <Route
                     path="/upi-statement"
