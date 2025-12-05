@@ -7,9 +7,19 @@ import { TableSkeleton } from "../components/TableSkeleton";
 const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
 
-
   const { data, loading, error } = useGet("/reportrecords-List?product=payout");
 
+  // SAME DATE FORMAT AS ACC_TOPUP
+  const formatDateLikeTopup = (date) => {
+    const d = new Date(date);
+
+    const day = d.getDate();
+    const month = MONTH_NAMES[d.getMonth()];
+    const year = d.getFullYear();
+    const time = d.toLocaleTimeString();
+
+    return `${day} ${month} ${year} - ${time}`;
+  };
 
   useEffect(() => {
     const statusClasses = {
@@ -37,6 +47,7 @@ const PayoutStatement = () => {
         ),
         id: item.id,
         user_id: item.user_id,
+
         product_type: item.product ?? "N/A",
         merchant_details: item.user.name ?? "N/A",
 
@@ -59,7 +70,6 @@ const PayoutStatement = () => {
           </div>
         ),
 
-        // JSX for table
         amount: (
           <div className="flex flex-col text-left">
             <span>Opening Wallet Amount: <b>{item.payout_opening_balance ?? "0"}</b></span>
@@ -71,15 +81,16 @@ const PayoutStatement = () => {
           </div>
         ),
 
-        // Numeric value for calculations
         numericAmount: parseFloat(item.payout_amount) || 0,
 
-        date: new Date(item.created_at).toISOString(),
+        // FIXED DATE FORMAT
+        date: formatDateLikeTopup(item.created_at),
+
         status: item.status,
+
         showstatus: (
           <span
-            className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-              }`}
+            className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"}`}
           >
             {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "N/A"}
           </span>
@@ -92,23 +103,19 @@ const PayoutStatement = () => {
 
   const upiColumn = [
     { header: "Order ID", accessor: "sqno" },
-
     { header: "User Details", accessor: "merchant_details" },
     { header: "Bank Details", accessor: "txnid" },
     { header: "Reference Details", accessor: "reference_details" },
     { header: "Amount/commission", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
-
   ];
 
   return (
     <div className="p-4 space-y-4">
-      {/* Header */}
       <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
         <h4 className="font-bold text-white text-xl">Payout Statement</h4>
       </div>
 
-      {/* Table */}
       {loading ? (
         <TableSkeleton />
       ) : error ? (
