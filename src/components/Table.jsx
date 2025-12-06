@@ -598,11 +598,23 @@ const Table = ({
   return (
     <div className="w-full">
 
-      {/* FILTER BAR (unchanged) */}
+      {/* FILTER BAR */}
       {(showSearch || showStatusFilter || showExport || showDateFilter || showSelectUserFilter) && (
         <div className="w-full bg-white shadow-md border border-sky-200 rounded-xl p-4 mb-4">
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
-            <div className="flex flex-wrap items-center gap-4">
+
+          {/* TOP FLEX ROW — FIXED RESPONSIVE */}
+          <div
+            className="
+              flex flex-col lg:flex-row
+              justify-between
+              items-start lg:items-center
+              gap-4
+              w-full
+            "
+          >
+
+            {/* LEFT FILTER SECTION — STOPS TAKING FULL WIDTH */}
+            <div className="flex flex-wrap items-center gap-4 lg:max-w-[65%]">
 
               {showSearch && (
                 <div className="relative w-56">
@@ -669,15 +681,17 @@ const Table = ({
                   ))}
                 </select>
               )}
+
             </div>
 
-            {/* RIGHT SIDE: Export + Clear */}
-            <div className="flex items-center gap-3">
+            {/* RIGHT SIDE BUTTONS — ALWAYS STICK TO RIGHT */}
+            <div className="flex items-center gap-3 ml-auto">
+
               {showExport && (
                 <div className="relative">
                   <button
                     onClick={() => setOpenExport(!openExport)}
-                    className="bg-yellow-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-500 transition flex items-center gap-2"
+                    className="bg-yellow-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-500 transition flex items-center gap-2 min-w-[110px] h-[42px] justify-center"
                   >
                     <i className="fa-solid fa-download"></i> Export
                   </button>
@@ -694,7 +708,7 @@ const Table = ({
               )}
 
               <Button
-                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg shadow-md transition"
+                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg shadow-md transition min-w-[110px] h-[42px] flex items-center justify-center"
                 onClick={() => {
                   setStartDate(null);
                   setEndDate(null);
@@ -705,10 +719,11 @@ const Table = ({
               >
                 Clear All
               </Button>
+
             </div>
           </div>
 
-          {/* Total Successful (unchanged) */}
+          {/* TOTAL SUCCESSFUL */}
           <div className="flex justify-end w-full mt-2">
             {showSelectUserFilter && (
               <div className="flex items-center gap-2 text-sm md:text-base font-semibold text-green-700 bg-green-50 px-3 py-2 rounded-lg shadow-sm">
@@ -720,89 +735,91 @@ const Table = ({
         </div>
       )}
 
+
       {/* TABLE SECTION */}
-      <div className="bg-white rounded-lg shadow-lg w-full overflow-x-auto border border-sky-300 mt-6">
+      <div className=" bg-white rounded-lg shadow-lg w-full border border-sky-300 mt-6">
 
         {/* ⭐ FIX: No min-w-max, no table-fixed, no nowrap */}
-        <table className="w-full text-sm text-left text-gray-700 border-collapse">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left text-gray-700 border-collapse">
 
-          <thead className="uppercase text-white tracking-wide"
-            style={{ background: "linear-gradient(90deg, #007BFF, #00C8FF)" }}
-          >
-            <tr>
-              {columns.map((column, index) => (
-                <th key={index} className="font-semibold text-md px-4 py-3 text-left border-b border-white/30">
-                  {column.header}
-                </th>
-              ))}
-
-              {showDeleteColumn && (
-                <th className="font-semibold text-md px-4 py-3 text-left border-b border-white/30">
-                  Delete
-                </th>
-              )}
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredData.length > 0 ? (
-              filteredData
-                .slice(
-                  (currentPage - 1) * entriesPerPage,
-                  currentPage * entriesPerPage
-                )
-                .map((row, rowIndex) => (
-                  <tr
-                    key={row.id}
-                    className={`${rowIndex % 2 === 0
-                        ? "bg-[#f1f7ff]"
-                        : "bg-white"
-                      } hover:bg-[#e0f0ff] transition-all duration-150 border-b border-gray-200`}
-                  >
-                    {columns.map((column, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className="px-4 py-3 text-gray-800 text-left text-sm md:text-base break-words"
-                      >
-                        {column.Cell
-                          ? column.Cell({
-                              value: row[column.accessor],
-                              row,
-                            })
-                          : row[column.accessor]}
-                      </td>
-                    ))}
-
-                    {showDeleteColumn && (
-                      <td className="px-4 py-3">
-                        <Button
-                          type="button"
-                          onClick={() => handleConfirmModal(row.id)}
-                          className="text-red-800 p-3 rounded-xl cursor-pointer"
-                        >
-                          <i className="fa-solid fa-trash fa-lg"></i>
-                        </Button>
-                      </td>
-                    )}
-                  </tr>
-                ))
-            ) : (
+            <thead className="uppercase text-white tracking-wide"
+              style={{ background: "linear-gradient(90deg, #007BFF, #00C8FF)" }}
+            >
               <tr>
-                <td
-                  colSpan={
-                    showDeleteColumn
-                      ? columns.length + 1
-                      : columns.length
-                  }
-                  className="text-center text-gray-600 py-6 bg-white font-medium"
-                >
-                  No data found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                {columns.map((column, index) => (
+                  <th key={index} className="font-semibold text-md px-4 py-3 text-left border-b border-white/30">
+                    {column.header}
+                  </th>
+                ))}
 
+                {showDeleteColumn && (
+                  <th className="font-semibold text-md px-4 py-3 text-left border-b border-white/30">
+                    Delete
+                  </th>
+                )}
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredData.length > 0 ? (
+                filteredData
+                  .slice(
+                    (currentPage - 1) * entriesPerPage,
+                    currentPage * entriesPerPage
+                  )
+                  .map((row, rowIndex) => (
+                    <tr
+                      key={row.id}
+                      className={`${rowIndex % 2 === 0
+                          ? "bg-[#f1f7ff]"
+                          : "bg-white"
+                        } hover:bg-[#e0f0ff] transition-all duration-150 border-b border-gray-200`}
+                    >
+                      {columns.map((column, colIndex) => (
+                        <td
+                          key={colIndex}
+                          className="px-4 py-3 text-gray-800 text-left text-sm md:text-base break-words"
+                        >
+                          {column.Cell
+                            ? column.Cell({
+                                value: row[column.accessor],
+                                row,
+                              })
+                            : row[column.accessor]}
+                        </td>
+                      ))}
+
+                      {showDeleteColumn && (
+                        <td className="px-4 py-3">
+                          <Button
+                            type="button"
+                            onClick={() => handleConfirmModal(row.id)}
+                            className="text-red-800 p-3 rounded-xl cursor-pointer"
+                          >
+                            <i className="fa-solid fa-trash fa-lg"></i>
+                          </Button>
+                        </td>
+                      )}
+                    </tr>
+                  ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={
+                      showDeleteColumn
+                        ? columns.length + 1
+                        : columns.length
+                    }
+                    className="text-center text-gray-600 py-6 bg-white font-medium"
+                  >
+                    No data found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
         {/* Pagination (unchanged) */}
         {showPagination && (
           <div className="flex flex-col md:flex-row justify-between items-center bg-white px-4 py-3 rounded-b-lg border-t border-sky-200 mt-3">

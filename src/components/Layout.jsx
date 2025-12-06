@@ -7,7 +7,7 @@ const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-gray-100 relative">
+    <div>
       {/* Sidebar — visible fixed on desktop, overlay on mobile */}
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
