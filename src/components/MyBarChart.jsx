@@ -3,27 +3,46 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 
-// Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const MyBarChart = ({ record }) => {
-  // Ensure all data points are numbers, fallback to 0
-  const todayPayin = Number(record?.today_payin) || 0;
-  const todayProfit = Number(record?.PayinProfitAmount_current) || 0;
-  const todaySuccess = Number(record?.payinTransactionStatusCounts.success) || 0;
-  const todayFailed = Number(record?.payinTransactionStatusCounts.failed) || 0;
-  const todayPending = Number(record?.payinTransactionStatusCounts.pending) || 0;
+const MyBarChart = ({ record, type = 'payin' }) => {
+  // Determine which data to use based on filter
+  const isPayin = type === 'payin';
+
+  // Numbers, fallback to 0 if empty
+  const totalAmount = Number(isPayin ? record.total_payin_amount : record.total_payout_amount) || 0;
+  const todayAmount = Number(isPayin ? record.today_payin : record.today_payout) || 0;
+  const profit = Number(isPayin ? record.todayPayingAmount : 0) || 0;
+  // const rolling = Number(isPayin ? record.PayinRollingAmount : 0) || 0;
+
+  // Status counts
+  const statusCounts = isPayin
+    ? record.payinTransactionStatusCounts || {}
+    : record.payoutTransactionStatusCounts || {};
+
+  const todayStatusCounts = isPayin
+    ? record.todayPayinStatusCounts || {}
+    : record.todayPayoutStatusCounts || {};
 
   const data = {
-    labels: ['Today Payin', 'Today Profit', 'Success', 'Failed', 'Pending'],
+    labels: ['Total', 'Today', 'Profit',  'Success', 'Pending', 'Failed'],
     datasets: [
       {
-        label: 'Today Summary',
-        data: [todayPayin, todayProfit, todaySuccess, todayFailed, todayPending],
+        label: isPayin ? 'Payin Summary' : 'Payout Summary',
+        data: [
+          totalAmount,
+          todayAmount,
+          profit,
+          Number(todayStatusCounts.success || 0),
+          Number(todayStatusCounts.pending ||  0),
+          Number(todayStatusCounts.failed ||  0),
+        ],
         backgroundColor: [
           'rgba(54, 162, 235, 0.7)',
           'rgba(255, 206, 86, 0.7)',
           'rgba(75, 192, 192, 0.7)',
+          'rgba(255, 159, 64, 0.7)',
+          'rgba(153, 102, 255, 0.7)',
           'rgba(255, 99, 132, 0.7)',
           'rgba(201, 203, 207, 0.7)',
         ],
@@ -31,12 +50,14 @@ const MyBarChart = ({ record }) => {
           'rgba(54, 162, 235, 1)',
           'rgba(255, 206, 86, 1)',
           'rgba(75, 192, 192, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(153, 102, 255, 1)',
           'rgba(255, 99, 132, 1)',
           'rgba(201, 203, 207, 1)',
         ],
         borderWidth: 2,
-        borderRadius: 10,        // Rounded edges for 3D effect
-        borderSkipped: false,    // Show border on all sides
+        borderRadius: 10,
+        borderSkipped: false,
       },
     ],
   };
@@ -45,21 +66,15 @@ const MyBarChart = ({ record }) => {
     responsive: true,
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: 'Today Summary' },
+      title: { display: true, text: isPayin ? 'Payin Summary' : 'Payout Summary' },
       tooltip: { enabled: true },
     },
     scales: {
       y: {
         beginAtZero: true,
-        ticks: {
-          stepSize: 1,
-        },
+        ticks: { stepSize: 1 },
       },
-      x: {
-        grid: {
-          display: false,
-        },
-      },
+      x: { grid: { display: false } },
     },
   };
 
@@ -67,4 +82,3 @@ const MyBarChart = ({ record }) => {
 };
 
 export default MyBarChart;
-  
