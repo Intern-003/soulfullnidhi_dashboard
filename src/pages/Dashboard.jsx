@@ -119,6 +119,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (!recordLoading && cardData) setInitialLoad(false);
+    console.log(cardData);
   }, [recordLoading, cardData]);
 
   // Role-based cards
