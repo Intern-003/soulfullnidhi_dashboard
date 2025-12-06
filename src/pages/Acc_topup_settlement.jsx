@@ -98,7 +98,7 @@ const Acc_topup_settlement = () => {
           showSearch={false}
           showSelectUserFilter={true}
           showDeleteColumn={false}
-          statusList={REPORT_STATUSES}
+          statusList={REPORT_STATUSES}  
           className="shadow-lg rounded-lg overflow-hidden"
         />
       )}
