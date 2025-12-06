@@ -5,23 +5,39 @@ import { useGet } from '../hooks/useGet'
 import useAutoFetch from '../hooks/useAutoFetch'
 
 import Chart from "react-apexcharts";
-    import MyBarChart from '../components/MyBarChart';
+import MyBarChart from '../components/MyBarChart';
 
 
 const MerchantDetails = () => {
   const { id } = useParams();
  const {data:record} = useGet(`/Merchant-Collection?merchant_id=${id}`);
-
+// console.log("records data: ",record);
  const {data:getMerchant} = useGet(`/show-merchant/${id}`);
  const chartCount  =record?.transactionStatusCounts || {};
+ const [filter,setFilter] =  useState('payin');
 
-const chartSeries = chartCount
+// const chartSeries = chartCount
+//   ? [
+//       chartCount.pending ?? 0,
+//       chartCount.success ?? 0,
+//       chartCount.initiated ?? 0,
+//     ]
+//   : [0, 0, 0];
+
+
+const chartSeries = filter === 'payin'
   ? [
-      chartCount.pending ?? 0,
-      chartCount.success ?? 0,
-      chartCount.initiated ?? 0,
+      record?.payinTransactionStatusCounts?.pending ?? 0,
+      record?.payinTransactionStatusCounts?.success ?? 0,
+      record?. payinTransactionStatusCounts ?.initiated ?? 0,
     ]
-  : [0, 0, 0];
+  : [
+      record?.payoutTransactionStatusCounts?.pending ?? 0,
+      record?.payoutTransactionStatusCounts?.success ?? 0,
+      record?.payoutTransactionStatusCounts?.initiated ?? 0,
+    ];
+
+
 
 const chartLabels = ["Pending", "Success", "Initiated"];
 // const pieOptions = {
@@ -124,36 +140,81 @@ const pieOptions = {
 
   return (
    <div className="p-4">
+      <div className="flex items-center justify-between mb-6">
 
       <h1 className="text-xl font-bold mb-4">Merchant Details</h1>
-
+      {/* <label className="block text-gray-600 text-sm font-medium mb-1">Select Type</label> */}
+      <select 
+      className="w-50 px-4 py-2 border rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      value ={filter}
+      onChange={(e) => setFilter(e.target.value)}>
+        <option value ="payin">Payin</option>
+      <option value="payout">Payout</option>
+      </select>
+      </div>
+        
       {/* Cards */}
       {record && (
         <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+  {filter === 'payin' && (
+    <>
+      {/* Expected Payin */}
+      <div className="bg-gradient-to-r from-blue-100 to-blue-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Expected Payin</h3>
+        <p className="text-3xl font-bold text-blue-600">₹ {record.todayPayingAmount}</p>
+      </div>
 
-          <div className="bg-white shadow-md rounded-xl p-4">
-            <h3 className="text-gray-500 text-sm">Payin Wallet</h3>
-            <p className="text-2xl font-semibold mt-2">₹ {record.today_payin}</p>
-          </div>
+      {/* Payin Wallet */}
+      <div className="bg-gradient-to-r from-green-100 to-green-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Payin Wallet</h3>
+        <p className="text-3xl font-bold text-green-600">₹ {record.PayingAmount}</p>
+      </div>
 
-          <div className="bg-white shadow-md rounded-xl p-4">
-            <h3 className="text-gray-500 text-sm">Payout Wallet</h3>
-            <p className="text-2xl font-semibold mt-2">₹ {record.today_payout}</p>
-          </div>
+      {/* Total Profit */}
+      <div className="bg-gradient-to-r from-yellow-100 to-yellow-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Total Profit</h3>
+        <p className="text-3xl font-bold text-yellow-600">₹ {record.PayinProfitAmount}</p>
+      </div>
 
-          <div className="bg-white shadow-md rounded-xl p-4">
-            <h3 className="text-gray-500 text-sm">Total Charges</h3>
-            <p className="text-2xl font-semibold mt-2">₹ {record.total_payin_amount}</p>
-          </div>
+      {/* Total Payin */}
+      <div className="bg-gradient-to-r from-purple-100 to-purple-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Total Payin</h3>
+        <p className="text-3xl font-bold text-purple-600">₹ {record.total_payin_amount}</p>
+      </div>
+    </>
+  )}
 
-          <div className="bg-white shadow-md rounded-xl p-4">
-            <h3 className="text-gray-500 text-sm">Rolling Amount</h3>
-            <p className="text-2xl font-semibold mt-2">₹ {record.total_payout_amount}</p>
-          </div>
+  {filter === 'payout' && (
+    <>
+      {/* Total Payout */}
+      <div className="bg-gradient-to-r from-red-100 to-red-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Total Payout</h3>
+        <p className="text-3xl font-bold text-red-600">₹ {record.total_payout_amount}</p>
+      </div>
 
-       
-        </div>
+      {/* Today's Payout */}
+      <div className="bg-gradient-to-r from-pink-100 to-pink-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Today's Payout</h3>
+        <p className="text-3xl font-bold text-pink-600">₹ {record.today_payout}</p>
+      </div>
+
+      {/* Payout Wallet */}
+      <div className="bg-gradient-to-r from-purple-100 to-purple-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Payout Wallet</h3>
+        <p className="text-3xl font-bold text-purple-600">₹ {record.payout_wallet}</p>
+      </div>
+
+      {/* Payout Refunded */}
+      <div className="bg-gradient-to-r from-orange-100 to-orange-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Refunded</h3>
+        <p className="text-3xl font-bold text-orange-600">₹ {record.payout_refunded}</p>
+      </div>
+    </>
+  )}
+</div>
+
+
         </>
 
       )}
