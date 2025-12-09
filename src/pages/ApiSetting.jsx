@@ -64,7 +64,7 @@ useEffect(()=>{
   if(WebhookUrl){
     setPayinWebHook(WebhookUrl?.data?.payin_callback || " ");
     setPayoutWebHook(WebhookUrl?.data?.payout_callback || " ");
-    console.log(WebhookUrl?.data?.payin_callback );
+    // console.log(WebhookUrl?.data?.payin_callback );
   }
 },[WebhookUrl]);
 const {execute:updateWebhook} =usePost("/update-merchant");

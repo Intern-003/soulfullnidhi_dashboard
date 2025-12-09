@@ -181,7 +181,7 @@ const stepRequiredFields = {
     const credentialsData = midCredentials?.data || [];
     if (credentialsData.length > 0) {
       setAirpayMids(credentialsData);
-      console.log("✅ credentials loaded:", credentialsData);
+      // console.log("✅ credentials loaded:", credentialsData);
     } else {
       console.warn("⚠️ no credentials found yet");
       setAirpayMids([]);
@@ -214,7 +214,7 @@ const handleDirectorChange = (index, e) => {
     };
     return { ...prev, director_info: updatedDirectors };
   });
-  console.log(`Director ${index} ${name}:`, files ? files[0] : value);
+  // console.log(`Director ${index} ${name}:`, files ? files[0] : value);
 };
 
 
@@ -249,7 +249,7 @@ const handleCompanyFileChange = (e) => {
     ...prev,
     [name]: files?.[0] || null, // only keep real file
   }));
-  console.log(name, files?.[0]); // verify
+  // console.log(name, files?.[0]); // verify
 };
 
 const handleDirectorFileChange = (index, e) => {
@@ -259,7 +259,7 @@ const handleDirectorFileChange = (index, e) => {
     updatedDirectors[index][name] = files?.[0] || null;
     return { ...prev, director_info: updatedDirectors };
   });
-  console.log(`Director ${index} ${name}`, files?.[0]);
+  // console.log(`Director ${index} ${name}`, files?.[0]);
 };
 
 
@@ -271,13 +271,13 @@ const handleSubmit = async (e) => {
   try {
     const formData = new FormData();
 
-    console.log("===== Form Submission Start =====");
+    // console.log("===== Form Submission Start =====");
 
     // Append text fields (excluding files and directors)
     Object.keys(memberFormData).forEach((key) => {
       if (!["director_info", "company_pan_no_doc", "company_gst_no_doc", "cancel_cheque_doc"].includes(key)) {
         formData.append(key, memberFormData[key]);
-        console.log(`[Text] ${key}:`, memberFormData[key]);
+        // console.log(`[Text] ${key}:`, memberFormData[key]);
       }
     });
 
@@ -285,7 +285,7 @@ const handleSubmit = async (e) => {
     ["company_pan_no_doc", "company_gst_no_doc", "cancel_cheque_doc"].forEach((fileKey) => {
       if (memberFormData[fileKey] instanceof File) {
         formData.append(fileKey, memberFormData[fileKey]);
-        console.log(`[File] ${fileKey}:`, memberFormData[fileKey].name);
+        // console.log(`[File] ${fileKey}:`, memberFormData[fileKey].name);
       }
     });
 
@@ -295,15 +295,15 @@ const handleSubmit = async (e) => {
         const value = director[field];
         if (value instanceof File) {
           formData.append(`director_info[${idx}][${field}]`, value);
-          console.log(`[File] director_info[${idx}][${field}]:`, value.name);
+          // console.log(`[File] director_info[${idx}][${field}]:`, value.name);
         } else {
           formData.append(`director_info[${idx}][${field}]`, value);
-          console.log(`[Text] director_info[${idx}][${field}]:`, value);
+          // console.log(`[Text] director_info[${idx}][${field}]:`, value);
         }
       });
     });
 
-    console.log("===== Form Submission End =====");
+    // console.log("===== Form Submission End =====");
 
     await executeMember(formData);
     toast.success("Form submitted successfully!");

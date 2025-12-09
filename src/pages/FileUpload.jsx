@@ -15,7 +15,7 @@ const FileUpload = () => {
       formData.append("file", file); // must match API key
 
       const response = await uploadFile(formData); // no Content-Type manually
-      console.log("Upload response:", response);
+      // console.log("Upload response:", response);
       toast.success("File uploaded!");
     } catch (err) {
       console.error(err);

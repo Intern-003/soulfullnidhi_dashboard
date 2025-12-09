@@ -36,7 +36,7 @@ export const ViewComplain = () => {
     editData ? `/update-ticket/${editData.id}` : ""
   );
 
-  console.log("Ticket Data:", data);
+  // console.log("Ticket Data:", data);
 
   const statusOptions = ["Open", "In Progress", "Resolved", "Closed"];
   const priorityOptions = ["High", "Medium", "Low"];
@@ -101,7 +101,7 @@ export const ViewComplain = () => {
   }, [showModal, editData]);
 
   const handleEdit = (ticket) => {
-    console.log("Editing:", ticket);
+    // console.log("Editing:", ticket);
     setEditData(ticket);
     setShowModal(true);
   };
@@ -214,7 +214,7 @@ export const ViewComplain = () => {
       const res = editData
         ? await updateTicket(payload)
         : await executeTicket(payload);
-      console.log("Ticket Submission Response:", res);
+      // console.log("Ticket Submission Response:", res);
       toast.success(
         editData
           ? "Complaint updated successfully!"

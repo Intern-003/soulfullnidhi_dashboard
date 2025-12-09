@@ -119,7 +119,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (!recordLoading && cardData) setInitialLoad(false);
-    console.log(cardData);
+    // console.log(cardData);
   }, [recordLoading, cardData]);
 
   // Role-based cards
@@ -141,7 +141,7 @@ export const Dashboard = () => {
   if (role === "admin") cardsToShow = [...normalCards];
   else if (role === "crypto") cardsToShow = [...cryptoCard];
   else cardsToShow = [...normalCards]; // normal users
-console.log(cardData?.transactionStatusCounts);
+// console.log(cardData?.transactionStatusCounts);
   return (
     <>
       {initialLoad ? (
