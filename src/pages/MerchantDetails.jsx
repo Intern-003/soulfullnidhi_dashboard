@@ -82,7 +82,7 @@ const pieOptions = {
     },
   },
   labels: ["Pending", "Success", "Initiated"],
-  colors: ['#b9a358ff', '#006400', '#E57373'], // Success = dark green (#006400)
+  colors: ['#E57373', '#006400', '#b9a358ff'], // Success = dark green (#006400)
   legend: {
     position: "bottom",
     labels: {
@@ -174,7 +174,7 @@ const pieOptions = {
         <h3 className="text-gray-600 text-sm font-medium mb-2">Expected Payin</h3>
         <p className="text-3xl font-bold text-blue-600">₹ {record.todayPayingAmount}</p>
       </div>
-
+    
       {/* Payin Wallet */}
       <div className="bg-gradient-to-r from-green-100 to-green-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
         <h3 className="text-gray-600 text-sm font-medium mb-2">Payin Wallet</h3>
