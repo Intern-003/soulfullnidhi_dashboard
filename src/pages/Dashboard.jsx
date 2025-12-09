@@ -5,7 +5,7 @@ import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { MONTH_NAMES } from "../constants/Constants";
 import DashboardSkeleton from "../components/DashboardSkeleton";
-// import largesttxn from "../images/largesttxn.jpg";
+import largesttxn from "../images/largesttxn.jpg";
 
 export const Dashboard = () => {
   // Get role from localStorage
@@ -94,6 +94,7 @@ export const Dashboard = () => {
     // Format large transactions
     const formattedLargeTransactionData = largeSource.map((item) => ({
       name: item.user.name,
+      product:item.product,
       amount: item.amount,
     }));
 
@@ -234,18 +235,41 @@ console.log(cardData?.transactionStatusCounts);
             key={index}
             className="py-3 sm:py-4 rounded-lg bg-[rgba(255,255,255,0.1)]"
           >
-            <div className="flex justify-between">
-              <p className="text-sm font-medium text-black truncate">{item.name}</p>
-              <div className="text-base font-semibold text-black">₹{item.amount}</div>
-            </div>
+        <div className="flex justify-between w-full">
+          <div className="flex flex-col w-full">
+            <p className="text-sm font-medium text-black truncate">{item.name}</p>
+
+            {/* line after name */}
+            <div className="w-full h-px bg-gray-300 my-1"></div>
+
+            <p className="text-sm font-medium text-black truncate">{item.product}</p>
+
+            {/* line after product */}
+            <div className="w-full h-px bg-gray-300 my-1"></div>
+          </div>
+
+          <div className="text-base font-semibold text-black">₹{item.amount}</div>
+        </div>
+
           </li>
         ))
       ) : (
-        <li className="py-3 sm:py-4 rounded-lg bg-[rgba(255,255,255,0.1)]">
-          <div className="flex justify-between">
-            <p className="text-sm font-medium text-black truncate">No Transactions</p>
-            <div className="text-base font-semibold text-black">₹0</div>
+        <li className=" sm:py-4 rounded-lg bg-[rgba(255,255,255,0.1)]">
+          {/* <div className="flex justify-between"> */}
+            {/* <p className="text-sm font-medium text-black truncate">No Transactions </p>
+            <div className="text-base font-semibold text-black">₹0</div> */}
+            <div style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}>
+                <img 
+                  src={largesttxn} 
+                  alt="no data found" 
+                  style={{ height: "250px", width: "250px" }} 
+                />
           </div>
+          {/* </div> */}
         </li>
       )}
     </ul>
