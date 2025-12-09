@@ -304,7 +304,7 @@ export const ViewComplain = () => {
       {/* -------- MODALS -------- */}
       {showModal && (
         <div
-          className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
+          className="fixed inset-0 flex items-center justify-center bg-red/300 backdrop-blur-sm z-50"
           onClick={() => setShowModal(false)}
         >
           <div
