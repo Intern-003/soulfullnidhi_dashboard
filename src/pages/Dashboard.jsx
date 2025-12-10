@@ -9,7 +9,12 @@ import largesttxn from "../images/largesttxn.jpg";
 
 export const Dashboard = () => {
   // Get role from localStorage
-  const [role] = useState(atob(localStorage.getItem("role")) || "admin");
+  // const [role] = useState(atob(localStorage.getItem("role")) || "admin");
+  const [role] = useState(() => {
+  const storedRole = localStorage.getItem("role");
+  return storedRole ? atob(storedRole) : "admin";
+});
+
 
   const [transactionData, setTransactionData] = useState([]);
   const [largeTransactionData, setLargeTransactionData] = useState([]);
@@ -120,7 +125,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (!recordLoading && cardData) setInitialLoad(false);
-    console.log(cardData);
+    // console.log(cardData);
   }, [recordLoading, cardData]);
 
   // Role-based cards
@@ -142,7 +147,7 @@ export const Dashboard = () => {
   if (role === "admin") cardsToShow = [...normalCards];
   else if (role === "crypto") cardsToShow = [...cryptoCard];
   else cardsToShow = [...normalCards]; // normal users
-console.log(cardData?.transactionStatusCounts);
+// console.log(cardData?.transactionStatusCounts);
   return (
     <>
       {initialLoad ? (
@@ -184,7 +189,7 @@ console.log(cardData?.transactionStatusCounts);
   <>
     <div className="flex justify-center items-start">
       <div className="w-full max-w-[380px] p-6 rounded-xl backdrop-blur-xl shadow-[0_4px_20px_rgba(255,192,203,0.25)]">
-        <DonutChart data={cardData?.transactionStatusCounts} />
+        <DonutChart data={cardData?.transactionStatusCounts || []} />
       </div>
     </div>
 

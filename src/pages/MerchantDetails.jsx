@@ -134,7 +134,7 @@ const pieOptions = {
 
 
 
- console.log("record data",record);;
+//  console.log("record data",record);
 
 
 
