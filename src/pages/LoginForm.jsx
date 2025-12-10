@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logo from "../images/logo.png";
+import logo from "../images/logo.jpeg";
 import paymentGatewayBg from "../images/login-background.jpg";
 import { usePost } from "../hooks/usePost";
 import { useNavigate } from "react-router-dom";
@@ -41,7 +41,7 @@ function LoginForm() {
       ></div>
       <div className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-gray-200 opacity-90">
         <div className="flex justify-center mb-6">
-          <img className="w-70 mr-2" src={logo} alt="logo" />
+          <img className="w-35 mr-2" src={logo} alt="logo" />
         </div>
         <h1 className="text-xl font-bold mb-6 text-center text-blue-600">
           Sign in to your account

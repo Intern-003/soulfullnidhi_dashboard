@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../css/sidebar.css";
-import Logo from "../images/logo.png";
+import Logo from "../images/logo.jpeg";
 
 export const Sidebar = ({ open, setOpen }) => {
   const role = atob(localStorage.getItem("role")); // admin / user / crypto
@@ -167,7 +167,13 @@ export const Sidebar = ({ open, setOpen }) => {
           bg-cover bg-no-repeat bg-center bg-blend-soft-light 
           shadow-xl z-40 transform transition-transform duration-300 ease-in-out
           md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
-          style={{backgroundColor:"#05275c"}}
+          // background: "linear-gradient(10deg, #2e53dbff, #1735a1 )" 
+          // backgroundColor:"#05275c"
+          style={{
+            //  background: "linear-gradient(275deg, #0f203fff, #0d3dc4ff)"
+           background: "linear-gradient(180deg, #ffffff, #e8f0ff, #d6e4ff)"
+
+          }}
       >
         {/* Close button mobile */}
         <button
@@ -201,8 +207,8 @@ export const Sidebar = ({ open, setOpen }) => {
                     className={`flex items-center w-full p-3 rounded-xl transition-all duration-300
                       ${
                         currentPath === item.link
-                          ? "bg-blue-600 text-white shadow-md"
-                          : "text-white hover:bg-blue-600 hover:text-white hover:shadow-md"
+                          ? "bg-[ #1183bdff] text-[#08327e] shadow-md"
+                          : "text-[#08327e]hover:bg-[ #1183bdff] hover:text-white hover:shadow-md"
                       }`}
                   >
                     <i className={`fa-solid ${item.icon} mr-3`}></i>
@@ -215,8 +221,8 @@ export const Sidebar = ({ open, setOpen }) => {
                       className={`flex items-center w-full p-3 rounded-xl transition-all duration-300
                         ${
                           isParentActive
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "text-white hover:bg-blue-600 hover:text-white hover:shadow-md"
+                            ? "bg-[#1183bdff] text-[#08327e] shadow-md"
+                            : "text-[#08327e] hover:bg-[#1183bdff] hover:text-[#08327e] hover:shadow-md"
                         }`}
                       onClick={() => toggleDropdown(item.dropdown)}
                     >
@@ -252,16 +258,16 @@ export const Sidebar = ({ open, setOpen }) => {
                         return (
                           <Link key={j} to={sub.link}>
                             <div
-                              className={`flex items-center gap-2 p-2 rounded-lg transition-all duration-300
+                              className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-300
                                 ${
                                   isActive
-                                    ? "bg-blue-600 text-white shadow-sm scale-[1.01]"
-                                    : "bg-transparent text-gray-100 hover:bg-blue-600 hover:text-white hover:shadow-sm hover:scale-[1.01]"
+                                    ? "bg-[#1183bdff] text-blue-500  shadow-sm scale-[1.01]"
+                                    : "bg-transparent text-gray-100 hover:bg-[#1183bdff] hover:text-[#08327e] hover:shadow-sm hover:scale-[1.01]"
                                 }`}
                             >
                               <i
                                 className={`fa-solid fa-circle text-[6px] ${
-                                  isActive ? "text-white" : ""
+                                  isActive ? "text-blue-500 " : ""
                                 }`}
                               ></i>
 
