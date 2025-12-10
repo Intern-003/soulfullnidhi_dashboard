@@ -123,7 +123,7 @@ export const SchemeModal = ({
         await updateScheme(payload);
         toast.success("Scheme updated successfully!");
       } else {
-        console.log("Payload of Scheme: ", payload);
+        // console.log("Payload of Scheme: ", payload);
         await createScheme(payload);
         toast.success("Scheme created successfully!");
       }

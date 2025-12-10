@@ -19,7 +19,7 @@ function LoginForm() {
     e.preventDefault();
     try {
       const response = await login(formData);
-      console.log(response.user.role_type);
+      // console.log(response.user.role_type);
 
       if (response) {
         localStorage.setItem("token", response.token);
