@@ -164,9 +164,10 @@ export const Sidebar = ({ open, setOpen }) => {
       {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-full w-64 p-4 flex flex-col
-          bg-blue-500 bg-cover bg-no-repeat bg-center bg-blend-soft-light 
+          bg-cover bg-no-repeat bg-center bg-blend-soft-light 
           shadow-xl z-40 transform transition-transform duration-300 ease-in-out
           md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+          style={{backgroundColor:"#05275c"}}
       >
         {/* Close button mobile */}
         <button

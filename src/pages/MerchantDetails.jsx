@@ -134,7 +134,7 @@ const pieOptions = {
 
 
 
-//  console.log("record data",record);
+ console.log("record data",record);;
 
 
 
@@ -174,29 +174,6 @@ const pieOptions = {
         <h3 className="text-gray-600 text-sm font-medium mb-2">Expected Payin</h3>
         <p className="text-3xl font-bold text-blue-600">₹ {record.todayPayingAmount}</p>
       </div>
-<<<<<<< HEAD
-
-      {/* Payin Wallet */}
-      <div className="bg-gradient-to-r from-green-100 to-green-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
-        <h3 className="text-gray-600 text-sm font-medium mb-2">Payin Wallet</h3>
-        <p className="text-3xl font-bold text-green-600">₹ {record.PayingAmount}</p>
-      </div>
-
-      {/* Total Profit */}
-      <div className="bg-gradient-to-r from-yellow-100 to-yellow-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
-        <h3 className="text-gray-600 text-sm font-medium mb-2">Total Profit</h3>
-        <p className="text-3xl font-bold text-yellow-600">₹ {record.PayinProfitAmount}</p>
-      </div>
-
-      {/* Total Payin */}
-      <div className="bg-gradient-to-r from-purple-100 to-purple-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
-        <h3 className="text-gray-600 text-sm font-medium mb-2">Total Payin</h3>
-        <p className="text-3xl font-bold text-purple-600">₹ {record.total_payin_amount}</p>
-      </div>
-    </>
-  )}
-
-=======
     
       {/* Payin Wallet */}
       <div className="bg-gradient-to-r from-green-100 to-green-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
@@ -218,7 +195,6 @@ const pieOptions = {
     </>
   )}
 
->>>>>>> 80c1dbd124345158d8eabd89af17b20b246e96e4
   {filter === 'payout' && (
     <>
       {/* Total Payout */}
