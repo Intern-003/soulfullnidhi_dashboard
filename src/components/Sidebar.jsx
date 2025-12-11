@@ -163,9 +163,9 @@ export const Sidebar = ({ open, setOpen }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 p-4 flex flex-col
+        className={`fixed top-0 left-0 h-full w-64 flex flex-col
           bg-cover bg-no-repeat bg-center bg-blend-soft-light 
-          shadow-xl z-40 transform transition-transform duration-300 ease-in-out
+          shadow-xl/30 z-40 transform transition-transform duration-300 ease-in-out
           md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
           // background: "linear-gradient(10deg, #2e53dbff, #1735a1 )" 
           // backgroundColor:"#05275c"
@@ -204,11 +204,11 @@ export const Sidebar = ({ open, setOpen }) => {
                 {!item.dropdown ? (
                   <Link
                     to={item.link}
-                    className={`flex items-center w-full p-3 rounded-xl transition-all duration-300
+                    className={` active-menu flex items-center w-full p-3 rounded-xl transition-all duration-300
                       ${
                         currentPath === item.link
-                          ? "bg-[ #1183bdff] text-[#08327e] shadow-md"
-                          : "text-[#08327e]hover:bg-[ #1183bdff] hover:text-white hover:shadow-md"
+                          ? "bg-[ #4189adff] text-[#08327e] shadow-md"
+                          : "text-[#08327e] hover:hover:text-[#08327e] hover:shadow-md"
                       }`}
                   >
                     <i className={`fa-solid ${item.icon} mr-3`}></i>
@@ -218,11 +218,11 @@ export const Sidebar = ({ open, setOpen }) => {
                   <>
                     {/* DROPDOWN BUTTON */}
                     <button
-                      className={`flex items-center w-full p-3 rounded-xl transition-all duration-300
+                      className={` dropdown-button flex items-center w-full p-3 rounded-xl transition-all duration-300
                         ${
                           isParentActive
-                            ? "bg-[#1183bdff] text-[#08327e] shadow-md"
-                            : "text-[#08327e] hover:bg-[#1183bdff] hover:text-[#08327e] hover:shadow-md"
+                            ? "active-menu shadow-md"
+                            : "text-[#08327e] hover:shadow-md"
                         }`}
                       onClick={() => toggleDropdown(item.dropdown)}
                     >
@@ -246,7 +246,7 @@ export const Sidebar = ({ open, setOpen }) => {
 
                     {/* DROPDOWN MENU */}
                     <div
-                      className={`ml-4 mt-1 rounded-lg p-2 transition-all duration-300 ease-in-out overflow-hidden ${
+                      className={`ml-4 mt-1 rounded-lg p-2 text-[#08327e]  transition-all duration-300 ease-in-out overflow-hidden ${
                         activeDropdown === item.dropdown
                           ? "max-h-40 opacity-100"
                           : "max-h-0 opacity-0"
@@ -258,16 +258,16 @@ export const Sidebar = ({ open, setOpen }) => {
                         return (
                           <Link key={j} to={sub.link}>
                             <div
-                              className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-300
+                              className={`subdropdown-button flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-300
                                 ${
                                   isActive
-                                    ? "bg-[#1183bdff] text-blue-500  shadow-sm scale-[1.01]"
-                                    : "bg-transparent text-gray-100 hover:bg-[#1183bdff] hover:text-[#08327e] hover:shadow-sm hover:scale-[1.01]"
+                                    ? "active-submenu shadow-sm scale-[1.01]"
+                                    : ""
                                 }`}
                             >
                               <i
                                 className={`fa-solid fa-circle text-[6px] ${
-                                  isActive ? "text-blue-500 " : ""
+                                  isActive ? "active-submenu" : ""
                                 }`}
                               ></i>
 
