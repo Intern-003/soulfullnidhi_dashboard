@@ -11,9 +11,9 @@ export const Dashboard = () => {
   // Get role from localStorage
   // const [role] = useState(atob(localStorage.getItem("role")) || "admin");
   const [role] = useState(() => {
-  const storedRole = localStorage.getItem("role");
-  return storedRole ? atob(storedRole) : "admin";
-});
+    const storedRole = localStorage.getItem("role");
+    return storedRole ? atob(storedRole) : "admin";
+  });
 
 
   const [transactionData, setTransactionData] = useState([]);
@@ -99,7 +99,7 @@ export const Dashboard = () => {
     // Format large transactions
     const formattedLargeTransactionData = largeSource.map((item) => ({
       name: item.user.name,
-      product:item.product,
+      product: item.product,
       amount: item.amount,
     }));
 
@@ -147,7 +147,7 @@ export const Dashboard = () => {
   if (role === "admin") cardsToShow = [...normalCards];
   else if (role === "crypto") cardsToShow = [...cryptoCard];
   else cardsToShow = [...normalCards]; // normal users
-// console.log(cardData?.transactionStatusCounts);
+  // console.log(cardData?.transactionStatusCounts);
   return (
     <>
       {initialLoad ? (
@@ -155,89 +155,87 @@ export const Dashboard = () => {
       ) : (
         <div className="w-full py-8">
           <div className="w-full px-4">
-    
-<div className="lg:col-span-2">
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+            <div className="max-w-[1140px] mx-auto px-4 grid grid-cols-1 gap-6">
 
-    {/* Today Pay-IN */}
-    <div className="h-30 bg-white rounded-2xl shadow-xl/20 overflow-hidden border border-blue-100  flex flex-col">
-      <h5
-        className="text-m font-semibold text-white tracking-wide p-3"
-        style={{ background: "linear-gradient(275deg,  #062f70ff, #0d3dc4ff)" }}
-      >
-        Today Pay-IN
-      </h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-xl font-bold text-gray-800">
-          ₹1200909097697          {/* ₹{cardsToShow.find(c => c.title.includes('Today Pay-IN'))?.value?.toLocaleString() || '0.00'} */}
-        </p>
-      </div>
+                {/* Today Pay-IN */}
+                <div className="h-30 bg-white rounded-2xl shadow-xl/20 overflow-hidden border border-blue-100  flex flex-col">
+                  <h5
+                    className="text-m font-semibold text-white tracking-wide p-3"
+                    style={{ background: "linear-gradient(275deg,  #062f70ff, #0d3dc4ff)" }}
+                  >
+                    Today Pay-IN
+                  </h5>
 
-      {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
-    </div>
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-xl font-bold text-gray-800">
+                      ₹1200909097697          {/* ₹{cardsToShow.find(c => c.title.includes('Today Pay-IN'))?.value?.toLocaleString() || '0.00'} */}
+                    </p>
+                  </div>
 
-    {/* Total Pay-IN */}
-    <div className="h-30 bg-white rounded-2xl shadow-xl/20  overflow-hidden  flex flex-col">
-      <h5
-        className="text-m font-semibold text-white tracking-wide p-3"
-        style={{ background: "linear-gradient(275deg,  #062f70ff, #0d3dc4ff)" }}
-      >
-        Total Pay-IN
-      </h5>
+                  {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
+                </div>
 
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-xl font-bold text-gray-800">
-          ₹{cardsToShow.find(c => c.title.includes('Total Pay-IN'))?.value?.toLocaleString() || '0.00'}
-        </p>
-      </div>
+                {/* Total Pay-IN */}
+                <div className="h-30 bg-white rounded-2xl shadow-xl/20  overflow-hidden  flex flex-col">
+                  <h5
+                    className="text-m font-semibold text-white tracking-wide p-3"
+                    style={{ background: "linear-gradient(275deg,  #062f70ff, #0d3dc4ff)" }}
+                  >
+                    Total Pay-IN
+                  </h5>
 
-      {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
-    </div>
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-xl font-bold text-gray-800">
+                      ₹{cardsToShow.find(c => c.title.includes('Total Pay-IN'))?.value?.toLocaleString() || '0.00'}
+                    </p>
+                  </div>
 
-    {/* Today Pay-OUT */}
-    <div className="h-30 bg-white rounded-2xl shadow-xl/30 overflow-hidden  flex flex-col">
-      <h5
-        className="text-m font-semibold text-white tracking-wide p-3"
-        style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
-      >
-        Today Pay-OUT
-      </h5>
+                  {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
+                </div>
 
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-xl font-bold text-gray-800">
-          ₹{cardsToShow.find(c => c.title.includes('Today Pay-OUT'))?.value?.toLocaleString() || '0.00'}
-        </p>
-      </div>
+                {/* Today Pay-OUT */}
+                <div className="h-30 bg-white rounded-2xl shadow-xl/30 overflow-hidden  flex flex-col">
+                  <h5
+                    className="text-m font-semibold text-white tracking-wide p-3"
+                    style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
+                  >
+                    Today Pay-OUT
+                  </h5>
 
-      {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
-    </div>
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-xl font-bold text-gray-800">
+                      ₹{cardsToShow.find(c => c.title.includes('Today Pay-OUT'))?.value?.toLocaleString() || '0.00'}
+                    </p>
+                  </div>
 
-    {/* Total Pay-OUT */}
-    <div className="h-30 bg-white rounded-2xl shadow-xl/30 overflow-hidden  flex flex-col">
-      <h5
-        className="text-m font-semibold text-white tracking-wide p-3"
-        style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
-      >
-        Total Pay-OUT
-      </h5>
+                  {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
+                </div>
 
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-xl font-bold text-gray-800">
-          ₹{cardsToShow.find(c => c.title.includes('Total Pay-OUT'))?.value?.toLocaleString() || '0.00'}
-        </p>
-      </div>
+                {/* Total Pay-OUT */}
+                <div className="h-30 bg-white rounded-2xl shadow-xl/30 overflow-hidden  flex flex-col">
+                  <h5
+                    className="text-m font-semibold text-white tracking-wide p-3"
+                    style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
+                  >
+                    Total Pay-OUT
+                  </h5>
 
-      {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
-    </div>
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-xl font-bold text-gray-800">
+                      ₹{cardsToShow.find(c => c.title.includes('Total Pay-OUT'))?.value?.toLocaleString() || '0.00'}
+                    </p>
+                  </div>
 
-  </div>
-</div>
+                  {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
+                </div>
 
-
+              </div>
+            </div>
 
             {/* -------- TABLE -------- */}
-            <div className="mt-8 mb-4">
+            <div className="mt-8">
               <Table
                 columns={transactioncolumn}
                 data={transactionData}
