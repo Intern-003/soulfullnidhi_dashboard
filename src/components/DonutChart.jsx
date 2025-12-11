@@ -1,34 +1,41 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export const DonutChart = ({ data }) => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
+  const [mode, setMode] = useState("UPI"); // default payin
 
-  const pending = Number(data?.pending) || 0;
-  const success = Number(data?.success) || 0;
-  const failed = Number(data?.failed) || 0;
-  const total = pending + success + failed;
+  const getValues = () => {
+    const transactionData = data?.[mode] || {};
+    const pending = Number(transactionData.initiated) || 0;
+    const success = Number(transactionData.success) || 0;
+    const failed = Number(transactionData.failed) || 0;
+    const total = pending + success + failed;
+
+    return { pending, success, failed, total };
+  };
+
+  const { pending, success, failed, total } = getValues();
+
+  const isEmpty = total === 0; // flag for no transactions
 
   useEffect(() => {
     if (!chartRef.current || typeof ApexCharts === "undefined") return;
 
-    // Destroy previous chart before creating a new one
     if (chartInstance.current) {
       chartInstance.current.destroy();
       chartInstance.current = null;
     }
 
-    const seriesData = total > 0 ? [pending, success, failed] : [0, 0, 0];
+    const seriesData = isEmpty ? [1] : [pending, success, failed]; // single slice if empty
 
     const options = {
       series: seriesData,
-      colors: ["#FDBA8C", "#1C64F2", "#16BDCA"],
-      chart: {
-        height: 320,
-        width: "100%",
-        type: "donut",
-        animations: { enabled: false },
-      },
+      labels: isEmpty ? ["No Transactions"] : ["Initiated", "Success", "Failed"],
+      chart: { height: 260, type: "donut" },
+      colors: isEmpty
+        ? ["#d1d5db"] // single gray color for empty chart
+        : ["#2194f1ff", "#369c36", "#2134dfff"],
       stroke: { colors: ["transparent"] },
       plotOptions: {
         pie: {
@@ -37,42 +44,52 @@ export const DonutChart = ({ data }) => {
             labels: {
               show: true,
               name: { show: true, offsetY: 20 },
+              value: { show: true, offsetY: -20 },
               total: {
                 showAlways: true,
                 show: true,
-                label: "Transactions",
-                formatter: () => total,
+                label: isEmpty ? "No Transactions" : "Transactions",
+                formatter: () => (isEmpty ? 0 : total),
               },
-              value: { show: true, offsetY: -20 },
             },
           },
         },
       },
-      labels: ["Pending", "Success", "Failed"],
-      dataLabels: { enabled: false },
-      legend: { position: "bottom" },
+      dataLabels: { enabled: !isEmpty },
+      fill: {
+        type: "gradient",
+        gradient: {
+          shade: "dark",
+          type: "radial",
+          gradientToColors: isEmpty ? ["#9ca3af"] : ["#ecbb19ff", "#3b82f6", "#14b8a6"],
+          stops: [0, 70, 100],
+        },
+      },
+      legend: { position: "bottom", fontSize: "14px" },
+      tooltip: { enabled: !isEmpty },
     };
 
     // eslint-disable-next-line no-undef
     chartInstance.current = new ApexCharts(chartRef.current, options);
     chartInstance.current.render();
 
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-      }
-    };
-  }, [pending, success, failed, total]);
+    return () => chartInstance.current?.destroy();
+  }, [mode, pending, success, failed, total, isEmpty]);
 
   return (
-    <div className="max-w-sm w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
-      <div className="mb-3">
-        <h5 className="text-xl font-bold leading-none text-gray-900 pe-1">
-          Transactions
-        </h5>
+    <div className="w-full bg-[#e8eaed] rounded-lg  p-4 md:p-6">
+      <div className="flex justify-between mb-3">
+        <h5 className="text-xl font-bold text-gray-900 h-24">Transactions</h5>
+        <div className="flex gap-2">
+          <button
+            className="px-3 py-1 rounded-lg font-bold text-[#062f70ff]"
+            onClick={() => setMode(mode === "UPI" ? "payout" : "UPI")}
+          >
+            {mode === "UPI" ? "Payin" : "Payout"}
+          </button>
+        </div>
       </div>
-
-      <div className="py-6" ref={chartRef}></div>
+      <div className="py-8" ref={chartRef}></div>
     </div>
   );
 };

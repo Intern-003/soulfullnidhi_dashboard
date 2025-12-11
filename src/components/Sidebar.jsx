@@ -258,7 +258,7 @@ export const Sidebar = ({ open, setOpen }) => {
                         return (
                           <Link key={j} to={sub.link}>
                             <div
-                              className={`subdropdown-button flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-300
+                              className={`subdropdown-button flex items-center gap-2 px-4 py-2 mb-3 rounded-lg transition-all duration-300
                                 ${
                                   isActive
                                     ? "active-submenu shadow-sm scale-[1.01]"

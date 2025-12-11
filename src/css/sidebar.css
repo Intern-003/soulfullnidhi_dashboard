@@ -12,13 +12,13 @@
 }
 .dropdown-button.active-menu,
 .dropdown-button:hover {
-  background: linear-gradient(275deg, rgb(60, 128, 255), rgb(85, 128, 245));
+  background: linear-gradient(275deg, rgb(8, 43, 109), rgb(85, 128, 245));
   color: white;
 }
 
 .subdropdown-button.active-submenu,
 .subdropdown-button:hover { 
-  background: linear-gradient(275deg, rgb(60, 128, 255), rgb(85, 128, 245));
+  background: linear-gradient(275deg, rgb(8, 43, 109), rgb(85, 128, 245));
   color: white !important;
 }
 
