@@ -270,7 +270,7 @@ export const ViewComplain = () => {
     {/* Outer container with padding */}
 
       <div className="w-full flex justify-center py-8">
-        <div className="w-full max-w-[1140px] px-4 lg:px-6 space-y-6">
+        <div className="w-full  px-4 ">
           {/* -------- HEADER: View Complain -------- */}
           <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center rounded-lg p-4 shadow-md">
             <h4 className="font-bold text-white text-lg">View Complain</h4>

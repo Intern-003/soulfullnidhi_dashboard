@@ -22,8 +22,11 @@ const Layout = () => {
         </div>
 
         {/* Main Body */}
-        <main className="flex-1 px-6 py-6 fixed md:relative top-[80px] w-full h-[calc(100vh-80px)] md:h-auto md:static md:overflow-y-visible overflow-y-auto overflow-x-hidden md:overflow-x-visible">
-          <div className="bg-white shadow-md rounded-lg w-full max-w-5xl  mx-auto">
+        <main className="flex-1 px-6 py-6  md:relative top-[80px] w-full h-[calc(100vh-80px)] md:h-auto md:static md:overflow-y-visible overflow-y-auto overflow-x-hidden md:overflow-x-visible">
+          <div className="
+          // bg-[#d5f5f2] 
+          bg-white
+          shadow-md  rounded-lg w-full px-2">
             <Outlet />
           </div>
         </main>

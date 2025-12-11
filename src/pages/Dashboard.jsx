@@ -153,135 +153,88 @@ export const Dashboard = () => {
       {initialLoad ? (
         <DashboardSkeleton />
       ) : (
-        <div className="w-full flex justify-center py-8">
-          <div className="w-full max-w-[1140px] px-4 lg:px-6">
-            
-            {/* -------- TOP CARDS + DONUT/LINE CHART -------- */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="w-full py-8">
+          <div className="w-full px-4">
+    
+<div className="lg:col-span-2">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
 
-              {/* Cards */}
-              <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {cardsToShow.map((card, i) => (
-                  <div key={i} className="relative bg-white rounded-xl shadow-[0_4px_15px_rgba(255,165,0,0.2)] flex flex-col h-full transform transition-transform duration-500 hover:scale-105 hover:shadow-[0_6px_20px_rgba(255,165,0,0.3)]">
-                    <div className="flex items-center px-5 py-4 bg-blue-500 text-white relative z-10 gap-4 rounded-t-xl">
-                      <div className="bg-white rounded-full p-3 flex items-center justify-center shrink-0">
-                        <i className={`fa-solid ${card.icon} text-blue-500 text-xl`}></i>
-                      </div>
-                      <h5 className="text-base sm:text-lg font-semibold text-white truncate whitespace-nowrap">
-                        {card.title}
-                      </h5>
-                    </div>
-                    <svg className="absolute bottom-0 w-full" viewBox="0 0 500 40" preserveAspectRatio="none">
-                      <path d="M0,0 C250,40 250,40 500,0 L500,40 L0,40 Z" className="fill-gray-300" />
-                    </svg>
-                    <div className="flex justify-between items-center px-5 py-6 relative z-10 flex-1">
-                      <h6 className="text-2xl font-bold text-gray-800 leading-none">₹ {card.value}</h6>
-                      <div className="bg-green-100 outline outline-green-500 text-xs rounded-full px-3 py-1 text-green-600 flex items-center">
-                        <i className="fa-solid fa-arrow-up fa-xs mr-1"></i> 3.2%
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+    {/* Today Pay-IN */}
+    <div className="h-30 bg-white rounded-2xl shadow-xl/20 overflow-hidden border border-blue-100  flex flex-col">
+      <h5
+        className="text-m font-semibold text-white tracking-wide p-3"
+        style={{ background: "linear-gradient(275deg,  #062f70ff, #0d3dc4ff)" }}
+      >
+        Today Pay-IN
+      </h5>
 
-              {/* Charts */}
-            {(role === "admin" || role === "user") && (
-  <>
-    <div className="flex justify-center items-start">
-      <div className="w-full max-w-[380px] p-6 rounded-xl backdrop-blur-xl shadow-[0_4px_20px_rgba(255,192,203,0.25)]">
-        <DonutChart data={cardData?.transactionStatusCounts || []} />
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-xl font-bold text-gray-800">
+          ₹1200909097697          {/* ₹{cardsToShow.find(c => c.title.includes('Today Pay-IN'))?.value?.toLocaleString() || '0.00'} */}
+        </p>
       </div>
+
+      {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
     </div>
 
-    <div className="lg:col-span-2 p-6 rounded-xl backdrop-blur-xl shadow-[0_4px_20px_rgba(144,238,144,0.25)]">
-      <LineChart
-        data={
-          cardData?.monthWiseStatusCounts?.length > 0
-            ? cardData.monthWiseStatusCounts
-            : [
-                { month: "Jan", count: 0 },
-                { month: "Feb", count: 0 },
-                { month: "Mar", count: 0 },
-                { month: "Apr", count: 0 }
-              ]
-        }
-        className="h-[260px]"
-      />
+    {/* Total Pay-IN */}
+    <div className="h-30 bg-white rounded-2xl shadow-xl/20  overflow-hidden  flex flex-col">
+      <h5
+        className="text-m font-semibold text-white tracking-wide p-3"
+        style={{ background: "linear-gradient(275deg,  #062f70ff, #0d3dc4ff)" }}
+      >
+        Total Pay-IN
+      </h5>
+
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-xl font-bold text-gray-800">
+          ₹{cardsToShow.find(c => c.title.includes('Total Pay-IN'))?.value?.toLocaleString() || '0.00'}
+        </p>
+      </div>
+
+      {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
     </div>
-  </>
-)}
 
+    {/* Today Pay-OUT */}
+    <div className="h-30 bg-white rounded-2xl shadow-xl/30 overflow-hidden  flex flex-col">
+      <h5
+        className="text-m font-semibold text-white tracking-wide p-3"
+        style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
+      >
+        Today Pay-OUT
+      </h5>
 
-              {role === "crypto" && (
-                <>
-                  <div className="flex justify-center items-start">
-                    <div className="w-full max-w-[380px] p-6 rounded-xl backdrop-blur-xl shadow-[0_4px_20px_rgba(255,192,203,0.25)]">
-                      <DonutChart data={cardData?.cryptoTransactionStatusCounts} />
-                    </div>
-                  </div>
-                  <div className="lg:col-span-2 p-6 rounded-xl backdrop-blur-xl shadow-[0_4px_20px_rgba(144,238,144,0.25)]">
-                    <LineChart data={cardData?.cryptoMonthWiseStatusCounts} className="h-[260px]" />
-                  </div>
-                </>
-              )}
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-xl font-bold text-gray-800">
+          ₹{cardsToShow.find(c => c.title.includes('Today Pay-OUT'))?.value?.toLocaleString() || '0.00'}
+        </p>
+      </div>
 
-              {/* Large Transactions */}
-             
-            <div className="flex justify-center">
-  <div className="w-full max-w-[380px] p-6 rounded-xl bg-white/30 backdrop-blur-xl shadow-[0_4px_25px_rgba(255,182,193,0.25)]">
-    <h5 className="text-lg font-bold mb-4">
-      {role === "crypto" ? "Crypto Large Transactions" : "Large Transactions"}
-    </h5>
+      {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
+    </div>
 
-    <ul className="divide-y divide-white/10">
-      {largeTransactionData.length > 0 ? (
-        largeTransactionData.map((item, index) => (
-          <li
-            key={index}
-            className="py-3 sm:py-4 rounded-lg bg-[rgba(255,255,255,0.1)]"
-          >
-        <div className="flex justify-between w-full">
-          <div className="flex flex-col w-full">
-            <p className="text-sm font-medium text-black truncate">{item.name}</p>
+    {/* Total Pay-OUT */}
+    <div className="h-30 bg-white rounded-2xl shadow-xl/30 overflow-hidden  flex flex-col">
+      <h5
+        className="text-m font-semibold text-white tracking-wide p-3"
+        style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
+      >
+        Total Pay-OUT
+      </h5>
 
-            {/* line after name */}
-            <div className="w-full h-px bg-gray-300 my-1"></div>
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-xl font-bold text-gray-800">
+          ₹{cardsToShow.find(c => c.title.includes('Total Pay-OUT'))?.value?.toLocaleString() || '0.00'}
+        </p>
+      </div>
 
-            <p className="text-sm font-medium text-black truncate">{item.product}</p>
+      {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
+    </div>
 
-            {/* line after product */}
-            <div className="w-full h-px bg-gray-300 my-1"></div>
-          </div>
-
-          <div className="text-base font-semibold text-black">₹{item.amount}</div>
-        </div>
-
-          </li>
-        ))
-      ) : (
-        <li className=" sm:py-4 rounded-lg bg-[rgba(255,255,255,0.1)]">
-          {/* <div className="flex justify-between"> */}
-            {/* <p className="text-sm font-medium text-black truncate">No Transactions </p>
-            <div className="text-base font-semibold text-black">₹0</div> */}
-            <div style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}>
-                <img 
-                  src={largesttxn} 
-                  alt="no data found" 
-                  style={{ height: "250px", width: "250px" }} 
-                />
-          </div>
-          {/* </div> */}
-        </li>
-      )}
-    </ul>
   </div>
 </div>
 
-            </div>
+
 
             {/* -------- TABLE -------- */}
             <div className="mt-8 mb-4">
