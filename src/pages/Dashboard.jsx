@@ -144,21 +144,25 @@
       { title: "Today Crypto-OUT Collection", icon: "fa-bitcoin-sign", value: cardData?.today_crypto_payout ?? 0 },
     ];
 
-    let cardsToShow = [];
-    if (role === "admin") cardsToShow = [...normalCards];
-    else if (role === "crypto") cardsToShow = [...cryptoCard];
-    else cardsToShow = [...normalCards]; // normal users
-  // console.log(cardData?.transactionStatusCounts);
-    return (
-      <>
-        {initialLoad ? (
-          <DashboardSkeleton />
-        ) : (
-          <div className="w-full py-8">
-            <div className="w-full px-4">
-      
-  <div className="lg:col-span-2">
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+  let cardsToShow = [];
+  if (role === "admin") cardsToShow = [...normalCards];
+  else if (role === "crypto") cardsToShow = [...cryptoCard];
+  else cardsToShow = [...normalCards]; // normal users
+// console.log(cardData?.transactionStatusCounts);
+  return (
+    <>
+      {initialLoad ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="w-full py-8">
+          <div className="w-full px-4">
+                       <div className="max-w-[1140px] mx-auto px-4 grid grid-cols-1 gap-6">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+    
+<div className="lg:col-span-2">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
 
       {/* Today Pay-IN */}
       <div className="h-30 bg-white rounded-2xl shadow-xl/20 overflow-hidden border border-blue-100  flex flex-col">
@@ -248,22 +252,24 @@
   </div>
 
 
-              {/* -------- TABLE -------- */}
-              <div className="mt-8 mb-4">
-                <Table
-                  columns={transactioncolumn}
-                  data={transactionData}
-                  showSearch={false}
-                  showPagination={true}
-                  showExport={false}
-                  showStatusFilter={false}
-                  showDeleteColumn={false}
-                  showDateFilter={false}
-                />
-              </div>
+            {/* -------- TABLE -------- */}
+            <div className="mt-8 mb-4">
+              <Table
+                columns={transactioncolumn}
+                data={transactionData}
+                showSearch={false}
+                showPagination={true}
+                showExport={false}
+                showStatusFilter={false}
+                showDeleteColumn={false}
+                showDateFilter={false}
+              />
             </div>
           </div>
-        )}
-      </>
-    );
-  };
+        </div>
+        </div>
+        </div>
+      )}
+    </>
+  );
+};
