@@ -60,26 +60,8 @@ export const Profile = () => {
 }, [initialMerchantData]);
 
 
-  //Change Password
-  const { execute: changePassword, loading: passwordLoading } =
-    usePost("/change-password");
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await changePassword(passwordFormData);
-      if (res) {
-        toast.success("Password Changed Successfully!");
-        setPasswordFormData({
-          old_password: "",
-          new_password: "",
-        });
-      }
-    } catch (err) {
-      console.log(err);
-      toast.error(err?.message);
-    }
-  };
+
 
   //Update Profile
   const { execute: updateProfile, loading: profileLoading } = usePost(
@@ -177,19 +159,7 @@ export const Profile = () => {
             Account Details
           </a>
         </li>
-        <li>
-          <a
-            onClick={() => setActiveTab("password")}
-            className={`inline-flex items-center px-4 py-3 rounded-lg w-full cursor-pointer ${
-              activeTab === "password"
-                ? "active text-white bg-blue-900"
-                : "text-gray-500 hover:text-gray-900 bg-gray-50 hover:bg-gray-100"
-            }`}
-          >
-            <i className="fa-solid fa-rotate fa-lg me-2"></i>
-            Change Password
-          </a>
-        </li>
+
       </ul>
 
       {loading ? (
@@ -701,137 +671,74 @@ export const Profile = () => {
             </div>
           )}
 
-          {activeTab === "account" && (
-            <>
-              <div className="p-6 bg-gray-50 text-medium text-gray-500 rounded-lg w-full">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  Account Details
-                </h3>
-                <div className="grid grid-cols-2 gap-4 mb-3">
-                  <div className="relative z-0 w-full mb-2 group">
-                    <input
-                      type="text"
-                      name="account_holder_name"
-                      id="floating_outlined_account_holder_name"
-                      className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
-                      placeholder=""
-                      value={userData?.account_holder_name}
-                      onChange={handleInputChange}
-                    />
-                    <label
-                      htmlFor="floating_outlined_account_holder_name"
-                      className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
-                    >
-                      Account Holder Name
-                    </label>
-                  </div>
-                  <div className="relative z-0 w-full mb-2 group">
-                    <input
-                      type="text"
-                      name="bank_account_no"
-                      id="floating_outlined_bank_account_no"
-                      className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
-                      placeholder=""
-                      value={userData?.bank_account_no}
-                      onChange={handleInputChange}
-                    />
-                    <label
-                      htmlFor="floating_outlined_bank_account_no"
-                      className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
-                    >
-                      Bank Account Number
-                    </label>
-                  </div>
-                  <div className="relative z-0 w-full mb-2 group">
-                    <input
-                      type="text"
-                      name="ifsc_code"
-                      id="floating_outlined_ifsc_code"
-                      className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
-                      placeholder=""
-                      value={userData?.ifsc_code}
-                      onChange={handleInputChange}
-                    />
-                    <label
-                      htmlFor="floating_outlined_ifsc_code"
-                      className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
-                    >
-                      IFSC Code
-                    </label>
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  onClick={handleUpdate}
-                  className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
-                >
-                  {profileLoading ? "Updating..." : "Update"}
-                </Button>
-              </div>
-            </>
-          )}
+ {activeTab === "account" && (
+  <>
+    <div className="p-6 bg-gray-50 text-medium text-gray-500 rounded-lg w-full">
+      <h3 className="text-lg font-bold text-gray-900 mb-2">
+        Account Details
+      </h3>
 
-          {activeTab === "password" && (
-            <div className="p-6 bg-gray-50 text-medium text-gray-500 rounded-lg w-full">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Change Password
-              </h3>
-              <form onSubmit={handleChangePassword}>
-                <div className="grid grid-cols-2 gap-4 mb-3">
-                  <div className="relative z-0 w-full mb-2 group">
-                    <input
-                      type="password"
-                      name="old_password"
-                      id="floating_outlined_old_password"
-                      className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
-                      placeholder=""
-                      value={passwordFormData.old_password}
-                      onChange={(e) =>
-                        setPasswordFormData({
-                          ...passwordFormData,
-                          [e.target.name]: e.target.value,
-                        })
-                      }
-                    />
-                    <label
-                      htmlFor="floating_outlined_old_password"
-                      className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
-                    >
-                      Old Password
-                    </label>
-                  </div>
-                  <div className="relative z-0 w-full mb-2 group">
-                    <input
-                      type="password"
-                      name="new_password"
-                      id="floating_outlined_new_password"
-                      className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300`}
-                      placeholder=""
-                      value={passwordFormData.new_password}
-                      onChange={(e) =>
-                        setPasswordFormData({
-                          ...passwordFormData,
-                          [e.target.name]: e.target.value,
-                        })
-                      }
-                    />
-                    <label
-                      htmlFor="floating_outlined_new_password"
-                      className={`absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 bg-white`}
-                    >
-                      New Password
-                    </label>
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  className="cursor-pointer text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
-                >
-                  {passwordLoading ? "Changing" : "Change"}
-                </Button>
-              </form>
-            </div>
-          )}
+      <div className="grid grid-cols-2 gap-4 mb-3">
+        <div className="relative z-0 w-full mb-2 group">
+          <input
+            type="text"
+            name="account_holder_name"
+            id="floating_outlined_account_holder_name"
+            className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300"
+            placeholder=""
+            value={userData?.account_holder_name}
+            readOnly
+          />
+          <label
+            htmlFor="floating_outlined_account_holder_name"
+            className="absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 bg-white"
+          >
+            Account Holder Name
+          </label>
+        </div>
+
+        <div className="relative z-0 w-full mb-2 group">
+          <input
+            type="text"
+            name="bank_account_no"
+            id="floating_outlined_bank_account_no"
+            className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300"
+            placeholder=""
+            value={userData?.bank_account_no}
+            readOnly
+          />
+          <label
+            htmlFor="floating_outlined_bank_account_no"
+            className="absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 bg-white"
+          >
+            Bank Account Number
+          </label>
+        </div>
+
+        <div className="relative z-0 w-full mb-2 group">
+          <input
+            type="text"
+            name="ifsc_code"
+            id="floating_outlined_ifsc_code"
+            className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 rounded-lg border-1 appearance-none peer border-gray-300"
+            placeholder=""
+            value={userData?.ifsc_code}
+            readOnly
+          />
+          <label
+            htmlFor="floating_outlined_ifsc_code"
+            className="absolute text-sm duration-300 text-blue-600 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 bg-white"
+          >
+            IFSC Code
+          </label>
+        </div>
+      </div>
+    </div>
+  </>
+)}
+
+
+ 
         </>
       )}
     </div>

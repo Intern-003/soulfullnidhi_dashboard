@@ -169,11 +169,11 @@ const stepRequiredFields = {
   };
 
   const handleNext = () => {
-    // if (validateStep()) {
+    if (validateStep()) {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
-    // }
+    } 
   };
   useEffect(() => {
     if (memberFormData.payin_at_onboard !== "Airpay") return; // only run for Airpay
@@ -321,7 +321,8 @@ const handleSubmit = async (e) => {
 
   return (
     <>
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
+      <div className=" flex justify-between items-center mb-3 p-2.5"
+      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
         <h4 className="font-bold text-white text-lg py-2">
           Add New Merchant Details
         </h4>

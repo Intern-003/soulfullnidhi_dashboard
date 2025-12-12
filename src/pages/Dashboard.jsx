@@ -1,37 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { DonutChart } from "../components/DonutChart";
-import { LineChart } from "../components/LineChart";
+import { LineChart1 } from "../components/LineChart1";
 import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { MONTH_NAMES } from "../constants/Constants";
 import DashboardSkeleton from "../components/DashboardSkeleton";
-import largesttxn from "../images/largesttxn.jpg";
 
 export const Dashboard = () => {
-  // Get role from localStorage
-  // const [role] = useState(atob(localStorage.getItem("role")) || "admin");
-  const [role] = useState(() => {
-    const storedRole = localStorage.getItem("role");
-    return storedRole ? atob(storedRole) : "admin";
-  });
-
+  const [role] = useState(atob(localStorage.getItem("role")) || "admin");
 
   const [transactionData, setTransactionData] = useState([]);
   const [largeTransactionData, setLargeTransactionData] = useState([]);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // Fetch data
+  // Normal API calls only (no crypto)
   const { data: cardData, loading: recordLoading } = useAutoFetch("/collection-record");
   const { data: tableData } = useAutoFetch("/reportrecords-List?status=success");
-  const { data: cryptotableData } = useAutoFetch("/crypto-reportrecords-list?status=success");
+  // console.log(cardData);
 
   const initialDataOfTransactions = tableData?.data;
-  const cryptoinitialDataOfTransactions = cryptotableData?.data;
 
-  // console.log("Table Data:", tableData);
-  // console.log("Crypto Table Data:", cryptotableData);
-
-  // Process table data
+  // Sort table data
   const processTableData = useMemo(() => {
     if (!initialDataOfTransactions) return [];
     return [...initialDataOfTransactions].sort(
@@ -39,14 +28,7 @@ export const Dashboard = () => {
     );
   }, [initialDataOfTransactions]);
 
-  const cryptoprocessTableData = useMemo(() => {
-    if (!cryptoinitialDataOfTransactions) return [];
-    return [...cryptoinitialDataOfTransactions].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
-    );
-  }, [cryptoinitialDataOfTransactions]);
-
-  // Process top 4 largest transactions
+  // Get largest 4 transactions
   const processLargeTransactionData = useMemo(() => {
     if (!initialDataOfTransactions) return [];
     return [...initialDataOfTransactions]
@@ -54,25 +36,13 @@ export const Dashboard = () => {
       .slice(0, 4);
   }, [initialDataOfTransactions]);
 
-  const cryptoprocessLargeTransactionData = useMemo(() => {
-    if (!cryptoinitialDataOfTransactions) return [];
-    return [...cryptoinitialDataOfTransactions]
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 4);
-  }, [cryptoinitialDataOfTransactions]);
-
-  // Format transaction & large transaction data
+  // Format table & top transactions
   useEffect(() => {
-    const tableSource =
-      role === "crypto" ? cryptoprocessTableData : processTableData;
-
-    const largeSource =
-      role === "crypto" ? cryptoprocessLargeTransactionData : processLargeTransactionData;
-
-    // Format table data
-    const formattedTableData = tableSource.map((item, index) => {
+    const formattedTableData = processTableData.map((item, index) => {
       const date = new Date(item.created_at);
-      const formattedDate = `${date.getDate()} ${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
+      const formattedDate = `${date.getDate()} ${
+        MONTH_NAMES[date.getMonth()]
+      } ${date.getFullYear()}`;
       const formattedTime = date.toLocaleTimeString();
 
       return {
@@ -94,23 +64,19 @@ export const Dashboard = () => {
         ),
       };
     });
+
     setTransactionData(formattedTableData);
 
-    // Format large transactions
-    const formattedLargeTransactionData = largeSource.map((item) => ({
-      name: item.user.name,
-      product: item.product,
-      amount: item.amount,
-    }));
+    const formattedLargeTransactionData = processLargeTransactionData.map(
+      (item) => ({
+        name: item.user.name,
+        product: item.product,
+        amount: item.amount,
+      })
+    );
 
     setLargeTransactionData(formattedLargeTransactionData);
-  }, [
-    role,
-    processTableData,
-    processLargeTransactionData,
-    cryptoprocessTableData,
-    cryptoprocessLargeTransactionData,
-  ]);
+  }, [processTableData, processLargeTransactionData]);
 
   // Table columns
   const transactioncolumn = [
@@ -125,29 +91,28 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (!recordLoading && cardData) setInitialLoad(false);
-    // console.log(cardData);
   }, [recordLoading, cardData]);
 
-  // Role-based cards
-  const normalCards = [
-    { title: "Total Pay-IN Collection", icon: "fa-wallet", value: cardData?.total_payin_amount ?? 0 },
-    { title: "Total Pay-OUT", icon: "fa-wallet", value: cardData?.total_payout_amount ?? 0 },
-    { title: "Today Pay-IN Collection", icon: "fa-arrow-trend-up", value: cardData?.today_payin ?? 0 },
-    { title: "Today Pay-OUT", icon: "fa-arrow-trend-up", value: cardData?.today_payout ?? 0 },
+  // Only normal cards
+  const cardsToShow = [
+    {
+      title: "Total Pay-IN Collection",
+      value: cardData?.total_payin_amount ?? 0,
+    },
+    {
+      title: "Total Pay-OUT",
+      value: cardData?.total_payout_amount ?? 0,
+    },
+    {
+      title: "Today Pay-IN Collection",
+      value: cardData?.today_payin ?? 0,
+    },
+    {
+      title: "Today Pay-OUT",
+      value: cardData?.today_payout ?? 0,
+    },
   ];
 
-  const cryptoCard = [
-    { title: "Total Crypto-IN Collection", icon: "fa-bitcoin-sign", value: cardData?.total_crypto ?? 0 },
-    { title: "Total Crypto-OUT Collection", icon: "fa-bitcoin-sign", value: cardData?.total_crypto_payout ?? 0 },
-    { title: "Today Crypto-IN Collection", icon: "fa-bitcoin-sign", value: cardData?.today_crypto ?? 0 },
-    { title: "Today Crypto-OUT Collection", icon: "fa-bitcoin-sign", value: cardData?.today_crypto_payout ?? 0 },
-  ];
-
-  let cardsToShow = [];
-  if (role === "admin") cardsToShow = [...normalCards];
-  else if (role === "crypto") cardsToShow = [...cryptoCard];
-  else cardsToShow = [...normalCards]; // normal users
-  // console.log(cardData?.transactionStatusCounts);
   return (
     <>
       {initialLoad ? (
@@ -155,86 +120,83 @@ export const Dashboard = () => {
       ) : (
         <div className="w-full py-8">
           <div className="w-full px-4">
-            <div className="max-w-[1140px] mx-auto px-4 grid grid-cols-1 gap-6">
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+ 
+            {/* --- CARDS --- */}
+            <div className="lg:col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
 
                 {/* Today Pay-IN */}
-                <div className="h-30 bg-white rounded-2xl shadow-xl/20 overflow-hidden border border-blue-100  flex flex-col">
+                <div className="h-30 bg-white rounded-2xl shadow-xl overflow-hidden border border-blue-100 flex flex-col">
                   <h5
                     className="text-m font-semibold text-white tracking-wide p-3"
-                    style={{ background: "linear-gradient(275deg,  #062f70ff, #0d3dc4ff)" }}
+                    style={{ background: "linear-gradient(275deg,#062f70ff,#0d3dc4ff)" }}
                   >
                     Today Pay-IN
                   </h5>
-
                   <div className="flex-1 flex items-center justify-center">
                     <p className="text-xl font-bold text-gray-800">
-                      ₹1200909097697          {/* ₹{cardsToShow.find(c => c.title.includes('Today Pay-IN'))?.value?.toLocaleString() || '0.00'} */}
+                      ₹{cardsToShow[2].value.toLocaleString()}
                     </p>
                   </div>
-
-                  {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
                 </div>
 
                 {/* Total Pay-IN */}
-                <div className="h-30 bg-white rounded-2xl shadow-xl/20  overflow-hidden  flex flex-col">
+                <div className="h-30 bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
                   <h5
                     className="text-m font-semibold text-white tracking-wide p-3"
-                    style={{ background: "linear-gradient(275deg,  #062f70ff, #0d3dc4ff)" }}
+                    style={{ background: "linear-gradient(75deg,#062f70ff,#0d3dc4ff)" }}
                   >
                     Total Pay-IN
                   </h5>
-
                   <div className="flex-1 flex items-center justify-center">
                     <p className="text-xl font-bold text-gray-800">
-                      ₹{cardsToShow.find(c => c.title.includes('Total Pay-IN'))?.value?.toLocaleString() || '0.00'}
+                      ₹{cardsToShow[0].value.toLocaleString()}
                     </p>
                   </div>
-
-                  {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
                 </div>
 
                 {/* Today Pay-OUT */}
-                <div className="h-30 bg-white rounded-2xl shadow-xl/30 overflow-hidden  flex flex-col">
+                <div className="h-30 bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
                   <h5
                     className="text-m font-semibold text-white tracking-wide p-3"
-                    style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
+                    style={{ background: "linear-gradient(275deg,#062f70ff,#0d3dc4ff)" }}
                   >
                     Today Pay-OUT
                   </h5>
-
                   <div className="flex-1 flex items-center justify-center">
                     <p className="text-xl font-bold text-gray-800">
-                      ₹{cardsToShow.find(c => c.title.includes('Today Pay-OUT'))?.value?.toLocaleString() || '0.00'}
+                      ₹{cardsToShow[3].value.toLocaleString()}
                     </p>
                   </div>
-
-                  {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
                 </div>
 
                 {/* Total Pay-OUT */}
-                <div className="h-30 bg-white rounded-2xl shadow-xl/30 overflow-hidden  flex flex-col">
+                <div className="h-30 bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
                   <h5
                     className="text-m font-semibold text-white tracking-wide p-3"
-                    style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
+                    style={{ background: "linear-gradient(275deg,#062f70ff,#0d3dc4ff)" }}
                   >
                     Total Pay-OUT
                   </h5>
-
                   <div className="flex-1 flex items-center justify-center">
                     <p className="text-xl font-bold text-gray-800">
-                      ₹{cardsToShow.find(c => c.title.includes('Total Pay-OUT'))?.value?.toLocaleString() || '0.00'}
+                      ₹{cardsToShow[1].value.toLocaleString()}
                     </p>
                   </div>
-
-                  {/* <div className="h-1" style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }} /> */}
                 </div>
-
               </div>
             </div>
 
-            {/* -------- TABLE -------- */}
+            {/* Charts */}
+            <div className="flex gap-4 w-full pt-8">
+              <div className="w-[60%]">
+                <LineChart1 data={cardData.monthWiseStatusCounts} />
+              </div>
+              <div className="w-[40%] bg-[#e8eaed] shadow-xl">
+                <DonutChart data={cardData?.transactionStatusCounts || []} />
+              </div>
+            </div>
+            {/* Table */}
             <div className="mt-8">
               <Table
                 columns={transactioncolumn}
@@ -247,8 +209,9 @@ export const Dashboard = () => {
                 showDateFilter={false}
               />
             </div>
+</div>
           </div>
-        </div>
+  
       )}
     </>
   );

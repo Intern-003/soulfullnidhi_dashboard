@@ -148,7 +148,8 @@ export const SchemeModal = ({
         className="fixed top-10 left-1/2 transform -translate-x-1/2 z-50 bg-white border rounded-lg w-full max-w-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center">
+        <div className="text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center"
+        style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
           <h3 className="text-lg font-semibold">
             {editData ? "Edit Scheme" : "Add New Scheme"}
           </h3>
@@ -211,7 +212,8 @@ export const SchemeModal = ({
           {/* Table */}
           <div className="relative">
             <table className="text-sm text-left text-gray-500 w-full">
-              <thead className="text-md text-white uppercase bg-gradient-to-r from-blue-400 to-blue-700">
+              <thead className="text-md text-white uppercase "
+              style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
                 <tr>
                   <th className="px-6 py-3">Operator</th>
                   <th className="px-6 py-3">Type</th>
