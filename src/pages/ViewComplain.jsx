@@ -242,37 +242,14 @@ export const ViewComplain = () => {
 
   return (
     <>
-      {/* <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
-        <h4 className="font-bold text-white text-lg py-2">View Complain</h4>
-        <Button
-          type="button"
-          className="cursor-pointer"
-          variant="AddNewBtn"
-          onClick={() => {
-            setEditData(null);
-            setShowModal(true);
-          }}
-        >
-          Raise Complain
-        </Button>
-      </div>
-      <Table
-        columns={complainColumns}
-        data={complainsWithModifications}
-        showStatusFilter={false}
-      /> */}
-
-      {/* <div className="w-full flex justify-center py-8">
-      <div className="w-full max-w-[1140px] px-4 lg:px-6 space-y-6">
-
-        return (
   
     {/* Outer container with padding */}
 
       <div className="w-full flex justify-center py-8">
         <div className="w-full  px-4 ">
           {/* -------- HEADER: View Complain -------- */}
-          <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center rounded-lg p-4 shadow-md">
+          <div className=" flex justify-between items-center rounded-lg p-4 shadow-md"
+          style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
             <h4 className="font-bold text-white text-lg">View Complain</h4>
             <Button
               type="button"

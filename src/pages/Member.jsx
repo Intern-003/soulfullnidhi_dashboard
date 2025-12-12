@@ -240,7 +240,8 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
+      <div className=" rounded-lg flex justify-between items-center p-4 shadow-md"
+      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
         <h4 className="font-bold text-white text-xl">Member List</h4>
         <div className="flex items-center space-x-2">
           <span className="font-bold text-white">All Payin ON/OFF</span>

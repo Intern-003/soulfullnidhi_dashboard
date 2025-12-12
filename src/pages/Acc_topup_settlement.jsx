@@ -78,7 +78,8 @@ const Acc_topup_settlement = () => {
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
+      <div className=" rounded-lg flex justify-between items-center p-4 shadow-md"
+      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
         <h4 className="font-bold text-white text-xl">
           Topup Settlement Statement
         </h4>

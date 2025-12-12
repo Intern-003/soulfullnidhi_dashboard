@@ -11,6 +11,7 @@ export const Header = ({ onMenuClick }) => {
   const { execute: logout } = usePost("/logout");
   const { data } = useAutoFetch("/collection-record");
   const { data: merchantData } = useGet("/show-merchant");
+  // console.log(data);
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -58,12 +59,7 @@ export const Header = ({ onMenuClick }) => {
     }
   };
 
-  const handleToggleRole = () => {
-    const newRole = role === "admin" ? "crypto" : "admin";
-    localStorage.setItem("role", btoa(newRole));
-    setRole(newRole);
-    window.location.reload();
-  };
+
 
   return (
     <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-indigo-500/50">
@@ -127,7 +123,7 @@ export const Header = ({ onMenuClick }) => {
         />
       </svg>
       <span>Payout Wallet: </span>
-      <span> 565</span>
+      <span>₹{Number(data?.cashfree_balance ?? 0).toFixed(2)}</span>
       {/* Optional: Add wallet icon */}
   
     </div>

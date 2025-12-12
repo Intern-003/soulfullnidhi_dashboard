@@ -88,13 +88,14 @@ const Scheme = () => {
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className="bg-gradient-to-t from-sky-500 to-indigo-500 rounded-lg flex justify-between items-center p-4 shadow-md">
+      <div className=" rounded-lg flex justify-between items-center p-2 shadow-md"
+      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
         <h4 className="font-bold text-white text-xl">Scheme Manager</h4>
       <Button
-  className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+  className="bg-white h-8 text-sky-800 font-bold px-4 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
   onClick={handleModal}
 >
-  ADD NEW
+  Add New
 </Button>
 
 
