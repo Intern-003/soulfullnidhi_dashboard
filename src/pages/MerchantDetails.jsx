@@ -13,8 +13,53 @@ const MerchantDetails = () => {
  const {data:record} = useGet(`/Merchant-Collection?merchant_id=${id}`);
 // console.log("records data: ",record);
  const {data:getMerchant} = useGet(`/show-merchant/${id}`);
+ console.log("get merchnant",getMerchant);
  const chartCount  =record?.transactionStatusCounts || {};
  const [filter,setFilter] =  useState('payin');
+
+const MerchantTable = () => {
+  const { data: getMerchant } = useGet(`/show-merchant/${id}`);
+  const merchant = getMerchant?.data;
+
+  if (!merchant) return <p>Loading...</p>;
+
+return (
+  <div className="w-full shadow-md rounded-lg bg-white ">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+      {[
+        ["Merchant Name", merchant.name],
+        ["Email", merchant.email],
+        ["Mobile", merchant.mobile_no],
+        ["Address", merchant.address],
+        ["Account Holder", merchant.account_holder_name],
+        ["Bank Account", merchant.bank_account_no],
+        ["Bank IFSC", merchant.ifsc_code],
+        ["Company Pan Number", merchant.company_pan_no],
+        ["Company GST Number", merchant.company_gst_no],
+        ["Company CIN Number", merchant.cin_llpin],
+        ["Date of Incorporation", merchant.date_of_incorporation],
+        ["Website URL", merchant.website_url],
+        ["Onboarded Payin Bank", merchant.payin_at_onboard],
+        ["Onboarded Payout Bank", merchant.payout_at_onboard],
+      ].map(([label, value], index) => (
+        <div
+          key={index}
+          className="border border-gray-300 flex items-center"
+        >
+          <div className="w-1/2 bg-gray-50 px-3 py-2 font-semibold text-gray-700 border-r border-gray-300">
+            {label}
+          </div>
+          <div className="w-1/2 px-3 py-2 text-gray-800">
+            {value}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+
+};
 
 // const chartSeries = chartCount
 //   ? [
@@ -234,6 +279,12 @@ const pieOptions = {
     </div>
   </div>
 )}
+
+  
+<div className="bg-white shadow-xl/30 rounded-2xl p-6 mb-6 mt-8">
+
+  <MerchantTable />
+</div>
 
     </div>
 
