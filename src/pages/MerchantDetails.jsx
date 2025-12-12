@@ -40,34 +40,6 @@ const chartSeries = filter === 'payin'
 
 
 const chartLabels = ["Pending", "Success", "Initiated"];
-// const pieOptions = {
-//   chart: {
-//     type: 'donut',
-//         dropShadow: {
-//       enabled: true, // adds shadow for depth
-//       top: 10,
-//       left: 0,
-//       blur: 10,
-//       opacity: 0.3,
-//     },
-//   },
-//   labels: ["Pending", "Success", "Initiated"], // This is REQUIRED for pie charts
-//    colors: ['#FFC107', '#4CAF50', '#F44336'], // yellow, green, red
-//   legend: {
-//     position: "bottom",
-//   },
-//   responsive: [{
-//     breakpoint: 480,
-//     options: {
-//       chart: {
-//         width: 300
-//       },
-//       legend: {
-//         position: "bottom"
-//       }
-//     }
-//   }]
-// };
 
 const pieOptions = {
   chart: {
@@ -82,7 +54,9 @@ const pieOptions = {
     },
   },
   labels: ["Pending", "Success", "Initiated"],
-  colors: ['#E57373', '#006400', '#b9a358ff'], // Success = dark green (#006400)
+  colors: ['#E57373', '#a18acaff', '#b9a358ff'], // Success = dark green (#006400)
+  // colors: ['#0947ccff', '#124612ff', '#EF9A9A'],
+
   legend: {
     position: "bottom",
     labels: {
@@ -109,8 +83,10 @@ const pieOptions = {
     gradient: {
       shade: 'light',
       type: 'vertical',
-      shadeIntensity: 0.5,
-      gradientToColors: ['#cc9e09ff', '#004d00', '#EF9A9A'], 
+      shadeIntensity: 0.9,
+      gradientToColors: ['#cc9e09ff', '#032f68ff','#EF9A9A'], 
+      // gradientToColors: ['#0947ccff', '#124612ff', '#EF9A9A'],
+
       // Success gradient = dark green (#004d00)
       inverseColors: false,
       // opacityFrom: 0.9,
@@ -171,7 +147,7 @@ const pieOptions = {
     <>
       {/* Expected Payin */}
       <div className="bg-gradient-to-r from-blue-100 to-blue-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
-        <h3 className="text-gray-600 text-sm font-medium mb-2">Expected Payin</h3>
+        <h3 className="text-gray-600 text-sm font-medium mb-2"> Today's Expected Settlement</h3>
         <p className="text-3xl font-bold text-blue-600">₹ {record.todayPayingAmount}</p>
       </div>
     
@@ -211,14 +187,14 @@ const pieOptions = {
 
       {/* Payout Wallet */}
       <div className="bg-gradient-to-r from-purple-100 to-purple-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
-        <h3 className="text-gray-600 text-sm font-medium mb-2">Payout Wallet</h3>
-        <p className="text-3xl font-bold text-purple-600">₹ {record.payout_wallet}</p>
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Todays Charges</h3>
+        <p className="text-3xl font-bold text-purple-600">₹ {record.todayPayoutgAmount}</p>
       </div>
 
       {/* Payout Refunded */}
       <div className="bg-gradient-to-r from-orange-100 to-orange-50 shadow-lg rounded-2xl p-6 hover:scale-105 transform transition duration-300 ease-in-out">
-        <h3 className="text-gray-600 text-sm font-medium mb-2">Refunded</h3>
-        <p className="text-3xl font-bold text-orange-600">₹ {record.refund_amount}</p>
+        <h3 className="text-gray-600 text-sm font-medium mb-2">Total Charges</h3>
+        <p className="text-3xl font-bold text-orange-600">₹ {record.total_profit}</p>
       </div>
     </>
   )}

@@ -39,7 +39,7 @@ const Payoutrequest = () => {
     }
   }, [data]);
 
-  const { execute: payoutsend } = usePost("/dashboard-payou/request");
+  const { execute: payoutsend } = usePost("/payout/request");
 
   const handleSubmit = async (e) => {
     e.preventDefault();

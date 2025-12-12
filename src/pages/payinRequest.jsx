@@ -18,7 +18,7 @@ export const PayinRequest = () => {
   const intervalRef = useRef(null);
 
   const { execute: executePayin, loading } = usePost("/Airpay/request");
-  const { execute: executeCheckStatus } = usePost("/AP/payin/checkstatus");
+  const { execute: executeCheckStatus } = usePost("/payin/status");
 
   // Generate unique order ID on mount
   useEffect(() => {

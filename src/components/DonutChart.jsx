@@ -55,7 +55,7 @@ export const DonutChart = ({ data }) => {
           },
         },
       },
-      dataLabels: { enabled: !isEmpty },
+      dataLabels: { enabled: false },
       fill: {
         type: "gradient",
         gradient: {

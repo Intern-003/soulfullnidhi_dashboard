@@ -77,7 +77,7 @@ const PayoutStatement = () => {
             <span>Total Charges: <b>{item.payer_charges ?? 0}</b></span>
             <span>Total Debited Amount: <b>{item.total_debit ?? 0}</b></span>
             <span>Closing Wallet Amount: <b>{item.payout_closing_balance ?? 0}</b></span>
-            <span>Note: <b>{item.note ?? "-"}</b></span>
+  
           </div>
         ),
 

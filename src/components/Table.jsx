@@ -336,11 +336,12 @@ const exportCSV = () => {
                 <div className="relative" ref={exportRef}>
                   <Button
                     onClick={() => setOpenExport(!openExport)}
-                    className="bg-yellow-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-500 transition flex items-center gap-2 min-w-[110px] h-[42px] justify-center"
+                    className="text-blue-800 px-4 py-2 rounded-lg shadow-md hover:transition flex items-center gap-2 min-w-[110px] h-[42px] justify-center"
+                    style={{ background: "linear-gradient(275deg, #a2c1f3ff, #d4d6ddff)" }} 
                   >
                     <i className="fa-solid fa-download"></i> Export
                   </Button>
-                  {openExport && (
+                  {openExport && (  
                     <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg p-2 w-40 z-50">
                       <button onClick={exportCSV} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md">CSV</button>
                       <button onClick={exportJSON} className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md">JSON</button>
@@ -358,6 +359,7 @@ const exportCSV = () => {
                   setSearch("");
                   setSelectedMerchant(null);
                 }}
+                style={{ background: "linear-gradient(275deg, #030b18ff, #0e92dfff)" }}
               >
                 Clear All
               </Button>
