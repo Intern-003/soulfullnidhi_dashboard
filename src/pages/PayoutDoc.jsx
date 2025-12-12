@@ -22,7 +22,7 @@ const PayoutDoc = () => {
     }, [getmerchant]);
 
   // console.log(getmerchant);
-  console.log(payoutGateway);
+  // console.log(payoutGateway);
 
 // -----------------------------------------
 // 👉 AIRPAY API DATA
@@ -32,7 +32,7 @@ const PayoutDoc = () => {
     id: "cashfree-request",
     title: "Create Payout Payment Request",
     type: "api1",
-    endpoint: "POST https://live.spay.live/api/CF/payout/payment/request",
+    endpoint: "POST https://uatfintech.spay.live/api/payout/request",
     headers: "Content-Type: application/json",
     parameters: [
       { field: "token", type: "String", required: "Yes", description: "API key/token provided by Spay for authentication" },
@@ -46,7 +46,7 @@ const PayoutDoc = () => {
     ],
     request: {
       curl: `
-curl --location https://live.spay.live/api/CF/payout/payment/request
+curl --location https://uatfintech.spay.live/api/payout/request
 --form 'token="Q9xRwseKPkXXXXXXXXtygT78wnHPji"
 --form 'orderid="AKXXXXX"
 --form "beneficiary_email=customer / enduser mail_id"
@@ -77,7 +77,7 @@ curl --location https://live.spay.live/api/CF/payout/payment/request
     errorExamples: [
       { code: "403", message: "Your Payout account is deactivated. Please contact the administrator.", cause: "Payout deactivated by Spay" },
       { code: "401", message: "Unauthorized", cause: "Invalid or expired token or Authorization header" },
-      { code: "422", message: "Validator Error", cause: "Occurs when required fields (orderid, amount, beneficiary_name, beneficiary_phone, beneficiary_email) are missing or invalid. Example: {\"errors\":{\"orderid\":[\"The orderid has already been taken.\"],\"amount\":[\"The amount must be at least 1.\"],\"beneficiary_name\":[\"The name field is required.\"],\"beneficiary_phone\":[\"The beneficiary_phone field is required.\"],\"beneficiary_email\":[\"The beneficiary_email field is required.\"]}} " },
+      { code: "422", message: "Validator Error", cause: "Occurs when required fields (orderid, amount, beneficiary_name, beneficiary_phone, beneficiary_email) are missing or invalid." },
       { code: "500", message: "Internal Server Error", cause: "Unexpected server-side error" }
     ],
   },
@@ -86,7 +86,7 @@ curl --location https://live.spay.live/api/CF/payout/payment/request
     id: "cashfree-status",
     title: "Check Payment Status",
     type: "api1",
-    endpoint: 'GET https://live.spay.live/api/CF/payout/status',
+    endpoint: 'GET https://uatfintech.spay.live/api/payout/status',
     headers: "Content-Type: application/json",
     parameters: [
       { field: "token", type: "String", required: "Yes", description: "API key/token provided by SPay Dashboard" },
@@ -94,7 +94,7 @@ curl --location https://live.spay.live/api/CF/payout/payment/request
     ],
     request: {
       curl: `
-curl --location GET "https://dashboard.spay.live/api/CF/payout/status?
+curl --location GET "https://uatfintech.spay.live/api/payout/request
 token = "Q9xRwseKPkMWXXXXXT78wnHPji&apitxnid=AK0XXXX"
       `
     },
@@ -205,283 +205,56 @@ token = "Q9xRwseKPkMWXXXXXT78wnHPji&apitxnid=AK0XXXX"
       `
     }
   },
-  {
-      id: "important-notes",
-      title: "Payout Integration Guidelines",
-      type: "notes",
-      content: [
-        {
-          title: "1. API Key & Credentials",
-          description:
-            "token, MID, and Key: Ensure that these values are securely stored and never shared in public forums or repositories. These credentials are sensitive and must be treated with high security to prevent unauthorized access during payout operations.",
-        },
-        {
-          title: "2. Consistency in Identifiers",
-          description:
-            "apitxnid (for request API): This is the unique identifier you provide for each payout transaction. It must be unique for every payout request and should not be reused. Reusing an apitxnid can lead to incorrect payout processing or status reporting.",
-        },
-        {
-          title: "3. Polling & Cron Jobs",
-          description:
-            "For high payout volumes, consider implementing polling or cron jobs to periodically check the payout status after the initial request. This ensures timely updates and reduces manual follow-ups.",
-        },
-        {
-          title: "4. Error Handling & Retry Logic",
-          description:
-            "Always implement proper error handling when calling payout APIs. Include retry logic for transient errors like network issues or server downtime to ensure payouts are not missed or delayed.",
-        },
-        {
-          title: "5. Payout Amount (INR)",
-          description:
-            "Ensure that the amount parameter is accurate in INR (Indian Rupees) and adheres to the limits set by SPay for payouts. Double-check the payout amounts before initiating the request to avoid failures.",
-        },
-        {
-          title: "6. Beneficiary Data Validation",
-          description:
-            "Validate and sanitize beneficiary details such as name, account number, IFSC, email, and mobile. Invalid or incomplete beneficiary data can result in payout failures or delays.",
-        },
-        {
-          title: "7. Security",
-          description:
-            "Always use HTTPS for secure communication to protect sensitive data such as API keys, beneficiary information, and payout details.",
-        },
-        {
-          title: "8. PayOUT Account Deactivated",
-          description:
-            "This means your PayOUT account has been deactivated by SPay. Contact support or your system administrator to reactivate your account before initiating any payouts.",
-        },
-      ]
-    },
+  // {
+  //     id: "important-notes",
+  //     title: "Payout Integration Guidelines",
+  //     type: "notes",
+  //     content: [
+  //       {
+  //         title: "1. API Key & Credentials",
+  //         description:
+  //           "token, MID, and Key: Ensure that these values are securely stored and never shared in public forums or repositories. These credentials are sensitive and must be treated with high security to prevent unauthorized access during payout operations.",
+  //       },
+  //       {
+  //         title: "2. Consistency in Identifiers",
+  //         description:
+  //           "apitxnid (for request API): This is the unique identifier you provide for each payout transaction. It must be unique for every payout request and should not be reused. Reusing an apitxnid can lead to incorrect payout processing or status reporting.",
+  //       },
+  //       {
+  //         title: "3. Polling & Cron Jobs",
+  //         description:
+  //           "For high payout volumes, consider implementing polling or cron jobs to periodically check the payout status after the initial request. This ensures timely updates and reduces manual follow-ups.",
+  //       },
+  //       {
+  //         title: "4. Error Handling & Retry Logic",
+  //         description:
+  //           "Always implement proper error handling when calling payout APIs. Include retry logic for transient errors like network issues or server downtime to ensure payouts are not missed or delayed.",
+  //       },
+  //       {
+  //         title: "5. Payout Amount (INR)",
+  //         description:
+  //           "Ensure that the amount parameter is accurate in INR (Indian Rupees) and adheres to the limits set by SPay for payouts. Double-check the payout amounts before initiating the request to avoid failures.",
+  //       },
+  //       {
+  //         title: "6. Beneficiary Data Validation",
+  //         description:
+  //           "Validate and sanitize beneficiary details such as name, account number, IFSC, email, and mobile. Invalid or incomplete beneficiary data can result in payout failures or delays.",
+  //       },
+  //       {
+  //         title: "7. Security",
+  //         description:
+  //           "Always use HTTPS for secure communication to protect sensitive data such as API keys, beneficiary information, and payout details.",
+  //       },
+  //       {
+  //         title: "8. PayOUT Account Deactivated",
+  //         description:
+  //           "This means your PayOUT account has been deactivated by SPay. Contact support or your system administrator to reactivate your account before initiating any payouts.",
+  //       },
+  //     ]
+  //   },
 ];
 
-// -----------------------------------------
-// 👉 BUSYBOX API DATA
-// -----------------------------------------
-const BUSYBOX_SECTIONS = [
-  {
-    id: "busybox-request",
-    title: "Create Payout Payment Request",
-    type: "api1",
-    endpoint: "POST https://live.spay.live/api/bb/payout/payment/request",
-    headers: "Content-Type: application/json",
-    parameters: [
-      { field: "token", type: "String", required: "Yes", description: "API key/token provided by Spay for authentication" },
-      { field: "orderid", type: "String", required: "Yes", description: "Unique transaction ID (merchant side) Maximum 20 Characters" },
-      { field: "beneficiary_name", type: "String", required: "Yes", description: "Beneficiary account holder's full name" },
-      { field: "beneficiary_email", type: "String", required: "Yes", description: "Beneficiary's email address (for communication/receipt)" },
-      { field: "beneficiary_phone", type: "String", required: "Yes", description: "Beneficiary's 10-digit mobile number" },
-      { field: "amount", type: "String", required: "Yes", description: "Payout amount in INR" },
-      { field: "beneficiary_account_number", type: "String", required: "Yes", description: "Beneficiary's bank account number" },
-      { field: "beneficiary_ifsc", type: "String", required: "Yes", description: "Beneficiary's bank IFSC code" },
-    ],
-    request: {
-      curl: `
-curl --location https://live.spay.live/api/bb/payout/payment/request
---form 'token="Q9xRwseKPkXXXXXXXXtygT78wnHPji"
---form 'orderid="AKXXXXX"
---form "beneficiary_email=customer / enduser mail_id"
---form "beneficiary_phone=customer / enduser mobile no"
---form 'amount=10XX.00'
---form 'beneficiary_account_number="17459XXXXX"
---form 'beneficiary_ifsc="KKBK00XXXXX"
---form 'beneficiary_name=customer / enduser name'
-      `,
-    },
-    successResponse: {
-      curl: `
-{
-"status": "pending",
-"statuscode": 200,
-"message": "✅ Payout status: Pending,
-"data": {
-"message": "Transfer Initiated",
-"bene_name": "name",
-"customer_account": "xxxxxxx7325",
-"amount": "1.00",
-"client_ref_no": "AK00XXXXX1",
-"txn_date": "2025-XX-1X 16:XX:49"
-"rrn": "null"
-}
-      `,
-    },
-    errorExamples: [
-      { code: "403", message: "Your Payout account is deactivated. Please contact the administrator.", cause: "Payout deactivated by Spay" },
-      { code: "401", message: "Unauthorized", cause: "Invalid or expired token or Authorization header" },
-      { code: "422", message: "Validator Error", cause: "Occurs when required fields (orderid, amount, beneficiary_name, beneficiary_phone, beneficiary_email) are missing or invalid. Example: {\"errors\":{\"orderid\":[\"The orderid has already been taken.\"],\"amount\":[\"The amount must be at least 1.\"],\"beneficiary_name\":[\"The name field is required.\"],\"beneficiary_phone\":[\"The beneficiary_phone field is required.\"],\"beneficiary_email\":[\"The beneficiary_email field is required.\"]}} " },
-      { code: "500", message: "Internal Server Error", cause: "Unexpected server-side error" }
-    ],
-  },
 
-  {
-    id: "cashfree-status",
-    title: "Check Payment Status",
-    type: "api1",
-    endpoint: 'GET https://live.spay.live/api/bb/payout/status',
-    headers: "Content-Type: application/json",
-    parameters: [
-      { field: "token", type: "String", required: "Yes", description: "API key/token provided by SPay Dashboard" },
-      { field: "orderid", type: "String", required: "Yes", description: "Unique ID Enter by Merchant(order id)" },
-    ],
-    request: {
-      curl: `
-curl --location GET "https://dashboard.spay.live/api/bb/payout/status?
-token = "Q9xRwseKPkMWXXXXXT78wnHPji&apitxnid=AK0XXXX"
-      `
-    },
-    successResponse: {
-      curl: `
-{
-"status": "success",
-"statuscode": 200,
-"data": {
-"status": "SUCCESS",
-"message": "Transaction Status Fetched",
-"amount": "1XX.00",
-"rrn": "522XXXX286",
-"account_number": "xxxxxxx7325",
-"ifsc_code": "KKBK0XXXX"
-}
-      `
-    },
-    failedResponse: {
-      curl: `
-{
-"statuscode": 400,
-"data": {
-"status": "FAILED",
-"message": "Transaction Status failed",
-"amount": "null",
-"rrn": "null",
-"account_number": "null",
-"ifsc_code": "null"
-}
-      `
-    },
-
-    errorExamples: [
-        {
-          code: "400",
-          message: "Missing required fields:MID",
-          cause: "Required query parameter not provided",
-        },
-        {
-          code: "404",
-          message: "payout method not found",
-          cause: "Incorrect or non-existent apitxnid", 
-        },
-        {
-          code: "401",
-          message: "Unauthorized",
-          cause: "Invalid or expired token or Authorization header",
-        },
-        {
-          code: "422",
-          message: "Validation failed",
-          cause: "payment_id format is invalid",
-        },
-        {
-          code: "500",
-          message: "Internal Server Error",
-          cause: "Unexpected server-side or cURL exception",
-        },
-      ],
-
-    errorStatus:[
-        {
-          code: "initiated",
-          message: "Payment has been initiated but not completed",
-        },
-        {
-          code: "success",
-          message: "Payment was completed successfully",
-        },
-        {
-          code: "failed",
-          message: "Payment failed",
-        },
-        {
-          code: "pending",
-          message: "Payment is in process and pending confirmation",
-        },
-      ],
-    
-  },
-  {
-    id: "busybox-callback",
-    title: "Callback Response",
-    type: "callback",
-    content: {
-      endpoint: "https://dashboard.spay.live/api/cronjob/payoutcall_back",
-      successResponse: `
-{
-"status": "success",
-"txnid": "SPAYXXX0004",
-"clienttxnid": "AKXXXXX",
-"amount": "1.00",
-"UTR": "6408204XXX"
-"timestamp":"2025-XX-XX 15:27:47"
-}
-      `,
-      failedResponse: `
-{
-"status":"failed",
-"txnid":"SPAY2025XXXX",
-"clienttxnid":"TXN0XXX59",
-"amount":1.00,
-"UTR":"null",
-"timestamp":"2025-XX-XX 15:27:47"
-}
-      `
-    }
-  },
-  {
-    id: "important-notes",
-    title: "Payout Integration Guidelines",
-    type: "notes",
-    content: [
-      {
-        title: "1. API Key & Credentials",
-        description:
-          "token, MID, and Key: Ensure that these values are securely stored and never shared in public forums or repositories. These credentials are sensitive and must be treated with high security to prevent unauthorized access during payout operations.",
-      },
-      {
-        title: "2. Consistency in Identifiers",
-        description:
-          "apitxnid (for request API): This is the unique identifier you provide for each payout transaction. It must be unique for every payout request and should not be reused. Reusing an apitxnid can lead to incorrect payout processing or status reporting.",
-      },
-      {
-        title: "3. Polling & Cron Jobs",
-        description:
-          "For high payout volumes, consider implementing polling or cron jobs to periodically check the payout status after the initial request. This ensures timely updates and reduces manual follow-ups.",
-      },
-      {
-        title: "4. Error Handling & Retry Logic",
-        description:
-          "Always implement proper error handling when calling payout APIs. Include retry logic for transient errors like network issues or server downtime to ensure payouts are not missed or delayed.",
-      },
-      {
-        title: "5. Payout Amount (INR)",
-        description:
-          "Ensure that the amount parameter is accurate in INR (Indian Rupees) and adheres to the limits set by SPay for payouts. Double-check the payout amounts before initiating the request to avoid failures.",
-      },
-      {
-        title: "6. Beneficiary Data Validation",
-        description:
-          "Validate and sanitize beneficiary details such as name, account number, IFSC, email, and mobile. Invalid or incomplete beneficiary data can result in payout failures or delays.",
-      },
-      {
-        title: "7. Security",
-        description:
-          "Always use HTTPS for secure communication to protect sensitive data such as API keys, beneficiary information, and payout details.",
-      },
-      {
-        title: "8. PayOUT Account Deactivated",
-        description:
-          "This means your PayOUT account has been deactivated by SPay. Contact support or your system administrator to reactivate your account before initiating any payouts.",
-      },
-    ]
-  },
-];
 
   // -----------------------------------------
   // 👉 APPLY PROVIDER DATA

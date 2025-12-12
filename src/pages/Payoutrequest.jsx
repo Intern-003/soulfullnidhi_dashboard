@@ -203,9 +203,10 @@ const Payoutrequest = () => {
         <h4 className="font-bold text-white text-lg py-2">Beneficiary List</h4> */}
       <div className="p-4">
         <div
-          className="bg-gradient-to-t from-sky-500 to-indigo-500 
+          className="
                flex justify-between items-center 
                rounded-lg p-4 mb-4"
+               style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
         >
           <h4 className="font-bold text-white text-lg">Beneficiary List</h4>
 

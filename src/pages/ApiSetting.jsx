@@ -20,21 +20,41 @@ const ApiSetting = () => {
   const { data: apiTokensData, refetch: refetchApiTokens } = useGet(endPoint);
   const initialDataOfTokens = apiTokensData?.data;
 
+  // useEffect(() => {
+  //   const formattedMerchantData = initialDataOfTokens?.map((item, index) => ({
+  //     sqno: index + 1,
+  //     id: item.id,
+  //     ip: item.ip,
+  //     token: item.token,
+  //     date:
+  //       new Date(item.created_at).getDate() +
+  //       " " +
+  //       MONTH_NAMES[new Date(item.created_at).getMonth()] +
+  //       " " +
+  //       new Date(item.created_at).getFullYear(),
+  //   }));
+  //   setApiToken(formattedMerchantData || []);
+  // }, [initialDataOfTokens]);
+
   useEffect(() => {
-    const formattedMerchantData = initialDataOfTokens?.map((item, index) => ({
+  const formattedMerchantData = initialDataOfTokens
+    ?.map((item, index) => ({
       sqno: index + 1,
       id: item.id,
       ip: item.ip,
       token: item.token,
+      createdAt: new Date(item.created_at), // keep raw date for sorting
       date:
         new Date(item.created_at).getDate() +
         " " +
         MONTH_NAMES[new Date(item.created_at).getMonth()] +
         " " +
         new Date(item.created_at).getFullYear(),
-    }));
-    setApiToken(formattedMerchantData || []);
-  }, [initialDataOfTokens]);
+    }))
+    ?.sort((a, b) => b.createdAt - a.createdAt); // 🔥 DESCENDING ORDER
+
+  setApiToken(formattedMerchantData || []);
+}, [initialDataOfTokens]);
 
   const tokenTableColumns = [
     { header: "SQNo", accessor: "sqno" },

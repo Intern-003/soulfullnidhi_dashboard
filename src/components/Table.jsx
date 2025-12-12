@@ -142,17 +142,116 @@ const Table = ({
   );
 
   // Export handlers
-  const exportCSV = () => {
-    const rows = filteredData.map(row => columns.map(col => row[col.accessor]));
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [columns.map(col => col.header).join(","), ...rows.map(r => r.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.href = encodedUri;
-    link.download = "table_export.csv";
-    link.click();
-  };
+  // const exportCSV = () => {
+  //   const rows = filteredData.map(row => columns.map(col => row[col.accessor]));
+  //   const csvContent =
+  //     "data:text/csv;charset=utf-8," +
+  //     [columns.map(col => col.header).join(","), ...rows.map(r => r.join(","))].join("\n");
+  //   const encodedUri = encodeURI(csvContent);
+  //   const link = document.createElement("a");
+  //   link.href = encodedUri;
+  //   link.download = "table_export.csv";
+  //   link.click();
+  // };
+// Recursively extract text from React element objects
+// Extract text from nested objects or React elements
+// Safely extract text from React elements, arrays, primitives
+const extractText = (element) => {
+  if (element === null || element === undefined) return "";
+
+  if (typeof element === "string" || typeof element === "number") {
+    return String(element);
+  }
+
+  if (Array.isArray(element)) {
+    return element.map(extractText).join(" | ");
+  }
+
+  // Detect React Elements: react elements have $$typeof symbol
+  if (typeof element === "object" && element.$$typeof) {
+    return extractText(element.props?.children);
+  }
+
+  // Generic object -> flatten values
+  if (typeof element === "object") {
+    return Object.values(element).map(extractText).join(" | ");
+  }
+
+  return String(element);
+};
+
+// Flatten plain objects only — ignores React elements & circulars
+const flattenObject = (obj, prefix = "", seen = new WeakSet()) => {
+  const result = {};
+
+  if (obj === null || typeof obj !== "object") return result;
+
+  if (seen.has(obj)) return result; // prevent circular recursion
+  seen.add(obj);
+
+  for (const key in obj) {
+    if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+
+    const value = obj[key];
+    const newKey = prefix ? `${prefix}.${key}` : key;
+
+    // Ignore React elements: treat them as text
+    if (value?.$$typeof) {
+      result[newKey] = extractText(value);
+      continue;
+    }
+
+    // If value is plain object → recurse
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      Object.assign(result, flattenObject(value, newKey, seen));
+      continue;
+    }
+
+    // Arrays → map to text
+    if (Array.isArray(value)) {
+      result[newKey] = value.map(extractText).join(" | ");
+      continue;
+    }
+
+    // Primitives
+    result[newKey] = extractText(value);
+  }
+
+  return result;
+};
+
+// Escape CSV values safely
+const escapeCSVValue = (val) => {
+  if (val === null || val === undefined) return "";
+  let str = String(val);
+  if (str.includes('"')) str = str.replace(/"/g, '""');
+  if (str.includes(",") || str.includes("\n") || str.includes('"')) str = `"${str}"`;
+  return str;
+};
+
+// Normalize row (you can keep your custom logic)
+const normalizeRow = (row) => flattenObject(row);
+
+// Export CSV
+const exportCSV = () => {
+  if (!filteredData.length) return;
+
+  const normalizedRows = filteredData.map(normalizeRow);
+  const headers = Array.from(new Set(normalizedRows.flatMap(row => Object.keys(row))));
+
+  const csvRows = normalizedRows.map(row =>
+    headers.map(header => escapeCSVValue(row[header])).join(",")
+  );
+
+  const csvContent = "data:text/csv;charset=utf-8," +
+    [headers.join(","), ...csvRows].join("\n");
+
+  const link = document.createElement("a");
+  link.href = encodeURI(csvContent);
+  link.download = "table_export.csv";
+  link.click();
+};
+
 
   const exportJSON = () => {
     const json = JSON.stringify(filteredData, null, 2);
@@ -164,7 +263,7 @@ const Table = ({
   };
 
   return (
-    <div className="w-full max-w-[1140px] mx-auto px-2 sm:px-0">
+    <div className="w-full  mx-auto px-2 sm:px-0">
       {/* FILTER BAR */}
       {(showSearch || showStatusFilter || showExport || showDateFilter || showSelectUserFilter) && (
         <div className="w-full bg-white shadow-md rounded-xl p-4 mb-4">

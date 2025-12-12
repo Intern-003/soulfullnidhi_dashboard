@@ -78,11 +78,11 @@ export const DonutChart = ({ data }) => {
 
   return (
     <div className="w-full bg-[#e8eaed] rounded-lg  p-4 md:p-6">
-      <div className="flex justify-between mb-3">
-        <h5 className="text-xl font-bold text-gray-900 h-24">Transactions</h5>
-        <div className="flex gap-2">
+      <div className="flex justify-between mb-3 h-20 ">
+        <h5 className="text-xl font-bold text-gray-900 pt-4 ">Transactions</h5>
+        <div className="flex">
           <button
-            className="px-3 py-1 rounded-lg font-bold text-[#062f70ff]"
+            className="px-3 rounded-lg font-bold text-[#062f70ff]"
             onClick={() => setMode(mode === "UPI" ? "payout" : "UPI")}
           >
             {mode === "UPI" ? "Payin" : "Payout"}

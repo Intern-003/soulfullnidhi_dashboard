@@ -16,6 +16,7 @@ export const Dashboard = () => {
   // Normal API calls only (no crypto)
   const { data: cardData, loading: recordLoading } = useAutoFetch("/collection-record");
   const { data: tableData } = useAutoFetch("/reportrecords-List?status=success");
+  // console.log(cardData);
 
   const initialDataOfTransactions = tableData?.data;
 
@@ -119,7 +120,7 @@ export const Dashboard = () => {
       ) : (
         <div className="w-full py-8">
           <div className="w-full px-4">
-
+ 
             {/* --- CARDS --- */}
             <div className="lg:col-span-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
@@ -195,9 +196,8 @@ export const Dashboard = () => {
                 <DonutChart data={cardData?.transactionStatusCounts || []} />
               </div>
             </div>
-
             {/* Table */}
-            <div className="mt-8 mb-4">
+            <div className="mt-8">
               <Table
                 columns={transactioncolumn}
                 data={transactionData}
@@ -209,9 +209,9 @@ export const Dashboard = () => {
                 showDateFilter={false}
               />
             </div>
-
+</div>
           </div>
-        </div>
+  
       )}
     </>
   );
