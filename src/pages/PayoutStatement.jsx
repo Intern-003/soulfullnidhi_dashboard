@@ -21,22 +21,29 @@ const PayoutStatement = () => {
     return `${day} ${month} ${year} - ${time}`;
   };
 
+  
+
   useEffect(() => {
     const statusClasses = {
-      pending: "bg-yellow-100 text-yellow-800",
-      initiated: "bg-blue-100 text-blue-800",
-      success: "bg-green-100 text-green-800",
-      complete: "bg-green-100 text-green-800",
-      failed: "bg-red-100 text-red-800",
-      reversed: "bg-red-100 text-red-800",
-      refunded: "bg-gray-100 text-gray-800",
+      pending:  "bg-yellow-600 text-white",
+      initiated:"bg-blue-600 text-white",
+      success:  "bg-green-600 text-white",
+      complete: "bg-green-700 text-white",
+      failed:   "bg-red-600 text-white",
+      reversed: "bg-red-700 text-white",
+      refunded: "bg-gray-600 text-white",
     };
 
     if (data?.data) {
-      const formattedData = data.data.map((item, index) => ({
+      const sortedData = [...data.data].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+      const total = sortedData.length;
+
+      const formattedData = sortedData.map((item, index) => ({
         sqno: (
           <div className="flex flex-col text-left">
-            <span><b>{index + 1}</b></span>
+            <span><b>{total - index}</b></span>
             <span>
               {new Date(item.created_at).getDate()}{" "}
               {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
@@ -45,11 +52,14 @@ const PayoutStatement = () => {
             </span>
           </div>
         ),
-        id: item.id,
-        user_id: item.user_id,
 
+
+        id: item.id,
+        // user_id: item.user_id,
         product_type: item.product ?? "N/A",
-        merchant_details: item.user.name ?? "N/A",
+        // merchant_details: item.user.name ?? "N/A",
+        merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
+
 
         txnid: (
           <div className="flex flex-col text-left">
@@ -82,11 +92,9 @@ const PayoutStatement = () => {
         ),
 
         numericAmount: parseFloat(item.payout_amount) || 0,
-
-        // FIXED DATE FORMAT
         date: formatDateLikeTopup(item.created_at),
-
         status: item.status,
+
 
         showstatus: (
           <span
