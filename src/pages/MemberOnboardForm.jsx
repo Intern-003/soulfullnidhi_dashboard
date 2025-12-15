@@ -135,38 +135,158 @@ const stepRequiredFields = {
     }
   };
 
-  const validateStep = () => {  
-    const requiredFields = stepRequiredFields[currentStep];
-    const newErrors = {};
+  const phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/;
+const nameRegex = /^[A-Za-z ]+$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const textRegex = /^[A-Za-z]+$/;
+const textNumberRegex = /^[A-Za-z0-9]+$/;
+const numberRegex = /^[0-9]{4}$/;
+const pinnumberRegex = /^[0-9]{6}$/;
+const aadharRegex = /^[0-9]{12}$/;
+const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 
-    if (currentStep === 3) {
-      memberFormData.director_info.forEach((director, idx) => {
-        requiredFields.forEach((field) => {
-          if (!director[field] || director[field].trim() === "") {
-            if (!newErrors.director) newErrors.director = [];
-            newErrors.director[idx] = {
-              ...newErrors.director[idx],
-              [field]: "This field is required",
-            };
-          }
-        });
-      });
-    } else {
-      requiredFields.forEach((field) => {
-        let value;
+const validationRules = {
+  name: {
+    required: true,
+    pattern: nameRegex,
+    message: "Name is not valid",
+  },
+  mobile_no: {
+    required: true,
+    pattern: phoneRegex,
+    message: "Mobile number is not valid",
+  },
+  email: {
+    required: true,
+    pattern: emailRegex,
+    message: "Email is not valid",
+  },
+  business_mcc: {
+    required: true,
+    pattern: numberRegex,
+    message: "Business MCC must be 4 digits",
+  },
+  city: {
+    required: true,
+    pattern: textRegex,
+    message: "City name is not valid",
+  },
+  state: {
+    required: true,
+    pattern: textRegex,
+    message: "State name is not valid",
+  },
+  district: {
+    required: true,
+    pattern: textRegex,
+    message: "District name is not valid",
+  },
+  pin_code: {
+    required: true,
+    pattern: pinnumberRegex,
+    message: "Pin code must be 6 digits",
+  },
+  account_holder_name: {
+    required: true,
+    pattern: nameRegex,
+    message: "Account holder name is not valid",
+  },
+  bank_account_no: {
+    required: true,
+    pattern: textNumberRegex,
+    message: "Bank account number is not valid",
+  },
+  cin_llpin: {
+    required: true,
+    pattern: textNumberRegex,
+    message: "CIN / LLPIN is not valid",
+  },
+  company_pan_no: {
+    required: true,
+    pattern: panRegex,
+    message: "Company PAN number is not valid",
+  },
+  company_gst_no: {
+    required: true,
+    pattern: textNumberRegex,
+    message: "Company GST number is not valid",
+  },
 
-        value = memberFormData[field];
+  // 👤 Director
+  director_name: {
+    required: true,
+    pattern: nameRegex,
+    message: "Director name is not valid",
+  },
+  director_pan_no: {
+    required: true,
+    pattern: panRegex,
+    message: "Director PAN number is not valid",
+  },
+  director_aadhar_no: {
+    required: true,
+    pattern: aadharRegex,
+    message: "Aadhaar number must be 12 digits",
+  },
+};
 
-        if (!value || value === "") {
-          newErrors[field] = `This field is required`;
-        }
-      });
+  
+const validateStep = () => {
+  const requiredFields = stepRequiredFields[currentStep];
+  const newErrors = {};
+
+  const validateValue = (value, field) => {
+    const rules = validationRules[field];
+
+    // required check
+    if (
+      value === undefined ||
+      value === null ||
+      (typeof value === "string" && value.trim() === "")
+    ) {
+      return "This field is required";
     }
 
-    setErrors(newErrors);
+    // regex check (only if rule exists)
+    if (rules?.pattern && typeof value === "string") {
+      if (!rules.pattern.test(value.trim())) {
+        return rules.message || "Invalid format";
+      }
+    }
 
-    return Object.keys(newErrors).length === 0; // true if no errors
+    return null;
   };
+
+  // 👤 STEP 3 — Directors
+  if (currentStep === 3) {
+    memberFormData.director_info.forEach((director, idx) => {
+      requiredFields.forEach((field) => {
+        const error = validateValue(director[field], field);
+
+        if (error) {
+          if (!newErrors.director) newErrors.director = [];
+          newErrors.director[idx] = {
+            ...newErrors.director[idx],
+            [field]: error,
+          };
+        }
+      });
+    });
+  }
+  // 🧾 Other steps
+  else {
+    requiredFields.forEach((field) => {
+      const error = validateValue(memberFormData[field], field);
+      if (error) {
+        newErrors[field] = error;
+      }
+    });
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
 
   const handleNext = () => {
     if (validateStep()) {
