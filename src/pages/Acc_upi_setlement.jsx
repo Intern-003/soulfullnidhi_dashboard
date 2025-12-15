@@ -15,62 +15,61 @@ const Acc_upi_setlement = () => {
 
   useEffect(() => {
     const statusClasses = {
-      pending: "bg-yellow-100 text-yellow-800",
-      initiated: "bg-blue-100 text-blue-800",
-      success: "bg-green-100 text-green-800",
-      complete: "bg-green-100 text-green-800",
-      failed: "bg-red-100 text-red-800",
-      reversed: "bg-red-100 text-red-800",
-      refunded: "bg-gray-100 text-gray-800",
+      pending:  "bg-yellow-600 text-white",
+      initiated:"bg-blue-600 text-white",
+      success:  "bg-green-600 text-white",
+      complete: "bg-green-700 text-white",
+      failed:   "bg-red-600 text-white",
+      reversed: "bg-red-700 text-white",
+      refunded: "bg-gray-600 text-white",
     };
 
     if (data?.data) {
-  const formattedData = data.data.map((item, index) => ({
-    sqno: index + 1,
-    id: item.id,
-    user_id: item.user_id,
-    product_type: item.product ?? "N/A",
-    merchant_details: item.user.name ?? "N/A",
-    txnid: item.txnid ?? "N/A",
-    amount: item.amount ?? "N/A",
+    const formattedData = data.data.map((item, index) => ({
+      sqno: index + 1,
+      id: item.id,
+      product_type: item.product ?? "N/A",
+      merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
+      txnid: item.txnid ?? "N/A",
+      amount: item.amount ?? "N/A",
+      numericAmount: parseFloat(item.amount) || 0,
 
-    // ✅ Numeric value for calculations
-    numericAmount: parseFloat(item.amount) || 0,
-
-    date:
-      new Date(item.created_at).getDate() +
-      " " +
-      MONTH_NAMES[new Date(item.created_at).getMonth()] +
-      " " +
-      new Date(item.created_at).getFullYear() +
-      " - " +
-      new Date(item.created_at).toLocaleTimeString(),
-    status: item.status,
-    showstatus: (
-      <span
-        className={`px-2 py-1 rounded-full text-sm font-medium ${
-          statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
-        }`}
-      >
-        {item?.status
-          ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
-          : "N/A"}
-      </span>
-    ),
-  }));
-  setPayinSettlementData(formattedData);
-} }, [data]);
+      date:
+        new Date(item.created_at).getDate() +
+        " " +
+        MONTH_NAMES[new Date(item.created_at).getMonth()] +
+        " " +
+        new Date(item.created_at).getFullYear() +
+        " - " +
+        new Date(item.created_at).toLocaleTimeString(),
+      status: item.status,
+      payin_closing_balance: item.payin_closing_balance ?? "0.0",
+      payin_opening_balance: item.payin_opening_balance ?? "0.0",
+      showstatus: (
+        <span
+          className={`px-2 py-1 rounded-full text-sm font-medium ${
+            statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
+          }`}
+        >
+          {item?.status
+            ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+            : "N/A"}
+        </span>
+      ),
+    }));
+    setPayinSettlementData(formattedData);
+  } }, [data]);
 
   const payinSettlementColumn = [
-    { header: "SQ NO", accessor: "sqno" },
-    { header: "Id", accessor: "id" },
-    { header: "User Id", accessor: "user_id" },
-    { header: "Product Type", accessor: "product_type" },
+    { header: "SQ NO", accessor: "id" },
     { header: "Merchant Details", accessor: "merchant_details" },
     { header: "Transaction Id", accessor: "txnid" },
+    { header: "Product Type", accessor: "product_type" },
     { header: "Amount", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
     { header: "Date", accessor: "date" },
+    { header: "Opening Bal", accessor: "payin_opening_balance" },
+    { header: "Closing Bal", accessor: "payin_closing_balance" },
   
   ];
 
