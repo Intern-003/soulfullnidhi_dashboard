@@ -8,6 +8,7 @@ const UpiStatement = () => {
   const [upiData, setUpiData] = useState([]);
 
   const { data, loading, error } = useGet("/reportrecords-List?product=UPI");
+  // console.log( "upi data",data);
 
   // 🔥 Same date format as ACC_TOPUP_SETTLEMENT.jsx
   const formatDateLikeTopup = (date) => {
@@ -20,7 +21,6 @@ const UpiStatement = () => {
     return `${day} ${month} ${year} - ${time}`;
   };
 
-  
 
   useEffect(() => {
   const statusClasses = {
@@ -37,13 +37,14 @@ const UpiStatement = () => {
     const sortedData = [...data.data].sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
+    // console.log("sorted data : ",sortedData);  
 
     const total = sortedData.length;
-
     const formattedData = sortedData.map((item, index) => ({
       sqno: (
         <div className="flex flex-col text-left">
-          <span><b>{total - index}</b></span>
+          {/* <span><b>{total - index}</b></span> */}
+          <span><b>{item.id}</b></span>
           <span>
             {new Date(item.created_at).getDate()}{" "}
             {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
@@ -61,7 +62,7 @@ const UpiStatement = () => {
       txnid: (
         <div className="flex flex-col text-left">
           <span>Payee VPA: <b>{item.payee_vpa ?? "null"}</b></span>
-          <span>Payee Name: <b>{item.payer_name ?? "null"}</b></span>
+          <span>Ref No: <b>{item.refno ?? "null"}</b></span>
           <span>Payee Txnid: <b>{item.mytxnid}</b></span>
           <span>TxnId: <b>{item.txnid}</b></span>
         </div>
@@ -70,8 +71,8 @@ const UpiStatement = () => {
       amount: (
         <div className="flex flex-col text-left">
           <span>Amount: <b>{item.amount}</b></span>
-          <span>GST: <b>{item.gst}</b></span>
           <span>Charges: <b>{item.charge}</b></span>
+          <span>GST: <b>{item.gst}</b></span>
           <span>Payin Rolling Amount: <b>{item.payin_rolling_amount}</b></span>
         </div>
       ),
@@ -99,9 +100,9 @@ const UpiStatement = () => {
 
 
   const upiColumn = [
-    { header: "SQ NO", accessor: "sqno" },
+    { header: "Order Id", accessor: "sqno" },
     { header: "Merchant Details", accessor: "merchant_details" },
-    { header: "Payer-Payee Details", accessor: "txnid" },
+    { header: "Transaction Details", accessor: "txnid" },
     { header: "Amount/ Commission", accessor: "amount" },
     { header: "Status", accessor: "showstatus" },
   ];
