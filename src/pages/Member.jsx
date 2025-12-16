@@ -149,17 +149,15 @@ export const Member = () => {
         );
 
       return {
-        sqno: index + 1,
+        sqno: item.id,
         id: item.id,
         // name: item.name,
         name:(
-        <span className="text-blue-600 cursor-pointer" 
-        
+        <span className="text-blue-600 cursor-pointer w-100" 
         onClick={() => {
           localStorage.setItem("merchantId", item.id);
           memberDetails(`/MerchantDetails/${item.id}`) 
         }}>
-        
           {item.name}
         </span>
         ),
@@ -191,7 +189,7 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
   }, [initialDataOfMerchants, credentialsData]);
 
   const memberColumns = [
-    { header: "SQNo", accessor: "sqno" },
+    { header: "User id", accessor: "sqno"},
     { header: "Name", accessor: "name" },
     { header: "Payin", accessor: "payin" },
  
@@ -226,7 +224,7 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
       />
     ),
     sqno: (
-      <div className="flex flex-col">
+      <div className="flex flex-col" style={{width:"100px"}}>
         <span className="text-sm font-semibold">{row.sqno}</span>
         <Toggle
           defaultChecked={row.account}
@@ -279,6 +277,7 @@ totalwallet: Number(item.total_payout || 0).toFixed(2),
           nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
           endPoint="/delete-merchant"
           setData={setMerchantData}
+          showStatusFilter={false}
         />
       )}
 

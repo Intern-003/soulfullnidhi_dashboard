@@ -28,7 +28,7 @@ const Scheme = () => {
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
         id: item.id,
-        sqno: index + 1,
+        sqno: item.id,  //index + 1,
         name: item.name,
         status: item.status ? "Active" : "Inactive",
         action: (
@@ -68,7 +68,7 @@ const Scheme = () => {
   };
 
   const schemecolumn = [
-    { header: "SQ No", accessor: "sqno" },
+    { header: "Scheme id", accessor: "sqno" },
     { header: "Name", accessor: "name" },
     {
       header: "Status",
