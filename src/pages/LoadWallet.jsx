@@ -19,6 +19,8 @@ const LoadWallet = () => {
   });
 
   const { data: tableData, refetch, loading } = useGet("/get-merchants");
+  // console.log( "load Wallet data",tableData);   
+
   const { execute: loadWallet } = usePost("/payout-load-wallet");
   const { execute: reverseTopup } = usePost("/payout-take-back");
 
@@ -81,8 +83,8 @@ const LoadWallet = () => {
   };
 
   const membercolumn = [
-    { header: "SQNo", accessor: "sqno" },
-    { header: "Name", accessor: "name" },
+    { header: "User Id", accessor: "id" },
+    { header: "Merchant", accessor: "name" },
     { header: "Payout Wallet", accessor: "payout_wallet" },
     { header: "Action", accessor: "action" },
   ];
