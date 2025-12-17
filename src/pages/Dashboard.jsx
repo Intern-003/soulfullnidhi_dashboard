@@ -200,10 +200,12 @@ export const Dashboard = () => {
 
             {/* ================= CHARTS ================= */}
             <div className="flex gap-4 w-full pt-8">
-              <div className="w-[60%]">
+              <div className="w-[60%]"
+              style={{background: "linear-gradient(180deg, #ecf3ffff, #e8f0ff, #d6e4ff)"}} >
                 <LineChart1 data={cardData?.monthWiseStatusCounts} />
               </div>
-              <div className="w-[40%] bg-[#e8eaed] shadow-xl">
+              <div className="w-[40%] shadow-xl"
+              style={{background: "linear-gradient(180deg, #ecf3ffff, #e8f0ff, #d6e4ff)"}}>
                 <DonutChart data={cardData?.transactionStatusCounts || []} />
               </div>
             </div>
