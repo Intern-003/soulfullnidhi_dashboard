@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../css/sidebar.css";
-import Logo from "../images/logo.jpeg";
+import Logo from "../images/logo.png";
 
 export const Sidebar = ({ open, setOpen }) => {
   const role = atob(localStorage.getItem("role")); // admin / user / crypto
@@ -185,7 +185,7 @@ export const Sidebar = ({ open, setOpen }) => {
 
         {/* Logo */}
         <div className="flex-shrink-0 p-4 ml-1">
-          <div className="ml-3 rounded-full h-24 w-40 mt-5 bg-white flex items-center justify-center">
+          <div className="ml-3 rounded-full h-24 w-40  flex items-center justify-center">
             <Link to={"/dashboard"}>
               <img src={Logo} className="w-50" alt="Spay Logo" />
             </Link>
