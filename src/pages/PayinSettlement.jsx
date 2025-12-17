@@ -32,7 +32,7 @@ const PayinSettlement = () => {
   }, [initialDataOfPayinWallet]);
 
   const membercolumn = [
-    { header: "SQNo", accessor: "id" },
+    { header: "User Id", accessor: "id" },
     { header: "Merchant", accessor: "name" },
     { header: "Payin Wallet", accessor: "payin_wallet" },
     { header: "Action", accessor: "action" },

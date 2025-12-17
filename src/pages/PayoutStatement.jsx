@@ -8,7 +8,6 @@ const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
 
   const { data, loading, error } = useGet("/reportrecords-List?product=payout");
-  // console.log( "payout data",data); 
 
 
   // SAME DATE FORMAT AS ACC_TOPUP
@@ -174,11 +173,11 @@ const PayoutStatement = () => {
         amount: (
           <div className="flex flex-col text-left">
             <span>Opening Wallet Amount: <b>{item.payout_opening_balance ?? "0"}</b></span>
-            <span>Pay Amount: <b>{item.payout_amount}</b></span>
-            <span>Total Charges: <b>{item.payer_charges ?? 0}</b></span>
-            <span>Total Debited Amount: <b>{item.total_debit ?? 0}</b></span>
+            <span>Pay Amount: <b>{item.amount}</b></span>
+            <span>Total Charges: <b>{item.charge ?? 0}</b></span>
+            <span>Total Debited Amount: <b>{(Number(item.amount ?? 0) + Number(item.charge ?? 0)).toFixed(2)}</b></span>
             <span>Closing Wallet Amount: <b>{item.payout_closing_balance ?? 0}</b></span>
-            <span>Note: <b>Debit {item.total_debit ?? 0} to Payout Wallet</b></span>
+            <span>Note: <b>Debit {(Number(item.amount ?? 0) + Number(item.charge ?? 0)).toFixed(2)} to Payout Wallet</b></span>
           </div>
         ),
         numericAmount: parseFloat(item.payout_amount) || 0,
