@@ -9,6 +9,7 @@ import MyBarChart from '../components/MyBarChart';
 
 
 const MerchantDetails = () => {
+  const { id } = useParams();
   const [chartKey, setChartKey] = useState(0);
 
 useEffect(() => {
@@ -19,18 +20,28 @@ useEffect(() => {
   window.addEventListener("resize", handleResize);
   return () => window.removeEventListener("resize", handleResize);
 }, []);
-  const { id } = useParams();
+
+const { data: getMerchant } = useGet(
+  id ? `/show-merchant/${id}` : null
+);
  const {data:record} = useGet(`/Merchant-Collection?merchant_id=${id}`);
 // console.log("records data: ",record);
- const {data:getMerchant} = useGet(`/show-merchant/${id}`);
+//  const {data:getMerchant} = useGet(`/show-merchant/${id}`);
+
+
+  const merchant = getMerchant?.data;
 //  console.log("show merchnant",getMerchant);
+
+
  const chartCount  =record?.transactionStatusCounts || {};
  const [filter,setFilter] =  useState('payin');
 
-const MerchantTable = () => {
-  const { data: getMerchant } = useGet(`/show-merchant/${id}`);
-  const merchant = getMerchant?.data;
-
+const MerchantTable = ({ merchant }) => {
+  const schemeId = merchant?.scheme_id;
+  const { data: schemeData } = useGet(
+    schemeId ? `/show-scheme/${schemeId}` : null
+  );
+  const scheme = schemeData?.data;  
   if (!merchant) return <p>Loading...</p>;
 
 return (
@@ -51,12 +62,12 @@ return (
         ["Website URL", merchant.website_url],
         ["Onboarded Payin Bank", merchant.payin_at_onboard],
         ["Onboarded Payout Bank", merchant.payout_at_onboard],
-        ["payin scheme", merchant.payin_percentage || "00"], 
-        ["payout scheme Below 700", merchant.payout_below || "00"], 
-        ["payout scheme above 700", merchant.payout_above|| "00"], 
-        ["Rolling Payin Amount", merchant.rolling_payin_amount || "00"], 
-        ["Rolling Fixed Amount", merchant.rolling_fixed_amount || "00"], 
-        ["GST", merchant.gst || "00"], 
+        ["payin scheme", scheme?.payin_commision_amount || "00"], 
+        ["payout scheme Below 700", scheme?.payout_commision_amount_below || "00"], 
+        ["payout scheme above 700", scheme?.payout_commision_amount_above|| "00"], 
+        ["Rolling Payin Amount", scheme?.rolling_payin_amount || "00"], 
+        ["Rolling Fixed Amount", scheme?.rolling_fixed_amount || "00"], 
+        ["GST", scheme?.gst_amount || "00"], 
 
       ].map(([label, value], index) => (
         <div
@@ -317,7 +328,7 @@ const pieOptions = {
   
 <div className="bg-white shadow-xl/30 rounded-2xl p-6 mb-6 mt-8">
 
-  <MerchantTable />
+  <MerchantTable  merchant={merchant} />
 </div>
 
     </div>
