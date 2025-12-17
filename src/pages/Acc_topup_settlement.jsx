@@ -11,6 +11,7 @@ const Acc_topup_settlement = () => {
   const { data, loading, error } = useGet(
     "/reportrecords-List?product[]=topup_payout&product[]=take_back_from_wallet"
   );
+  console.log("topup",data);
 
 
   useEffect(() => {

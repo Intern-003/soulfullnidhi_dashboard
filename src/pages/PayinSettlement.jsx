@@ -17,8 +17,6 @@ const PayinSettlement = () => {
   });
 
   const { data: tableData, refetch, loading } = useGet("/get-merchants");
-  // console.log("Payin Settlement Data",tableData);
-
   const { execute: payinSettlement } = usePost("/payin-settlement");
 
   const initialDataOfPayinWallet = tableData?.data;

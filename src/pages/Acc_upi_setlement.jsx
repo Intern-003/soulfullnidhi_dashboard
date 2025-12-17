@@ -11,7 +11,7 @@ const Acc_upi_setlement = () => {
   const { data, loading, error } = useGet(
     "/reportrecords-List?product=payin_settlement"
   );
-
+console.log("report data :",data);
 
   useEffect(() => {
     const statusClasses = {
@@ -43,8 +43,8 @@ const Acc_upi_setlement = () => {
         " - " +
         new Date(item.created_at).toLocaleTimeString(),
       status: item.status,
-      payin_closing_balance: item.payin_closing_balance ?? "0.0",
-      payin_opening_balance: item.payin_opening_balance ?? "0.0",
+      payin_closing_balance: item.payin_amount ?? "0.0",
+      payin_opening_balance: item.payin_opening ?? "0.0",
       showstatus: (
         <span
           className={`px-2 py-1 rounded-full text-sm font-medium ${
