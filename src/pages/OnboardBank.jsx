@@ -102,11 +102,11 @@ const OnboardBank = () => {
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className=" rounded-lg flex justify-between items-center p-4 shadow-md"
-      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
+      <div className=" rounded-lg flex justify-between items-center p-2 shadow-md"
+      style={{ background: 'linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)' }}>
         <h4 className="font-bold text-white text-xl">Onboard Bank</h4>
         <Button
-          className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+          className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-1 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
           onClick={handleModal}
         >
           ADD BANK

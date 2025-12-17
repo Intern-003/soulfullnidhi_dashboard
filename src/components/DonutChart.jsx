@@ -83,13 +83,15 @@ export const DonutChart = ({ data }) => {
   }, [mode, pending, success, failed, total, isEmpty]);
 
   return (
-    <div className="w-full bg-[#e8eaed] rounded-lg  p-4 md:p-6">
-      <div className="flex justify-between mb-3 h-20 ">
-        <h5 className="text-xl font-bold text-gray-900 pt-4 ">Transactions</h5>
+    <div className="w-full rounded-lg  p-4 md:p-6"
+    >
+      <div className="flex justify-between ">
+        <h5 className="text-xl font-bold text-gray-900 pt-4 ">TRANSACTIONS</h5>
         <div className="flex">
           <button
-            className="px-3 rounded-lg font-bold text-[#062f70ff]"
+            className="px-4 rounded-lg font-bold text-[#fff] w-25 shadow-lg/10 "
             onClick={() => setMode(mode === "UPI" ? "payout" : "UPI")}
+           style={{ background: "linear-gradient(0deg, #67b5ecff, #0362cfff)" ,fontSize:"20px"}}
           >
             {mode === "UPI" ? "Payin" : "Payout"}
           </button>
