@@ -89,7 +89,7 @@ return (
 
 const chartSeries = filter === 'payin'
   ? [
-      record?.payinTransactionStatusCounts?.pending ?? 0,
+      record?.payinTransactionStatusCounts?.failed ?? 0,
       record?.payinTransactionStatusCounts?.success ?? 0,
       record?. payinTransactionStatusCounts ?.initiated ?? 0,
     ]
@@ -101,7 +101,7 @@ const chartSeries = filter === 'payin'
 
 
 
-const chartLabels = ["Pending", "Success", "Initiated"];
+const chartLabels = ["failed", "Success", "Initiated"];
 
 const pieOptions = {
   chart: {
@@ -115,7 +115,7 @@ const pieOptions = {
       opacity: 0.2,
     },
   },
-  labels: ["Pending", "Success", "Initiated"],
+  labels: ["Failed", "Success", "Initiated"],
   colors: ['#E57373', '#a18acaff', '#b9a358ff'], // Success = dark green (#006400)
   // colors: ['#0947ccff', '#124612ff', '#EF9A9A'],
 

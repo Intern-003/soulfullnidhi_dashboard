@@ -14,7 +14,7 @@ export const Dashboard = () => {
   const [initialLoad, setInitialLoad] = useState(true);
 
   // ✅ Status filter
-const [statusFilter, setStatusFilter] = useState("SUCCESS");
+  const [statusFilter, setStatusFilter] = useState("SUCCESS");
 
 
   // APIs
@@ -53,40 +53,40 @@ const [statusFilter, setStatusFilter] = useState("SUCCESS");
   useEffect(() => {
     const formattedTableData = filteredTableData.map((item, index) => {
       const date = new Date(item.created_at);
-    const formattedDate = date.toLocaleDateString("en-GB", {
-  day: "2-digit",
-  month: "short",
-  year: "2-digit",
-});
+      const formattedDate = date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "2-digit",
+      });
       const formattedTime = date.toLocaleTimeString("en-US", {
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: true,
-});
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
 
 
-let statusClass =
-  "bg-green-100 text-green-600 border border-green-300"; // default
+      let statusClass =
+        "bg-[#057034ff] text-white"; // default
 
-if (item.status === "pending") {
-  statusClass =
-    "bg-yellow-100 text-yellow-600 border border-yellow-300";
-} else if (item.status === "failed") {
-  statusClass =
-    "bg-red-100 text-red-600 border border-red-300";
-} else if (item.status === "initiated") {
-  statusClass =
-    "bg-blue-100 text-blue-600 border border-blue-300";
-} else if (item.status === "complete") {
-  statusClass =
-    "bg-green-200 text-green-700 border border-green-400";
-} else if (item.status === "reversed") {
-  statusClass =
-    "bg-red-200 text-red-700 border border-red-400";
-} else if (item.status === "refunded") {
-  statusClass =
-    "bg-gray-100 text-gray-600 border border-gray-300";
-}
+      if (item.status === "pending") {
+        statusClass =
+          "bg-[#dfaf03ff] text-white";
+      } else if (item.status === "failed") {
+        statusClass =
+          "bg-[#ff3366] text-white border-red-300";
+      } else if (item.status === "initiated") {
+        statusClass =
+          "bg-blue-100 text-blue-600 border border-blue-300";
+      } else if (item.status === "complete") {
+        statusClass =
+          "bg-[#057034ff] text-white";
+      } else if (item.status === "reversed") {
+        statusClass =
+          "bg-[#ff3366] text-white";
+      } else if (item.status === "refunded") {
+        statusClass =
+          "bg-gray-100 text-gray-600 border border-gray-300";
+      }
 
 
 
@@ -97,9 +97,9 @@ if (item.status === "pending") {
         type: item.product,
         amount: item.amount,
         status: (
-          <span className={`px-2 py-1 rounded-full text-sm font-medium ${statusClass}`}>
-      {item.status.toUpperCase()}
-    </span>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClass}`}>
+            {item.status.toUpperCase()}
+          </span>
         ),
         time: (
           <div className="flex flex-col">
@@ -215,20 +215,20 @@ if (item.status === "pending") {
               <div className="flex justify-between items-center mb-4">
                 <h4 className="text-lg font-semibold">Transactions</h4>
 
-             <select
-  value={statusFilter}
-  onChange={(e) => setStatusFilter(e.target.value)}
-  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
->
-  <option value="ALL">All</option>
-  <option value="SUCCESS">Success</option>
-  <option value="FAILED">Failed</option>
-  <option value="PENDING">Pending</option>
-  <option value="REVERSED">Reversed</option>
-  <option value="REFUNDED">Refunded</option>
-  <option value="COMPLETE">Complete</option>
-  <option value="INITIATED">Initiated</option>
-</select>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="ALL">All</option>
+                  <option value="SUCCESS">Success</option>
+                  <option value="FAILED">Failed</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="REVERSED">Reversed</option>
+                  <option value="REFUNDED">Refunded</option>
+                  <option value="COMPLETE">Complete</option>
+                  <option value="INITIATED">Initiated</option>
+                </select>
 
               </div>
 
