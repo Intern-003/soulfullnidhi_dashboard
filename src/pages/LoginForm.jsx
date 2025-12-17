@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logo from "../images/logo1.jpeg";
+import logo from "../images/logo.png";
 import paymentGatewayBg from "../images/login-background.jpg";
 import { usePost } from "../hooks/usePost";
 import { useNavigate } from "react-router-dom";

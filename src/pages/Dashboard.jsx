@@ -13,47 +13,92 @@ export const Dashboard = () => {
   const [largeTransactionData, setLargeTransactionData] = useState([]);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // Normal API calls only (no crypto)
-  const { data: cardData, loading: recordLoading } = useAutoFetch("/collection-record");
-  const { data: tableData } = useAutoFetch("/reportrecords-List?status=success");
-  // console.log(cardData);
+  // ✅ Status filter
+  const [statusFilter, setStatusFilter] = useState("SUCCESS");
 
-  const initialDataOfTransactions = tableData?.data;
 
-  // Sort table data
+  // APIs
+  const { data: cardData, loading: recordLoading } =
+    useAutoFetch("/collection-record");
+
+  const { data: tableData } =
+    useAutoFetch("/reportrecords-List");
+
+  const initialDataOfTransactions = tableData?.data || [];
+
+  // Sort by latest
   const processTableData = useMemo(() => {
-    if (!initialDataOfTransactions) return [];
     return [...initialDataOfTransactions].sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
   }, [initialDataOfTransactions]);
 
-  // Get largest 4 transactions
+  // Status filter logic
+  const filteredTableData = useMemo(() => {
+    if (statusFilter === "ALL") return processTableData;
+
+    return processTableData.filter(
+      (item) => item.status?.toUpperCase() === statusFilter
+    );
+  }, [processTableData, statusFilter]);
+
+  // Top 4 transactions
   const processLargeTransactionData = useMemo(() => {
-    if (!initialDataOfTransactions) return [];
     return [...initialDataOfTransactions]
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 4);
   }, [initialDataOfTransactions]);
 
-  // Format table & top transactions
+  // Format table data
   useEffect(() => {
-    const formattedTableData = processTableData.map((item, index) => {
+    const formattedTableData = filteredTableData.map((item, index) => {
       const date = new Date(item.created_at);
-      const formattedDate = `${date.getDate()} ${
-        MONTH_NAMES[date.getMonth()]
-      } ${date.getFullYear()}`;
-      const formattedTime = date.toLocaleTimeString();
+      const formattedDate = date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "2-digit",
+      });
+      const formattedTime = date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+
+
+      let statusClass =
+        "bg-[#057034ff] text-white"; // default
+
+      if (item.status === "pending") {
+        statusClass =
+          "bg-[#dfaf03ff] text-white";
+      } else if (item.status === "failed") {
+        statusClass =
+          "bg-[#ff3366] text-white border-red-300";
+      } else if (item.status === "initiated") {
+        statusClass =
+          "bg-blue-100 text-blue-600 border border-blue-300";
+      } else if (item.status === "complete") {
+        statusClass =
+          "bg-[#057034ff] text-white";
+      } else if (item.status === "reversed") {
+        statusClass =
+          "bg-[#ff3366] text-white";
+      } else if (item.status === "refunded") {
+        statusClass =
+          "bg-gray-100 text-gray-600 border border-gray-300";
+      }
+
+
 
       return {
         sqno: index + 1,
         txnid: item.txnid,
-        name: item.user.name,
+        name: item.user?.name || "-",
         type: item.product,
         amount: item.amount,
         status: (
-          <span className="px-2 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClass}`}>
+            {item.status.toUpperCase()}
           </span>
         ),
         time: (
@@ -69,20 +114,20 @@ export const Dashboard = () => {
 
     const formattedLargeTransactionData = processLargeTransactionData.map(
       (item) => ({
-        name: item.user.name,
+        name: item.user?.name,
         product: item.product,
         amount: item.amount,
       })
     );
 
     setLargeTransactionData(formattedLargeTransactionData);
-  }, [processTableData, processLargeTransactionData]);
+  }, [filteredTableData, processLargeTransactionData]);
 
   // Table columns
   const transactioncolumn = [
-    { header: "SQ No.", accessor: "sqno" },
+
     { header: "TXN Id", accessor: "txnid" },
-    { header: "Name", accessor: "name" },
+    { header: "Merchant", accessor: "name" },
     { header: "Type", accessor: "type" },
     { header: "Amount", accessor: "amount" },
     { header: "Status", accessor: "status" },
@@ -93,24 +138,11 @@ export const Dashboard = () => {
     if (!recordLoading && cardData) setInitialLoad(false);
   }, [recordLoading, cardData]);
 
-  // Only normal cards
   const cardsToShow = [
-    {
-      title: "Total Pay-IN Collection",
-      value: cardData?.total_payin_amount ?? 0,
-    },
-    {
-      title: "Total Pay-OUT",
-      value: cardData?.total_payout_amount ?? 0,
-    },
-    {
-      title: "Today Pay-IN Collection",
-      value: cardData?.today_payin ?? 0,
-    },
-    {
-      title: "Today Pay-OUT",
-      value: cardData?.today_payout ?? 0,
-    },
+    { title: "Total Pay-IN Collection", value: cardData?.total_payin_amount ?? 0 },
+    { title: "Total Pay-OUT", value: cardData?.total_payout_amount ?? 0 },
+    { title: "Today Pay-IN Collection", value: cardData?.today_payin ?? 0 },
+    { title: "Today Pay-OUT", value: cardData?.today_payout ?? 0 },
   ];
 
   return (
@@ -120,84 +152,86 @@ export const Dashboard = () => {
       ) : (
         <div className="w-full py-8">
           <div className="w-full px-4">
- 
-            {/* --- CARDS --- */}
-            <div className="lg:col-span-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
 
-                {/* Today Pay-IN */}
-                <div className="h-30 bg-white rounded-2xl shadow-xl overflow-hidden border border-blue-100 flex flex-col">
-                  <h5
-                    className="text-m font-semibold text-white tracking-wide p-3"
-                    style={{ background: "linear-gradient(275deg,#062f70ff,#0d3dc4ff)" }}
-                  >
-                    Today Pay-IN
-                  </h5>
-                  <div className="flex-1 flex items-center justify-center">
-                    <p className="text-xl font-bold text-gray-800">
-                      ₹{cardsToShow[2].value.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
+            {/* ================= CARDS ================= */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
 
-                {/* Total Pay-IN */}
-                <div className="h-30 bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
-                  <h5
-                    className="text-m font-semibold text-white tracking-wide p-3"
-                    style={{ background: "linear-gradient(75deg,#062f70ff,#0d3dc4ff)" }}
-                  >
-                    Total Pay-IN
-                  </h5>
-                  <div className="flex-1 flex items-center justify-center">
-                    <p className="text-xl font-bold text-gray-800">
-                      ₹{cardsToShow[0].value.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Today Pay-OUT */}
-                <div className="h-30 bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
-                  <h5
-                    className="text-m font-semibold text-white tracking-wide p-3"
-                    style={{ background: "linear-gradient(275deg,#062f70ff,#0d3dc4ff)" }}
-                  >
-                    Today Pay-OUT
-                  </h5>
-                  <div className="flex-1 flex items-center justify-center">
-                    <p className="text-xl font-bold text-gray-800">
-                      ₹{cardsToShow[3].value.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Total Pay-OUT */}
-                <div className="h-30 bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
-                  <h5
-                    className="text-m font-semibold text-white tracking-wide p-3"
-                    style={{ background: "linear-gradient(275deg,#062f70ff,#0d3dc4ff)" }}
-                  >
-                    Total Pay-OUT
-                  </h5>
-                  <div className="flex-1 flex items-center justify-center">
-                    <p className="text-xl font-bold text-gray-800">
-                      ₹{cardsToShow[1].value.toLocaleString()}
-                    </p>
-                  </div>
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <h5 className="p-3 text-white font-semibold"
+                  style={{ background: "linear-gradient(250deg,#2a91d9,#00418c)" }}>
+                  Today Pay-IN
+                </h5>
+                <div className="p-6 text-center font-bold text-xl">
+                  ₹{cardsToShow[2].value.toLocaleString()}
                 </div>
               </div>
+
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <h5 className="p-3 text-white font-semibold"
+                  style={{ background: "linear-gradient(250deg,#118dca,#1158ad)" }}>
+                  Total Pay-IN
+                </h5>
+                <div className="p-6 text-center font-bold text-xl">
+                  ₹{cardsToShow[0].value.toLocaleString()}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <h5 className="p-3 text-white font-semibold"
+                  style={{ background: "linear-gradient(250deg,#2a91d9,#00418c)" }}>
+                  Today Pay-OUT
+                </h5>
+                <div className="p-6 text-center font-bold text-xl">
+                  ₹{cardsToShow[3].value.toLocaleString()}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <h5 className="p-3 text-white font-semibold"
+                  style={{ background: "linear-gradient(250deg,#2a91d9,#00418c)" }}>
+                  Total Pay-OUT
+                </h5>
+                <div className="p-6 text-center font-bold text-xl">
+                  ₹{cardsToShow[1].value.toLocaleString()}
+                </div>
+              </div>
+
             </div>
 
-            {/* Charts */}
+            {/* ================= CHARTS ================= */}
             <div className="flex gap-4 w-full pt-8">
-              <div className="w-[60%]">
-                <LineChart1 data={cardData.monthWiseStatusCounts} />
+              <div className="w-[60%]"
+              style={{background: "linear-gradient(180deg, #ecf3ffff, #e8f0ff, #d6e4ff)"}} >
+                <LineChart1 data={cardData?.monthWiseStatusCounts} />
               </div>
-              <div className="w-[40%] bg-[#e8eaed] shadow-xl">
+              <div className="w-[40%] shadow-xl"
+              style={{background: "linear-gradient(180deg, #ecf3ffff, #e8f0ff, #d6e4ff)"}}>
                 <DonutChart data={cardData?.transactionStatusCounts || []} />
               </div>
             </div>
-            {/* Table */}
-            <div className="mt-8">
+
+            {/* ================= TABLE ================= */}
+            <div className="mt-8 bg-white p-4 rounded-xl shadow">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-lg font-semibold">Transactions</h4>
+
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="ALL">All</option>
+                  <option value="SUCCESS">Success</option>
+                  <option value="FAILED">Failed</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="REVERSED">Reversed</option>
+                  <option value="REFUNDED">Refunded</option>
+                  <option value="COMPLETE">Complete</option>
+                  <option value="INITIATED">Initiated</option>
+                </select>
+
+              </div>
+
               <Table
                 columns={transactioncolumn}
                 data={transactionData}
@@ -209,9 +243,9 @@ export const Dashboard = () => {
                 showDateFilter={false}
               />
             </div>
-</div>
+
           </div>
-  
+        </div>
       )}
     </>
   );

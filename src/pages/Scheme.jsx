@@ -28,7 +28,7 @@ const Scheme = () => {
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
         id: item.id,
-        sqno: index + 1,
+        sqno: item.id,  //index + 1,
         name: item.name,
         status: item.status ? "Active" : "Inactive",
         action: (
@@ -68,7 +68,7 @@ const Scheme = () => {
   };
 
   const schemecolumn = [
-    { header: "SQ No", accessor: "sqno" },
+    { header: "Scheme id", accessor: "sqno" },
     { header: "Name", accessor: "name" },
     {
       header: "Status",
@@ -89,7 +89,7 @@ const Scheme = () => {
     <div className="p-4 space-y-4">
       {/* Header */}
       <div className=" rounded-lg flex justify-between items-center p-2 shadow-md"
-      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
+      style={{ background: 'linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)' }}>
         <h4 className="font-bold text-white text-xl">Scheme Manager</h4>
       <Button
   className="bg-white h-8 text-sky-800 font-bold px-4 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
@@ -128,6 +128,7 @@ const Scheme = () => {
           endPoint="/delete-scheme"
           refreshTable={refetch}
           statusList={TOGGLE_STATUSES}
+           showExport={false}
         />
       )}
     </div>

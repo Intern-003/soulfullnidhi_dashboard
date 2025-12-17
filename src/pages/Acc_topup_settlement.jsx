@@ -17,11 +17,11 @@ const Acc_topup_settlement = () => {
   useEffect(() => {
 
     const statusClasses = {
-      pending:  "bg-yellow-600 text-white",
-      initiated:"bg-blue-600 text-white",
-      success:  "bg-green-600 text-white",
+      pending: "bg-yellow-600 text-white",
+      initiated: "bg-blue-600 text-white",
+      success: "bg-green-600 text-white",
       complete: "bg-green-700 text-white",
-      failed:   "bg-red-600 text-white",
+      failed: "bg-red-600 text-white",
       reversed: "bg-red-700 text-white",
       refunded: "bg-gray-600 text-white",
     };
@@ -33,14 +33,33 @@ const Acc_topup_settlement = () => {
         product_type: item.product ?? "N/A",
         merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
         txnid: item.txnid,
-        date:
-          new Date(item.created_at).getDate() +
-          " " +
-          MONTH_NAMES[new Date(item.created_at).getMonth()] +
-          " " +
-          new Date(item.created_at).getFullYear() +
-          " - " +
-          new Date(item.created_at).toLocaleTimeString(),
+        date: (() => {
+          const d = new Date(item.created_at);
+
+          // Format date like "16 Dec 25"
+          const formattedDate = d.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "2-digit",
+          });
+
+
+          const formattedTime = d.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          });
+
+          return (
+            <div className="flex flex-col w-28">
+              <span className="text-sm font-medium">{formattedDate}</span>
+              <span className="text-sm text-gray-500">{formattedTime}</span>
+            </div>
+          );
+        })(),
+
+
+
         amount: item.amount ?? "N/A",
         numericAmount: parseFloat(item.amount) || 0, // ✅ for calculations
         status: item.status,
@@ -78,7 +97,7 @@ const Acc_topup_settlement = () => {
     <div className="p-4 space-y-4">
       {/* Header */}
       <div className=" rounded-lg flex justify-between items-center p-4 shadow-md"
-      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
+      style={{ background: 'linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)' }}>
         <h4 className="font-bold text-white text-xl">
           Topup Settlement Statement
         </h4>
@@ -98,7 +117,7 @@ const Acc_topup_settlement = () => {
           showSearch={false}
           showSelectUserFilter={true}
           showDeleteColumn={false}
-          statusList={REPORT_STATUSES}  
+          statusList={REPORT_STATUSES}
           className="shadow-lg rounded-lg overflow-hidden"
         />
       )}

@@ -87,7 +87,7 @@ const PayinSettlement = () => {
     <div className="p-4 space-y-4">
       {/* Header */}
       <div className="rounded-lg flex justify-between items-center p-4 shadow-md"
-      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
+      style={{ background: 'linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)' }}>
         <h4 className="font-bold text-white text-xl">Payin Settlement</h4>
       </div>
 
@@ -105,6 +105,7 @@ const PayinSettlement = () => {
           paginationClassName="flex justify-end gap-2 mt-4"
           previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
           nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+           showExport={false}
         />
       )}
 

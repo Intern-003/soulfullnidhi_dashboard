@@ -14,20 +14,20 @@ export const SchemeModal = ({
   const [activeTab, setActiveTab] = useState("tab1");
   const [percentage, setPercentage] = useState(18);
   const [name, setName] = useState("");
-  const [payin, setPayin] = useState({ type: "percent", amount: 0 });
+  const [payin, setPayin] = useState({ type: "percent", amount: "" });
   const [payout, setPayout] = useState({
-    below700: { type: "flat", amount: 0 },
-    above700: { type: "percent", amount: 0 },
+    below700: { type: "flat", amount: "" },
+    above700: { type: "percent", amount: "" },
   });
   const [rollingPayin, setRollingPayin] = useState({
     type: "percent",
-    amount: 0,
-    amountStr: "0",
+    amount: "",
+    amountStr: "",
   });
   const [rollingFixed, setRollingFixed] = useState({
     type: "flat",
-    amount: 0,
-    amountStr: "0",
+    amount: "",
+    amountStr: "",
   });
   const [selectedRolling, setSelectedRolling] = useState("payin");
 
@@ -74,13 +74,13 @@ export const SchemeModal = ({
       } else {
         // Reset for adding new scheme
         setName("");
-        setPayin({ type: "percent", amount: 0 });
+        setPayin({ type: "percent", amount: "" });
         setPayout({
-          below700: { type: "flat", amount: 0 },
-          above700: { type: "percent", amount: 0 },
+          below700: { type: "flat", amount: "" },
+          above700: { type: "percent", amount: "" },
         });
-        setRollingPayin({ type: "percent", amount: 0, amountStr: "0" });
-        setRollingFixed({ type: "percent", amount: 0, amountStr: "0" });
+        setRollingPayin({ type: "percent", amount: "", amountStr: "" });
+        setRollingFixed({ type: "percent", amount: "", amountStr: "" });
         setSelectedRolling("payin");
         setPercentage(18);
       }
@@ -93,7 +93,55 @@ export const SchemeModal = ({
       toast.info("Please enter scheme name");
       return;
     }
+    const isEmptyValue = (val) =>
+      val === "" || val === null || val === undefined || isNaN(val);
 
+      if (isEmptyValue(payin.amount)) {
+      toast.info("Please enter Payin commission amount");
+      setActiveTab("tab1");
+      return;
+    }
+
+        
+      // PAYOUT validation
+      if (
+        isEmptyValue(payout.below700.amount) ||
+        isEmptyValue(payout.above700.amount)
+      ) {
+        toast.info("Please enter Payout commission amounts");
+        setActiveTab("tab2");
+        return;
+      }
+
+
+      // ROLLING validation
+        if (
+          selectedRolling === "payin" &&
+          isEmptyValue(rollingPayin.amountStr)
+        ) {
+          toast.info("Please enter Rolling Payin amount");
+          setActiveTab("tab3");
+          return;
+        }
+
+
+        if (
+          selectedRolling === "fixed" &&
+          isEmptyValue(rollingFixed.amountStr)
+        ) {
+          toast.info("Please enter Rolling Fixed amount");
+          setActiveTab("tab3");
+          return;
+        }
+
+
+      // GST validation
+        if (isEmptyValue(percentage)) {
+          toast.info("Please enter GST percentage");
+          setActiveTab("tab4");
+          return;
+        }
+ 
     const payload = {
       name: name,
       payin_commision_type: payin.type,
