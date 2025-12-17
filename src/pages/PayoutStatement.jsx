@@ -8,6 +8,8 @@ const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
 
   const { data, loading, error } = useGet("/reportrecords-List?product=payout");
+  // console.log( "payout data",data); 
+
 
   // SAME DATE FORMAT AS ACC_TOPUP
   const formatDateLikeTopup = (date) => {
@@ -43,7 +45,8 @@ const PayoutStatement = () => {
       const formattedData = sortedData.map((item, index) => ({
         sqno: (
           <div className="flex flex-col text-left">
-            <span><b>{total - index}</b></span>
+            {/* <span><b>{total - index}</b></span> */}
+            <span><b>{item.id}</b></span>
             <span>
               {new Date(item.created_at).getDate()}{" "}
               {MONTH_NAMES[new Date(item.created_at).getMonth()]}{" "}
@@ -55,17 +58,14 @@ const PayoutStatement = () => {
 
 
         id: item.id,
-        // user_id: item.user_id,
         product_type: item.product ?? "N/A",
-        // merchant_details: item.user.name ?? "N/A",
         merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
 
 
         txnid: (
           <div className="flex flex-col text-left">
-            <span>Payment Mode: <b>{item.payout_mode ?? "null"}</b></span>
-            <span>Account: <b>{item.payer_acc_no}</b></span>
             <span>Holder: <b>{item.payer_name}</b></span>
+            <span>Account: <b>{item.payer_acc_no}</b></span>
             <span>IFSC: <b>{item.payer_ifsc}</b></span>
             <span>UPI Id: <b>{item.payer_upi ?? "N/A"}</b></span>
             <span>Mobile: <b>{item.payer_mobile}</b></span>
@@ -74,6 +74,7 @@ const PayoutStatement = () => {
 
         reference_details: (
           <div className="flex flex-col text-left">
+            <span>Payment Mode: <b>{item.payout_mode ?? "null"}</b></span>
             <span>Ref No: <b>{item.refno ?? "null"}</b></span>
             <span>Order ID: <b>{item.mytxnid}</b></span>
             <span>Txnid: <br /><b>{item.txnid}</b></span>
@@ -87,7 +88,7 @@ const PayoutStatement = () => {
             <span>Total Charges: <b>{item.payer_charges ?? 0}</b></span>
             <span>Total Debited Amount: <b>{item.total_debit ?? 0}</b></span>
             <span>Closing Wallet Amount: <b>{item.payout_closing_balance ?? 0}</b></span>
-  
+            <span>Note: <b>Debit {item.total_debit ?? 0} to Payout Wallet</b></span>
           </div>
         ),
 
@@ -111,7 +112,7 @@ const PayoutStatement = () => {
 
   const upiColumn = [
     { header: "Order ID", accessor: "sqno" },
-    { header: "User Details", accessor: "merchant_details" },
+    { header: "Merchant Details", accessor: "merchant_details" },
     { header: "Bank Details", accessor: "txnid" },
     { header: "Reference Details", accessor: "reference_details" },
     { header: "Amount/commission", accessor: "amount" },

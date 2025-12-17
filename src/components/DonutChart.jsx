@@ -32,22 +32,28 @@ export const DonutChart = ({ data }) => {
     const options = {
       series: seriesData,
       labels: isEmpty ? ["No Transactions"] : ["Initiated", "Success", "Failed"],
-      chart: { height: 260, type: "donut" },
+      chart: { height: 260, 
+              type: "donut",
+
+      },
       colors: isEmpty
         ? ["#d1d5db"] // single gray color for empty chart
-        : ["#2194f1ff", "#369c36", "#2134dfff"],
-      stroke: { colors: ["transparent"] },
+        : ["#3187afff", "#369c36", "#1a5b8a"],
+      stroke: { 
+        show: true,
+        width:2,
+        colors: ["#e9eeecff"] },
       plotOptions: {
         pie: {
           donut: {
-            size: "80%",
+            size: "0%",
             labels: {
               show: true,
-              name: { show: true, offsetY: 20 },
-              value: { show: true, offsetY: -20 },
+              name: { show: false, offsetY: 20 },
+              value: { show: false, offsetY: -20 },
               total: {
                 showAlways: true,
-                show: true,
+                show: false,
                 label: isEmpty ? "No Transactions" : "Transactions",
                 formatter: () => (isEmpty ? 0 : total),
               },
@@ -61,8 +67,8 @@ export const DonutChart = ({ data }) => {
         gradient: {
           shade: "dark",
           type: "radial",
-          gradientToColors: isEmpty ? ["#9ca3af"] : ["#ecbb19ff", "#3b82f6", "#14b8a6"],
-          stops: [0, 70, 100],
+          gradientToColors: isEmpty ? ["#9ca3af"] : ["#0d35b9ff", "#3b82f6", "#14b8a6"],
+          stops: [0, 0, 100],
         },
       },
       legend: { position: "bottom", fontSize: "14px" },

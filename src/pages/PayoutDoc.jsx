@@ -261,7 +261,7 @@ token = "Q9xRwseKPkMWXXXXXT78wnHPji&apitxnid=AK0XXXX"
   // -----------------------------------------
 
   useEffect(() => {
-  if (payoutGateway === "cashfree") {
+  if (payoutGateway === "nxt") {
     setApiSections(CASHFREE_SECTIONS);
     setActiveSection("cashfree-request");
 

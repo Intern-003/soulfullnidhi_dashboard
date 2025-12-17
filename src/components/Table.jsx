@@ -26,7 +26,7 @@ const Table = ({
   const toast = useToast();
   const [search, setSearch] = useState("");
   const [recordId, setRecordId] = useState(null);
-  const [entriesPerPage, setEntriesPerPage] = useState(5);
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [startDate, setStartDate] = useState(null);
@@ -396,8 +396,8 @@ const exportCSV = () => {
 
       {/* HEADER */}
       <thead
-        className="uppercase text-white sticky top-0 z-20"
-        style={{ background: "linear-gradient(90deg, #062f70, #0d3dc4)" }}
+        className="uppercase text-white top-0 z-20"
+        style={{ background: 'linear-gradient(250deg, #2a91d9 0%, #00418c 100%)' }}
       >
         <tr>
           {columns.map((col, idx) => (
@@ -489,7 +489,7 @@ const exportCSV = () => {
           }}
           className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-sky-400 outline-none"
         >
-          {[10, 20, 30, 50].map((num) => (
+          {[10, 50, 100, 150].map((num) => (
             <option key={num} value={num}>{num}</option>
           ))}
         </select>

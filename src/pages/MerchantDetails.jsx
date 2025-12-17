@@ -13,7 +13,7 @@ const MerchantDetails = () => {
  const {data:record} = useGet(`/Merchant-Collection?merchant_id=${id}`);
 // console.log("records data: ",record);
  const {data:getMerchant} = useGet(`/show-merchant/${id}`);
- console.log("get merchnant",getMerchant);
+ console.log("show merchnant",getMerchant);
  const chartCount  =record?.transactionStatusCounts || {};
  const [filter,setFilter] =  useState('payin');
 
@@ -41,6 +41,17 @@ return (
         ["Website URL", merchant.website_url],
         ["Onboarded Payin Bank", merchant.payin_at_onboard],
         ["Onboarded Payout Bank", merchant.payout_at_onboard],
+        ["payin scheme percentage", merchant.payin_percentage || "00"], 
+        ["payout scheme Below 700", merchant.payout_below || "00"], 
+        ["payin scheme above 700", merchant.payout_above|| "00"], 
+        ["Rolling Payin Amount", merchant.rolling_payin_amount || "00"], 
+        ["Rolling Fixed Amount", merchant.rolling_fixed_amount || "00"], 
+        ["payin scheme percentage", merchant.payin_percentage || "00"], 
+        ["payout scheme Below 700", merchant.payout_below || "00"], 
+        ["payin scheme above 700", merchant.payout_above || "00"], 
+        ["Rolling Payin Amount", merchant.rolling_payin_amount || "00"], 
+        ["GST", merchant.gst || "00"], 
+
       ].map(([label, value], index) => (
         <div
           key={index}
