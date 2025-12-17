@@ -197,9 +197,9 @@
       
       { header: "Payin Wallet", accessor: "walletpayin" },
       { header: "Payout Wallet", accessor: "walletpayout" },
-      { header: "Total Payin Wallet", accessor: "totalwalletpayin" },
+      { header: "Total Payin", accessor: "totalwalletpayin" },
           { header: "Payin Charge", accessor: "payincharge" },
-        { header: "Total Payout Wallet", accessor: "totalwalletpayout" },
+        { header: "Total Payout", accessor: "totalwalletpayout" },
           { header: "Payout Charge", accessor: "payoutcharge" },
         { header: "Total Wallet", accessor: "totalwallet" },
 

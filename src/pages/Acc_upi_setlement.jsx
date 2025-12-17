@@ -78,7 +78,7 @@ const Acc_upi_setlement = () => {
     <div className="p-4 space-y-4">
       {/* Header */}
       <div className="rounded-lg flex justify-between items-center p-4 shadow-md"
-      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
+      style={{ background: 'linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)' }}>
         <h4 className="font-bold text-white text-lg sm:text-xl">
           Payin Settlement Statement
         </h4>

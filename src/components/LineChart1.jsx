@@ -113,7 +113,7 @@ const payout = chartData.map((i) => i.payoutAmount    );
 
 
   return (
-    <div className=" w-full bg-[#e8eaed] rounded-lg  md:p-6 ">
+    <div className=" w-full rounded-lg  md:p-6 ">
       <div className="flex justify-between">
         <div>
           <h5 className="leading-none text-2xl font-bold text-gray-900 pb-2">
@@ -122,7 +122,7 @@ const payout = chartData.map((i) => i.payoutAmount    );
           <p className="text-xl font-bold text-gray-500">Total success (Payin + Payout)</p>
         </div>
       </div>
-      <div ref={chartRef} className="py-8"></div>
+      <div ref={chartRef} className=""></div>
     </div>
   );
 };

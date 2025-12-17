@@ -9,6 +9,16 @@ import MyBarChart from '../components/MyBarChart';
 
 
 const MerchantDetails = () => {
+  const [chartKey, setChartKey] = useState(0);
+
+useEffect(() => {
+  const handleResize = () => {
+    setChartKey(prev => prev + 1);
+  };
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
   const { id } = useParams();
  const {data:record} = useGet(`/Merchant-Collection?merchant_id=${id}`);
 // console.log("records data: ",record);
@@ -41,15 +51,11 @@ return (
         ["Website URL", merchant.website_url],
         ["Onboarded Payin Bank", merchant.payin_at_onboard],
         ["Onboarded Payout Bank", merchant.payout_at_onboard],
-        ["payin scheme percentage", merchant.payin_percentage || "00"], 
+        ["payin scheme", merchant.payin_percentage || "00"], 
         ["payout scheme Below 700", merchant.payout_below || "00"], 
-        ["payin scheme above 700", merchant.payout_above|| "00"], 
+        ["payout scheme above 700", merchant.payout_above|| "00"], 
         ["Rolling Payin Amount", merchant.rolling_payin_amount || "00"], 
         ["Rolling Fixed Amount", merchant.rolling_fixed_amount || "00"], 
-        ["payin scheme percentage", merchant.payin_percentage || "00"], 
-        ["payout scheme Below 700", merchant.payout_below || "00"], 
-        ["payin scheme above 700", merchant.payout_above || "00"], 
-        ["Rolling Payin Amount", merchant.rolling_payin_amount || "00"], 
         ["GST", merchant.gst || "00"], 
 
       ].map(([label, value], index) => (
@@ -166,32 +172,47 @@ const pieOptions = {
 
 
 
- console.log("record data",record);;
+ console.log("record data",record);
 
 
 
   return (
    <div className="p-4">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between py-6">
 
-      <h1 className="text-xl font-bold mb-4">Merchant Details</h1>
-      {/* <label className="block text-gray-600 text-sm font-medium mb-1">Select Type</label> */}
- <div className="relative inline-flex items-center bg-gray-100 rounded-full p-1 w-64">
-  <div
-    className={`absolute top-1 bottom-1 left-1 w-1/2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-transform duration-500 ease-out shadow-lg
-      ${filter === 'payout' ? 'translate-x-full' : 'translate-x-0'}`}
-  />
-  {['payin', 'payout'].map((type) => (
-    <button
-      key={type}
-      onClick={() => setFilter(type)}
-      className="relative z-10 w-1/2 py-3 text-center font-medium capitalize transition-colors duration-300"
-    >
-      <span className={filter === type ? 'text-white' : 'text-gray-600'}>
-        {type}
-      </span>
-    </button>
-  ))}
+      <h1 className="text-xl"><span className="text-xl font-bold">Merchant Details: </span><span className="text-xm"></span> </h1>
+       
+<div className="flex items-center gap-4 ">
+  {filter === 'payout' && (
+    <div class="">
+      <div className="text-gray-600 text-xl font-medium mb-1 bg-blue-100 px-3 py-2 rounded-lg">
+        Payout Wallet :<span className="font-bold text-xl">₹ {record?.payout_wallet ?? 0}</span> 
+      </div>
+ 
+    </div>
+  )}
+  <div className="relative inline-flex items-center bg-gray-100 rounded-full p-1 w-64">
+    <div
+      className={`absolute top-1 bottom-1 left-1 w-1/2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-transform duration-500
+        ${filter === 'payout' ? 'translate-x-full' : 'translate-x-0'}`}
+    />
+
+    {['payin', 'payout'].map((type) => (
+      <button
+        key={type}
+        onClick={() => setFilter(type)}
+        className="relative z-10 w-1/2 py-3 text-center font-medium capitalize"
+      >
+        <span className={filter === type ? 'text-white' : 'text-gray-600'}>
+          {type}
+        </span>
+      </button>
+    ))}
+
+  </div>
+
+
+
 </div>
       </div>
         
@@ -270,7 +291,8 @@ const pieOptions = {
           options={pieOptions}
           series={chartSeries}
           type="pie"
-          height={350}
+          height={300}
+          key={`pie-${chartKey}-${filter}`}
         />
       ) : (
         <div className="text-center text-gray-500">
@@ -284,7 +306,8 @@ const pieOptions = {
       <h3 className="text-lg font-semibold mb-4">Transactions Over Time</h3>
      {/* <MyBarChart record={record} type="payin" />
     <MyBarChart record={record} type="payout" /> */}
-    <MyBarChart record={record} type={filter} />
+    <MyBarChart record={record} type={filter} 
+    key={`bar-${chartKey}-${filter}`} />
 
 
     </div>
