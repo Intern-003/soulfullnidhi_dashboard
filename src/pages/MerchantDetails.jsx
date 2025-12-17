@@ -23,7 +23,7 @@ useEffect(() => {
  const {data:record} = useGet(`/Merchant-Collection?merchant_id=${id}`);
 // console.log("records data: ",record);
  const {data:getMerchant} = useGet(`/show-merchant/${id}`);
- console.log("show merchnant",getMerchant);
+//  console.log("show merchnant",getMerchant);
  const chartCount  =record?.transactionStatusCounts || {};
  const [filter,setFilter] =  useState('payin');
 
@@ -172,7 +172,7 @@ const pieOptions = {
 
 
 
- console.log("record data",record);
+//  console.log("record data",record);
 
 
 
