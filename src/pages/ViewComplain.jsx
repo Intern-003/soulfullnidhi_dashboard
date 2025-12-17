@@ -16,7 +16,7 @@ export const ViewComplain = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [ticketData, setTicketData] = useState([]);
   const [editData, setEditData] = useState(null);
- 
+
   const toast = useToast();
   const navigate = useNavigate();
   const { execute: executeTicket, loading: creating } =
@@ -50,11 +50,28 @@ export const ViewComplain = () => {
       .join(" "); // "In Progress"
   };
 
-  // ✅ Format data whenever "data" changes
-  useEffect(() => {
-    if (data?.data) {
-      const formattedData = data.data.map((item) => ({
-        id:item.id ?? "N/A",
+useEffect(() => {
+  if (data?.data) {
+    const formattedData = data.data.map((item) => {
+      const d = new Date(item.created_at);
+
+      // Format date like "16 Dec 25"
+      const formattedDate = d.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "2-digit",
+      });
+
+      // Format time like "04:59 PM"
+      const formattedTime = d.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+
+      return {
+        ...item,
+        id: item.id ?? "N/A",
         ticket_id: item.ticket_id ?? "N/A",
         user_name: item.user?.name ?? "N/A",
         subject: item.subject ?? "N/A",
@@ -62,7 +79,12 @@ export const ViewComplain = () => {
         status: formatForUI(item.status),
         priority: formatForUI(item.priority),
         assigned_to: item.assigned_to ?? "N/A",
-        created_at: new Date(item.created_at).toLocaleString(),
+        created_at: (
+          <div className="flex flex-col w-32 text-center"> {/* adjust width */}
+            <span className="text-sm font-medium">{formattedDate}</span>
+            <span className="text-sm text-gray-500 mt-1">{formattedTime}</span>
+          </div>
+        ),
         action: (
           <Button
             onClick={() => handleEdit(item)}
@@ -71,11 +93,40 @@ export const ViewComplain = () => {
             Edit
           </Button>
         ),
-      }));
+      };
+    });
 
-      setTicketData(formattedData);
-    }
-  }, [data]);
+    setTicketData(formattedData);
+  }
+}, [data]);
+
+
+  // ✅ Format data whenever "data" changes
+  // useEffect(() => {
+  //   if (data?.data) {
+  //     const formattedData = data.data.map((item) => ({
+  //       id: item.id ?? "N/A",
+  //       ticket_id: item.ticket_id ?? "N/A",
+  //       user_name: item.user?.name ?? "N/A",
+  //       subject: item.subject ?? "N/A",
+  //       description: item.description ?? "N/A",
+  //       status: formatForUI(item.status),
+  //       priority: formatForUI(item.priority),
+  //       assigned_to: item.assigned_to ?? "N/A",
+  //       created_at: new Date(item.created_at).toLocaleString(),
+  //       action: (
+  //         <Button
+  //           onClick={() => handleEdit(item)}
+  //           className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md"
+  //         >
+  //           Edit
+  //         </Button>
+  //       ),
+  //     }));
+
+  //     setTicketData(formattedData);
+  //   }
+  // }, [data]);
 
   useEffect(() => {
     if (showModal) {
@@ -85,7 +136,7 @@ export const ViewComplain = () => {
           subject: editData.subject || "",
           description: editData.description || "",
           attachment: "", // file cannot be prefilled
-          assigned_to: editData.assigned_to || "",
+          //assigned_to: editData.assigned_to || "",
         });
       } else {
         // Reset form for new record
@@ -124,6 +175,11 @@ export const ViewComplain = () => {
   /**Logic to handle the dropdowns, modals and image modals inside table. */
   const complainsWithModifications = ticketData.map((row) => ({
     ...row,
+    description: (
+  <div className="whitespace-normal break-words w-96">
+    {row.description}
+  </div>
+),
     status: (
       <select
         className="p-2.5 mb-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50"
@@ -242,21 +298,21 @@ export const ViewComplain = () => {
 
   return (
     <>
-  
-    {/* Outer container with padding */}
+
+      {/* Outer container with padding */}
 
       <div className="w-full flex justify-center py-8">
         <div className="w-full  px-4 ">
           {/* -------- HEADER: View Complain -------- */}
           <div className=" flex justify-between items-center rounded-lg p-4 shadow-md"
-          style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
+            style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
             <h4 className="font-bold text-white text-lg">View Complain</h4>
             <Button
               type="button"
               onClick={() => {
                 setEditData(null);
                 setShowModal(true);
-              }}  
+              }}
               className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
             >
               Raise Complain
@@ -272,6 +328,7 @@ export const ViewComplain = () => {
             showStatusFilter={false}
             endPoint="/delete-ticket"
             setData={setTicketData}
+             showExport={false}
           />
 
 
@@ -281,116 +338,88 @@ export const ViewComplain = () => {
       {/* -------- MODALS -------- */}
       {showModal && (
         <div
-          className="fixed inset-0 flex items-center justify-center bg-red/300 backdrop-blur-sm z-50"
+          className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50 p-4 overflow-auto"
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white border rounded-lg shadow-lg max-w-3xl w-full mx-2 p-6 transform transition-all scale-100"
+            className="bg-white rounded-lg shadow-xl w-full max-w-3xl transform transition-all scale-100"
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
-            font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
-            >
-              <h4 className="font-bold text-white text-lg py-2">
+            {/* Header */}
+            <div className="flex justify-between items-center bg-blue-600 text-white px-6 py-3 rounded-t-lg"
+              style={{ background: "linear-gradient(250deg,#2a91d9,#00418c)" }}>
+              <h4 className="text-lg font-semibold">
                 {editData ? "Edit Complaint" : "Register Complaint"}
               </h4>
-              <Button
+              <button
                 onClick={() => setShowModal(false)}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-red-500 hover:bg-red-500 hover:text-white transition"
               >
-                <i className="fa-solid fa-xmark fa-lg"></i>
-              </Button>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
             </div>
 
-            <form className="p-6" onSubmit={handleSubmit}>
-              <div className="grid md:grid-cols-1 gap-6 px-4">
-                {/* User Id */}
-                <div className="relative z-0 w-full mb-5 group">
+            {/* Modal Body */}
+            <div className="p-6">
+              <form onSubmit={handleSubmit}>
+                <div className="grid gap-6 md:grid-cols-1">
+                  {/* User Id */}
                   <input
                     type="text"
                     name="user_id"
                     value={ticketFormData.user_id}
                     onChange={handleChange}
                     placeholder="User Id"
-                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.user_id ? "border-red-500" : "border-gray-300"
-                      }`}
+                    className="block w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                     required
                   />
-                </div>
 
-                {/* Subject */}
-                <div className="relative z-0 w-full mb-5 group">
+                  {/* Subject */}
                   <input
                     type="text"
                     name="subject"
                     value={ticketFormData.subject}
                     onChange={handleChange}
                     placeholder="Subject"
-                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.subject ? "border-red-500" : "border-gray-300"
-                      }`}
+                    className="block w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                     required
                   />
-                </div>
 
-                {/* Description */}
-                <div className="relative z-0 w-full mb-5 group">
+                  {/* Description */}
                   <textarea
                     name="description"
                     value={ticketFormData.description}
                     onChange={handleChange}
                     placeholder="Description"
-                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.description ? "border-red-500" : "border-gray-300"
-                      }`}
                     rows={4}
+                    className="block w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                     required
                   />
-                </div>
 
-                {/* Attachment */}
-                <div className="relative z-0 w-full mb-5 group">
+                  {/* Attachment */}
                   <input
                     type="file"
                     name="attachment"
                     onChange={handleChange}
-                    className={`block px-2.5 pb-2.5 pt-2 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.attachment ? "border-red-500" : "border-gray-300"
-                      }`}
+                    className="block w-full px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
+
                 </div>
 
-                {/* Assigned To */}
-                <div className="relative z-0 w-full mb-5 group">
-                  <input
-                    type="text"
-                    name="assigned_to"
-                    value={ticketFormData.assigned_to}
-                    onChange={handleChange}
-                    placeholder="Assigned To"
-                    className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border ${errors?.assigned_to ? "border-red-500" : "border-gray-300"
-                      }`}
-                    required
-                  />
+                {/* Submit Button */}
+                <div className="flex justify-end mt-6">
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition"
+                  >
+                    {editData ? "Update" : "Submit"}
+                  </button>
                 </div>
-              </div>
-
-              <div className="flex justify-center mt-6">
-                <Button
-                  type="submit"
-                  disabled={creating || updating}
-                  className="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-                >
-                  {editData
-                    ? updating
-                      ? "Updating..."
-                      : "Update"
-                    : creating
-                      ? "Submitting..."
-                      : "Submit"}
-                </Button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
+
       )}
       {showViewMessageModal && (
         <div
