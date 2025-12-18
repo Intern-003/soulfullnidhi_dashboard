@@ -15,13 +15,13 @@ const Acc_upi_setlement = () => {
 
   useEffect(() => {
     const statusClasses = {
-      pending: "bg-yellow-600 text-white",
-      initiated: "bg-blue-600 text-white",
-      success: "bg-green-600 text-white",
-      complete: "bg-green-700 text-white",
-      failed: "bg-red-600 text-white",
-      reversed: "bg-red-700 text-white",
-      refunded: "bg-gray-600 text-white",
+      pending:  "bg-[#dfaf03ff] text-white",
+      initiated:"bg-blue-400 text-white",
+      success:  "bg-[#057034ff] text-white",
+      completed: "bg-[#057034ff] text-white",
+      failed:   "bg-[#ff3366] text-white",
+      reversed: "bg-[#ff3366] text-white",
+      refunded: "bg-gray-400 text-white",
     };
 
     if (data?.data) {
