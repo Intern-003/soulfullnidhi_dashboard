@@ -43,7 +43,7 @@
 
     const { data: dataOfMerchants, refetch: refetchOfMerchants, loading: merchantLoading } =
       useAutoFetch("/get-merchants", 20000);
-      console.log(dataOfMerchants);
+      // console.log(dataOfMerchants);
 
       // console.log("payoutdata", dataOfMerchants);
     const { data: credentialsData } = useGet("/credentials");
