@@ -201,18 +201,18 @@ const Payoutrequest = () => {
 
       {/* <div className="bg-gradient-to-t from-sky-500 to-indigo-500 flex justify-between items-center mb-3 p-2.5">
         <h4 className="font-bold text-white text-lg py-2">Beneficiary List</h4> */}
-      <div className="p-4">
+      <div className="">
         <div
           className="
                flex justify-between items-center 
-               rounded-lg p-4 mb-4"
-               style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
+               rounded-lg p-3"
+               style={{ background: 'linear-gradient(250deg, #2a91d9 0%, #00418c 100%)' }}
         >
           <h4 className="font-bold text-white text-lg">Beneficiary List</h4>
 
         <Button
   type="button"
-  className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200 cursor-pointer"
+  className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-1 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200 cursor-pointer"
   onClick={() => setShowFormModal(true)}
 >
   + Add New Beneficiary
