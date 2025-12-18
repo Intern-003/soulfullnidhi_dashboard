@@ -11,6 +11,7 @@ const Acc_upi_setlement = () => {
   const { data, loading, error } = useGet(
     "/reportrecords-List?product=payin_settlement"
   );
+  console.log("settle",data);
 
   useEffect(() => {
     const statusClasses = {
@@ -59,7 +60,7 @@ const Acc_upi_setlement = () => {
         })(),
 
         status: item.status,
-        payin_closing_balance: item.payin_amount ?? "0.0",
+        payin_closing_balance: item.payin_closing ?? "0.0",
         payin_opening_balance: item.payin_opening ?? "0.0",
         showstatus: (
           <span
