@@ -57,6 +57,7 @@ const payingAmount = data?.PayingAmount ?? "0.00";
     e.preventDefault();
     try {
       await logout();
+      localStorage.removeItem(DASHBOARD_LOCK_KEY);
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       navigate("/");
@@ -64,8 +65,6 @@ const payingAmount = data?.PayingAmount ?? "0.00";
       console.error("Logout failed:", err);
     }
   };
-
-
 
   return (
     <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-indigo-500/50">
