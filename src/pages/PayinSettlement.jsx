@@ -17,8 +17,6 @@ const PayinSettlement = () => {
   });
 
   const { data: tableData, refetch, loading } = useGet("/get-merchants");
-  // console.log("Payin Settlement Data",tableData);
-
   const { execute: payinSettlement } = usePost("/payin-settlement");
 
   const initialDataOfPayinWallet = tableData?.data;
@@ -34,7 +32,7 @@ const PayinSettlement = () => {
   }, [initialDataOfPayinWallet]);
 
   const membercolumn = [
-    { header: "SQNo", accessor: "id" },
+    { header: "User Id", accessor: "id" },
     { header: "Merchant", accessor: "name" },
     { header: "Payin Wallet", accessor: "payin_wallet" },
     { header: "Action", accessor: "action" },

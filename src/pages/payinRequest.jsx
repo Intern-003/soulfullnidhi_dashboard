@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 import Button from "../components/Button";
 import { usePost } from "../hooks/usePost";
+import useAutoFetch from "../hooks/useAutoFetch";
+
+
 
 export const PayinRequest = () => {
   const [payerName, setPayerName] = useState("");
@@ -17,9 +20,13 @@ export const PayinRequest = () => {
 
   const intervalRef = useRef(null);
 
+  const { data } = useAutoFetch("/collection-record");
   const { execute: executePayin, loading } = usePost("/Airpay/request");
   const { execute: executeCheckStatus } = usePost("/payin/status");
+console.log("collection records",data);
+// const payin_wallet = collection_data?.data;
 
+const payingAmount = data?.PayingAmount ?? "0.00";
   // Generate unique order ID on mount
   useEffect(() => {
     const uniqueOrderId = `DSB${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -113,10 +120,34 @@ export const PayinRequest = () => {
   return (
     <div className="p-6 space-y-6"> 
       {/* Header */}
-      <div className=" rounded-lg p-4 shadow-md"
-      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
-        <h4 className="text-white font-bold text-xl">Load Wallet</h4>
-      </div>
+      {/* <h1>Payin wallet {payingAmount}</h1> */}
+
+
+
+
+
+<div
+  className="rounded-lg p-4 shadow-md flex items-center"
+  style={{ background: 'linear-gradient(250deg, #2a91d9 0%, #0555afff 100%)' }}
+>
+  {/* Left Side */}
+  <div className="flex-1">
+    <h4 className="text-white font-bold text-xl">
+      Load Wallet 
+    </h4>
+  </div>
+
+  {/* Right Side */}
+  {/* <div className="flex-1 flex justify-end">
+    <div className="flex items-center bg-gray-100 px-4 py-2 rounded-lg shadow-md">
+      <h1 className="text-lg font-semibold mr-3">Payin Wallet :</h1>
+      <span className="text-lg font-semibold text-indigo-600">
+        {payingAmount}
+      </span>
+    </div>
+  </div> */}
+</div>
+
 
       {/* Form */}
       {!qrUrl && !showSuccess && !showFailed && (
