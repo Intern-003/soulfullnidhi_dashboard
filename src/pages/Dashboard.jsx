@@ -108,9 +108,10 @@ export const Dashboard = () => {
       } else if (item.status === "initiated") {
         statusClass =
           "bg-blue-100 text-blue-600 border border-blue-300";
-      } else if (item.status === "complete") {
+      } else if (item.status === "completed") {
         statusClass =
-          "bg-[#057034ff] text-white";
+          "bg-[#08667eff] text-white";
+          // "#08667eff] text-white";
       } else if (item.status === "reversed") {
         statusClass =
           "bg-[#ff3366] text-white";
@@ -257,7 +258,7 @@ export const Dashboard = () => {
                   <option value="PENDING">Pending</option>
                   <option value="REVERSED">Reversed</option>
                   <option value="REFUNDED">Refunded</option>
-                  <option value="COMPLETE">Complete</option>
+                  <option value="COMPLETED">Completed</option>
                   <option value="INITIATED">Initiated</option>
                 </select>
 
