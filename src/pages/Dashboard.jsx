@@ -5,8 +5,13 @@ import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import { MONTH_NAMES } from "../constants/Constants";
 import DashboardSkeleton from "../components/DashboardSkeleton";
+import { useNavigate } from "react-router-dom";
 
 export const Dashboard = () => {
+
+  const DASHBOARD_LOCK_KEY = "payment_dashboard_logged_in";
+
+  const navigate = useNavigate();
   const [role] = useState(atob(localStorage.getItem("role")) || "admin");
 
   const [transactionData, setTransactionData] = useState([]);
@@ -48,6 +53,32 @@ export const Dashboard = () => {
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 4);
   }, [initialDataOfTransactions]);
+
+
+ // Verify tab lock
+ useEffect(() => {
+  const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // Only redirect if there is NO logged-in user
+  if (!lock.userId || !user.id || lock.userId !== user.id) {
+    navigate("/", { replace: true });
+  }
+}, [navigate]);
+
+
+  // Clear lock on tab close
+  useEffect(() => {
+    const handleUnload = () => {
+      const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
+      if (lock.tabId === sessionStorage.getItem("tabId")) {
+        localStorage.removeItem(DASHBOARD_LOCK_KEY);
+      }
+    };
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, []);
+
 
   // Format table data
   useEffect(() => {
