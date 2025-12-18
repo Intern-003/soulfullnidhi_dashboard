@@ -12,7 +12,6 @@ const Acc_upi_setlement = () => {
     "/reportrecords-List?product=payin_settlement"
   );
 
-
   useEffect(() => {
     const statusClasses = {
       pending: "bg-yellow-600 text-white",
@@ -60,8 +59,8 @@ const Acc_upi_setlement = () => {
         })(),
 
         status: item.status,
-        payin_closing_balance: item.payin_closing_balance ?? "0.0",
-        payin_opening_balance: item.payin_opening_balance ?? "0.0",
+        payin_closing_balance: item.payin_amount ?? "0.0",
+        payin_opening_balance: item.payin_opening ?? "0.0",
         showstatus: (
           <span
             className={`px-2 py-1 rounded-full text-sm font-medium ${statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
