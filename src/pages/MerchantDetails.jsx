@@ -62,6 +62,7 @@ return (
         ["Website URL", merchant.website_url],
         ["Onboarded Payin Bank", merchant.payin_at_onboard],
         ["Onboarded Payout Bank", merchant.payout_at_onboard],
+        ["Scheme Name", scheme?.name ?? "null"],
         ["payin scheme", scheme?.payin_commision_amount || "00"], 
         ["payout scheme Below 700", scheme?.payout_commision_amount_below || "00"], 
         ["payout scheme above 700", scheme?.payout_commision_amount_above|| "00"], 
