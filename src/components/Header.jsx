@@ -13,7 +13,7 @@ export const Header = ({ onMenuClick }) => {
   const { execute: logout } = usePost("/logout");
   const { data } = useAutoFetch("/collection-record");
   const { data: merchantData } = useGet("/show-merchant");
-  // console.log(data);
+  // console.log("payout data : ",data);
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -22,6 +22,7 @@ export const Header = ({ onMenuClick }) => {
 // payin wallet
 
 const payingAmount = data?.PayingAmount ?? "0.00";
+const Payoutwallet = data?.payout_wallet ?? "0.00";
 
   // State for role
   const [role, setRole] = useState(atob(localStorage.getItem("role"))); // admin / user / crypto
@@ -32,15 +33,15 @@ const payingAmount = data?.PayingAmount ?? "0.00";
 
 
   
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+  //       setOpen(false);
+  //     }
+  //   };
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, []);
 
   const userStats = [
     { id: 1, icon: "fa-solid fa-arrow-trend-up text-green-400", label: "Payin Rolling Amount", value: `${Number(data?.PayinRollingAmount ?? 0).toFixed(2)}` },
@@ -49,22 +50,20 @@ const payingAmount = data?.PayingAmount ?? "0.00";
     { id: 4, icon: "fa-solid fa-wallet text-green-400", label: "Payin Wallet", value: `${Number(data?.PayingAmount ?? 0).toFixed(2)}` },
   ];
 
-  const cryptoStats = [
-    { id: 101, icon: "fa-brands fa-bitcoin text-yellow-400", label: "Crypto Wallet", value: `${Number(data?.total_crypto ?? 0).toFixed(2)}` },
-  ];
 
-  const handleLogout = async (e) => {
-    e.preventDefault();
-    try {
-      await logout();
-      localStorage.removeItem(DASHBOARD_LOCK_KEY);
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      navigate("/");
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
+
+  // const handleLogout = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     await logout();
+  //     localStorage.removeItem(DASHBOARD_LOCK_KEY);
+  //     localStorage.removeItem("token");
+  //     localStorage.removeItem("role");
+  //     navigate("/");
+  //   } catch (err) {
+  //     console.error("Logout failed:", err);
+  //   }
+  // };
 
   return (
     <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-indigo-500/50">
@@ -75,6 +74,34 @@ const payingAmount = data?.PayingAmount ?? "0.00";
 
       {/* right side */}
       <div className="flex items-center justify-end gap-4">
+<div className="text-gray-800 font-semibold flex items-center gap-1">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5 text-gray-600"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9h14z"
+    />
+  </svg>
+
+  <span>Payout Wallet:</span>
+
+  <span>
+    ₹
+    {Number(
+      role === "admin"
+        ? data?.cashfree_balance
+        : data?.payout_wallet
+    ).toFixed(2)}
+  </span>
+</div>
+
         {/* Profile Icon */}
         <div className="relative" ref={dropdownRef}>
           <button onClick={() => setOpen(!open)} className="flex items-center focus:outline-none">

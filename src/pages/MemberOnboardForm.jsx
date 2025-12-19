@@ -9,7 +9,7 @@ import { useGet } from "../hooks/useGet";
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
 
-export const MemberOnboardForm = () => {
+export const MemberOnboardForm = ({mode = "admin "}) => {
   const [errors, setErrors] = useState();
   const [currentStep, setCurrentStep] = useState(1);
   const [showSchemeModal, setShowSchemeModal] = useState(false);
@@ -289,11 +289,11 @@ const validateStep = () => {
 
 
   const handleNext = () => {
-    if (validateStep()) {
+    // if (validateStep()) {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
-    } 
+    // } 
   };
   useEffect(() => {
     if (memberFormData.payin_at_onboard !== "Airpay") return; // only run for Airpay
@@ -444,7 +444,11 @@ const handleSubmit = async (e) => {
       <div className=" flex justify-between items-center mb-3 p-2.5"
       style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
         <h4 className="font-bold text-white text-lg py-2">
-          Add New Merchant Details
+          {/* Add New Merchant Details */}
+          {
+            mode === "self"
+            ? "Register your business" : "add new merchant"
+          }
         </h4>
       </div>
 

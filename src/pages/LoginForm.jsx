@@ -150,6 +150,7 @@ function LoginForm() {
           >
             {loading ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Signing in...</span> : "Sign in"}
           </button>
+          <p className="text-center">New to Spay? <span onClick={() => navigate("/register")}>Create an account</span></p>
         </form>
       </div>
     </section>
