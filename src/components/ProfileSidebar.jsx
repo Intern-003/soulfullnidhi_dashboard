@@ -1,34 +1,92 @@
 import { Link, useNavigate } from "react-router-dom";
 import { usePost } from "../hooks/usePost";
+import { useState } from "react";
 
-export const ProfileSidebar = ({ open, onClose, data, role, payingAmount }) => {
+
+export const ProfileSidebar = ({ open, onClose, data, role, payingAmount ,Payoutwallet}) => {
+
+    const [PayAmount,setPayAmount] =  useState(false);
   const navigate = useNavigate();
   const { execute: logout } = usePost("/logout");
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      navigate("/");
-    } catch (err) {
-      console.error("Logout failed:", err);
+const DASHBOARD_LOCK_KEY = "payment_dashboard_logged_in";
+
+const handleLogout = async () => {
+  try {
+    await logout(); // optional backend logout
+  } catch (err) {
+    console.error("Logout API failed:", err);
+  } finally {
+    // 🔐 clear dashboard lock safely
+    const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
+    const tabId = sessionStorage.getItem("tabId");
+
+    if (lock.tabId === tabId) {
+      localStorage.removeItem(DASHBOARD_LOCK_KEY);
     }
-  };
+
+    // 🧹 clear auth data
+    localStorage.removeItem("token");
+    localStorage.removeItem("email");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+
+    // 🧹 clear tab id
+    sessionStorage.removeItem("tabId");
+
+    // 📢 notify other tabs
+    if (window.BroadcastChannel) {
+      const channel = new BroadcastChannel("dashboard_login_channel");
+      channel.postMessage({ type: "LOGOUT" });
+      channel.close();
+    }
+
+    onClose(); // close sidebar
+    navigate("/", { replace: true });
+  }
+};
+
+//     try {
+//       await logout();
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("role");
+//       onClose();
+//       navigate("/");
+//     } catch (err) {
+//       console.error("Logout failed:", err);
+//     }
+//   };
+
+// const handleLogout = async () => {
+//   try {
+//     await logout(); // optional backend cleanup
+//   } catch (err) {
+//     console.error("Logout API failed:", err);
+//   } finally {
+//     // ALWAYS logout frontend
+//     localStorage.removeItem("token");
+//     localStorage.removeItem("role");
+
+//     onClose(); // close sidebar
+//     navigate("/", { replace: true });
+//   }
+// };
+
 
   return (
     <>
     
       {/* Backdrop */}
-      {open && (
-        <div
-          onClick={onClose}
-          className="fixed inset-0 bg-black/20 z-40"
-        />
-      )}
+        {open && (
+            <div
+            onClick={onClose}
+            className="fixed inset-0 bg-black/20 z-40"
+            />
+        )}
 
       {/* Drawer */}
       <div
+      onClick={(e) => e.stopPropagation()}
         className={`
           fixed top-0 right-0 w-64 h-full z-50
           bg-[#dce8ff] shadow-2xl
@@ -76,12 +134,20 @@ export const ProfileSidebar = ({ open, onClose, data, role, payingAmount }) => {
             </p>
             <div className="flex justify-between text-sm text-gray-700 mb-2">
               <span>Payin Wallet</span>
-              <span className="font-semibold text-indigo-600">₹{payingAmount}</span>
+              <span className="font-semibold text-indigo-600">{PayAmount ? `₹${payingAmount}` : `******`}</span>
+                  <button
+      type="button"
+      onClick={() => setPayAmount((prev) => !prev)}
+      className="text-gray-500 hover:text-gray-700"
+    >
+      <i
+        className={`fa-solid ${
+          PayAmount ? "fa-eye-slash" : "fa-eye"
+        }`}
+      />
+    </button>
             </div>
-            <div className="flex justify-between text-sm text-gray-700">
-              <span>Payout Wallet</span>
-              <span className="font-semibold text-gray-900">₹{payingAmount ?? "0.00"}</span>
-            </div>
+
           </div>
         )}
 
@@ -99,17 +165,13 @@ export const ProfileSidebar = ({ open, onClose, data, role, payingAmount }) => {
           )}
 
           {/* Logout Button */}
-<button
-  onClick={(e) => {
-    e.stopPropagation();  // Prevent backdrop click
-    handleLogout();
-  }}
-  className="flex items-center gap-3 text-sm text-red-600 py-2 hover:text-red-700 transition"
->
-  <i className="fa-solid fa-right-from-bracket"></i>
-  <span>Logout</span>
-</button>
-
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 text-sm text-red-600 py-2 hover:text-red-700 transition"
+          >
+            <i className="fa-solid fa-right-from-bracket"></i>
+            <span>Logout</span>
+          </button>
         </div>
       </div>
     </>

@@ -28,14 +28,28 @@ import SpayGlidePGCancel from "../pages/SpayGlidePGCancel";
 import SpayGlidePGSuccess from "../pages/SpayGlidePGSuccess";
 import SpayGlidePGError from "../pages/SpayGlidePGError";
 import MerchantDetails from "../pages/MerchantDetails";
+import PublicLayout from "../components/PublicLayout";
+
 
 const AppRoutes = () => {
     return(
+        
         <Routes>
-            <Route path="/spay-glide-pgwidget" element={ <SpayGlidePGWidget/> } />
-            <Route path="/spay-glide-pgsuccess" element={ <SpayGlidePGSuccess/> } />
-            <Route path="/spay-glide-pgcancel" element={ <SpayGlidePGCancel/> } />
-            <Route path="/spay-glide-pgerror" element={ <SpayGlidePGError/> } />
+ 
+<Route element={<PublicLayout />}>
+    <Route 
+      path="/register" 
+      element={<MemberOnboardForm mode="self" />} 
+    />
+  </Route>
+
+                 {/* <Route
+                    path="/member-create"
+                    element={
+                        <MemberOnboardForm />
+                    }
+                />  */}
+
             <Route path="/" element={<LoginForm />} />
             <Route element={<Layout />}>
                 <Route 
@@ -110,6 +124,7 @@ const AppRoutes = () => {
                     </PrivateRoute>
                     }
                 />
+              
                 <Route
                 path = "/MerchantDetails/:id"
                 element = {
