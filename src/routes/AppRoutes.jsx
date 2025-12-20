@@ -29,6 +29,9 @@ import SpayGlidePGSuccess from "../pages/SpayGlidePGSuccess";
 import SpayGlidePGError from "../pages/SpayGlidePGError";
 import MerchantDetails from "../pages/MerchantDetails";
 import PublicLayout from "../components/PublicLayout";
+import Register from "../pages/Register";
+import Kyc from "../pages/Kyc";
+
 
 
 const AppRoutes = () => {
@@ -39,7 +42,11 @@ const AppRoutes = () => {
 <Route element={<PublicLayout />}>
     <Route 
       path="/register" 
-      element={<MemberOnboardForm mode="self" />} 
+      element={<Register  />} 
+    />
+    <Route 
+      path="/kyc" 
+      element={<Kyc  />} 
     />
   </Route>
 

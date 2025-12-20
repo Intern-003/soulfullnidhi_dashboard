@@ -4,9 +4,12 @@ import paymentGatewayBg from "../images/login-background.jpg";
 
 const PublicLayout = () => {
   return (
-<div className="min-h-screen flex items-center justify-center bg-gray-100 py-12  sm:px-6 lg:px-8"
-   style={{ backgroundImage: `url(${paymentGatewayBg})` }}>
-      <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden py-6 px-8"
+<div
+  className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-6"
+  // style={{ backgroundImage: `url(${paymentGatewayBg})` }}
+>
+
+      <div className="rounded-lg shadow-lg overflow-hidden"
       >
         <Outlet />
       </div>

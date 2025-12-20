@@ -93,9 +93,9 @@ const stepRequiredFields = {
     "user_pan_doc",     // add director files here if required
     "user_addhar_doc",
   ],
-  4: ["payin_at_onboard", "payout_at_onboard", "scheme_id"],
+...(mode === "admin" ? { 4: ["payin_at_onboard", "payout_at_onboard", "scheme_id"] } : {}),
 };
-
+const maxStep = mode === "self" ? 3 : 4;
 
   const navigate = useNavigate();
 
