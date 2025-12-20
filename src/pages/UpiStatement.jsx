@@ -100,7 +100,7 @@ const UpiStatement = () => {
 useEffect(() => {
   const statusClasses = {
     pending:  "bg-[#dfaf03ff] text-white",
-    initiated:"bg-blue-400 text-white",
+    initiated:"bg-[#0f3cb9ff] text-white",
     success:  "bg-[#057034ff] text-white",
     complete: "bg-[#057034ff] text-white",
     failed:   "bg-[#ff3366] text-white",

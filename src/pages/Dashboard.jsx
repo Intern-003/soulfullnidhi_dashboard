@@ -107,17 +107,16 @@ export const Dashboard = () => {
           "bg-[#ff3366] text-white border-red-300";
       } else if (item.status === "initiated") {
         statusClass =
-          "bg-blue-100 text-blue-600 border border-blue-300";
+          "bg-[#0f3cb9ff] text-white";
       } else if (item.status === "completed") {
         statusClass =
           "bg-[#08667eff] text-white";
-          // "#08667eff] text-white";
       } else if (item.status === "reversed") {
         statusClass =
           "bg-[#ff3366] text-white";
       } else if (item.status === "refunded") {
         statusClass =
-          "bg-gray-100 text-gray-600 border border-gray-300";
+          "bg-[#ff3366] text-white";
       }
 
 

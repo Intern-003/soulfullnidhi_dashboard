@@ -117,7 +117,7 @@ const PayoutStatement = () => {
     completed: "bg-[#057034ff] text-white",
     failed:   "bg-[#ff3366] text-white",
     reversed: "bg-[#ff3366] text-white",
-    refunded: "bg-gray-400 text-white",
+    refunded: "bg-[#ff3366] text-white",
   };
 
   if (data?.data) {
