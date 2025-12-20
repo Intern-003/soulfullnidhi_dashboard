@@ -125,7 +125,7 @@ export const Dashboard = () => {
       return {
         sqno: index + 1,
         txnid: item.txnid,
-        name: item.user?.name || "-",
+        name: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
         type: item.product,
         amount: item.amount,
         status: (
@@ -146,7 +146,7 @@ export const Dashboard = () => {
 
     const formattedLargeTransactionData = processLargeTransactionData.map(
       (item) => ({
-        name: item.user?.name,
+        name: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
         product: item.product,
         amount: item.amount,
       })
