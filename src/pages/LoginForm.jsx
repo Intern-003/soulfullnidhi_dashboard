@@ -58,16 +58,17 @@ function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
-    if (lock.userId && lock.userId !== formData.email) {
-      alert("Another admin is already logged in on a different tab.");
-      return;
-    }
+    // const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
+    // if (lock.userId && lock.userId !== formData.email) {
+    //   alert("Another admin is already logged in on a different tab.");
+    //   return;
+    // }
 
     try {
       const response = await login(formData);
       if (response) {
         // Save login info
+         const user = response.user;
         localStorage.setItem("token", response.token);
         localStorage.setItem("email", response.user.email);
         localStorage.setItem("role", btoa(response.user.role_type));
@@ -81,8 +82,13 @@ function LoginForm() {
 
         // Broadcast login to other tabs
         channelRef.current?.postMessage({ type: "LOGIN", userId: response.user.id });
-
-        navigate("/dashboard", { replace: true });
+        
+        if (user.kyc === 1){
+             navigate("/dashboard", { replace: true });
+        }else{
+          alert("Please complete KYC first!");
+          navigate("/kyc", { replace: true ,state: { user } });
+        }
       }
     } catch (err) {
       console.log("Login failed:", err);

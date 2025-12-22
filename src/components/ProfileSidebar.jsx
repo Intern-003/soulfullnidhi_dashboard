@@ -17,13 +17,8 @@ const handleLogout = async () => {
   } catch (err) {
     console.error("Logout API failed:", err);
   } finally {
-    // 🔐 clear dashboard lock safely
-    const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
-    const tabId = sessionStorage.getItem("tabId");
-
-    if (lock.tabId === tabId) {
-      localStorage.removeItem(DASHBOARD_LOCK_KEY);
-    }
+    // 🔐 ALWAYS clear dashboard lock
+    localStorage.removeItem("payment_dashboard_logged_in");
 
     // 🧹 clear auth data
     localStorage.removeItem("token");
@@ -41,10 +36,11 @@ const handleLogout = async () => {
       channel.close();
     }
 
-    onClose(); // close sidebar
+    onClose();
     navigate("/", { replace: true });
   }
 };
+
 
 //     try {
 //       await logout();
