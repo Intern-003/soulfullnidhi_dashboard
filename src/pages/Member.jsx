@@ -11,6 +11,7 @@
   import { useGet } from "../hooks/useGet";
   import { usePost } from "../hooks/usePost";
   import { useToast } from "../contexts/ToastContext";
+  import { VerifyModal } from "../components/VerifyModal";
 
 
 
@@ -21,6 +22,14 @@
     const memberDetails = useNavigate();
     const [merchantData, setMerchantData] = useState([]);
     const [initialLoad, setInitialLoad] = useState(true);
+
+    const [showVerifyModal, setShowVerifyModal] = useState(false);
+      const handleVerifyConfirm = () => {
+    // Your verify/onboard logic here
+        toast.success("Merchant onboarded and verified successfully!");
+        // Optionally call API or update state
+        navigate("/member-list");
+      };
 
 
     const { executePut: updateSingle } = usePut("/update-user-statuses");
@@ -161,6 +170,18 @@
             {item.name}
           </span>
           ),
+          kyc:item.kyc === 1 ? (
+              <span className="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
+                Verified
+              </span>
+          ) : (
+            <button
+              className="px-3 py-1 text-sm font-semibold text-orange-700 bg-orange-100 rounded-full hover:bg-orange-200"
+             onClick={() => setShowVerifyModal(true)}
+            >
+              Verify
+            </button>
+          ),
           payin_bank: payinBank,
           payin: item.payin_status,
         
@@ -191,6 +212,7 @@
     const memberColumns = [
       { header: "User id", accessor: "sqno"},
       { header: "Name", accessor: "name" },
+      {header: "KYC", accessor:"kyc"},
       { header: "Payin", accessor: "payin" },
   
       { header: "Payout", accessor: "payout" },
@@ -205,6 +227,7 @@
 
 
       { header: "Payin Onboarded Bank", accessor: "payin_bank" },
+
     ];
 
     const tableDataWithActions = merchantData?.map((row) => ({
@@ -299,6 +322,14 @@
         )}
 
         <SchemeModal showModal={showModal} handleModal={() => setShowModal(!showModal)} />
+
+          <VerifyModal
+  showVerifyModal={showVerifyModal}
+  handleVerifyModal={setShowVerifyModal}
+  action={handleVerifyConfirm}
+  heading="Verify Merchant Onboarding"
+  body="Are you sure you want to verify this merchant and complete onboarding? This action is final."
+/>
       </div>
     );
   };

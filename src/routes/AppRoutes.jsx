@@ -30,7 +30,7 @@ import SpayGlidePGError from "../pages/SpayGlidePGError";
 import MerchantDetails from "../pages/MerchantDetails";
 import PublicLayout from "../components/PublicLayout";
 import Register from "../pages/Register";
-import Kyc from "../pages/Kyc";
+import { Kyc } from "../pages/Kyc";
 
 
 
@@ -44,12 +44,12 @@ const AppRoutes = () => {
       path="/register" 
       element={<Register  />} 
     />
+
+  </Route>
     <Route 
       path="/kyc" 
       element={<Kyc  />} 
     />
-  </Route>
-
                  {/* <Route
                     path="/member-create"
                     element={
@@ -59,6 +59,15 @@ const AppRoutes = () => {
 
             <Route path="/" element={<LoginForm />} />
             <Route element={<Layout />}>
+             {/* <Route 
+                path="/kyc" 
+                element={
+                 
+                            <Kyc  />          
+                } 
+                /> */}
+           
+
                 <Route 
                     path="/profile" 
                     element={

@@ -159,9 +159,13 @@ const verifyEmailOtp = async () => {
         email:formData.email,
         mobile_no:formData.mobile,
       };
-     await register(paylaod);
+      const res = await register(paylaod);
      console.log("merchant created");
      alert("merchant created");
+      localStorage.setItem("merchantId", res.merchant.id);
+
+    // Redirect to KYC page
+    navigate("/kyc");
     }catch(err){
       console.error("Registration failed", err);
     }
@@ -337,7 +341,7 @@ return (
           className="w-full mt-4 py-3 bg-gradient-to-r from-[#062f70] to-[#0d3dc4]
           text-white font-semibold rounded-xl shadow-md hover:shadow-xl
           hover:-translate-y-0.5 transition-all"
-          
+   
         >
           Create Account
         </button>
