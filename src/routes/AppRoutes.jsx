@@ -31,7 +31,7 @@ import MerchantDetails from "../pages/MerchantDetails";
 import PublicLayout from "../components/PublicLayout";
 import Register from "../pages/Register";
 import { Kyc } from "../pages/Kyc";
-
+import { VerifyMerchant } from "../pages/VerifyMerchant";
 
 
 const AppRoutes = () => {
@@ -146,6 +146,14 @@ const AppRoutes = () => {
                 element = {
                     <PrivateRoute role = {"admin"}>
                         <MerchantDetails />
+                    </PrivateRoute>
+                }
+                />
+                                <Route
+                path = "/VerifyMerchant/:id"
+                element = {
+                    <PrivateRoute role = {"admin"}>
+                        <VerifyMerchant />
                     </PrivateRoute>
                 }
                 />

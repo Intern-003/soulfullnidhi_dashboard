@@ -20,16 +20,17 @@
     const [showModal, setShowModal] = useState(false);
     const navigate = useNavigate();
     const memberDetails = useNavigate();
+    const memberVerify = useNavigate();
     const [merchantData, setMerchantData] = useState([]);
     const [initialLoad, setInitialLoad] = useState(true);
 
-    const [showVerifyModal, setShowVerifyModal] = useState(false);
-      const handleVerifyConfirm = () => {
-    // Your verify/onboard logic here
-        toast.success("Merchant onboarded and verified successfully!");
-        // Optionally call API or update state
-        navigate("/member-list");
-      };
+    // const [showVerifyModal, setShowVerifyModal] = useState(false);
+    //   const handleVerifyConfirm = () => {
+    // // Your verify/onboard logic here
+    //     toast.success("Merchant onboarded and verified successfully!");
+    //     // Optionally call API or update state
+    //     navigate("/member-list");
+    //   };
 
 
     const { executePut: updateSingle } = usePut("/update-user-statuses");
@@ -177,7 +178,11 @@
           ) : (
             <button
               className="px-3 py-1 text-sm font-semibold text-orange-700 bg-orange-100 rounded-full hover:bg-orange-200"
-             onClick={() => setShowVerifyModal(true)}
+             onClick={() => 
+             {
+               localStorage.setItem("merchantId", item.id);
+               memberVerify(`/VerifyMerchant/${item.id}`);
+             }}
             >
               Verify
             </button>
@@ -323,13 +328,7 @@
 
         <SchemeModal showModal={showModal} handleModal={() => setShowModal(!showModal)} />
 
-          <VerifyModal
-  showVerifyModal={showVerifyModal}
-  handleVerifyModal={setShowVerifyModal}
-  action={handleVerifyConfirm}
-  heading="Verify Merchant Onboarding"
-  body="Are you sure you want to verify this merchant and complete onboarding? This action is final."
-/>
+
       </div>
     );
   };

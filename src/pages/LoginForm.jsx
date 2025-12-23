@@ -3,6 +3,7 @@ import logo from "../images/logo.png";
 import paymentGatewayBg from "../images/login-background.jpg";
 import { usePost } from "../hooks/usePost";
 import { useNavigate } from "react-router-dom";
+import { ConfirmModal } from "../components/ConfirmModal";
 
 const DASHBOARD_LOCK_KEY = "payment_dashboard_logged_in";
 
@@ -16,6 +17,7 @@ const TAB_ID =
   })();
 
 function LoginForm() {
+  const [prekycmodal,setprekycmodal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
@@ -83,11 +85,13 @@ function LoginForm() {
         // Broadcast login to other tabs
         channelRef.current?.postMessage({ type: "LOGIN", userId: response.user.id });
         
-        if (user.kyc === 1){
+        if (user.kyc === 1 && user.pre_kyc === 1){
              navigate("/dashboard", { replace: true });
+        }else if(user.kyc === 0 && user.pre_kyc === 0){
+             alert("Please complete KYC first!");
+             navigate("/kyc", { replace: true ,state: { user } });
         }else{
-          alert("Please complete KYC first!");
-          navigate("/kyc", { replace: true ,state: { user } });
+          setprekycmodal(true);
         }
       }
     } catch (err) {
@@ -96,6 +100,7 @@ function LoginForm() {
   };
 
   return (
+    <>
     <section className="bg-gray-100 min-h-screen flex items-center justify-center px-6">
       <div
         className="absolute inset-0 bg-no-repeat bg-center bg-cover opacity-70"
@@ -160,6 +165,21 @@ function LoginForm() {
         </form>
       </div>
     </section>
+    <ConfirmModal
+    showConfirmModal={prekycmodal}
+    handleConfirmModal={setprekycmodal}
+    action={()=>{
+      setprekycmodal(false);
+      navigate("/");
+    } }
+    heading="KYC Completed Successfully"
+    body="Your KYC has been completed. Please wait for 24 to 48 hours for admin approval to activate your account."
+     confirmText="OK"
+     showCancel={false}
+
+     />
+</>
+
   );
 }
 

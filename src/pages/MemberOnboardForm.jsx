@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Stepper } from "../components/Stepper";
+import { AdminStepper } from "../components/AdminStepper";
 import { SchemeModal } from "../components/SchemeModal";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
@@ -452,7 +452,7 @@ const handleSubmit = async (e) => {
         </h4>
       </div>
 
-      <Stepper currentStep={currentStep} />
+      <AdminStepper currentStep={currentStep} />
 
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         {currentStep === 1 && (
