@@ -6,6 +6,7 @@ export const Stepper = ({ currentStep }) => {
     { id: 1, label: "Business & Contact Details" },
     { id: 2, label: "Company & Bank Details" },
     { id: 3, label: "Director KYC Details" },
+    {id:4, label:"Video KYC"}
   ];
 
   return (
@@ -43,7 +44,7 @@ export const Stepper = ({ currentStep }) => {
 
             {index !== steps.length - 1 && (
               <div
-                className={`w-[2px] h-25 ${
+                className={`w-[2px] h-15 ${
                   isCompleted ? "bg-emerald-400" : "bg-gray-300"
                 }`}
                 style={{ marginTop: "2px" }}

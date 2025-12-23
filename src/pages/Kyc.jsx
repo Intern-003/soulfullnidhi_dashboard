@@ -7,7 +7,6 @@ import { useGet } from "../hooks/useGet";
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
 import { useLocation } from "react-router-dom";
-import { PendingVerificationModal } from "../components/PendingVerificationModal";
 
 
 export const Kyc = () => {
@@ -16,17 +15,18 @@ export const Kyc = () => {
   const [errors, setErrors] = useState();
   const [currentStep, setCurrentStep] = useState(1);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showPendingModal, setShowPendingModal] = useState(false);
   
   const toast = useToast();
 const user = location.state?.user || {};
 console.log("user data",user);
+const singlemerchant = location.state?.merchant || {};
+console.log("single merchant",singlemerchant);
 
   const [memberFormData, setMemberFormData] = useState({
-    id: user.id || "",
-    name: user.name || "",
-    mobile_no:user.mobile_no||  "",
-    email: user.email || "",
+    id: user.id || singlemerchant.id || "",
+    name: user.name || singlemerchant.name ||"",
+    mobile_no:user.mobile_no||  singlemerchant.mobile ||"",
+    email: user.email ||singlemerchant.email || "",
     business_mcc: "",
     city: "",
     district: "",
@@ -56,9 +56,11 @@ console.log("user data",user);
         user_addhar_doc: null,
       },
     ],
+    video_kyc: null,
     payin_at_onboard: "",
     payout_at_onboard: "",
     scheme_id: "",
+
   });
 
 const stepRequiredFields = {
@@ -93,6 +95,9 @@ const stepRequiredFields = {
     "user_pan_doc",     // add director files here if required
     "user_addhar_doc",
   ],
+  4:[
+    "video_kyc"
+  ],
 };
   const navigate = useNavigate();
 
@@ -125,11 +130,6 @@ const validationRules = {
     required: true,
     pattern: nameRegex,
     message: "Name is not valid",
-  },
-  mobile_no: {
-    required: true,
-    pattern: phoneRegex,
-    message: "Mobile number is not valid",
   },
   email: {
     required: true,
@@ -203,6 +203,10 @@ const validationRules = {
     pattern: aadharRegex,
     message: "Aadhaar number must be 12 digits",
   },
+  video_kyc:{
+    required:true,
+    message:"Please upload your Video KYC recording",
+  },
 };
 
   
@@ -249,14 +253,15 @@ const validateStep = () => {
     });
   }
   // 🧾 Other steps
-  else {
-    requiredFields.forEach((field) => {
-      const error = validateValue(memberFormData[field], field);
-      if (error) {
-        newErrors[field] = error;
-      }
-    });
-  }
+else {
+  requiredFields.forEach((field) => {
+    const value = field === "video_kyc" ? memberFormData.video_kyc : memberFormData[field];
+    const error = validateValue(value, field);  // ← Use 'value', not memberFormData[field]
+    if (error) {
+      newErrors[field] = error;
+    }
+  });
+}
 
   setErrors(newErrors);
   return Object.keys(newErrors).length === 0;
@@ -265,7 +270,7 @@ const validateStep = () => {
 
   const handleNext = () => {
     // if (validateStep()) {
-    if (currentStep < 3) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
     // } 
@@ -346,6 +351,17 @@ const handleDirectorFileChange = (index, e) => {
   // console.log(`Director ${index} ${name}`, files?.[0]);
 };
 
+const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("video/")) {
+      setMemberFormData((prev) => ({ ...prev, video_kyc: file }));
+      setErrors((prev) => ({ ...prev, video_kyc: null })); // Clear error
+    } else {
+      toast.error("Please upload a valid video file");
+    }
+  };
+
+
 
 const handleSubmit = async (e) => {
   e.preventDefault();
@@ -355,11 +371,18 @@ const handleSubmit = async (e) => {
   try {
     const formData = new FormData();
     // Add this right after creating formData
-    if (user.id) {
-      formData.append("id", user.id);
-    }
+    // if (user.id) {
+    //   formData.append("id", user.id);
+    // }
 
-    // console.log("===== Form Submission Start =====");
+    const merchantId = user.id || singlemerchant.id;
+    if (!merchantId) {
+      toast.error("Merchant ID missing – cannot submit KYC");
+      return;
+    }
+    formData.append("id", merchantId);
+
+    // console.log("===== Form Submission   Start =====");
 
     // Append text fields (excluding files and directors)
     Object.keys(memberFormData).forEach((key) => {
@@ -376,6 +399,11 @@ const handleSubmit = async (e) => {
         // console.log(`[File] ${fileKey}:`, memberFormData[fileKey].name);
       }
     });
+
+    // Video KYC file
+      if (memberFormData.video_kyc instanceof File) {
+        formData.append("video_kyc", memberFormData.video_kyc);
+      }
 
     // Append directors correctly
     memberFormData.director_info.forEach((director, idx) => {
@@ -418,6 +446,10 @@ const stepHeadings = {
   3: {
     title: "Director Details",
     subtitle: "Director KYC information"
+  },
+  4: {
+    title: "Video KYC",
+    subtitle: "video kyc information"
   }
 };
 
@@ -466,6 +498,7 @@ const stepHeadings = {
           <div className="grid gap-6 mb-6 md:grid-cols-2">
             <div className="relative">
               <input
+              readOnly
                 type="text"
                 name="name"
                 id="floating_outlined_name"
@@ -495,6 +528,7 @@ focus:outline-none focus:ring-0  ${
             </div>
             <div className="relative">
               <input
+              readOnly
                 type="number"
                 name="mobile_no"
                 id="floating_outlined_mobile"
@@ -516,14 +550,10 @@ focus:outline-none focus:ring-0 ${
               >
                 Business Mobile <span className="text-red-600">*</span>
               </label>
-              {errors?.mobile_no && (
-                <span className="text-sm text-red-500">
-                  {errors?.mobile_no}
-                </span>
-              )}
             </div>
             <div className="relative">
               <input
+              readOnly
                 type="email"
                 name="email"
                 id="floating_outlined_email"
@@ -1245,7 +1275,64 @@ focus:outline-none focus:ring-0 ${
               </div>
             </div>
           ))}
+{currentStep === 4 && (
+                    <div className="max-w-2xl mx-auto">
+                      <div className="bg-white border-l-4 border-[#4b669a] p-6 rounded-r-lg mb-8">
+                        <div className="flex items-start">
+                          <div className="flex-shrink-0">
+                            <i className="fa-solid fa-video text-2xl text-[#4b669a]"></i>
+                          </div>
+                          <div className="ml-4">
+                            <h3 className="text-xl font-bold text-[#4b669a] mb-4">Video KYC</h3>
+                            <p className="text-black-500 mb-4">
+                              Please record a short video following these steps:
+                            </p>
+                            <ol className="list-decimal list-inside text-black space-y-3">
+                              <li>Hold your face in front of the camera and clearly say your full name.</li>
+                              <li>Show your PAN card to the camera so it is clearly visible.</li>
+                              <li>Optionally, show any other required documents if prompted.</li>
+                              <li>Ensure good lighting and no obstructions for clear verification.</li>
+                            </ol>
+                          </div>
+                        </div>
+                      </div>
 
+                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={handleVideoChange}
+                          className="hidden"
+                          id="video_kyc_upload"
+                        />
+                        <label
+                          htmlFor="video_kyc_upload"
+                          className="cursor-pointer block w-full py-4 px-6 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                        >
+                          <div className="text-lg font-medium text-gray-700">
+                            {memberFormData.video_kyc ? memberFormData.video_kyc.name : "Choose file"}
+                          </div>
+                          <div className="text-sm text-gray-500 mt-1">
+                            {memberFormData.video_kyc ? "Click to change" : "No file chosen"}
+                          </div>
+                        </label>
+
+                        {errors?.video_kyc && (
+                          <p className="mt-3 text-sm text-red-600">{errors.video_kyc}</p>
+                        )}
+
+                        {memberFormData.video_kyc && (
+                          <div className="mt-6">
+                            <video
+                              src={URL.createObjectURL(memberFormData.video_kyc)}
+                              controls
+                              className="max-w-full h-auto rounded-lg shadow-md mx-auto max-h-96"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
  
 
         <div className="flex justify-between">
@@ -1262,23 +1349,18 @@ focus:outline-none focus:ring-0 ${
               &lt; Prev
             </button>
 
-            {currentStep < 3 && (
+            {currentStep < 4 && (
               <button
-                type="button"
-                disabled={Object.keys(errors || {}).length > 0}
-                className={`text-white font-medium rounded-lg text-sm px-5 py-2.5 ${
-                  Object.keys(errors || {}).length > 0
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-800"
-                }`}
-                onClick={handleNext}
-              >
-                Next &gt;
-              </button>
+              type="button"
+              className="text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5"
+              onClick={handleNext}
+            >
+              Next &gt;
+            </button>
 
             )}
 
-            {currentStep === 3 && (
+            {currentStep === 4 && (
               <button
                 type="submit"
                 className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"

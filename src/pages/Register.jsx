@@ -160,12 +160,24 @@ const verifyEmailOtp = async () => {
         mobile_no:formData.mobile,
       };
       const res = await register(paylaod);
-     console.log("merchant created");
+     console.log("merchant created",res);
      alert("merchant created");
       localStorage.setItem("merchantId", res.merchant.id);
+      localStorage.setItem("merchant name",res.name);
+
 
     // Redirect to KYC page
-    navigate("/kyc");
+    navigate("/kyc",{
+      state:{
+        merchant:{
+          id:res.merchant.id,
+          name:res.merchant.name,
+          email:res.merchant.email,
+          mobile:res.merchant.mobile_no,
+
+        },
+      }
+    });
     }catch(err){
       console.error("Registration failed", err);
     }

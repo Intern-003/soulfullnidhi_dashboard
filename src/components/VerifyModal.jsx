@@ -1,6 +1,8 @@
 // src/components/VerifyModal.jsx
 import React from "react";
 import Button from "./Button";
+import { useGet } from "../hooks/useGet";
+
 
 export const VerifyModal = ({
   showVerifyModal,
@@ -9,6 +11,8 @@ export const VerifyModal = ({
   heading = "Verify Merchant Onboarding",
   body = "Are you sure you want to verify and onboard this merchant? This action will complete the process.",
 }) => {
+
+  const {data:verifyMerchant} = useState('show-merchant')
   return (
     <>
       {showVerifyModal && (
