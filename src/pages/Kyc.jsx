@@ -85,6 +85,9 @@ const stepRequiredFields = {
     "company_pan_no_doc",   // add file here
     "company_gst_no_doc",   // add file here
     "cancel_cheque_doc",    // add file here
+    "account_holder_name", 
+    "bank_account_no",    
+    "ifsc_code",
   ],
   3: [
     "director_name",
@@ -123,7 +126,14 @@ const textNumberRegex = /^[A-Za-z0-9]+$/;
 const numberRegex = /^[0-9]{4}$/;
 const pinnumberRegex = /^[0-9]{6}$/;
 const aadharRegex = /^[0-9]{12}$/;
+const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+const websiteRegex = /^(https?:\/\/)(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/;
+const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+const cinRegex = /^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/;
+
+
+
 
 const validationRules = {
   name: {
@@ -161,30 +171,47 @@ const validationRules = {
     pattern: pinnumberRegex,
     message: "Pin code must be 6 digits",
   },
+    website_url: {
+      required: true,
+      pattern: websiteRegex,
+      message: "Website URL must be like https://example.com",
+    },
+
+
   account_holder_name: {
     required: true,
     pattern: nameRegex,
     message: "Account holder name is not valid",
   },
+
   bank_account_no: {
     required: true,
-    pattern: textNumberRegex,
-    message: "Bank account number is not valid",
+    pattern: /^[0-9]{9,18}$/,
+    message: "Bank account number must be 9–18 digits",
   },
+
+  ifsc_code: {
+    required: true,
+    pattern: ifscRegex,
+    message: "IFSC is not valid (e.g. HDFC0001234)",
+  },
+
   cin_llpin: {
     required: true,
-    pattern: textNumberRegex,
-    message: "CIN / LLPIN is not valid",
+    pattern: cinRegex,
+    message: "CIN is not valid (e.g. L12345MH2010PLC123456)",
   },
+
   company_pan_no: {
     required: true,
     pattern: panRegex,
-    message: "Company PAN number is not valid",
+    message: "Company PAN is not valid (e.g. ABCDE1234F)",
   },
+
   company_gst_no: {
     required: true,
-    pattern: textNumberRegex,
-    message: "Company GST number is not valid",
+    pattern: gstRegex,
+    message: "GST is not valid (e.g. 27AAAPZ1234C1Z1)",
   },
 
   // 👤 Director
@@ -193,19 +220,33 @@ const validationRules = {
     pattern: nameRegex,
     message: "Director name is not valid",
   },
+
   director_pan_no: {
     required: true,
     pattern: panRegex,
-    message: "Director PAN number is not valid",
+    message: "Director PAN is not valid (e.g. ABCDE1234F)",
   },
+
   director_aadhar_no: {
     required: true,
     pattern: aadharRegex,
-    message: "Aadhaar number must be 12 digits",
+    message: "Aadhaar must be 12 digits   ",
   },
-  video_kyc:{
-    required:true,
-    message:"Please upload your Video KYC recording",
+  user_pan_doc: {
+  required: true,
+  message: "PAN document is required",
+},
+
+user_addhar_doc: {
+  required: true,
+  message: "Aadhaar document is required",
+},
+
+
+  // 🎥 Video KYC
+  video_kyc: {
+    required: true,
+    message: "Please upload your Video KYC recording",
   },
 };
 
@@ -269,11 +310,11 @@ else {
 
 
   const handleNext = () => {
-    // if (validateStep()) {
+    if (validateStep()) {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
-    // } 
+    } 
   };
 
 
@@ -502,7 +543,7 @@ const stepHeadings = {
                 type="text"
                 name="name"
                 id="floating_outlined_name"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-md text-black bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0  ${
                   errors?.name ? "border-red-500" : "border-gray-300"
                 }`}
@@ -532,7 +573,7 @@ focus:outline-none focus:ring-0  ${
                 type="number"
                 name="mobile_no"
                 id="floating_outlined_mobile"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.mobile_no ? "border-red-500" : "border-gray-300"
                 }`}
@@ -557,7 +598,7 @@ focus:outline-none focus:ring-0 ${
                 type="email"
                 name="email"
                 id="floating_outlined_email"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.email ? "border-red-500" : "border-gray-300"
                 }`}
@@ -584,7 +625,7 @@ focus:outline-none focus:ring-0 ${
                 type="number"
                 name="business_mcc"
                 id="floating_outlined_mcc"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-7 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.business_mcc ? "border-red-500" : "border-gray-300"
                 }`}
@@ -594,7 +635,7 @@ focus:outline-none focus:ring-0 ${
               />
               <label
                 for="floating_outlined_mcc"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
+                className={`absolute mt-3 text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
                   errors?.business_mcc
                     ? "peer-focus:text-red-600"
                     : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
@@ -613,7 +654,7 @@ focus:outline-none focus:ring-0 ${
                 type="text"
                 name="city"
                 id="floating_outlined_city"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-4 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.city ? "border-red-500" : "border-gray-300"
                 }`}
@@ -640,7 +681,7 @@ focus:outline-none focus:ring-0 ${
                 type="text"
                 name="state"
                 id="floating_outlined_state"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-5 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.state ? "border-red-500" : "border-gray-300"
                 }`}
@@ -667,7 +708,7 @@ focus:outline-none focus:ring-0 ${
                 type="text"
                 name="district"
                 id="floating_outlined_district"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.district ? "border-red-500" : "border-gray-300"
                 }`}
@@ -694,7 +735,7 @@ focus:outline-none focus:ring-0 ${
                 type="number"
                 name="pin_code"
                 id="floating_outlined_pin"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.pin_code ? "border-red-500" : "border-gray-300"
                 }`}
@@ -721,7 +762,7 @@ focus:outline-none focus:ring-0 ${
                 type="text"
                 name="address"
                 id="floating_outlined_address"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.address ? "border-red-500" : "border-gray-300"
                 }`}
@@ -743,12 +784,12 @@ focus:outline-none focus:ring-0 ${
                 <span className="text-sm text-red-500">{errors?.address}</span>
               )}
             </div>
-                        <div className="relative">
+             <div className="relative">
               <input
                 type="text"
                 name="website_url"
                 id="floating_outlined_web"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.website_url ? "border-red-500" : "border-gray-300"
                 }`}
@@ -777,37 +818,42 @@ focus:outline-none focus:ring-0 ${
 
         {currentStep === 2 && (
           <div className="grid gap-6 mb-5 md:grid-cols-2">
-            <div className="relative">
-              <input
-                type="text"
-                name="company_pan_no"
-                id="floating_outlined_pan"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-focus:outline-none focus:ring-0 ${
-                  errors?.company_pan_no ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder=""
-                value={memberFormData.company_pan_no}
-                onChange={handleChange}
-              />
-              <label
-                for="floating_outlined_pan"
-                className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                  errors?.company_pan_no
-                    ? "peer-focus:text-red-600"
-                    : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                }`}
-              >
-                Company Pan Number <span className="text-red-600">*</span>
-              </label>
-              {errors?.company_pan_no && (
-                <span className="text-sm text-red-500">
-                  {errors?.company_pan_no}
-                </span>
-              )}
-            </div>
+<div className="relative">
+  <input
+    type="text"
+    name="company_pan_no"
+    id="floating_outlined_pan"
+    className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg 
+      border appearance-none peer focus:outline-none focus:ring-0
+      border-t-transparent peer-placeholder-shown:border-t-gray-300
+      ${errors?.company_pan_no ? "border-red-500" : "border-gray-300"}
+    `}
+    placeholder=" "
+    value={memberFormData.company_pan_no}
+    onChange={handleChange}
+  />
+  <label
+    htmlFor="floating_outlined_pan"
+    className={`absolute text-sm duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 bg-white
+      ${errors?.company_pan_no
+        ? "text-red-600 peer-focus:text-red-600"
+        : "text-gray-500 peer-focus:text-blue-600"
+      }
+      peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 
+      peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4
+    `}
+  >
+    Company Pan Number <span className="text-red-600">*</span>
+  </label>
+  {/* Error Message */}
+  {errors?.company_pan_no && (
+    <span className="mt-1 text-sm text-red-500 block">
+      {errors.company_pan_no}
+    </span>
+  )}
+</div>
       <div className="relative">
- <input type="file" name="company_pan_no_doc" className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+ <input type="file" name="company_pan_no_doc" className="block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0" onChange={handleCompanyFileChange} />
 
   <label
@@ -816,13 +862,19 @@ focus:outline-none focus:ring-0" onChange={handleCompanyFileChange} />
   >
     Document Of Pan Card <span className="text-red-600">*</span>
   </label>
-</div>
+  {errors?.company_pan_no_doc && (
+  <span className="text-sm text-red-500">
+    {errors.company_pan_no_doc}
+  </span>
+)}
+
+  </div>
             <div className="relative">
               <input
                 type="text"
                 name="company_gst_no"
                 id="floating_outlined_gst"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.company_gst_no ? "border-red-500" : "border-gray-300"
                 }`}
@@ -847,7 +899,7 @@ focus:outline-none focus:ring-0 ${
               )}
             </div>
             <div className="relative">
-<input type="file" name="company_gst_no_doc" className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+<input type="file" name="company_gst_no_doc" className="block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0" onChange={handleCompanyFileChange} />
 
 
@@ -858,13 +910,19 @@ focus:outline-none focus:ring-0" onChange={handleCompanyFileChange} />
               >
                 Document Of GST Number <span className="text-red-600">*</span>
               </label>
+              {errors?.company_gst_no_doc && (
+  <span className="text-sm text-red-500">
+    {errors.company_gst_no_doc}
+  </span>
+)}
+
             </div>
             <div className="relative">
               <input
                 type="text"
                 name="cin_llpin"
                 id="floating_outlined_cin"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.cin_llpin ? "border-red-500" : "border-gray-300"
                 }`}
@@ -904,7 +962,7 @@ focus:outline-none focus:ring-0 ${
                 name="company_type"
                 onChange={handleChange}
                 value={memberFormData.company_type}
-                className={`bg-gray-50 border  text-gray-900 text-sm rounded-lg w-full p-2.5 ${
+                className={`bg-gray-50 border mt-5 text-gray-900 text-sm rounded-lg w-full p-2.5 ${
                   errors?.company_type ? "border-red-500" : "border-gray-300"
                 }`}
               >
@@ -933,7 +991,7 @@ focus:outline-none focus:ring-0 ${
                 type="date"
                 name="date_of_incorporation"
                 id="floating_outlined_date"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.date_of_incorporation
                     ? "border-red-500"
@@ -964,7 +1022,7 @@ focus:outline-none focus:ring-0 ${
                 type="text"
                 name="account_holder_name"
                 id="floating_outlined_account_holder_name"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.account_holder_name
                     ? "border-red-500"
@@ -995,7 +1053,7 @@ focus:outline-none focus:ring-0 ${
                 type="number"
                 name="bank_account_no"
                 id="floating_outlined_account_number"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.bank_account_no ? "border-red-500" : "border-gray-300"
                 }`}
@@ -1024,7 +1082,7 @@ focus:outline-none focus:ring-0 ${
                 type="text"
                 name="ifsc_code"
                 id="floating_outlined_ifsc"
-                className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                   errors?.ifsc_code ? "border-red-500" : "border-gray-300"
                 }`}
@@ -1049,7 +1107,7 @@ focus:outline-none focus:ring-0 ${
               )}
             </div>
             <div className="relative">
-<input type="file" name="cancel_cheque_doc" className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+<input type="file" name="cancel_cheque_doc" className="block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0" onChange={handleCompanyFileChange} />
 
 
@@ -1060,6 +1118,12 @@ focus:outline-none focus:ring-0" onChange={handleCompanyFileChange} />
                 Document Of Cancel Cheque{" "}
                 <span className="text-red-600">*</span>
               </label>
+              {errors?.cancel_cheque_doc && (
+                <span className="text-sm text-red-500">
+                  {errors.cancel_cheque_doc}
+                </span>
+              )}
+
             </div>
 
           </div>
@@ -1073,7 +1137,7 @@ focus:outline-none focus:ring-0" onChange={handleCompanyFileChange} />
                   type="text"
                   id="floating_outlined_director_name"
                   name="director_name"
-                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                  className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                     errors?.director?.[index]?.director_name
                       ? "border-red-500"
@@ -1100,39 +1164,39 @@ focus:outline-none focus:ring-0 ${
                   </span>
                 )}
               </div>
-              <div className="relative">
-                <label
-                  for="default"
-                  className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                    errors?.director?.[index]?.director_gender
-                      ? "peer-focus:text-red-600"
-                      : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                  }`}
-                >
-                  Gender
-                </label>
-                <select
-                  id="default"
-                  name="director_gender"
-                  className={`bg-gray-50 border text-gray-900 text-sm rounded-lg w-full p-2.5 ${
-                    errors?.director?.[index]?.director_gender
-                      ? "border-red-500"
-                      : " border-gray-300"
-                  }`}
-                  value={director.director_gender}
-                  onChange={(e) => handleDirectorChange(index, e)}
-                  required
-                >
-                  <option selected>Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-                {errors?.director?.[index]?.director_gender && (
-                  <span className="text-sm text-red-500">
-                    {errors?.director?.[index]?.director_gender}
-                  </span>
-                )}
-              </div>
+<div className="relative">
+  <label
+    className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 px-2 ${
+      errors?.director?.[index]?.director_gender
+        ? "text-red-600"
+        : "text-gray-500"
+    }`}
+  >
+    Gender <span className="text-red-600">*</span>
+  </label>
+
+  <select
+    name="director_gender"
+    value={director.director_gender || ""}
+    onChange={(e) => handleDirectorChange(index, e)}
+    className={`bg-gray-50 mt-4 border text-sm rounded-lg w-full p-2.5 ${
+      errors?.director?.[index]?.director_gender
+        ? "border-red-500"
+        : "border-gray-300"
+    }`}
+  >
+    <option value="">Select Gender</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+  </select>
+
+  {errors?.director?.[index]?.director_gender && (
+    <span className="text-sm text-red-500">
+      {errors.director[index].director_gender}
+    </span>
+  )}
+</div>
+
               <div className="relative">
                 <input
                   type="text"
@@ -1140,7 +1204,7 @@ focus:outline-none focus:ring-0 ${
                   name="director_pan_no"
                   value={director.director_pan_no}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                  className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                     errors?.director?.[index]?.director_pan_no
                       ? "border-red-500"
@@ -1165,24 +1229,29 @@ focus:outline-none focus:ring-0 ${
                   </span>
                 )}
               </div>
-              <div className="relative">
-<input
-      type="file"
-      name="user_pan_doc"
-      className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-focus:outline-none focus:ring-0"
-      onChange={(e) => handleDirectorFileChange(index, e)}
-    />
+<div className="relative">
+  <input
+    type="file"
+    name="user_pan_doc"
+    onChange={(e) => handleDirectorFileChange(index, e)}
+    className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm bg-transparent rounded-lg appearance-none focus:outline-none focus:ring-0
+      ${errors?.director?.[index]?.user_pan_doc
+        ? "border border-red-500"
+        : "border border-gray-300"
+      }`}
+  />
 
+  <label className="absolute text-sm text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 px-2">
+    Document Of PAN Card <span className="text-red-600">*</span>
+  </label>
 
+  {errors?.director?.[index]?.user_pan_doc && (
+    <span className="text-sm text-red-500">
+      {errors.director[index].user_pan_doc}
+    </span>
+  )}
+</div>
 
-                <label
-                  for="floating_outlined_director_pan_doc"
-                  className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                >
-                  Document Of Pan Card <span className="text-red-600">*</span>
-                </label>
-              </div>
               <div className="relative">
                 <input
                   type="number"
@@ -1190,7 +1259,7 @@ focus:outline-none focus:ring-0"
                   name="director_aadhar_no"
                   value={director.director_aadhar_no}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                  className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                     errors?.director?.[index]?.director_aadhar_no
                       ? "border-red-500"
@@ -1215,23 +1284,31 @@ focus:outline-none focus:ring-0 ${
                   </span>
                 )}
               </div>
-              <div className="relative">
-    <input
-      type="file"
-      name="user_addhar_doc"
-      className="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-focus:outline-none focus:ring-0"
-      onChange={(e) => handleDirectorFileChange(index, e)}
-    />
+  <div className="relative">
+  <input
+    type="file"
+    name="user_addhar_doc"
+    onChange={(e) => handleDirectorFileChange(index, e)}
+    className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm bg-transparent rounded-lg appearance-none focus:outline-none focus:ring-0
+      ${errors?.director?.[index]?.user_addhar_doc
+        ? "border border-red-500"
+        : "border border-gray-300"
+      }`}
+  />
 
-                <label
-                  for="floating_outlined_director_aadhar_doc"
-                  className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                >
-                  Document Of Aadhar Card{" "}
-                  <span className="text-red-600">*</span>
-                </label>
-              </div>
+  <label
+    className="absolute text-sm text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 px-2"
+  >
+    Document Of Aadhaar Card <span className="text-red-600">*</span>
+  </label>
+
+  {errors?.director?.[index]?.user_addhar_doc && (
+    <span className="text-sm text-red-500">
+      {errors.director[index].user_addhar_doc}
+    </span>
+  )}
+</div>
+
               <div className="relative">
                 <input
                   type="date"
@@ -1239,7 +1316,7 @@ focus:outline-none focus:ring-0"
                   name="director_dob"
                   value={director.director_dob}
                   onChange={(e) => handleDirectorChange(index, e)}
-                  className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
+                  className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
 focus:outline-none focus:ring-0 ${
                     errors?.director?.[index]?.director_dob
                       ? "border-red-500"
@@ -1302,7 +1379,7 @@ focus:outline-none focus:ring-0 ${
                           type="file"
                           accept="video/*"
                           onChange={handleVideoChange}
-                          className="hidden"
+                          className="hidden   "
                           id="video_kyc_upload"
                         />
                         <label

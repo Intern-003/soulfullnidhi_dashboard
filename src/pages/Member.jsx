@@ -172,21 +172,24 @@
           </span>
           ),
           kyc:item.kyc === 1 ? (
-              <span className="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
-                Verified
-              </span>
-          ) : (
-            <button
-              className="px-3 py-1 text-sm font-semibold text-orange-700 bg-orange-100 rounded-full hover:bg-orange-200"
-             onClick={() => 
-             {
-               localStorage.setItem("merchantId", item.id);
-               memberVerify(`/VerifyMerchant/${item.id}`);
-             }}
-            >
-              Verify
-            </button>
-          ),
+          <span className="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
+            Verified
+          </span>
+        ) : item.kyc_rejected === 1 ? (
+          <span className="px-3 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded-full">
+            Rejected
+          </span>
+        ) : (
+          <button
+            className="px-3 py-1 text-sm font-semibold text-orange-700 bg-orange-100 rounded-full hover:bg-orange-200 cursor-pointer transition"
+            onClick={() => {
+              localStorage.setItem("merchantId", item.id);
+              memberVerify(`/VerifyMerchant/${item.id}`);
+            }}
+          >
+            Verify
+          </button>
+        ),
           payin_bank: payinBank,
           payin: item.payin_status,
         

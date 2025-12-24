@@ -18,11 +18,14 @@ export const VerifyMerchant = () => {
     const [airpayMids, setAirpayMids] = useState([]);
     const toast = useToast();
   const { id } = useParams();
+  console.log("Merchant ID:", id);
+
   const navigate = useNavigate();
 
   const { data: response, loading, error } = useGet(
     id ? `/show-merchant/${id}` : null
   );
+  console.log("merchant response",response);
     const { execute: updateMerchant } = usePost("/update-merchant-scheme");
 // Payin Banks (for "Payin at Onboard")
 const { data: payinBanks, refetch: refetchPayin } = useGet(
@@ -139,7 +142,27 @@ const handleApproveOnboard = async () => {
     toast.error(apiMessage);
   }
 };
+const handleReject = async () => {
+  try {
+    setErrors(null);
 
+    await updateMerchant({id:memberFormData.id,kyc_rejected:true});
+
+    toast.success("KYC Rejected Successfully");
+
+    navigate(-1);
+
+  } catch (err) {
+    console.error("Reject error:", err);
+
+    const apiMessage =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Something went wrong";
+
+    toast.error(apiMessage);
+  }
+};
 
 
   const merchant = response?.data;
@@ -160,49 +183,61 @@ const handleApproveOnboard = async () => {
     );
   }
 
-  const DocumentPreview = ({ label, filePath }) => {
-    if (!filePath) return <span className="text-gray-400 text-sm">Not uploaded</span>;
- 
+const DocumentPreview = ({ label, filePath }) => {
+  if (!filePath)
+    return <span className="text-gray-400 text-sm">Not uploaded</span>;
 
-      const BASE_URL = "https://uatfintech.spay.live";
+  const BASE_URL = "https://uatfintech.spay.live";
 
-      const fullUrl = filePath.startsWith("http")
-        ? filePath
-        : `${BASE_URL}/${filePath.replace(/^\/+/, "")}`;
-    const isImage = /\.(jpg|jpeg|png)$/i.test(filePath);
-    const isVideo = filePath.includes('videokyc/');
-
-    return (
-      <div>
-        <p className="text-xs font-medium text-gray-600 mb-1">{label}</p>
-        {isImage && (
-          <a href={fullUrl} target="_blank" rel="noopener noreferrer">
-            <img
-              src={fullUrl}
-              alt={label}
-              className="w-full max-w-sm rounded-md shadow hover:shadow-md transition"
-            />
-          </a>
-        )}
-        {isVideo && (
-          <video controls className="w-full max-w-xl rounded-md shadow mt-2">
-            <source src={fullUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        )}
-        {!isImage && !isVideo && (
-          <a
-            href={fullUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-blue-600 hover:underline"
-          >
-            View/Download File
-          </a>
-        )}
-      </div>
-    );
+  // 🚀 FIX: convert server path → public URL
+  const normalizePath = (path) => {
+    // remove server root till /storage
+    const storageIndex = path.indexOf("/storage/");
+    if (storageIndex !== -1) {
+      return BASE_URL + path.substring(storageIndex);
+    }
+    return path.startsWith("http") ? path : `${BASE_URL}/${path}`;
   };
+
+  const fullUrl = normalizePath(filePath);
+
+  const isImage = /\.(jpg|jpeg|png)$/i.test(fullUrl);
+  const isVideo = fullUrl.includes("videokyc");
+
+  return (
+    <div>
+      <p className="text-xs font-medium text-gray-600 mb-1">{label}</p>
+
+      {isImage && (
+        <a href={fullUrl} target="_blank" rel="noopener noreferrer">
+          <img
+            src={fullUrl}
+            alt={label}
+            className="w-full max-w-sm rounded-md shadow hover:shadow-md transition"
+          />
+        </a>
+      )}
+
+      {isVideo && (
+        <video controls className="w-full max-w-xl rounded-md shadow mt-2">
+          <source src={fullUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {!isImage && !isVideo && (
+        <a
+          href={fullUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          View / Download File
+        </a>
+      )}
+    </div>
+  );
+};
+
 
   return (
     <div className="w-full py-6 px-4"
@@ -232,8 +267,8 @@ const handleApproveOnboard = async () => {
         {/* Main Content */}
         <div className="bg-[#ecf3ff] rounded-b-xl shadow-md p-6">
           {/* Basic Info */}
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Basic Information</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8 text-sm">
+          <h2 className="text-lg font-semibold mb-4 text-[#1d3a96] ">Basic Information</h2>
+          <div className="grid  p-7 bg-white grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8 text-sm">
             <div>
               <p className="text-gray-500">Business Name</p>
               <p className="font-medium">{merchant.name}</p>
@@ -265,8 +300,8 @@ const handleApproveOnboard = async () => {
           </div>
 
           {/* Company & Bank */}
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Company & Bank Details</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8 text-sm">
+          <h2 className="text-lg font-semibold text-[#1d3a96]  mb-4">Company & Bank Details</h2>
+          <div className="grid  p-7 bg-white grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8 text-sm">
             <div>
               <p className="text-gray-500">Company PAN</p>
               <p className="font-medium">{merchant.company_pan_no}</p>
@@ -304,16 +339,16 @@ const handleApproveOnboard = async () => {
           </div>
 
           {/* Documents */}
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Uploaded Documents</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <h2 className="text-lg font-semibold text-[#1d3a96]  mb-4">Uploaded Documents</h2>
+          <div className="grid  p-7 bg-white grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <DocumentPreview label="Company PAN" filePath={merchant.company_pan_no_doc} />
             <DocumentPreview label="GST Document" filePath={merchant.company_gst_no_doc} />
             <DocumentPreview label="Cancelled Cheque" filePath={merchant.cancel_cheque_doc} />
           </div>
 
           {/* Video KYC */}
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Video KYC</h2>
-          <div className="mb-8">
+          <h2 className="text-lg font-semibold text-[#1d3a96] mb-4">Video KYC</h2>
+          <div className="mb-8  p-7 bg-white">
             <DocumentPreview label="Video Recording" filePath={merchant.video_kyc} />
           </div>
 
@@ -364,10 +399,10 @@ const handleApproveOnboard = async () => {
    
 
 <div>
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                <h2 className="text-lg font-semibold text-[#1d3a96]  mb-4">
                 Add Scheme and Bank
               </h2>
-<div className="grid gap-6 mb-6 md:grid-cols-2 p-5">
+<div className="grid  p-7 bg-white gap-6 mb-6 md:grid-cols-2 p-5">
     {/* ==================== Payin at Onboard ==================== */}
 
     <div className="flex items-center gap-4 mb-4">
@@ -538,7 +573,7 @@ const handleApproveOnboard = async () => {
   </div></div>
             <div className="mt-10 pt-6 border-t flex justify-end gap-3">
             <Button className="px-6 py-2.5 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
-            onClick={() => navigate(-1)}
+            onClick={handleReject}
               >
               Reject Application
             </Button>
