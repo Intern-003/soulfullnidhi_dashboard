@@ -23,16 +23,12 @@ import FileUpload from "../pages/FileUpload";
 import { Profile } from "../pages/Profile";
 import Layout from "../components/Layout";
 import PrivateRoute from "../components/PrivateRoute";
-import SpayGlidePGWidget from "../pages/SpayGlidePGWidget";
-import SpayGlidePGCancel from "../pages/SpayGlidePGCancel";
-import SpayGlidePGSuccess from "../pages/SpayGlidePGSuccess";
-import SpayGlidePGError from "../pages/SpayGlidePGError";
 import MerchantDetails from "../pages/MerchantDetails";
 import PublicLayout from "../components/PublicLayout";
 import Register from "../pages/Register";
 import { Kyc } from "../pages/Kyc";
 import { VerifyMerchant } from "../pages/VerifyMerchant";
-
+import { PendingVerificationModal } from "../components/PendingVerificationModal";
 
 const AppRoutes = () => {
     return(
@@ -49,6 +45,10 @@ const AppRoutes = () => {
     <Route 
       path="/kyc" 
       element={<Kyc  />} 
+    />
+        <Route 
+      path="/PendingVerificationModal" 
+      element={<PendingVerificationModal  />} 
     />
                  {/* <Route
                     path="/member-create"

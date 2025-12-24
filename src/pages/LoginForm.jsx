@@ -22,6 +22,9 @@ function LoginForm() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const channelRef = useRef(null);
+  const [modalHeading, setModalHeading] = useState("");
+  const [modalBody, setModalBody] = useState("");
+
 
   const { execute: login, error, loading } = usePost("/login");
 
@@ -90,14 +93,24 @@ function LoginForm() {
         }else if(user.kyc === 0 && user.pre_kyc === 0){
              alert("Please complete KYC first!");
              navigate("/kyc", { replace: true ,state: { user } });
-        }else{
+        }else if (user.pre_kyc === 1 && user.kyc === 0) {
+    // Show modal with dynamic content
+          setModalHeading(user.kyc_rejected === 1 ? "KYC Rejected" : "KYC Pending Approval");
+          setModalBody(
+              user.kyc_rejected === 1
+                  ? "Your KYC has been rejected by the admin. Please contact support or re-submit your documents."
+                  : "Your KYC has been submitted successfully. Please wait up to 24 hours for admin approval."
+          );
           setprekycmodal(true);
-        }
+      }
       }
     } catch (err) {
       console.log("Login failed:", err);
     }
   };
+
+
+
 
   return (
     <>
@@ -161,7 +174,7 @@ function LoginForm() {
           >
             {loading ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Signing in...</span> : "Sign in"}
           </button>
-          <p className="text-center">New to Spay? <span onClick={() => navigate("/register")}>Create an account</span></p>
+          <p className="text-center">New to Spay? <span className="text-blue-800" onClick={() => navigate("/register")}>Create an account</span></p>
         </form>
       </div>
     </section>
@@ -172,8 +185,8 @@ function LoginForm() {
       setprekycmodal(false);
       navigate("/");
     } }
-    heading="KYC Completed Successfully"
-    body="Your KYC has been completed. Please wait for 24 to 48 hours for admin approval to activate your account."
+    heading={modalHeading}
+    body={modalBody}
      confirmText="OK"
      showCancel={false}
 
