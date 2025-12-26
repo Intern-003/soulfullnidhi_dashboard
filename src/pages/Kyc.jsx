@@ -22,6 +22,9 @@ console.log("user data",user);
 const singlemerchant = location.state?.merchant || {};
 console.log("single merchant",singlemerchant);
 
+
+
+
   const [memberFormData, setMemberFormData] = useState({
     id: user.id || singlemerchant.id || "",
     name: user.name || singlemerchant.name ||"",
@@ -62,6 +65,42 @@ console.log("single merchant",singlemerchant);
     scheme_id: "",
 
   });
+
+// Add this useEffect near the top
+useEffect(() => {
+  // Restore from localStorage
+  const saved = localStorage.getItem("kycFormData");
+  if (saved) {
+    const data = JSON.parse(saved);
+    setMemberFormData(prev => ({ ...prev, ...data }));
+  }
+
+  // Warn before refresh
+  const warn = (e) => {
+    e.preventDefault();
+    e.returnValue = "";
+  };
+  window.addEventListener("beforeunload", warn);
+  return () => window.removeEventListener("beforeunload", warn);
+}, []);
+
+// Auto-save text fields
+useEffect(() => {
+  const savable = { ...memberFormData };
+  delete savable.video_kyc;
+  delete savable.company_pan_no_doc;
+  delete savable.company_gst_no_doc;
+  delete savable.cancel_cheque_doc;
+  savable.director_info = savable.director_info.map(d => ({
+    director_name: d.director_name,
+    director_pan_no: d.director_pan_no,
+    director_aadhar_no: d.director_aadhar_no,
+    director_gender: d.director_gender,
+    director_dob: d.director_dob,
+  }));
+
+  localStorage.setItem("kycFormData", JSON.stringify(savable));
+}, [memberFormData]);
 
 const stepRequiredFields = {
   1: [
@@ -151,21 +190,30 @@ const validationRules = {
     pattern: numberRegex,
     message: "Business MCC must be 4 digits",
   },
-  city: {
-    required: true,
-    pattern: textRegex,
-    message: "City name is not valid",
-  },
-  state: {
-    required: true,
-    pattern: textRegex,
-    message: "State name is not valid",
-  },
-  district: {
-    required: true,
-    pattern: textRegex,
-    message: "District name is not valid",
-  },
+city: { 
+  required: true, 
+  minLength: 2, 
+  pattern: /^[A-Za-z ]+$/, 
+  message: "Valid city name required" 
+},
+  state: { 
+    required: true, 
+    minLength: 2,
+     pattern: /^[A-Za-z ]+$/,
+      message: "Valid state name required"
+     },
+  district: { 
+    required: true, 
+    minLength: 2, 
+    pattern: /^[A-Za-z ]+$/, 
+    message: "Valid district name required"
+   },
+  address: { 
+    required: true, 
+    minLength: 10,
+     message: "Address must be at least 10 characters" 
+    },
+
   pin_code: {
     required: true,
     pattern: pinnumberRegex,
@@ -241,7 +289,22 @@ user_addhar_doc: {
   required: true,
   message: "Aadhaar document is required",
 },
-
+company_type: { 
+  required: true, 
+  message: "Please select company type"
+ },
+date_of_incorporation: {
+   required: true,
+    message: "Date of incorporation is required"
+   },
+director_gender: { 
+  required: true,
+   message: "Please select gender"
+   },
+director_dob: { 
+  required: true, 
+  message: "Date of birth is required" 
+},
 
   // 🎥 Video KYC
   video_kyc: {
@@ -375,22 +438,58 @@ const handleDirectorChange = (index, e) => {
   };
 const handleCompanyFileChange = (e) => {
   const { name, files } = e.target;
+  const file = files?.[0];
+
+  if (!file) {
+    setMemberFormData((prev) => ({ ...prev, [name]: null }));
+    return;
+  }
+
+  // Allow only PDF
+  if (file.type !== "application/pdf") {
+    toast.error(`Only PDF files are allowed for ${name.replace(/_/g, " ")}`);
+    e.target.value = ""; // Clear input
+    return;
+  }
+
+  // Optional: Size limit (e.g., 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error("File size should be less than 5MB");
+    e.target.value = "";
+    return;
+  }
+
   setMemberFormData((prev) => ({
     ...prev,
-    [name]: files?.[0] || null, // only keep real file
+    [name]: file,
   }));
-  // console.log(name, files?.[0]); // verify
 };
 
 const handleDirectorFileChange = (index, e) => {
   const { name, files } = e.target;
-  setMemberFormData((prev) => {
-    const updatedDirectors = [...prev.director_info];
-    updatedDirectors[index][name] = files?.[0] || null;
-    return { ...prev, director_info: updatedDirectors };
+  const file = files?.[0];
+
+  if (!file) return;
+
+  if (file.type !== "application/pdf") {
+    toast.error("Only PDF files are allowed!");
+    e.target.value = "";
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error("File size must be under 5MB");
+    e.target.value = "";
+    return;
+  }
+
+  setMemberFormData(prev => {
+    const updated = [...prev.director_info];
+    updated[index][name] = file;
+    return { ...prev, director_info: updated };
   });
-  // console.log(`Director ${index} ${name}`, files?.[0]);
 };
+
 
 const handleVideoChange = (e) => {
     const file = e.target.files[0];
