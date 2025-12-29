@@ -8,6 +8,8 @@ import { MONTH_NAMES } from "../constants/Constants";
 const ApiSetting = () => {
   const [activeTab, setActiveTab] = useState("apiToken");
   const [apiToken, setApiToken] = useState([]);
+  const [showIpModal, setShowIpModal] = useState(false);
+const [ipAddress, setIpAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const Toast = useToast();
   const [PayinWebHook, setPayinWebHook] = useState("");
@@ -63,22 +65,51 @@ const ApiSetting = () => {
     { header: "Date", accessor: "date" },
   ];
 
-  const handleGenerateToken = async (e) => {
-    e.preventDefault();
-    setIsLoading(true); // start loading
+const isValidIP = (ip) => {
+  const ipv4Regex =
+    /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
 
-    try {
-      const res = await execute({});
-      if (res.message == "Auth token generated successfully") {
-        Toast.success("Token Generated Successfully");
-        refetchApiTokens();
-      }
-    } catch (err) {
-      console.error("Error generating token:", err);
-    } finally {
-      setIsLoading(false); // stop loading after response
+  const ipv6Regex =
+    /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::1)$/;
+
+  return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+};
+
+const handleGenerateToken = async () => {
+  if (!ipAddress) {
+    Toast.error("Please enter IP address");
+    return;
+  }
+
+  if (!isValidIP(ipAddress)) {
+    Toast.error("Please enter a valid IP address");
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const res = await execute({
+      ip: ipAddress,
+    });
+
+    if (res.message === "Auth token generated successfully") {
+      Toast.success("Token Generated Successfully");
+      refetchApiTokens();
+      setShowIpModal(false);
+      setIpAddress("");
     }
-  };
+  } catch (err) {
+    console.error("Error generating token:", err);
+    Toast.error("Failed to generate token");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
+
 const {data:WebhookUrl, loading:WebHookLoading} = useGet("/show-merchant");
 useEffect(()=>{
   if(WebhookUrl){
@@ -103,9 +134,55 @@ const handleSaveWebhook = async () => {
     Toast.error("Failed to update webhook!");
   }
 };
+
+
+
+
   return (
     <div className="p-6 mx-auto">
+{showIpModal && (
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
+    <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        Generate Token
+      </h3>
+
+      <div className="mb-4">
+        <label className="block mb-2 text-sm font-medium text-gray-700">
+          IP Address
+        </label>
+        <input
+          type="text"
+          placeholder="Enter IP address"
+          value={ipAddress}
+          onChange={(e) => setIpAddress(e.target.value)}
+          className="w-full p-2.5 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowIpModal(false)}
+          className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleGenerateToken}
+          disabled={isLoading || !ipAddress}
+          className="px-4 py-2 text-sm text-white rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
+        >
+          {isLoading ? "Generating..." : "Generate"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       {/* Tabs */}
+
       <div className="flex border-b mb-4">
         <button
           className={`flex items-center gap-2 px-4 py-2 font-medium transition ${
@@ -138,7 +215,7 @@ const handleSaveWebhook = async () => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Manage API Tokens</h2>
 
-              <button
+              {/* <button
                 onClick={handleGenerateToken}
                 disabled={isLoading}
                 type="button"
@@ -191,7 +268,15 @@ const handleSaveWebhook = async () => {
                   </svg>
                 )}
                 {isLoading ? "Generating..." : "Generate New Token"}
-              </button>
+              </button> */}
+              <button
+                  type="button"
+                  onClick={() => setShowIpModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-5 py-2.5"
+                >
+                  Generate New Token
+                </button>
+
             </div>
 
             <Table
@@ -263,7 +348,10 @@ const handleSaveWebhook = async () => {
         )}
       </div>
     </div>
+    
+    
   );
+  
 };
 
 export default ApiSetting;
