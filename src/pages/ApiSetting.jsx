@@ -111,6 +111,7 @@ const handleGenerateToken = async () => {
 
 
 const {data:WebhookUrl, loading:WebHookLoading} = useGet("/show-merchant");
+console.log("show merchant data",WebhookUrl);
 useEffect(()=>{
   if(WebhookUrl){
     setPayinWebHook(WebhookUrl?.data?.payin_callback || " ");

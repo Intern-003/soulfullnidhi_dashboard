@@ -4,8 +4,6 @@ import Button from "../components/Button";
 import { usePost } from "../hooks/usePost";
 import useAutoFetch from "../hooks/useAutoFetch";
 
-
-
 export const PayinRequest = () => {
   const [payerName, setPayerName] = useState("");
   const [amount, setAmount] = useState("");
@@ -23,10 +21,10 @@ export const PayinRequest = () => {
   const { data } = useAutoFetch("/collection-record");
   const { execute: executePayin, loading } = usePost("/Airpay/request");
   const { execute: executeCheckStatus } = usePost("/payin/status");
-console.log("collection records",data);
-// const payin_wallet = collection_data?.data;
+  console.log("collection records", data);
+  // const payin_wallet = collection_data?.data;
 
-const payingAmount = data?.PayingAmount ?? "0.00";
+  const payingAmount = data?.PayingAmount ?? "0.00";
   // Generate unique order ID on mount
   useEffect(() => {
     const uniqueOrderId = `DSB${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -52,17 +50,17 @@ const payingAmount = data?.PayingAmount ?? "0.00";
         setPayerName("");
         setPayerMobile("");
         setPayerEmail("");
-        const uniqueOrderId = `DSB${Date.now()}${Math.floor(Math.random() * 1000)}`;
+        const uniqueOrderId = `DSB${Date.now()}${Math.floor(
+          Math.random() * 1000
+        )}`;
         setPayerOrderId(uniqueOrderId);
       }, 5000);
       return () => clearTimeout(timer);
     }
-
-
   }, [showSuccess, showFailed]);
-    
 
   const handlePayinSubmit = async () => {
+    if (qrUrl || orderId) return;
     if (Number(amount) < 10) {
       setAmountError("Amount must be at least ₹10");
       return;
@@ -116,29 +114,45 @@ const payingAmount = data?.PayingAmount ?? "0.00";
       console.error(err);
     }
   };
+  const isFormValid =
+    payerName.trim().length >= 3 &&
+    Number(amount) >= 10 &&
+    payerMobile.length === 10 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payerEmail);
+
+  // resret qr
+  const resetPayinState = () => {
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+
+    setQrUrl("");
+    setOrderId("");
+    setShowSuccess(false);
+    setShowFailed(false);
+
+    // generate NEW order id
+    const newOrderId = `DSB${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    setPayerOrderId(newOrderId);
+  };
 
   return (
-    <div className="p-6 space-y-6"> 
+    <div className="p-6 space-y-6">
       {/* Header */}
       {/* <h1>Payin wallet {payingAmount}</h1> */}
 
+      <div
+        className="rounded-lg p-4 shadow-md flex items-center"
+        style={{
+          background: "linear-gradient(250deg, #2a91d9 0%, #0555afff 100%)",
+        }}
+      >
+        {/* Left Side */}
+        <div className="flex-1">
+          <h4 className="text-white font-bold text-xl">Load Wallet</h4>
+        </div>
 
-
-
-
-<div
-  className="rounded-lg p-4 shadow-md flex items-center"
-  style={{ background: 'linear-gradient(250deg, #2a91d9 0%, #0555afff 100%)' }}
->
-  {/* Left Side */}
-  <div className="flex-1">
-    <h4 className="text-white font-bold text-xl">
-      Load Wallet 
-    </h4>
-  </div>
-
-  {/* Right Side */}
-  {/* <div className="flex-1 flex justify-end">
+        {/* Right Side */}
+        {/* <div className="flex-1 flex justify-end">
     <div className="flex items-center bg-gray-100 px-4 py-2 rounded-lg shadow-md">
       <h1 className="text-lg font-semibold mr-3">Payin Wallet :</h1>
       <span className="text-lg font-semibold text-indigo-600">
@@ -146,8 +160,7 @@ const payingAmount = data?.PayingAmount ?? "0.00";
       </span>
     </div>
   </div> */}
-</div>
-
+      </div>
 
       {/* Form */}
       {!qrUrl && !showSuccess && !showFailed && (
@@ -156,34 +169,52 @@ const payingAmount = data?.PayingAmount ?? "0.00";
             <div className="relative w-full">
               <input
                 type="text"
-                
                 value={payerName}
-                onChange={(e) => setPayerName(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  // allow only letters & spaces
+                  if (!/^[a-zA-Z\s]*$/.test(value)) return;
+
+                  setPayerName(value);
+                }}
                 className="block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 bg-transparent focus:outline-none focus:border-blue-600 peer"
-                placeholder=" " // important for peer-focus & floating label
+                placeholder=" "
               />
-              <label className={`absolute left-0 text-gray-500 text-sm transition-all duration-200
+
+              <label
+                className={`absolute left-0 text-gray-500 text-sm transition-all duration-200
                 ${payerName ? "-top-3 text-blue-600 text-xs" : "top-2"} 
-                peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm`}>
+                peer-placeholder-shown:top-2 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm`}
+              >
                 Payer Name
               </label>
             </div>
 
             <div className="relative w-full">
-            <input
-              type="number"
-              required
-              value={amount}
-              onChange={(e) => {
-                const val = e.target.value;
-                setAmount(val);
-                setAmountError(Number(val) < 10 ? "Amount must be at least ₹10" : "");
-              }}
-              className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-blue-600 focus:outline-none placeholder-transparent"
-              placeholder=" "
-            />
-            <label
-              className="
+              <input
+                type="text"
+                required
+                value={amount}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  // allow only numbers
+                  if (!/^\d*$/.test(value)) return;
+
+                  setAmount(value);
+                  setAmountError(
+                    value && Number(value) < 10
+                      ? "Amount must be at least ₹10"
+                      : ""
+                  );
+                }}
+                className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-blue-600 focus:outline-none placeholder-transparent"
+                placeholder=" "
+              />
+
+              <label
+                className="
                 absolute left-0 text-gray-500 text-sm 
                 transition-all duration-200
                 peer-placeholder-shown:top-2
@@ -193,28 +224,42 @@ const payingAmount = data?.PayingAmount ?? "0.00";
                 peer-valid:-top-3
                 peer-valid:text-blue-600
               "
-            >
-              Amount
-            </label>
-            {amountError && <p className="text-red-600 text-sm mt-1">{amountError}</p>}
-          </div>
+              >
+                Amount
+              </label>
+              {amountError && (
+                <p className="text-red-600 text-sm mt-1">{amountError}</p>
+              )}
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-          {/* Mobile Number */}
-          <div className="relative w-full">
-            <input
-              type="tel"
-              required
-              value={payerMobile}
-              onChange={(e) => setPayerMobile(e.target.value)}
-              className="peer block w-full border-b-2 border-gray-300 py-2 px-0
-                        text-gray-900 focus:border-blue-600 focus:outline-none 
-                        placeholder-transparent"
-              placeholder=" "
-            />
-            <label
-              className="
+            {/* Mobile Number */}
+            <div className="relative w-full">
+              <input
+                type="text"
+                inputMode="numeric"
+                required
+                value={payerMobile}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  // allow digits only
+                  if (!/^\d*$/.test(value)) return;
+
+                  // max 10 digits
+                  if (value.length > 10) return;
+
+                  setPayerMobile(value);
+                }}
+                className="peer block w-full border-b-2 border-gray-300 py-2 px-0
+            text-gray-900 focus:border-blue-600 focus:outline-none 
+            placeholder-transparent"
+                placeholder=" "
+              />
+
+              <label
+                className="
                 absolute left-0 text-gray-500 text-sm transition-all duration-200
 
                 peer-placeholder-shown:top-2
@@ -226,21 +271,28 @@ const payingAmount = data?.PayingAmount ?? "0.00";
                 peer-valid:-top-3
                 peer-valid:text-blue-600
               "
-            >
-              Mobile Number
-            </label>
-          </div>
+              >
+                Mobile Number
+              </label>
+            </div>
 
-          {/* Email */}
+            {/* Email */}
             <div className="relative w-full">
               <input
                 type="email"
                 required
                 value={payerEmail}
-                onChange={(e) => setPayerEmail(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  // prevent spaces
+                  if (/\s/.test(value)) return;
+
+                  setPayerEmail(value);
+                }}
                 className="peer block w-full border-b-2 border-gray-300 py-2 px-0
-                          text-gray-900 focus:border-blue-600 focus:outline-none 
-                          placeholder-transparent"
+            text-gray-900 focus:border-blue-600 focus:outline-none 
+            placeholder-transparent"
                 placeholder=" "
               />
 
@@ -255,12 +307,18 @@ const payingAmount = data?.PayingAmount ?? "0.00";
                 Email
               </label>
             </div>
-        </div>
+          </div>
 
           <div className="flex justify-center mt-4">
             <Button
               onClick={handlePayinSubmit}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 py-2 shadow-md"
+              disabled={!isFormValid || loading}
+              className={`rounded-lg px-6 py-2 shadow-md text-white
+                  ${
+                    !isFormValid || loading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
             >
               {loading ? "Submitting..." : "Submit"}
             </Button>
@@ -272,9 +330,14 @@ const payingAmount = data?.PayingAmount ?? "0.00";
       {qrUrl && (
         <div className="flex justify-center">
           <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-200">
-            <h3 className="text-gray-800 font-semibold text-lg mb-4">Scan to Pay</h3>
+            <h3 className="text-gray-800 font-semibold text-lg mb-4">
+              Scan to Pay
+            </h3>
             <img src={qrUrl} alt="UPI QR Code" className="w-64 h-64 mb-4" />
-            <Button onClick={() => setQrUrl("")} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            <Button
+              onClick={resetPayinState}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            >
               Back
             </Button>
           </div>
@@ -285,7 +348,9 @@ const payingAmount = data?.PayingAmount ?? "0.00";
       {showSuccess && (
         <div className="flex justify-center">
           <div className="bg-green-100 w-72 h-72 rounded-full shadow-lg flex flex-col items-center justify-center border border-green-300">
-            <h2 className="text-green-800 font-bold text-lg">Payment Successful!</h2>
+            <h2 className="text-green-800 font-bold text-lg">
+              Payment Successful!
+            </h2>
           </div>
         </div>
       )}
