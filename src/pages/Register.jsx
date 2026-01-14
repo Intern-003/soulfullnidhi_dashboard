@@ -21,12 +21,13 @@ const FloatingInput = ({
   disabled = false,
   className = "",
   error = "",
+  noFloat = false,
   ...props
 }) => {
   const hasValue = value && value.length > 0;
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <input
         {...props}
         type={type}
@@ -34,34 +35,40 @@ const FloatingInput = ({
         onChange={onChange}
         disabled={disabled}
         required={required}
-        placeholder=" "
+        placeholder={noFloat ? placeholder : " "}
         className={`
-          peer w-full h-12 px-5 pt-6 pb-2 rounded-xl border 
-          bg-white text-gray-900 placeholder-transparent text-sm
+          peer w-full h-11 px-4 rounded-xl border 
+          bg-white text-gray-900 text-sm leading-tight
           focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all duration-200
           disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
+          ${noFloat ? "py-2.5" : "pt-6 pb-2"}
           ${error 
             ? "border-red-500 focus:border-red-500 focus:ring-red-500/30" 
             : "border-gray-300 focus:border-blue-600 focus:ring-blue-500/20"}
           ${className}
         `}
       />
-      <label
-        className={`
-          absolute left-5 pointer-events-none transition-all duration-200 text-sm
-          ${hasValue || props.autoFocus
-            ? "top-2 text-xs font-medium"
-            : "top-4 text-gray-500"}
-          peer-focus:top-2 peer-focus:text-xs peer-focus:font-medium
-          ${error ? "text-red-600" : "text-gray-500 peer-focus:text-blue-600"}
-        `}
-      >
-        {placeholder}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
+
+      {/* Floating label ONLY when enabled */}
+      {!noFloat && (
+        <label
+          className={`
+            absolute left-4 pointer-events-none transition-all duration-200 text-sm
+            ${hasValue || props.autoFocus
+              ? "top-2 text-xs font-medium"
+              : "top-3.5 text-gray-500"}
+            peer-focus:top-2 peer-focus:text-xs peer-focus:font-medium
+            ${error ? "text-red-600" : "text-gray-500 peer-focus:text-blue-600"}
+          `}
+        >
+          {placeholder}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+      )}
     </div>
   );
 };
+
 
 const Register = () => {
   const navigate = useNavigate();
@@ -423,7 +430,7 @@ return (
 
             {/* Email */}
             <FloatingInput
-              placeholder={emailOtpSent ? "Check your inbox 📧" : "Business Email"}
+              placeholder={emailOtpSent ? "Check your inbox " : "Business Email"}
               type="email"
               value={formData.email}
               onChange={e => {
@@ -460,7 +467,7 @@ return (
                   </span>
 
                   <FloatingInput
-                    placeholder={mobileOtpSent ? "Check messages 📱" : "Mobile Number"}
+                    placeholder={mobileOtpSent ? "Check messages " : "Mobile Number"}
                     type="tel"
                     value={formData.mobile}
                     onChange={e => setFormData({
