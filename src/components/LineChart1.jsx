@@ -1,128 +1,240 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 
 export const LineChart1 = ({ data }) => {
   const chartRef = useRef(null);
+  const chartInstance = useRef(null);
 
-    useEffect(() => {
-        // console.log("👉 Raw API data received in LineChart:", data);
-    }, [data]);
+  const [showPayin, setShowPayin] = useState(true);
+  const [showPayout, setShowPayout] = useState(true);
 
- // Default 12 months
-const DEFAULT_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  // ================= MONTH CONSTANTS =================
+  const DEFAULT_MONTHS = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
 
-// Map full month names to short names
-const MONTH_MAP = {
-  January: "Jan", February: "Feb", March: "Mar", April: "Apr",
-  May: "May", June: "Jun", July: "Jul", August: "Aug",
-  September: "Sep", October: "Oct", November: "Nov", December: "Dec"
-};
+  const MONTH_MAP = {
+    January: "Jan", February: "Feb", March: "Mar", April: "Apr",
+    May: "May", June: "Jun", July: "Jul", August: "Aug",
+    September: "Sep", October: "Oct", November: "Nov", December: "Dec",
+  };
 
-const chartData = useMemo(() => {
-  const dataMap = {};
+  // ================= FORMAT API DATA =================
+  const chartData = useMemo(() => {
+    const map = {};
 
-  if (Array.isArray(data) && data.length > 0) {
-    data.forEach((item) => {
-      // Remove year from month_name, e.g., "December 2025" → "December"
-      const monthFull = item.month_name?.split(" ")[0];
-      const month = MONTH_MAP[monthFull] || "Jan"; // normalize to short name
+    if (Array.isArray(data)) {
+      data.forEach((item) => {
+        const monthFull = item.month_name?.split(" ")[0];
+        const month = MONTH_MAP[monthFull] || "Jan";
 
-      dataMap[month] = {
-        payinAmount: Number(item.payin_amount) || 0,
-        // payinAmount:50000,
-        payinCount: Number(item.payin_count) || 0,
-        payoutAmount: Number(item.payout_amount) || 0,
-        // payoutAmount:987654321,
-        payoutCount: Number(item.payout_count) || 0,
-      };
+        map[month] = {
+          payinAmount: Number(item.payin_amount) || 0,
+          payinCount: Number(item.payin_count) || 0,
+          payoutAmount: Number(item.payout_amount) || 0,
+          payoutCount: Number(item.payout_count) || 0,
+        };
+      });
+    }
+
+    return DEFAULT_MONTHS.map((month) => ({
+      month_name: month,
+      payinAmount: map[month]?.payinAmount || 0,
+      payinCount: map[month]?.payinCount || 0,
+      payoutAmount: map[month]?.payoutAmount || 0,
+      payoutCount: map[month]?.payoutCount || 0,
+    }));
+  }, [data]);
+
+  const months = chartData.map((i) => i.month_name);
+
+  // ================= FORMATTERS =================
+  const formatShortIndian = (num) => {
+    if (num == null || num === 0) return "0";
+    const abs = Math.abs(num);
+
+    let value, unit;
+    if (abs >= 10000000) {        // ≥ 1 Cr
+      value = abs / 10000000;
+      unit = "Cr";
+    } else if (abs >= 100000) {   // ≥ 1 Lakh
+      value = abs / 100000;
+      unit = "L";
+    } else if (abs >= 1000) {
+      value = abs / 1000;
+      unit = "K";
+    } else {
+      value = abs;
+      unit = "";
+    }
+
+    // 1 decimal if small, else round to whole
+    const formatted = value < 10 ? value.toFixed(1) : Math.round(value).toString();
+
+    return (num < 0 ? "-" : "") + formatted + unit;
+  };
+
+  const formatFullIndian = (num) =>
+    Number(num).toLocaleString("en-IN", {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: num % 1 !== 0 ? 2 : 0,
     });
-  }
 
-  // Merge API data with default months so all months appear
-  return DEFAULT_MONTHS.map((month) => ({
-    month_name: month,
-    payinAmount: dataMap[month]?.payinAmount || 0,
-    payinCount:dataMap[month]?.payinCount || 0,
-    payoutAmount: dataMap[month]?.payoutAmount || 0,
-    payoutCount: dataMap[month]?.payoutCount || 0,
-    // payin: 1200,
-    // payout: 90
-  }));
-}, [data]);
+  // ================= DYNAMIC Y-MAX (only visible series) =================
+  const yAxisMax = useMemo(() => {
+    let values = [];
+    if (showPayin) values.push(...chartData.map((i) => i.payinAmount));
+    if (showPayout) values.push(...chartData.map((i) => i.payoutAmount));
 
-const months = chartData.map((i) => i.month_name);
-const payin = chartData.map((i) => i.payinAmount);
-const payout = chartData.map((i) => i.payoutAmount    );
+    const max = Math.max(...values, 0);
+    return max > 0 ? max * 1.12 : 10; // slight headroom
+  }, [chartData, showPayin, showPayout]);
 
+  // ================= SERIES =================
+  const series = useMemo(() => {
+    const s = [];
+    if (showPayin) {
+      s.push({ name: "Payin", data: chartData.map((i) => i.payinAmount) });
+    }
+    if (showPayout) {
+      s.push({ name: "Payout", data: chartData.map((i) => i.payoutAmount) });
+    }
+    // Prevent empty chart crash / ugly look
+    if (s.length === 0) {
+      s.push({ name: "No selection", data: Array(12).fill(0) });
+    }
+    return s;
+  }, [showPayin, showPayout, chartData]);
 
-  // Render ApexCharts
+  // ================= CHART =================
   useEffect(() => {
-    if (window.ApexCharts && chartRef.current) {
+    if (!window.ApexCharts || !chartRef.current) return;
 
-      const options = {
-        chart: {
-          height: 300,
-          type: "area",
-          toolbar: { show: false },
-          fontFamily: "Inter, sans-serif",
+    chartInstance.current?.destroy();
+
+    const options = {
+      chart: {
+        type: "area",
+        height: 320,
+        toolbar: { show: false },
+        fontFamily: "Inter, sans-serif",
+      },
+
+      series,
+
+      colors: ["#2563EB", "#22C55E"].slice(0, series.length),
+
+      stroke: { curve: "smooth", width: 3 },
+
+      dataLabels: { enabled: false },
+
+      xaxis: {
+        categories: months,
+        axisBorder: { show: true },
+        axisTicks: { show: true },
+      },
+
+      yaxis: {
+        min: 0,
+        max: yAxisMax,
+        tickAmount: 5,
+        forceNiceScale: true,
+        labels: {
+          formatter: formatShortIndian,
+          style: { fontSize: "12px" },
         },
-        series: [
-          { name: "Payin", data: payin },
-          { name: "Payout", data: payout },
-        ],
-        stroke: { curve: "smooth", width: 4 },
-        dataLabels: { enabled: false },
-        xaxis: { categories: months },
-        yaxis: { show: true },
-        fill: {
-          type: "gradient",
-          gradient: {
-            shade: "light",
-            type: "horizontal",
-            shadeIntensity: 0.5,
-            gradientToColors: ["#34D399", "#0C7EDB"],
-            opacityFrom: 0.6,
-            opacityTo: 0.1,
-            stops: [0, 100],
+        title: {
+          text: "Amount (₹)",
+          offsetX: 5,
+          style: { fontSize: "13px", fontWeight: 500 },
+        },
+      },
+
+      legend: { show: false },
+
+      fill: {
+        type: "gradient",
+        gradient: {
+          shade: "light",
+          type: "vertical",
+          shadeIntensity: 0.4,
+          gradientToColors: ["#60A5FA", "#86EFAC"].slice(0, series.length),
+          opacityFrom: 0.65,
+          opacityTo: 0.15,
+          stops: [0, 90, 100],
+        },
+      },
+
+      tooltip: {
+        shared: showPayin && showPayout,
+        followCursor: true,
+        intersect: false,
+        y: {
+          formatter: (_, { dataPointIndex }) => {
+            const point = chartData[dataPointIndex];
+            if (!point) return "";
+
+            const lines = [];
+
+            if (showPayin) {
+              lines.push(
+                `Payin: ₹${formatFullIndian(point.payinAmount)} (${point.payinCount})`
+              );
+            }
+            if (showPayout) {
+              lines.push(
+                `Payout: ₹${formatFullIndian(point.payoutAmount)} (${point.payoutCount})`
+              );
+            }
+
+            return lines.join("<br>");
           },
         },
- tooltip: {
-  enabled: true,
-  shared: false, // set to false so each series shows individually
-  y: {
-    formatter: (val, { seriesIndex, dataPointIndex }) => {
-      const point = chartData[dataPointIndex];
-      if (seriesIndex === 0) {
-        // Payin series
-        return `Payin Amount: ${point.payinAmount}, Count: ${point.payinCount}`;
-      } else {
-        // Payout series
-        return `Payout Amount: ${point.payoutAmount}, Count: ${point.payoutCount}`;
-      }
-    }
-  }
-}
+      },
 
-      };
+      noData: {
+        text: "No data available",
+        align: "center",
+        verticalAlign: "middle",
+        style: { fontSize: "14px", color: "#94a3b8" },
+      },
+    };
 
-      const chart = new window.ApexCharts(chartRef.current, options);
-      chart.render();
+    chartInstance.current = new window.ApexCharts(chartRef.current, options);
+    chartInstance.current.render();
 
-      return () => chart.destroy();
-    }
-  }, [payin, payout, months, chartData]);
-
+    return () => chartInstance.current?.destroy();
+  }, [series, months, chartData, yAxisMax, showPayin, showPayout]);
 
   return (
-    <div className=" w-full rounded-lg  md:p-6 ">
-      <div className="flex justify-between">
-        <div>
-          <h5 className="leading-none text-2xl font-bold text-gray-900 pb-2">
-            {/* {payin.reduce((a, b) => a + b, 0) + payout.reduce((a, b) => a + b, 0)} */}
-          </h5>
-          <p className="text-xl font-bold text-gray-500">Total success (Payin + Payout)</p>
-        </div>
+    <div className="w-full rounded-lg md:p-6 bg-white shadow-sm">
+      <p className="text-xl font-bold text-gray-700 mb-4">
+        Monthly Success Volume (Payin + Payout)
+      </p>
+
+      <div ref={chartRef} />
+
+      <div className="flex justify-center gap-10 mt-5 text-sm font-medium text-gray-700">
+        <label className="flex items-center gap-2.5 cursor-pointer hover:text-blue-600 transition">
+          <input
+            type="checkbox"
+            checked={showPayin}
+            onChange={() => setShowPayin((p) => !p)}
+            className="w-4 h-4 accent-blue-600"
+          />
+          Payin
+        </label>
+
+        <label className="flex items-center gap-2.5 cursor-pointer hover:text-green-600 transition">
+          <input
+            type="checkbox"
+            checked={showPayout}
+            onChange={() => setShowPayout((p) => !p)}
+            className="w-4 h-4 accent-green-600"
+          />
+          Payout
+        </label>
       </div>
-      <div ref={chartRef} className=""></div>
     </div>
   );
 };
