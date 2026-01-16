@@ -3,65 +3,72 @@ import React, { useEffect, useRef, useState } from "react";
 export const DonutChart = ({ data }) => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
-  const [mode, setMode] = useState("UPI"); // default payin
+  const [mode, setMode] = useState("UPI");
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const getValues = () => {
-    const transactionData = data?.[mode] || {};
-    const pending = Number(transactionData.initiated) || 0;
-    const success = Number(transactionData.success) || 0;
-    const failed = Number(transactionData.failed) || 0;
-    const total = pending + success + failed;
+  // ────────────────────────────────────────────────
+  // Data handling – computed once per render
+  // ────────────────────────────────────────────────
+  const txData = data?.[mode] || {};
+  const pending = Number(txData.initiated) || 0;
+  const success = Number(txData.success)   || 0;
+  const failed  = Number(txData.failed)    || 0;
+  const total   = pending + success + failed;
+  const isEmpty = total === 0;
 
-    return { pending, success, failed, total };
-  };
-
-  const { pending, success, failed, total } = getValues();
-
-  const isEmpty = total === 0; // flag for no transactions
-
+  // Animation trigger when data or mode meaningfully changes
   useEffect(() => {
-    if (!chartRef.current || typeof ApexCharts === "undefined") return;
+    setIsAnimating(true);
+    const timer = setTimeout(() => setIsAnimating(false), 1000);
+    return () => clearTimeout(timer);
+  }, [mode, data]);
 
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
-      chartInstance.current = null;
+  // ────────────────────────────────────────────────
+  // Chart creation / update
+  // ────────────────────────────────────────────────
+  useEffect(() => {
+    if (!chartRef.current || typeof ApexCharts === "undefined") {
+      console.warn("ApexCharts not loaded or ref missing");
+      return;
     }
 
-    const seriesData = isEmpty ? [1] : [pending, success, failed]; // single slice if empty
+    const series = isEmpty ? [1] : [pending, success, failed];
+    const labels = isEmpty ? ["No activity"] : ["Initiated", "Success", "Failed"];
 
     const options = {
-      series: seriesData,
-      labels: isEmpty ? ["No Transactions"] : ["Initiated", "Success", "Failed"],
-      chart: { height: 260, 
-              type: "donut",
-
+      series,
+      labels,
+      chart: {
+        height: 280,
+        type: "donut",
+        animations: {
+          enabled: true,
+          easing: "easeinout",
+          speed: 800,
+        },
       },
-      colors: isEmpty
-        ? ["#d1d5db"] // single gray color for empty chart
-        : ["#3187afff", "#369c36", "#1a5b8a"],
-      stroke: { 
-        show: true,
-        width:2,
-        colors: ["#e9eeecff"] },
+      colors: isEmpty ? ["#e2e8f0"] : ["#3187afff", "#369c36", "#1a5b8a"],
+      stroke: { show: true, width: 5, colors: ["#e9eeecff"] },
       plotOptions: {
         pie: {
           donut: {
-            size: "0%",
+            size: "74%",
             labels: {
               show: true,
-              name: { show: false, offsetY: 20 },
-              value: { show: false, offsetY: -20 },
               total: {
+                show: true,
                 showAlways: true,
-                show: false,
-                label: isEmpty ? "No Transactions" : "Transactions",
-                formatter: () => (isEmpty ? 0 : total),
+                label: isEmpty ? "—" : total.toLocaleString(),
+                fontSize: isAnimating ? "22px" : "20px",
+                fontWeight: 800,
+                color: isEmpty ? "#94a3b8" : "#0f172a",
+                offsetY: -4,
+                formatter: () => (isEmpty ? "" : total.toLocaleString()),
               },
             },
           },
         },
       },
-      dataLabels: { enabled: false },
       fill: {
         type: "gradient",
         gradient: {
@@ -71,33 +78,222 @@ export const DonutChart = ({ data }) => {
           stops: [0, 0, 100],
         },
       },
-      legend: { position: "bottom", fontSize: "14px" },
-      tooltip: { enabled: !isEmpty },
+      dataLabels: { enabled: false },
+      legend: {
+        position: "bottom",
+        fontSize: "13px",
+        fontWeight: 500,
+        offsetY: 6,
+        markers: { width: 12, height: 12, radius: 12 },
+        itemMargin: { horizontal: 14, vertical: 6 },
+      },
+      tooltip: {
+        enabled: !isEmpty,
+        style: { fontSize: "12.5px" },
+      },
     };
 
-    // eslint-disable-next-line no-undef
-    chartInstance.current = new ApexCharts(chartRef.current, options);
-    chartInstance.current.render();
+    if (!chartInstance.current) {
+      // First render → create chart
+      chartInstance.current = new ApexCharts(chartRef.current, options);
+      chartInstance.current.render();
+    } else {
+      // Update existing chart → smooth transition
+      chartInstance.current.updateOptions(options, true, true);
+    }
 
-    return () => chartInstance.current?.destroy();
-  }, [mode, pending, success, failed, total, isEmpty]);
+    // Cleanup on unmount or before next effect run
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+        chartInstance.current = null;
+      }
+    };
+  }, [mode, data]); // ← correct dependencies only
+
+  // Prevent rapid mode spam (optional but improves UX)
+  const changeMode = (newMode) => {
+    if (newMode !== mode) {
+      setMode(newMode);
+    }
+  };
+
+  const accentColor = mode === "UPI" ? "#3187afff" : "#369c36";
 
   return (
-    <div className="w-full rounded-lg  p-4 md:p-6"
+    <div
+      style={{
+        background: "linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)",
+        borderRadius: "20px",
+        border: "1px solid rgba(226,232,240,0.9)",
+        boxShadow: "0 16px 32px -10px rgba(0,0,0,0.07)",
+        padding: "20px 20px 28px",
+        position: "relative",
+        overflow: "hidden",
+        height: "100%",
+        minHeight: "340px",
+        display: "flex",
+        flexDirection: "column",
+        transition: "all 0.4s ease",
+      }}
     >
-      <div className="flex justify-between ">
-        <h5 className="text-xl font-bold text-gray-900 pt-4 ">TRANSACTIONS</h5>
-        <div className="flex">
+      {/* Glow background */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(circle at 70% 30%, ${accentColor}12 0%, transparent 65%)`,
+          opacity: isAnimating ? 0.6 : 0.12,
+          transition: "opacity 1s ease",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Header - more compact */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginBottom: "20px",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              width: "12px",
+              height: "12px",
+              borderRadius: "50%",
+              background: accentColor,
+              boxShadow: `0 0 12px ${accentColor}50`,
+              animation: isAnimating ? "breathe 2s infinite ease-in-out" : "none",
+            }}
+          />
+          <div>
+            <h5
+              style={{
+                fontSize: "1.35rem",
+                fontWeight: "800",
+                color: "#0f172a",
+                margin: 0,
+              }}
+            >
+              {mode === "UPI" ? "Pay-in" : "Pay-out"}
+            </h5>
+            <p
+              style={{
+                margin: "2px 0 0 22px",
+                fontSize: "0.9rem",
+                color: "#64748b",
+                fontWeight: 500,
+              }}
+            >
+              Transactions
+            </p>
+          </div>
+        </div>
+
+        {/* Even smaller toggle */}
+        <div
+          style={{
+            background: "#f1f5f9",
+            borderRadius: "999px",
+            padding: "3px",
+            display: "inline-flex",
+            boxShadow: "inset 0 1px 4px rgba(0,0,0,0.05)",
+          }}
+        >
           <button
-            className="px-4 rounded-lg font-bold text-[#fff] w-25 shadow-lg/10 "
-            onClick={() => setMode(mode === "UPI" ? "payout" : "UPI")}
-           style={{ background: "linear-gradient(0deg, #67b5ecff, #0362cfff)" ,fontSize:"20px"}}
+            onClick={() => changeMode("UPI")}
+            style={{
+              padding: "5px 16px",
+              borderRadius: "999px",
+              fontSize: "0.86rem",
+              fontWeight: "600",
+              color: mode === "UPI" ? "white" : "#475569",
+              background: mode === "UPI" ? accentColor : "transparent",
+              border: "none",
+              cursor: "pointer",
+              transition: "all 0.28s ease",
+              boxShadow: mode === "UPI" ? "0 2px 8px rgba(49,135,175,0.3)" : "none",
+              minWidth: "70px",
+            }}
           >
-            {mode === "UPI" ? "Payin" : "Payout"}
+            Pay-in
+          </button>
+
+          <button
+            onClick={() => changeMode("payout")}
+            style={{
+              padding: "5px 16px",
+              borderRadius: "999px",
+              fontSize: "0.86rem",
+              fontWeight: "600",
+              color: mode !== "UPI" ? "white" : "#475569",
+              background: mode !== "UPI" ? accentColor : "transparent",
+              border: "none",
+              cursor: "pointer",
+              transition: "all 0.28s ease",
+              boxShadow: mode !== "UPI" ? "0 2px 8px rgba(54,156,54,0.3)" : "none",
+              minWidth: "70px",
+            }}
+          >
+            Payout
           </button>
         </div>
       </div>
-      <div className="py-8" ref={chartRef}></div>
+
+      {/* Chart area */}
+      <div
+        style={{
+          flex: 1,
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          ref={chartRef}
+          style={{
+            width: "100%",
+            maxWidth: "340px",
+            height: "280px",
+            transform: isAnimating ? "scale(0.98)" : "scale(1)",
+            transition: "transform 0.8s ease-out",
+          }}
+        />
+
+        {isEmpty && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#94a3b8",
+              fontSize: "1.1rem",
+              background: "rgba(248,250,252,0.88)",
+              borderRadius: "14px",
+              pointerEvents: "none",
+            }}
+          >
+            <div style={{ fontSize: "2.8rem", marginBottom: "8px", opacity: 0.7 }}>📊</div>
+            No data
+          </div>
+        )}
+      </div>
+
+      <style jsx>{`
+        @keyframes breathe {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50%      { transform: scale(1.3); opacity: 0.7; }
+        }
+      `}</style>
     </div>
   );
 };

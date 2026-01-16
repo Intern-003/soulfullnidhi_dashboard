@@ -19,32 +19,99 @@ export const LineChart1 = ({ data }) => {
     September: "Sep", October: "Oct", November: "Nov", December: "Dec",
   };
 
-  // ================= FORMAT API DATA =================
-  const chartData = useMemo(() => {
-    const map = {};
+  // ================= DYNAMIC MONTH RANGE (last 12 months from today) =================
+  const getLast12Months = () => {
+    const today = new Date();
+    const months = [];
 
-    if (Array.isArray(data)) {
-      data.forEach((item) => {
-        const monthFull = item.month_name?.split(" ")[0];
-        const month = MONTH_MAP[monthFull] || "Jan";
-
-        map[month] = {
-          payinAmount: Number(item.payin_amount) || 0,
-          payinCount: Number(item.payin_count) || 0,
-          payoutAmount: Number(item.payout_amount) || 0,
-          payoutCount: Number(item.payout_count) || 0,
-        };
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthShort = DEFAULT_MONTHS[date.getMonth()];
+      const yearShort = date.getFullYear().toString().slice(-2);
+      const yearFull = date.getFullYear();
+      months.push({
+        label: `${monthShort} '${yearShort}`,
+        month: monthShort,
+        fullMonth: date.toLocaleString("default", { month: "long" }),
+        year: yearFull,
       });
     }
 
-    return DEFAULT_MONTHS.map((month) => ({
-      month_name: month,
-      payinAmount: map[month]?.payinAmount || 0,
-      payinCount: map[month]?.payinCount || 0,
-      payoutAmount: map[month]?.payoutAmount || 0,
-      payoutCount: map[month]?.payoutCount || 0,
-    }));
+    return months;
+  };
+
+  const monthsRange = useMemo(() => getLast12Months(), []);
+
+  // ================= FORMAT API DATA INTO MAP =================
+  const dataMap = useMemo(() => {
+    const map = {};
+
+    if (!Array.isArray(data)) {
+      console.warn("[LineChart1] Invalid data: expected array, received:", data);
+      return map;
+    }
+
+    data.forEach((item, index) => {
+      if (typeof item !== "object" || item === null) {
+        console.warn(`[LineChart1] Invalid item at index ${index}:`, item);
+        return;
+      }
+
+      let rawMonth = (item.month_name || "").trim();
+      let monthPart = rawMonth.split(/[\s\-/]/)[0];
+      let yearPartFromMonth = rawMonth.match(/\d{4}|\d{2}/)?.[0];
+
+      const month = MONTH_MAP[monthPart] ||
+                    MONTH_MAP[monthPart.charAt(0).toUpperCase() + monthPart.slice(1).toLowerCase()] ||
+                    "Jan";
+
+      let year = item.year ?? yearPartFromMonth ?? new Date().getFullYear();
+      if (typeof year === "string") {
+        year = year.replace(/\D/g, "");
+        year = year.length === 2 ? `20${year}` : year;
+        year = parseInt(year, 10);
+      }
+
+      if (isNaN(year) || year < 2000 || year > new Date().getFullYear() + 5) {
+        console.warn(`[LineChart1] Invalid year for item:`, item, "→ using current year");
+        year = new Date().getFullYear();
+      }
+
+      const key = `${month}-${year}`;
+
+      console.log(`[LineChart1] Parsed item #${index}: raw_month="${rawMonth}", month="${month}", year=${year}, key="${key}"`);
+
+      map[key] = {
+        payinAmount: Number(item.payin_amount) || 0,
+        payinCount: Number(item.payin_count) || 0,
+        payoutAmount: Number(item.payout_amount) || 0,
+        payoutCount: Number(item.payout_count) || 0,
+      };
+    });
+
+    console.log("[LineChart1] All parsed keys:", Object.keys(map));
+
+    return map;
   }, [data]);
+
+  const chartData = useMemo(() => {
+    return monthsRange.map(({ label, month, year }) => {
+      const key = `${month}-${year}`;
+      const entry = dataMap[key] || {};
+
+      if (month === "Dec" && year === 2025 && !entry.payinAmount && !entry.payoutAmount) {
+        console.warn(`Dec 2025 missing! Expected key: ${key} | Available keys:`, Object.keys(dataMap));
+      }
+
+      return {
+        month_name: label,
+        payinAmount: entry.payinAmount || 0,
+        payinCount: entry.payinCount || 0,
+        payoutAmount: entry.payoutAmount || 0,
+        payoutCount: entry.payoutCount || 0,
+      };
+    });
+  }, [monthsRange, dataMap]);
 
   const months = chartData.map((i) => i.month_name);
 
@@ -54,10 +121,10 @@ export const LineChart1 = ({ data }) => {
     const abs = Math.abs(num);
 
     let value, unit;
-    if (abs >= 10000000) {        // ≥ 1 Cr
+    if (abs >= 10000000) {
       value = abs / 10000000;
       unit = "Cr";
-    } else if (abs >= 100000) {   // ≥ 1 Lakh
+    } else if (abs >= 100000) {
       value = abs / 100000;
       unit = "L";
     } else if (abs >= 1000) {
@@ -68,9 +135,7 @@ export const LineChart1 = ({ data }) => {
       unit = "";
     }
 
-    // 1 decimal if small, else round to whole
     const formatted = value < 10 ? value.toFixed(1) : Math.round(value).toString();
-
     return (num < 0 ? "-" : "") + formatted + unit;
   };
 
@@ -80,17 +145,15 @@ export const LineChart1 = ({ data }) => {
       minimumFractionDigits: num % 1 !== 0 ? 2 : 0,
     });
 
-  // ================= DYNAMIC Y-MAX (only visible series) =================
   const yAxisMax = useMemo(() => {
     let values = [];
     if (showPayin) values.push(...chartData.map((i) => i.payinAmount));
     if (showPayout) values.push(...chartData.map((i) => i.payoutAmount));
 
     const max = Math.max(...values, 0);
-    return max > 0 ? max * 1.12 : 10; // slight headroom
+    return max > 0 ? max * 1.12 : 10;
   }, [chartData, showPayin, showPayout]);
 
-  // ================= SERIES =================
   const series = useMemo(() => {
     const s = [];
     if (showPayin) {
@@ -99,18 +162,14 @@ export const LineChart1 = ({ data }) => {
     if (showPayout) {
       s.push({ name: "Payout", data: chartData.map((i) => i.payoutAmount) });
     }
-    // Prevent empty chart crash / ugly look
     if (s.length === 0) {
       s.push({ name: "No selection", data: Array(12).fill(0) });
     }
     return s;
   }, [showPayin, showPayout, chartData]);
 
-  // ================= CHART =================
   useEffect(() => {
-    if (!window.ApexCharts || !chartRef.current) return;
-
-    chartInstance.current?.destroy();
+    if (!chartRef.current || typeof ApexCharts === "undefined") return;
 
     const options = {
       chart: {
@@ -122,7 +181,8 @@ export const LineChart1 = ({ data }) => {
 
       series,
 
-      colors: ["#2563EB", "#22C55E"].slice(0, series.length),
+      // Fixed: Assign colors by name instead of index slicing
+      colors: series.map(s => s.name === "Payin" ? "#2563EB" : "#22C55E"),
 
       stroke: { curve: "smooth", width: 3 },
 
@@ -158,7 +218,7 @@ export const LineChart1 = ({ data }) => {
           shade: "light",
           type: "vertical",
           shadeIntensity: 0.4,
-          gradientToColors: ["#60A5FA", "#86EFAC"].slice(0, series.length),
+          gradientToColors: series.map(s => s.name === "Payin" ? "#60A5FA" : "#86EFAC"),
           opacityFrom: 0.65,
           opacityTo: 0.15,
           stops: [0, 90, 100],
@@ -166,28 +226,24 @@ export const LineChart1 = ({ data }) => {
       },
 
       tooltip: {
-        shared: showPayin && showPayout,
+        shared: true,
         followCursor: true,
         intersect: false,
         y: {
-          formatter: (_, { dataPointIndex }) => {
+          formatter: function (val, { seriesIndex, dataPointIndex }) {
             const point = chartData[dataPointIndex];
             if (!point) return "";
 
-            const lines = [];
+            // Only show the line for the current series being hovered
+            const name = series[seriesIndex]?.name;
 
-            if (showPayin) {
-              lines.push(
-                `Payin: ₹${formatFullIndian(point.payinAmount)} (${point.payinCount})`
-              );
+            if (name === "Payin") {
+              return `Payin: ₹${formatFullIndian(point.payinAmount)} (${point.payinCount})`;
             }
-            if (showPayout) {
-              lines.push(
-                `Payout: ₹${formatFullIndian(point.payoutAmount)} (${point.payoutCount})`
-              );
+            if (name === "Payout") {
+              return `Payout: ₹${formatFullIndian(point.payoutAmount)} (${point.payoutCount})`;
             }
-
-            return lines.join("<br>");
+            return "";
           },
         },
       },
@@ -200,10 +256,19 @@ export const LineChart1 = ({ data }) => {
       },
     };
 
-    chartInstance.current = new window.ApexCharts(chartRef.current, options);
-    chartInstance.current.render();
+    if (!chartInstance.current) {
+      chartInstance.current = new ApexCharts(chartRef.current, options);
+      chartInstance.current.render();
+    } else {
+      chartInstance.current.updateOptions(options, true, true);
+    }
 
-    return () => chartInstance.current?.destroy();
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+        chartInstance.current = null;
+      }
+    };
   }, [series, months, chartData, yAxisMax, showPayin, showPayout]);
 
   return (

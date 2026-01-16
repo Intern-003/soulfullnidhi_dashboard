@@ -98,11 +98,13 @@ const Register = () => {
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [emailOtpVerified, setEmailOtpVerified] = useState(false);
   const [emailTimer, setEmailTimer] = useState(0);
+  const [emailExpired, setEmailExpired] = useState(false);
 
   const [mobileOtp, setMobileOtp] = useState("");
   const [mobileOtpSent, setMobileOtpSent] = useState(false);
   const [mobileOtpVerified, setMobileOtpVerified] = useState(false);
   const [mobileTimer, setMobileTimer] = useState(0);
+  const [mobileExpired, setMobileExpired] = useState(false);
 
   const emailOtpRefs = useRef([]);
   const mobileOtpRefs = useRef([]);
@@ -122,18 +124,34 @@ const Register = () => {
   useEffect(() => {
     let interval;
     if (emailTimer > 0) {
-      interval = setInterval(() => setEmailTimer(t => Math.max(0, t - 1)), 1000);
+      interval = setInterval(() => {
+        setEmailTimer((t) => {
+          const next = Math.max(0, t - 1);
+          if (next === 0 && emailOtpSent && !emailOtpVerified) {
+            setEmailExpired(true);
+          }
+          return next;
+        });
+      }, 1000);
     }
     return () => clearInterval(interval);
-  }, [emailTimer]);
+  }, [emailTimer, emailOtpSent, emailOtpVerified]);
 
   useEffect(() => {
     let interval;
     if (mobileTimer > 0) {
-      interval = setInterval(() => setMobileTimer(t => Math.max(0, t - 1)), 1000);
+      interval = setInterval(() => {
+        setMobileTimer((t) => {
+          const next = Math.max(0, t - 1);
+          if (next === 0 && mobileOtpSent && !mobileOtpVerified) {
+            setMobileExpired(true);
+          }
+          return next;
+        });
+      }, 1000);
     }
     return () => clearInterval(interval);
-  }, [mobileTimer]);
+  }, [mobileTimer, mobileOtpSent, mobileOtpVerified]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -144,6 +162,7 @@ const Register = () => {
   const sendEmailOtpHandler = async () => {
     setServerErrorMessage("");
     setFieldErrors(prev => ({ ...prev, companyName: "", email: "" }));
+    setEmailExpired(false);
 
     if (!isValidCompany) {
       setFieldErrors(prev => ({ ...prev, companyName: "3–100 letters only" }));
@@ -162,6 +181,7 @@ const Register = () => {
       setEmailOtpSent(true);
       setEmailTimer(OTP_TIMER);
       setEmailOtp("");
+      setEmailExpired(false);
       alert(`Email OTP (dev): ${res.otp || "—"}`);
     } catch (err) {
       const msg = err?.message || "Failed to send OTP";
@@ -172,10 +192,18 @@ const Register = () => {
 
   const verifyEmailOtp = async () => {
     if (emailOtp.length !== 6) return;
+
+    if (emailTimer === 0 || emailExpired) {
+      toast.error("OTP has expired. Please request a new one.");
+      setEmailExpired(true);
+      return;
+    }
+
     try {
       await verifyEmailOtpApi({ email: trimmedEmail, otp: emailOtp });
       setEmailOtpVerified(true);
       setEmailTimer(0);
+      setEmailExpired(false);
     } catch (err) {
       toast.error("Invalid or expired OTP");
     }
@@ -184,6 +212,7 @@ const Register = () => {
   const sendMobileOtp = async () => {
     setServerErrorMessage("");
     setFieldErrors(prev => ({ ...prev, mobile: "" }));
+    setMobileExpired(false);
 
     if (!isValidMobile) {
       setFieldErrors(prev => ({ ...prev, mobile: "Exactly 10 digits" }));
@@ -196,6 +225,7 @@ const Register = () => {
       setMobileOtpSent(true);
       setMobileTimer(OTP_TIMER);
       setMobileOtp("");
+      setMobileExpired(false);
       alert(`Mobile OTP (dev): ${res.otp || "—"}`);
     } catch (err) {
       const msg = err?.message || "Failed to send OTP";
@@ -206,10 +236,18 @@ const Register = () => {
 
   const verifyMobileOtp = async () => {
     if (mobileOtp.length !== 6) return;
+
+    if (mobileTimer === 0 || mobileExpired) {
+      toast.error("OTP has expired. Please request a new one.");
+      setMobileExpired(true);
+      return;
+    }
+
     try {
       await verifyMobileOtpApi({ mobile: trimmedMobile, otp: mobileOtp });
       setMobileOtpVerified(true);
       setMobileTimer(0);
+      setMobileExpired(false);
     } catch (err) {
       toast.error("Invalid or expired OTP");
     }
@@ -266,11 +304,12 @@ const Register = () => {
     }
   };
 
-  const renderOtpInputs = (otp, setOtp, refs, verifyFn, timer, resendFn, isVerified) => (
+  const renderOtpInputs = (otp, setOtp, refs, verifyFn, timer, resendFn, isVerified, expired, channel) => (
     <div className="space-y-3 mt-4">
       <label className="block text-sm font-medium text-gray-700">
         Enter 6-digit code
         {timer > 0 && <span className="text-red-600 ml-2">({formatTime(timer)})</span>}
+        {timer === 0 && expired && <span className="text-red-600 ml-2">(Expired)</span>}
       </label>
 
       <div className="flex gap-2 sm:gap-3 justify-center">
@@ -288,9 +327,16 @@ const Register = () => {
               e.preventDefault();
               const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
               setOtp(pasted.padEnd(6, ""));
-              if (pasted.length === 6) setTimeout(verifyFn, 100);
+              if (pasted.length === 6 && timer > 0 && !expired) {
+                setTimeout(verifyFn, 100);
+              }
             }}
-            className="h-11 w-11 sm:h-12 sm:w-12 text-center text-xl font-semibold border border-gray-300 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-400 outline-none transition"
+            disabled={expired}
+            className={`h-11 w-11 sm:h-12 sm:w-12 text-center text-xl font-semibold border rounded-lg outline-none transition ${
+              expired
+                ? "border-red-400 bg-red-50/60 cursor-not-allowed"
+                : "border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-400"
+            }`}
             autoFocus={i === 0}
           />
         ))}
@@ -300,15 +346,19 @@ const Register = () => {
         <button
           type="button"
           onClick={verifyFn}
-          disabled={otp.length !== 6 || isVerified}
+          disabled={otp.length !== 6 || isVerified || timer === 0 || expired}
           className={`
             flex-1 py-3 px-5 rounded-xl font-medium text-sm transition
-            ${otp.length === 6 && !isVerified
+            ${otp.length === 6 && !isVerified && timer > 0 && !expired
               ? "bg-green-600 text-white hover:bg-green-700 shadow-sm"
               : "bg-gray-200 text-gray-500 cursor-not-allowed"}
           `}
         >
-          {isVerified ? "Verified ✓" : "Verify OTP"}
+          {isVerified 
+            ? "Verified ✓" 
+            : timer === 0 || expired 
+              ? "Time Expired" 
+              : "Verify OTP"}
         </button>
 
         <button
@@ -328,146 +378,131 @@ const Register = () => {
     </div>
   );
 
-return (
-  <>
-    {/* Background */}
-    <div
-      className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(${paymentGatewayBg})` }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/22 to-black/5" />
-    </div>
-
-    {/* Content wrapper */}
-    <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8 overflow-y-auto">
-      <div 
-        className={`
-          w-full max-w-md lg:max-w-lg 
-          bg-gradient-to-b from-white/98 via-white/96 to-white/93
-          backdrop-blur-lg 
-          rounded-2xl sm:rounded-3xl 
-          shadow-2xl shadow-black/9 
-          border border-gray-100/70 
-          overflow-hidden
-          transition-all duration-700 ease-out
-          ${emailOtpVerified && mobileOtpVerified 
-            ? 'scale-[1.012] shadow-green-600/25 border-green-400/60 animate-gentle-glow' 
-            : 'hover:shadow-2xl hover:shadow-black/14'}
-        `}
+  return (
+    <>
+      {/* Background */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${paymentGatewayBg})` }}
       >
-        <div className="p-5 sm:p-7 lg:p-9 space-y-7">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/22 to-black/5" />
+      </div>
 
-          {/* Header + progress */}
-          <div className="text-center space-y-5">
-            {/* Smaller logo */}
-            <div className="inline-block p-2.5 bg-gradient-to-br from-blue-50/70 to-indigo-50/50 rounded-xl shadow-sm transition-transform duration-500 hover:scale-105">
-              <img
-                src={logo}
-                alt="SPay Logo"
-                className="w-20 sm:w-24 lg:w-28 h-auto drop-shadow-md transition-all duration-700"
-              />
-            </div>
+      {/* Content wrapper */}
+      <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8 overflow-y-auto">
+        <div 
+          className={`
+            w-full max-w-md lg:max-w-lg 
+            bg-gradient-to-b from-white/98 via-white/96 to-white/93
+            backdrop-blur-lg 
+            rounded-2xl sm:rounded-3xl 
+            shadow-2xl shadow-black/9 
+            border border-gray-100/70 
+            overflow-hidden
+            transition-all duration-700 ease-out
+            ${emailOtpVerified && mobileOtpVerified 
+              ? 'scale-[1.012] shadow-green-600/25 border-green-400/60 animate-gentle-glow' 
+              : 'hover:shadow-2xl hover:shadow-black/14'}
+          `}
+        >
+          <div className="p-5 sm:p-7 lg:p-9 space-y-7">
 
-            {/* Smaller heading */}
-            <div>
-              <h1 className="
-                text-xl sm:text-2xl lg:text-[28px] 
-                font-extrabold 
-                bg-gradient-to-r from-blue-700 via-blue-500 to-blue-800 
-                bg-clip-text text-transparent 
-                tracking-tight leading-tight
-              ">
-                Create Your Account
-              </h1>
-              <p className="mt-2.5 text-gray-600 text-sm sm:text-base font-medium opacity-90">
-                Fast • Secure • Ready in minutes
-              </p>
-            </div>
-
-            {/* Modern progress bar */}
-            <div className="w-full max-w-xs mx-auto mt-4">
-              <div className="h-1.5 bg-gray-200/70 rounded-full overflow-hidden">
-                <div 
-                  className={`
-                    h-full rounded-full transition-all duration-900 ease-out
-                    ${emailOtpVerified && mobileOtpVerified 
-                      ? 'w-full bg-gradient-to-r from-emerald-500 to-green-500' 
-                      : emailOtpVerified 
-                        ? 'w-2/3 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500' 
-                        : 'w-1/3 bg-gradient-to-r from-blue-400 to-indigo-500'}
-                  `}
-                  style={{ transition: 'width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+            {/* Header + progress */}
+            <div className="text-center space-y-5">
+              <div className="inline-block p-2.5 bg-gradient-to-br from-blue-50/70 to-indigo-50/50 rounded-xl shadow-sm transition-transform duration-500 hover:scale-105">
+                <img
+                  src={logo}
+                  alt="SPay Logo"
+                  className="w-20 sm:w-24 lg:w-28 h-auto drop-shadow-md transition-all duration-700"
                 />
               </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-2 font-medium tracking-wide">
-                <span className={emailOtpVerified ? 'text-green-600 font-semibold' : ''}>Email</span>
-                <span className={mobileOtpVerified ? 'text-green-600 font-semibold' : ''}>Mobile</span>
-                <span className={(emailOtpVerified && mobileOtpVerified) ? 'text-green-600 font-semibold' : ''}>Ready</span>
+
+              <div>
+                <h1 className="
+                  text-xl sm:text-2xl lg:text-[28px] 
+                  font-extrabold 
+                  bg-gradient-to-r from-blue-700 via-blue-500 to-blue-800 
+                  bg-clip-text text-transparent 
+                  tracking-tight leading-tight
+                ">
+                  Create Your Account
+                </h1>
+                <p className="mt-2.5 text-gray-600 text-sm sm:text-base font-medium opacity-90">
+                  Fast • Secure • Ready in minutes
+                </p>
+              </div>
+
+              <div className="w-full max-w-xs mx-auto mt-4">
+                <div className="h-1.5 bg-gray-200/70 rounded-full overflow-hidden">
+                  <div 
+                    className={`
+                      h-full rounded-full transition-all duration-900 ease-out
+                      ${emailOtpVerified && mobileOtpVerified 
+                        ? 'w-full bg-gradient-to-r from-emerald-500 to-green-500' 
+                        : emailOtpVerified 
+                          ? 'w-2/3 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500' 
+                          : 'w-1/3 bg-gradient-to-r from-blue-400 to-indigo-500'}
+                    `}
+                    style={{ transition: 'width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 mt-2 font-medium tracking-wide">
+                  <span className={emailOtpVerified ? 'text-green-600 font-semibold' : ''}>Email</span>
+                  <span className={mobileOtpVerified ? 'text-green-600 font-semibold' : ''}>Mobile</span>
+                  <span className={(emailOtpVerified && mobileOtpVerified) ? 'text-green-600 font-semibold' : ''}>Ready</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
 
-            {/* Company Name */}
-            <FloatingInput
-              placeholder="Company Name"
-              value={formData.companyName}
-              onChange={e => setFormData({
-                ...formData,
-                companyName: e.target.value.replace(/[^a-zA-Z\s]/g, ""),
-              })}
-              required
-              error={fieldErrors.companyName || (!isValidCompany && formData.companyName && "3–100 letters only")}
-              className="
-                h-11 text-sm
-                transition-all duration-200
-                hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 
-                focus-within:shadow-[0_0_0_3.5px] focus-within:shadow-blue-500/30
-                focus-within:scale-[1.008]
-              "
-            />
+              {/* Company Name */}
+              <FloatingInput
+                placeholder="Company Name"
+                value={formData.companyName}
+                onChange={e => setFormData({
+                  ...formData,
+                  companyName: e.target.value.replace(/[^a-zA-Z\s]/g, ""),
+                })}
+                required
+                error={fieldErrors.companyName || (!isValidCompany && formData.companyName && "3–100 letters only")}
+                className="
+                  h-11 text-sm
+                  transition-all duration-200
+                  hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 
+                  focus-within:shadow-[0_0_0_3.5px] focus-within:shadow-blue-500/30
+                  focus-within:scale-[1.008]
+                "
+              />
 
-            {/* Email */}
-            <FloatingInput
-              placeholder={emailOtpSent ? "Check your inbox " : "Business Email"}
-              type="email"
-              value={formData.email}
-              onChange={e => {
-                setFormData({ ...formData, email: e.target.value });
-                setFieldErrors(p => ({ ...p, email: "" }));
-              }}
-              disabled={emailOtpVerified}
-              required
-              className={`
-                h-11 text-sm
-                transition-all duration-200
-                ${emailOtpVerified
-                  ? "border-green-500 bg-green-50/80 text-green-950 shadow-sm shadow-green-300/30"
-                  : ""}
-                ${!emailOtpVerified && (fieldErrors.email || (!isValidEmail && formData.email))
-                  ? "border-red-500 focus:border-red-500 ring-red-500/30 bg-red-50/45"
-                  : "border-gray-300 hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 focus-within:shadow-[0_0_0_3.5px] focus-within:shadow-blue-500/30 focus-within:scale-[1.008]"}
-              `}
-            />
+              {/* Email */}
+              <FloatingInput
+                placeholder={emailOtpSent ? "Check your inbox " : "Business Email"}
+                type="email"
+                value={formData.email}
+                onChange={e => {
+                  setFormData({ ...formData, email: e.target.value });
+                  setFieldErrors(p => ({ ...p, email: "" }));
+                }}
+                disabled={emailOtpVerified}
+                required
+                className={`
+                  h-11 text-sm
+                  transition-all duration-200
+                  ${emailOtpVerified
+                    ? "border-green-500 bg-green-50/80 text-green-950 shadow-sm shadow-green-300/30"
+                    : ""}
+                  ${!emailOtpVerified && (fieldErrors.email || (!isValidEmail && formData.email))
+                    ? "border-red-500 focus:border-red-500 ring-red-500/30 bg-red-50/45"
+                    : "border-gray-300 hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 focus-within:shadow-[0_0_0_3.5px] focus-within:shadow-blue-500/30 focus-within:scale-[1.008]"}
+                `}
+              />
 
-            {/* Mobile section */}
-            {emailOtpVerified && (
-              <div className="space-y-5 animate-fade-in-up">
-                <div className="flex">
-                  <span className={`
-                    inline-flex items-center px-4.5 h-11 
-                    border border-r-0 border-gray-300 rounded-l-xl 
-                    font-medium text-sm transition-all duration-300
-                    ${mobileOtpVerified 
-                      ? "bg-green-50 text-green-800 border-green-500 shadow-sm shadow-green-300/30" 
-                      : "bg-gray-100 text-gray-700"}
-                  `}>
-                    +91
-                  </span>
-
+              {/* Mobile section – NO +91 prefix anymore */}
+              {emailOtpVerified && (
+                <div className="space-y-5 animate-fade-in-up">
                   <FloatingInput
-                    placeholder={mobileOtpSent ? "Check messages " : "Mobile Number"}
+                    placeholder={mobileOtpSent ? "Check messages " : "Mobile Number (10 digits)"}
                     type="tel"
                     value={formData.mobile}
                     onChange={e => setFormData({
@@ -477,7 +512,7 @@ return (
                     disabled={mobileOtpVerified}
                     required
                     className={`
-                      h-11 text-sm rounded-l-none border-l-0
+                      h-11 text-sm
                       transition-all duration-200
                       ${mobileOtpVerified
                         ? "border-green-500 bg-green-50/80 text-green-950 shadow-sm shadow-green-300/30"
@@ -487,127 +522,130 @@ return (
                         : "border-gray-300 hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 focus-within:shadow-[0_0_0_3.5px] focus-within:shadow-blue-500/30 focus-within:scale-[1.008]"}
                     `}
                   />
+
+                  {/* Send / OTP controls */}
+                  {mobileOtpVerified ? null : !mobileOtpSent ? (
+                    <button
+                      type="button"
+                      onClick={sendMobileOtp}
+                      disabled={mobileTimer > 0 || !isValidMobile}
+                      className={`
+                        relative w-full py-3 font-semibold rounded-xl overflow-hidden group
+                        transition-all duration-300 shadow-md
+                        ${!isValidMobile || mobileTimer > 0
+                          ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                          : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-650 hover:to-indigo-650 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"}
+                      `}
+                    >
+                      <span className="relative z-10">Send Mobile OTP</span>
+                      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/18 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                    </button>
+                  ) : (
+                    renderOtpInputs(
+                      mobileOtp,
+                      setMobileOtp,
+                      mobileOtpRefs,
+                      verifyMobileOtp,
+                      mobileTimer,
+                      sendMobileOtp,
+                      mobileOtpVerified,
+                      mobileExpired,
+                      "mobile"
+                    )
+                  )}
                 </div>
+              )}
 
-                {/* Send / OTP controls */}
-                {mobileOtpVerified ? null : !mobileOtpSent ? (
-                  <button
-                    type="button"
-                    onClick={sendMobileOtp}
-                    disabled={mobileTimer > 0 || !isValidMobile}
-                    className={`
-                      relative w-full py-3 font-semibold rounded-xl overflow-hidden group
-                      transition-all duration-300 shadow-md
-                      ${!isValidMobile || mobileTimer > 0
-                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-650 hover:to-indigo-650 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"}
-                    `}
-                  >
-                    <span className="relative z-10">Send Mobile OTP</span>
-                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/18 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                  </button>
-                ) : (
-                  renderOtpInputs(
-                    mobileOtp,
-                    setMobileOtp,
-                    mobileOtpRefs,
-                    verifyMobileOtp,
-                    mobileTimer,
-                    sendMobileOtp,
-                    mobileOtpVerified
-                  )
-                )}
-              </div>
-            )}
+              {/* Email OTP block */}
+              {emailOtpVerified ? null : emailOtpSent ? (
+                renderOtpInputs(
+                  emailOtp,
+                  setEmailOtp,
+                  emailOtpRefs,
+                  verifyEmailOtp,
+                  emailTimer,
+                  sendEmailOtpHandler,
+                  emailOtpVerified,
+                  emailExpired,
+                  "email"
+                )
+              ) : (
+                <button
+                  type="button"
+                  onClick={sendEmailOtpHandler}
+                  disabled={emailOtpLoading || emailOtpVerified || !isValidCompany || !isValidEmail}
+                  className={`
+                    relative w-full py-3 font-semibold rounded-xl overflow-hidden group
+                    transition-all duration-300 shadow-md
+                    ${!isValidCompany || !isValidEmail || emailOtpLoading
+                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-650 hover:to-indigo-650 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"}
+                  `}
+                >
+                  <span className="relative z-10">
+                    {emailOtpLoading ? "Sending…" : "Send Email OTP"}
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/18 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                </button>
+              )}
 
-            {/* Email OTP block */}
-            {emailOtpVerified ? null : emailOtpSent ? (
-              renderOtpInputs(
-                emailOtp,
-                setEmailOtp,
-                emailOtpRefs,
-                verifyEmailOtp,
-                emailTimer,
-                sendEmailOtpHandler,
-                emailOtpVerified
-              )
-            ) : (
+              {/* Error message */}
+              {serverErrorMessage && (
+                <div className="bg-red-50/80 border-l-4 border-red-500 p-4 rounded-xl text-red-800 text-sm shadow-sm">
+                  <strong className="block mb-1">Error</strong>
+                  {serverErrorMessage}
+                </div>
+              )}
+
+              {/* Submit button */}
               <button
-                type="button"
-                onClick={sendEmailOtpHandler}
-                disabled={emailOtpLoading || emailOtpVerified || !isValidCompany || !isValidEmail}
+                type="submit"
+                disabled={loading || !emailOtpVerified || !mobileOtpVerified}
                 className={`
-                  relative w-full py-3 font-semibold rounded-xl overflow-hidden group
-                  transition-all duration-300 shadow-md
-                  ${!isValidCompany || !isValidEmail || emailOtpLoading
-                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-650 hover:to-indigo-650 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"}
+                  relative w-full py-3.5 px-6 font-semibold text-base
+                  rounded-xl overflow-hidden group
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-all duration-300
+                  shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30
+                  active:scale-[0.98]
+                  bg-gradient-to-r from-blue-600 via-blue-650 to-indigo-600
+                  hover:from-blue-650 hover:via-blue-700 hover:to-indigo-700
+                  text-white
                 `}
               >
-                <span className="relative z-10">
-                  {emailOtpLoading ? "Sending…" : "Send Email OTP"}
+                <span className="relative z-10 flex items-center justify-center gap-2.5">
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" className="opacity-30"/>
+                        <path fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                      Creating…
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/18 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/18 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
               </button>
-            )}
 
-            {/* Error message */}
-            {serverErrorMessage && (
-              <div className="bg-red-50/80 border-l-4 border-red-500 p-4 rounded-xl text-red-800 text-sm shadow-sm">
-                <strong className="block mb-1">Error</strong>
-                {serverErrorMessage}
-              </div>
-            )}
+            </form>
 
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading || !emailOtpVerified || !mobileOtpVerified}
-              className={`
-                relative w-full py-3.5 px-6 font-semibold text-base
-                rounded-xl overflow-hidden group
-                disabled:opacity-50 disabled:cursor-not-allowed
-                transition-all duration-300
-                shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30
-                active:scale-[0.98]
-                bg-gradient-to-r from-blue-600 via-blue-650 to-indigo-600
-                hover:from-blue-650 hover:via-blue-700 hover:to-indigo-700
-                text-white
-              `}
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2.5">
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" className="opacity-30"/>
-                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                    </svg>
-                    Creating…
-                  </>
-                ) : (
-                  "Create Account"
-                )}
-              </span>
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/18 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
-            </button>
+            <p className="text-center text-sm text-gray-600 pt-4">
+              Already have an account?{" "}
+              <button
+                onClick={() => navigate("/")}
+                className="font-semibold text-blue-700 hover:text-blue-800 underline-offset-4 hover:underline transition-colors duration-200"
+              >
+                Sign in
+              </button>
+            </p>
 
-          </form>
-
-          <p className="text-center text-sm text-gray-600 pt-4">
-            Already have an account?{" "}
-            <button
-              onClick={() => navigate("/")}
-              className="font-semibold text-blue-700 hover:text-blue-800 underline-offset-4 hover:underline transition-colors duration-200"
-            >
-              Sign in
-            </button>
-          </p>
-
+          </div>
         </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
 };
 
-export default Register; 
+export default Register;
