@@ -142,13 +142,13 @@ export const Sidebar = ({ open, setOpen }) => {
         ]
       : []),
 
-    // ---------------------- COMPLAINTS (all roles) ----------------------
-    {
-      label: "Complaints",
-      icon: "fa-comment",
-      dropdown: "tickets",
-      items: [{ label: "View Complain", link: "/view-complain" }],
-    },
+    // // ---------------------- COMPLAINTS (all roles) ----------------------
+    // {
+    //   label: "Complaints",
+    //   icon: "fa-comment",
+    //   dropdown: "tickets",
+    //   items: [{ label: "View Complain", link: "/view-complain" }],
+    // },
   ];
 
   return (

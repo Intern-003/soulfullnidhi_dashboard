@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { DonutChart } from "../components/DonutChart";
 import { LineChart1 } from "../components/LineChart1";
 import Table from "../components/Table";
@@ -8,26 +8,30 @@ import DashboardSkeleton from "../components/DashboardSkeleton";
 import { useNavigate } from "react-router-dom";
 
 export const Dashboard = () => {
-
   const DASHBOARD_LOCK_KEY = "payment_dashboard_logged_in";
 
   const navigate = useNavigate();
+
+  // ──────────────────────────────────────────────────────
+  // 1. Auth checking state – prevents premature redirect
+  // ──────────────────────────────────────────────────────
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // ──────────────────────────────────────────────────────
+  // 2. Main dashboard states
+  // ──────────────────────────────────────────────────────
   const [role] = useState(atob(localStorage.getItem("role")) || "admin");
 
   const [transactionData, setTransactionData] = useState([]);
   const [largeTransactionData, setLargeTransactionData] = useState([]);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // ✅ Status filter
   const [statusFilter, setStatusFilter] = useState("SUCCESS");
 
-
   // APIs
-  const { data: cardData, loading: recordLoading } =
-    useAutoFetch("/collection-record");
-
-  const { data: tableData } =
-    useAutoFetch("/reportrecords-List");
+  const { data: cardData, loading: recordLoading } = useAutoFetch("/collection-record");
+  const { data: tableData } = useAutoFetch("/reportrecords-List");
 
   const initialDataOfTransactions = tableData?.data || [];
 
@@ -54,33 +58,48 @@ export const Dashboard = () => {
       .slice(0, 4);
   }, [initialDataOfTransactions]);
 
-
- // Verify tab lock
- useEffect(() => {
-  const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-  // Only redirect if there is NO logged-in user
-  if (!lock.userId || !user.id || lock.userId !== user.id) {
-    navigate("/", { replace: true });
-  }
-}, [navigate]);
-
-
-  // Clear lock on tab close
+  // ──────────────────────────────────────────────────────
+  // 3. Authentication check (only once on mount)
+  // ──────────────────────────────────────────────────────
   useEffect(() => {
-    const handleUnload = () => {
+    const checkAuthentication = () => {
       const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
-      if (lock.tabId === sessionStorage.getItem("tabId")) {
-        localStorage.removeItem(DASHBOARD_LOCK_KEY);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+      const isValid =
+        lock?.userId &&
+        user?.id &&
+        lock.userId === user.id &&
+        user.id !== undefined;
+
+      setIsAuthenticated(isValid);
+      setIsCheckingAuth(false);
+
+      if (!isValid) {
+        console.log("Auth check failed → redirecting to login");
+        navigate("/", { replace: true });
+      } else {
+        console.log("Auth check passed");
       }
     };
-    window.addEventListener("beforeunload", handleUnload);
-    return () => window.removeEventListener("beforeunload", handleUnload);
-  }, []);
 
+    const timer = setTimeout(checkAuthentication, 150);
 
-  // Format table data
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
+  // ──────────────────────────────────────────────────────
+  // 4. Logout handler
+  // ──────────────────────────────────────────────────────
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem(DASHBOARD_LOCK_KEY);
+    navigate("/", { replace: true });
+  };
+
+  // ──────────────────────────────────────────────────────
+  // 5. Format table data (removed status dot)
+  // ──────────────────────────────────────────────────────
   useEffect(() => {
     const formattedTableData = filteredTableData.map((item, index) => {
       const date = new Date(item.created_at);
@@ -95,47 +114,44 @@ export const Dashboard = () => {
         hour12: true,
       });
 
+      const statusUpper = (item.status || "UNKNOWN").toUpperCase();
+      let statusClass = "bg-gray-100 text-gray-700 border-gray-300 font-medium";
 
-      let statusClass =
-        "bg-[#057034ff] text-white"; // default
-
-      if (item.status === "pending") {
-        statusClass =
-          "bg-[#dfaf03ff] text-white";
-      } else if (item.status === "failed") {
-        statusClass =
-          "bg-[#ff3366] text-white border-red-300";
-      } else if (item.status === "initiated") {
-        statusClass =
-          "bg-[#0f3cb9ff] text-white";
-      } else if (item.status === "completed") {
-        statusClass =
-          "bg-[#08667eff] text-white";
-      } else if (item.status === "reversed") {
-        statusClass =
-          "bg-[#ff3366] text-white";
-      } else if (item.status === "refunded") {
-        statusClass =
-          "bg-[#ff3366] text-white";
+      switch (statusUpper) {
+        case "SUCCESS":
+        case "COMPLETED":
+          statusClass = "bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold";
+          break;
+        case "PENDING":
+        case "INITIATED":
+          statusClass = "bg-amber-50 text-amber-700 border-amber-200 font-semibold";
+          break;
+        case "FAILED":
+        case "REVERSED":
+        case "REFUNDED":
+          statusClass = "bg-rose-50 text-rose-700 border-rose-200 font-semibold";
+          break;
+        default:
+          break;
       }
-
-
 
       return {
         sqno: index + 1,
-        txnid: item.txnid,
+        txnid: item.txnid || "—",
         name: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
-        type: item.product,
+        type: item.product || "—",
         amount: item.amount,
         status: (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClass}`}>
-            {item.status.toUpperCase()}
+          <span
+            className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide border shadow-sm ${statusClass}`}
+          >
+            {statusUpper} {/* Dot removed */}
           </span>
         ),
         time: (
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">{formattedDate}</span>
-            <span className="text-sm text-gray-500">{formattedTime}</span>
+          <div className="flex flex-col leading-tight">
+            <span className="font-medium text-gray-900">{formattedDate}</span>
+            <span className="text-xs text-gray-500 mt-0.5">{formattedTime}</span>
           </div>
         ),
       };
@@ -143,20 +159,17 @@ export const Dashboard = () => {
 
     setTransactionData(formattedTableData);
 
-    const formattedLargeTransactionData = processLargeTransactionData.map(
-      (item) => ({
-        name: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
-        product: item.product,
-        amount: item.amount,
-      })
-    );
+    const formattedLarge = processLargeTransactionData.map((item) => ({
+      name: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
+      product: item.product,
+      amount: item.amount,
+    }));
 
-    setLargeTransactionData(formattedLargeTransactionData);
+    setLargeTransactionData(formattedLarge);
   }, [filteredTableData, processLargeTransactionData]);
 
   // Table columns
   const transactioncolumn = [
-
     { header: "TXN Id", accessor: "txnid" },
     { header: "Merchant", accessor: "name" },
     { header: "Type", accessor: "type" },
@@ -170,88 +183,117 @@ export const Dashboard = () => {
   }, [recordLoading, cardData]);
 
   const cardsToShow = [
-    { title: "Total Pay-IN Collection", value: cardData?.total_payin_amount ?? 0 },
-    { title: "Total Pay-OUT", value: cardData?.total_payout_amount ?? 0 },
     { title: "Today Pay-IN Collection", value: cardData?.today_payin ?? 0 },
+    { title: "Total Pay-IN", value: cardData?.total_payin_amount ?? 0 },
     { title: "Today Pay-OUT", value: cardData?.today_payout ?? 0 },
+    { title: "Total Pay-OUT", value: cardData?.total_payout_amount ?? 0 },
   ];
 
+  // ──────────────────────────────────────────────────────
+  // Render logic
+  // ──────────────────────────────────────────────────────
+  if (isCheckingAuth) {
+    return <DashboardSkeleton />;
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
-    <>
-      {initialLoad ? (
-        <DashboardSkeleton />
-      ) : (
-        <div className="w-full py-8">
-          <div className="w-full px-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/70 pb-16">
+      <div className="mx-auto max-w-[1720px] px-5 sm:px-7 lg:px-10 pt-8 lg:pt-12">
 
-            {/* ================= CARDS ================= */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
-
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                <h5 className="p-3 text-white font-semibold"
-                  style={{ background: "linear-gradient(250deg,#2a91d9,#00418c)" }}>
-                  Today Pay-IN
-                </h5>
-                <div className="p-6 text-center font-bold text-xl">
-                  ₹{cardsToShow[2].value.toLocaleString()}
+        {/* CARDS - now with enhanced shadow */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 mb-12">
+          {cardsToShow.map((card, i) => (
+            <div
+              key={i}
+              className={`
+                group relative bg-white rounded-tl-3xl rounded-br-3xl 
+                shadow-[0_10px_30px_rgba(0,0,0,0.12)] overflow-hidden 
+                transition-all duration-400 hover:shadow-[0_25px_70px_rgba(0,0,0,0.18)]
+                hover:-translate-y-2 border border-slate-100/80
+              `}
+            >
+              {/* SAME GRADIENT FOR ALL CARDS */}
+              <div 
+                className="absolute top-0 left-0 right-0 h-3 transform -skew-x-12 origin-left"
+                style={{
+                  background: "linear-gradient(90deg, rgba(6, 76, 150, 1) 0%, rgba(40, 142, 214, 1) 100%)"
+                }}
+              />
+              
+              <div className="p-7 pt-10 relative">
+                <h3 className="text-sm font-semibold text-slate-600 mb-3 tracking-wider uppercase">
+                  {card.title}
+                </h3>
+                <div className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight">
+                  ₹{(card.value || 0).toLocaleString("en-IN")}
                 </div>
-              </div>
 
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                <h5 className="p-3 text-white font-semibold"
-                  style={{ background: "linear-gradient(250deg,#118dca,#1158ad)" }}>
-                  Total Pay-IN
-                </h5>
-                <div className="p-6 text-center font-bold text-xl">
-                  ₹{cardsToShow[0].value.toLocaleString()}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                <h5 className="p-3 text-white font-semibold"
-                  style={{ background: "linear-gradient(250deg,#2a91d9,#00418c)" }}>
-                  Today Pay-OUT
-                </h5>
-                <div className="p-6 text-center font-bold text-xl">
-                  ₹{cardsToShow[3].value.toLocaleString()}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                <h5 className="p-3 text-white font-semibold"
-                  style={{ background: "linear-gradient(250deg,#2a91d9,#00418c)" }}>
-                  Total Pay-OUT
-                </h5>
-                <div className="p-6 text-center font-bold text-xl">
-                  ₹{cardsToShow[1].value.toLocaleString()}
-                </div>
-              </div>
-
-            </div>
-
-            {/* ================= CHARTS ================= */}
-            <div className="flex gap-4 w-full pt-8">
-              <div className="w-[60%]"
-              style={{background: "linear-gradient(180deg, #ecf3ffff, #e8f0ff, #d6e4ff)"}} >
-                <LineChart1 data={cardData?.monthWiseStatusCounts} />
-              </div>
-              <div className="w-[40%] shadow-xl"
-              style={{background: "linear-gradient(180deg, #ecf3ffff, #e8f0ff, #d6e4ff)"}}>
-                <DonutChart data={cardData?.transactionStatusCounts || []} />
+                {/* Subtle inner glow on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* ================= TABLE ================= */}
-            <div className="mt-8 bg-white p-4 rounded-xl shadow">
-              <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-semibold">Transactions</h4>
+        {/* CHARTS - modern container */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-7 mb-12">
+          <div className="
+            lg:col-span-3 bg-white rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.06)] 
+            border border-slate-100/80 p-6 lg:p-8 overflow-hidden
+            transition-all duration-400 hover:shadow-[0_25px_70px_rgb(0,0,0,0.09)]
+          ">
+            <h3 className="text-2xl font-semibold text-slate-800 mb-8 relative inline-block">
+              Monthly Performance
+              <span className="absolute -bottom-2.5 left-0 w-16 h-1 bg-gradient-to-r from-blue-500/50 to-indigo-500/50 rounded-full" />
+            </h3>
+            <div className="h-[400px] lg:h-[440px] -mx-2">
+              <LineChart1 data={cardData?.monthWiseStatusCounts} />
+            </div>
+          </div>
 
+          <div className="
+            lg:col-span-2 bg-white rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.06)] 
+            border border-slate-100/80 p-6 lg:p-8
+            transition-all duration-400 hover:shadow-[0_25px_70px_rgb(0,0,0,0.09)]
+          ">
+            <h3 className="text-2xl font-semibold text-slate-800 mb-8 relative inline-block">
+              Status Distribution
+              <span className="absolute -bottom-2.5 left-0 w-16 h-1 bg-gradient-to-r from-rose-500/50 to-pink-500/50 rounded-full" />
+            </h3>
+            <div className="h-[400px] flex items-center justify-center">
+              <DonutChart data={cardData?.transactionStatusCounts || []} />
+            </div>
+          </div>
+        </div>
+
+        {/* TABLE - pill header + creative style */}
+        <div className="
+          bg-white rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.06)] 
+          border border-slate-100/80 overflow-hidden
+        ">
+          <div className="px-7 py-6 border-b border-slate-100/80 bg-slate-50/40">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+              <h3 className="text-2xl font-semibold text-slate-800">
+                Transaction History
+              </h3>
+
+              <div className="relative">
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="
+                    bg-white border border-slate-200 text-slate-700 text-sm 
+                    rounded-full px-6 py-3 focus:ring-2 focus:ring-blue-500 
+                    focus:border-blue-500 outline-none min-w-[200px] 
+                    transition-all shadow-sm hover:border-blue-300
+                    appearance-none cursor-pointer
+                  "
                 >
-                  <option value="ALL">All</option>
+                  <option value="ALL">All Statuses</option>
                   <option value="SUCCESS">Success</option>
                   <option value="FAILED">Failed</option>
                   <option value="PENDING">Pending</option>
@@ -260,24 +302,25 @@ export const Dashboard = () => {
                   <option value="COMPLETED">Completed</option>
                   <option value="INITIATED">Initiated</option>
                 </select>
-
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">▼</span>
               </div>
-
-              <Table
-                columns={transactioncolumn}
-                data={transactionData}
-                showSearch={false}
-                showPagination={true}
-                showExport={false}
-                showStatusFilter={false}
-                showDeleteColumn={false}
-                showDateFilter={false}
-              />
             </div>
+          </div>
 
+          <div className="overflow-x-auto">
+            <Table
+              columns={transactioncolumn}
+              data={transactionData}
+              showSearch={false}
+              showPagination={true}
+              showExport={false}
+              showStatusFilter={false}
+              showDeleteColumn={false}
+              showDateFilter={false}
+            />
           </div>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 };

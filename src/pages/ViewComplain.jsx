@@ -11,8 +11,8 @@ import { useToast } from "../contexts/ToastContext";
 export const ViewComplain = () => {
   const [errors, setErrors] = useState();
   const [showModal, setShowModal] = useState(false);
-  const [showViewMessageModal, setShowViewMessageModal] = useState(false);
-  const [showSendMessageModal, setShowSendMessageModal] = useState(false);
+  // const [showViewMessageModal, setShowViewMessageModal] = useState(false);
+  // const [showSendMessageModal, setShowSendMessageModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [ticketData, setTicketData] = useState([]);
   const [editData, setEditData] = useState(null);
@@ -184,10 +184,10 @@ export const ViewComplain = () => {
     { header: "Description", accessor: "description" },
     { header: "Status", accessor: "status" },
     { header: "Priority", accessor: "priority" },
-    { header: "Send Message", accessor: "send" },
-    { header: "View Message", accessor: "view" },
+    // { header: "Send Message", accessor: "send" },
+    // { header: "View Message", accessor: "view" },
     { header: "Issue Image", accessor: "image" },
-    { header: "Assigned To", accessor: "assigned_to" },
+    // { header: "Assigned To", accessor: "assigned_to" },
     { header: "Created At", accessor: "created_at_ui" },
     { header: "Action", accessor: "action" },
   ];
@@ -248,29 +248,31 @@ export const ViewComplain = () => {
       </select>
     ),
 
-    send: (
-      <Button
-        onClick={() => setShowSendMessageModal(true)}
-        className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-md"
-      >
-        Send Message
-      </Button>
-    ),
+    // send: (
+    //   <Button
+    //     onClick={() => setShowSendMessageModal(true)}
+    //     className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-md"
+    //   >
+    //     Send Message
+    //   </Button>
+    // ),
 
-    view: (
-      <Button
-        onClick={() => setShowViewMessageModal(true)}
-        className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-md"
-      >
-        View Message
-      </Button>
-    ),
+    // view: (
+    //   <Button
+    //     onClick={() => setShowViewMessageModal(true)}
+    //     className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-md"
+    //   >
+    //     View Message
+    //   </Button>
+    // ),
 
     image: (
       <Button onClick={() => setShowImageModal(true)}>
         <img src={Logo || Placeholder} alt="" />
       </Button>
     ),
+
+    // assigned_to: row.assigned_to,
   }));
 
   /* ===================== RENDER ===================== */
@@ -374,53 +376,56 @@ export const ViewComplain = () => {
         </div>
       )}
 
-      {/* Other modals (view / send / image) stay unchanged */}
-      {showViewMessageModal && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50 overflow-y-scroll"
-          onClick={() => setShowViewMessageModal(false)}
-        >
-          <div
-            className="bg-white border rounded-lg shadow-lg max-w-3xl w-full mx-2 p-6 transform transition-all scale-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 
-                    font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center"
-            >
-              <h4 className="font-bold text-white text-lg py-2">
-                View Message
-              </h4>
-              <Button
-                onClick={() => setShowViewMessageModal(false)}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition"
-              >
-                <i class="fa-solid fa-xmark fa-lg"></i>
-              </Button>
-            </div>
+      {/* {showViewMessageModal && ( */}
+      {/*   <div */}
+      {/*     className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50 overflow-y-scroll" */}
+      {/*     onClick={() => setShowViewMessageModal(false)} */}
+      {/*   > */}
+      {/*     <div */}
+      {/*       className="bg-white border rounded-lg shadow-lg max-w-3xl w-full mx-2 p-6 transform transition-all scale-100" */}
+      {/*       onClick={(e) => e.stopPropagation()} */}
+      {/*     > */}
+      {/*       <div */}
+      {/*         className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700  */}
+      {/*               font-medium rounded-t-lg text-sm px-5 py-3 flex justify-between items-center" */}
+      {/*       > */}
+      {/*         <h4 className="font-bold text-white text-lg py-2"> */}
+      {/*           View Message */}
+      {/*         </h4> */}
+      {/*         <Button */}
+      {/*           onClick={() => setShowViewMessageModal(false)} */}
+      {/*           className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-500 font-bold text-lg shadow-md hover:bg-red-500 hover:text-white transition" */}
+      {/*         > */}
+      {/*           <i class="fa-solid fa-xmark fa-lg"></i> */}
+      {/*         </Button> */}
+      {/*       </div> */}
 
-            <div class="flex justify-end mt-3">
-              <div class="block relative max-w-xs bg-blue-500 text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md">
-                <p class="text-lg leading-relaxed">Chat 1</p>
-                <p class="text-xs leading-relaxed text-gray-200">
-                  {new Date().toLocaleString()}
-                </p>
-                <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-blue-500 rotate-45 rounded-sm"></span>
-              </div>
-            </div>
+      {/*       <div class="flex justify-end mt-3"> */}
+      {/*         <div class="block relative max-w-xs bg-blue-500 text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md"> */}
+      {/*           <p class="text-lg leading-relaxed">Chat 1</p> */}
+      {/*           <p class="text-xs leading-relaxed text-gray-200"> */}
+      {/*             {new Date().toLocaleString()} */}
+      {/*           </p> */}
+      {/*           <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-blue-500 rotate-45 rounded-sm"></span> */}
+      {/*         </div> */}
+      {/*       </div> */}
 
-            <div class="flex justify-end mt-3">
-              <div class="block relative max-w-xs bg-blue-500 text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md">
-                <p class="text-lg leading-relaxed">Chat 2</p>
-                <p class="text-xs leading-relaxed text-gray-200">
-                  {new Date().toLocaleString()}
-                </p>
-                <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-blue-500 rotate-45 rounded-sm"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/*       <div class="flex justify-end mt-3"> */}
+      {/*         <div class="block relative max-w-xs bg-blue-500 text-white p-3 px-4 rounded-2xl rounded-br-none shadow-md"> */}
+      {/*           <p class="text-lg leading-relaxed">Chat 2</p> */}
+      {/*           <p class="text-xs leading-relaxed text-gray-200"> */}
+      {/*             {new Date().toLocaleString()} */}
+      {/*           </p> */}
+      {/*           <span class="absolute right-[-3px] bottom-0 w-2 h-2 bg-blue-500 rotate-45 rounded-sm"></span> */}
+      {/*         </div> */}
+      {/*       </div> */}
+      {/*     </div> */}
+      {/*   </div> */}
+      {/* )} */}
+
+      {/* {showSendMessageModal && ( */}
+      {/*   // ... send message modal content would be here if it existed */}
+      {/* )} */}
 
       {showImageModal && (
         <div
