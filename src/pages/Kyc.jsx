@@ -16,16 +16,12 @@ export const Kyc = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const toast = useToast();
-  const user = location.state?.user || {};
-  console.log("user data", user);
-  const singlemerchant = location.state?.merchant || {};
-  console.log("single merchant", singlemerchant);
 
   const [memberFormData, setMemberFormData] = useState({
-    id: user.id || singlemerchant.id || "",
-    name: user.name || singlemerchant.name || "",
-    mobile_no: user.mobile_no || singlemerchant.mobile || "",
-    email: user.email || singlemerchant.email || "",
+    id: "",
+    name: "",
+    mobile_no: "",
+    email: "",
     business_mcc: "",
     city: "",
     district: "",
@@ -62,29 +58,44 @@ export const Kyc = () => {
   });
 
   useEffect(() => {
-    // Restore from localStorage
     const saved = localStorage.getItem("kycFormData");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setMemberFormData((prev) => ({ ...prev, ...data }));
+    const merchant = location.state?.merchant;
+
+    // 1️⃣ Fresh navigation from Register
+    if (merchant?.id) {
+      setMemberFormData((prev) => ({
+        ...prev,
+        id: merchant.id,
+        name: merchant.name || "",
+        email: merchant.email || "",
+        mobile_no: merchant.mobile_no || "",
+      }));
+      return;
     }
 
-    // Warn before refresh
-    const warn = (e) => {
-      e.preventDefault();
-      e.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, []);
+    // 2️⃣ Refresh case
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setMemberFormData((prev) => ({
+          ...prev,
+          ...parsed,
+        }));
+      } catch (e) {
+        console.error("Invalid localStorage data");
+      }
+    }
+  }, [location.state]);
 
-  // Auto-save text fields
   useEffect(() => {
+    if (!memberFormData.id) return; // 🔥 MOST IMPORTANT LINE
+
     const savable = { ...memberFormData };
     delete savable.video_kyc;
     delete savable.company_pan_no_doc;
     delete savable.company_gst_no_doc;
     delete savable.cancel_cheque_doc;
+
     savable.director_info = savable.director_info.map((d) => ({
       director_name: d.director_name,
       director_pan_no: d.director_pan_no,
@@ -114,13 +125,13 @@ export const Kyc = () => {
       "company_gst_no",
       "cin_llpin",
       "company_type",
-      "date_of_incorporation",
-      "company_pan_no_doc", // add file here
-      "company_gst_no_doc", // add file here
-      "cancel_cheque_doc", // add file here
-      "account_holder_name",
-      "bank_account_no",
-      "ifsc_code",
+      "company_pan_no_doc",
+      "company_gst_no_doc",
+      "cancel_cheque_doc",
+      // "account_holder_name",
+      // "bank_account_no",
+      // "ifsc_code",
+      // "date_of_incorporation",
     ],
     3: [
       "director_name",
@@ -362,6 +373,7 @@ export const Kyc = () => {
         setCurrentStep(currentStep + 1);
       }
     }
+    console.log("Errors:", errors);
   };
 
   const handleChange = (e) => {
@@ -381,48 +393,47 @@ export const Kyc = () => {
   };
 
   const handleFileChange = (key, file) => {
-  if (!file) return;
+    if (!file) return;
 
-  // ✅ Allowed file types
-  const allowedTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "application/pdf",
-  ];
+    // ✅ Allowed file types
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+    ];
 
-  // ❌ Invalid type
-  if (!allowedTypes.includes(file.type)) {
+    // ❌ Invalid type
+    if (!allowedTypes.includes(file.type)) {
+      setErrors((prev) => ({
+        ...prev,
+        [key]: "Only JPG, PNG, WEBP images or PDF files are allowed",
+      }));
+      return;
+    }
+
+    // ❌ Size limit: 5MB
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setErrors((prev) => ({
+        ...prev,
+        [key]: "File size must be under 5MB",
+      }));
+      return;
+    }
+
+    // ✅ Clear error for this field
     setErrors((prev) => ({
       ...prev,
-      [key]: "Only JPG, PNG, WEBP images or PDF files are allowed",
+      [key]: null,
     }));
-    return;
-  }
 
-  // ❌ Size limit: 5MB
-  const maxSize = 5 * 1024 * 1024;
-  if (file.size > maxSize) {
-    setErrors((prev) => ({
+    // ✅ Save file in companyDocs state
+    setCompanyDocs((prev) => ({
       ...prev,
-      [key]: "File size must be under 5MB",
+      [key]: file,
     }));
-    return;
-  }
-
-  // ✅ Clear error for this field
-  setErrors((prev) => ({
-    ...prev,
-    [key]: null,
-  }));
-
-  // ✅ Save file in companyDocs state
-  setCompanyDocs((prev) => ({
-    ...prev,
-    [key]: file,
-  }));
-};
-
+  };
 
   const handleDirectorChange = (index, e) => {
     const { name, value, files } = e.target;
@@ -533,12 +544,8 @@ export const Kyc = () => {
 
     try {
       const formData = new FormData();
-      // Add this right after creating formData
-      // if (user.id) {
-      //   formData.append("id", user.id);
-      // }
 
-      const merchantId = user.id || singlemerchant.id;
+      const merchantId = memberFormData.id;
       if (!merchantId) {
         toast.error("Merchant ID missing – cannot submit KYC");
         return;
@@ -673,318 +680,7 @@ export const Kyc = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
-                  {/* {currentStep === 1 && (
-                    <div className="grid gap-6 mb-6 md:grid-cols-2">
-                      <div className="relative h-[72px]">
-                        <input
-                          readOnly
-                          type="text"
-                          name="name"
-                          id="floating_outlined_name"
-                          className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-md text-black bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                          focus:outline-none focus:ring-0  ${
-                            errors?.name ? "border-red-500" : "border-gray-300"
-                          }`}
-                          placeholder=""
-                          value={memberFormData.name}
-                          onChange={handleChange}
-                        />
-                        <label
-                          for="floating_outlined_name"
-                          className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.name
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          Business Name <span className="text-red-600">*</span>
-                        </label>
-                        {errors?.name && (
-                          <span className="mt-1 text-sm text-red-500">
-                            {errors?.name}
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative h-[72px]">
-                        <input
-                          readOnly
-                          type="number"
-                          name="mobile_no"
-                          id="floating_outlined_mobile"
-                          className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                            focus:outline-none focus:ring-0 ${
-                              errors?.mobile_no
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          placeholder=""
-                          value={memberFormData.mobile_no}
-                          onChange={handleChange}
-                        />
-                        <label
-                          for="floating_outlined_mobile"
-                          className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.mobile_no
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          Business Mobile{" "}
-                          <span className="text-red-600">*</span>
-                        </label>
-                      </div>
-                      <div className="relative h-[72px]">
-                        <input
-                          readOnly
-                          type="email"
-                          name="email"
-                          id="floating_outlined_email"
-                          className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                            focus:outline-none focus:ring-0 ${
-                              errors?.email
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          placeholder=""
-                          value={memberFormData.email}
-                          onChange={handleChange}
-                        />
-                        <label
-                          for="floating_outlined_email"
-                          className={`absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.email
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          Business Email <span className="text-red-600">*</span>
-                        </label>
-                        {errors?.email && (
-                          <span className="text-sm text-red-500">
-                            {errors?.email}
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative h-[72px]">
-                        <input
-                          type="number"
-                          name="business_mcc"
-                          id="floating_outlined_mcc"
-                          className={`block mt-7 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                            focus:outline-none focus:ring-0 ${
-                              errors?.business_mcc
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          placeholder=""
-                          value={memberFormData.business_mcc}
-                          onChange={handleChange}
-                        />
-                        <label
-                          for="floating_outlined_mcc"
-                          className={`absolute mt-3 text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.business_mcc
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          Business MCC <span className="text-red-600">*</span>
-                        </label>
-                        {errors?.business_mcc && (
-                          <span className="text-sm text-red-500">
-                            {errors?.business_mcc}
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative h-[72px]">
-                        <input
-                          type="text"
-                          name="city"
-                          id="floating_outlined_city"
-                          className={`block mt-4 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                            focus:outline-none focus:ring-0 ${
-                              errors?.city
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          placeholder=""
-                          value={memberFormData.city}
-                          onChange={handleChange}
-                        />
-                        <label
-                          for="floating_outlined_city"
-                          className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.city
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          City <span className="text-red-600">*</span>
-                        </label>
-                        {errors?.city && (
-                          <span className="text-sm text-red-500">
-                            {errors?.city}
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative h-[72px]">
-                        <input
-                          type="text"
-                          name="state"
-                          id="floating_outlined_state"
-                          className={`block mt-5 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                            focus:outline-none focus:ring-0 ${
-                              errors?.state
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          placeholder=""
-                          value={memberFormData.state}
-                          onChange={handleChange}
-                        />
-                        <label
-                          for="floating_outlined_state"
-                          className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.state
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          State <span className="text-red-600">*</span>
-                        </label>
-                        {errors?.state && (
-                          <span className="text-sm text-red-500">
-                            {errors?.state}
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative h-[72px]">
-                        <input
-                          type="text"
-                          name="district"
-                          id="floating_outlined_district"
-                          className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                            focus:outline-none focus:ring-0 ${
-                              errors?.district
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          placeholder=""
-                          value={memberFormData.district}
-                          onChange={handleChange}
-                        />
-                        <label
-                          for="floating_outlined_district"
-                          className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.district
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          District <span className="text-red-600">*</span>
-                        </label>
-                        {errors?.district && (
-                          <span className="text-sm text-red-500">
-                            {errors?.district}
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative h-[72px]">
-                        <input
-                          type="number"
-                          name="pin_code"
-                          id="floating_outlined_pin"
-                          className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                            focus:outline-none focus:ring-0 ${
-                              errors?.pin_code
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          placeholder=""
-                          value={memberFormData.pin_code}
-                          onChange={handleChange}
-                        />
-                        <label
-                          for="floating_outlined_pin"
-                          className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.pin_code
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          Pincode <span className="text-red-600">*</span>
-                        </label>
-                        {errors?.pin_code && (
-                          <span className="text-sm text-red-500">
-                            {errors?.pin_code}
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative h-[72px]">
-                        <input
-                          type="text"
-                          name="address"
-                          id="floating_outlined_address"
-                          className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                            focus:outline-none focus:ring-0 ${
-                              errors?.address
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          placeholder=""
-                          value={memberFormData.address}
-                          onChange={handleChange}
-                        />
-                        <label
-                          for="floating_outlined_address"
-                          className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.address
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          <span className="text-red-600">*</span>
-                        </label>
-                        {errors?.address && (
-                          <span className="text-sm text-red-500">
-                            {errors?.address}
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative h-[72px]">
-                        <input
-                          type="text"
-                          name="website_url"
-                          id="floating_outlined_web"
-                          className={`block mt-6 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border border-gray-300 appearance-none peer
-                            focus:outline-none focus:ring-0 ${
-                            errors?.website_url
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }`}
-                          value={memberFormData.website_url}
-                          onChange={handleChange}
-                          placeholder=""
-                        />
-                        <label
-                          for="floating_outlined_web"
-                          className={`absolute text-sm duration-300 text-gray-500 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] px-2 ${
-                            errors?.website_url
-                              ? "peer-focus:text-red-600"
-                              : "peer-focus:text-blue-600 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-                          }`}
-                        >
-                          Website Url <span className="text-red-600">*</span>
-                        </label>
-                        {errors?.website_url && (
-                          <span className="text-sm text-red-500">
-                            {errors?.website_url}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )} */}
-
+                
                   {currentStep === 1 && (
                     <div className="space-y-4 mb-8">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1027,7 +723,7 @@ export const Kyc = () => {
                                 w-full px-3 py-2
                                 rounded-lg
                                 border border-gray-300
-                                focus:outline-none focus:ring-2 focus:ring-[#9E7C19]
+                                focus:outline-none focus:ring-1 focus:ring-[#375EF4]
                                 ${
                                   field.readOnly
                                     ? "bg-gray-100 cursor-not-allowed"
@@ -1050,20 +746,22 @@ export const Kyc = () => {
                   {currentStep === 2 && (
                     <div className="space-y-4 mb-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                         {/* Company PAN */}
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            Company PAN Number <span className="text-red-600">*</span>
+                            Company PAN Number{" "}
+                            <span className="text-red-600">*</span>
                           </label>
                           <input
                             name="company_pan_no"
                             value={memberFormData.company_pan_no || ""}
                             onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                           />
                           {errors?.company_pan_no && (
-                            <p className="text-red-600 text-xs mt-1">{errors.company_pan_no}</p>
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.company_pan_no}
+                            </p>
                           )}
                         </div>
 
@@ -1077,10 +775,14 @@ export const Kyc = () => {
                             type="text"
                             readOnly
                             placeholder="Upload PAN document"
-                            value={memberFormData.company_pan_no_doc?.name || ""}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white"
+                            value={
+                              memberFormData.company_pan_no_doc?.name || ""
+                            }
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                             onClick={() =>
-                              document.getElementById("company_pan_no_doc").click()
+                              document
+                                .getElementById("company_pan_no_doc")
+                                .click()
                             }
                           />
 
@@ -1109,10 +811,12 @@ export const Kyc = () => {
                             name="company_gst_no"
                             value={memberFormData.company_gst_no || ""}
                             onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                           />
                           {errors?.company_gst_no && (
-                            <p className="text-red-600 text-xs mt-1">{errors.company_gst_no}</p>
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.company_gst_no}
+                            </p>
                           )}
                         </div>
 
@@ -1126,10 +830,14 @@ export const Kyc = () => {
                             type="text"
                             readOnly
                             placeholder="Upload GST document"
-                            value={memberFormData.company_gst_no_doc?.name || ""}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white"
+                            value={
+                              memberFormData.company_gst_no_doc?.name || ""
+                            }
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                             onClick={() =>
-                              document.getElementById("company_gst_no_doc").click()
+                              document
+                                .getElementById("company_gst_no_doc")
+                                .click()
                             }
                           />
 
@@ -1158,10 +866,12 @@ export const Kyc = () => {
                             name="cin_llpin"
                             value={memberFormData.cin_llpin || ""}
                             onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                           />
                           {errors?.cin_llpin && (
-                            <p className="text-red-600 text-xs mt-1">{errors.cin_llpin}</p>
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.cin_llpin}
+                            </p>
                           )}
                         </div>
 
@@ -1174,7 +884,7 @@ export const Kyc = () => {
                             name="company_type"
                             value={memberFormData.company_type || ""}
                             onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                           >
                             <option value="">Select</option>
                             <option value="private">Private</option>
@@ -1182,14 +892,17 @@ export const Kyc = () => {
                             <option value="llp">LLP</option>
                           </select>
                           {errors?.company_type && (
-                            <p className="text-red-600 text-xs mt-1">{errors.company_type}</p>
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.company_type}
+                            </p>
                           )}
                         </div>
 
                         {/* Cancel Cheque */}
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            Cancel Cheque <span className="text-red-600">*</span>
+                            Cancel Cheque{" "}
+                            <span className="text-red-600">*</span>
                           </label>
 
                           <input
@@ -1197,9 +910,11 @@ export const Kyc = () => {
                             readOnly
                             placeholder="Upload cancel cheque"
                             value={memberFormData.cancel_cheque_doc?.name || ""}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                             onClick={() =>
-                              document.getElementById("cancel_cheque_doc").click()
+                              document
+                                .getElementById("cancel_cheque_doc")
+                                .click()
                             }
                           />
 
@@ -1224,7 +939,6 @@ export const Kyc = () => {
 
                   {currentStep === 3 && (
                     <div className="space-y-6 mb-6">
-
                       {memberFormData?.director_info?.map((director, index) => (
                         <div
                           key={index}
@@ -1248,17 +962,17 @@ export const Kyc = () => {
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                             {/* Director Name */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Director Name <span className="text-red-600">*</span>
+                                Director Name{" "}
+                                <span className="text-red-600">*</span>
                               </label>
                               <input
                                 name="director_name"
                                 value={director.director_name || ""}
                                 onChange={(e) => handleDirectorChange(index, e)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9E7C19]"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                               />
                               {errors?.director?.[index]?.director_name && (
                                 <p className="text-red-600 text-xs mt-1">
@@ -1276,7 +990,7 @@ export const Kyc = () => {
                                 name="director_gender"
                                 value={director.director_gender || ""}
                                 onChange={(e) => handleDirectorChange(index, e)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-[#9E7C19]"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                               >
                                 <option value="">Select Gender</option>
                                 <option value="male">Male</option>
@@ -1293,13 +1007,14 @@ export const Kyc = () => {
                             {/* PAN Number */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                PAN Number <span className="text-red-600">*</span>
+                                PAN Number{" "}
+                                <span className="text-red-600">*</span>
                               </label>
                               <input
                                 name="director_pan_no"
                                 value={director.director_pan_no || ""}
                                 onChange={(e) => handleDirectorChange(index, e)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9E7C19]"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                               />
                               {errors?.director?.[index]?.director_pan_no && (
                                 <p className="text-red-600 text-xs mt-1">
@@ -1311,7 +1026,8 @@ export const Kyc = () => {
                             {/* PAN Document (Fake Input) */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                PAN Document <span className="text-red-600">*</span>
+                                PAN Document{" "}
+                                <span className="text-red-600">*</span>
                               </label>
 
                               <input
@@ -1319,9 +1035,11 @@ export const Kyc = () => {
                                 readOnly
                                 value={director.user_pan_doc?.name || ""}
                                 placeholder="Upload PAN document"
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white cursor-pointer"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                                 onClick={() =>
-                                  document.getElementById(`director-pan-${index}`).click()
+                                  document
+                                    .getElementById(`director-pan-${index}`)
+                                    .click()
                                 }
                               />
 
@@ -1331,7 +1049,9 @@ export const Kyc = () => {
                                 type="file"
                                 accept="image/*,application/pdf"
                                 className="hidden"
-                                onChange={(e) => handleDirectorFileChange(index, e)}
+                                onChange={(e) =>
+                                  handleDirectorFileChange(index, e)
+                                }
                               />
 
                               {errors?.director?.[index]?.user_pan_doc && (
@@ -1344,15 +1064,17 @@ export const Kyc = () => {
                             {/* Aadhaar Number */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Aadhaar Number <span className="text-red-600">*</span>
+                                Aadhaar Number{" "}
+                                <span className="text-red-600">*</span>
                               </label>
                               <input
                                 name="director_aadhar_no"
                                 value={director.director_aadhar_no || ""}
                                 onChange={(e) => handleDirectorChange(index, e)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9E7C19]"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                               />
-                              {errors?.director?.[index]?.director_aadhar_no && (
+                              {errors?.director?.[index]
+                                ?.director_aadhar_no && (
                                 <p className="text-red-600 text-xs mt-1">
                                   {errors.director[index].director_aadhar_no}
                                 </p>
@@ -1362,7 +1084,8 @@ export const Kyc = () => {
                             {/* Aadhaar Document (Fake Input) */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Aadhaar Document <span className="text-red-600">*</span>
+                                Aadhaar Document{" "}
+                                <span className="text-red-600">*</span>
                               </label>
 
                               <input
@@ -1370,9 +1093,11 @@ export const Kyc = () => {
                                 readOnly
                                 value={director.user_addhar_doc?.name || ""}
                                 placeholder="Upload Aadhaar document"
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white cursor-pointer"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                                 onClick={() =>
-                                  document.getElementById(`director-aadhaar-${index}`).click()
+                                  document
+                                    .getElementById(`director-aadhaar-${index}`)
+                                    .click()
                                 }
                               />
 
@@ -1382,7 +1107,9 @@ export const Kyc = () => {
                                 type="file"
                                 accept="image/*,application/pdf"
                                 className="hidden"
-                                onChange={(e) => handleDirectorFileChange(index, e)}
+                                onChange={(e) =>
+                                  handleDirectorFileChange(index, e)
+                                }
                               />
 
                               {errors?.director?.[index]?.user_addhar_doc && (
@@ -1395,14 +1122,15 @@ export const Kyc = () => {
                             {/* DOB */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Date of Birth <span className="text-red-600">*</span>
+                                Date of Birth{" "}
+                                <span className="text-red-600">*</span>
                               </label>
                               <input
                                 type="date"
                                 name="director_dob"
                                 value={director.director_dob || ""}
                                 onChange={(e) => handleDirectorChange(index, e)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9E7C19]"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                               />
                               {errors?.director?.[index]?.director_dob && (
                                 <p className="text-red-600 text-xs mt-1">
@@ -1410,177 +1138,33 @@ export const Kyc = () => {
                                 </p>
                               )}
                             </div>
-
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
 
-                  {/* {currentStep === 4 && (
-                    <div className="max-w-2xl mx-auto">
-                      <div className="bg-white border-l-4 border-[#4b669a] p-6 rounded-r-lg mb-8">
-                        <div className="flex items-start">
-                          <div className="flex-shrink-0">
-                            <i className="fa-solid fa-video text-2xl text-[#4b669a]"></i>
-                          </div>
-                          <div className="ml-4">
-                            <h3 className="text-xl font-bold text-[#4b669a] mb-4">
-                              Video KYC
-                            </h3>
-                            <p className="text-black-500 mb-4">
-                              Please record a short video following these steps:
-                            </p>
-                            <ol className="list-decimal list-inside text-black space-y-3">
-                              <li>
-                                Hold your face in front of the camera and
-                                clearly say your full name.
-                              </li>
-                              <li>
-                                Show your PAN card to the camera so it is
-                                clearly visible.
-                              </li>
-                              <li>
-                                Optionally, show any other required documents if
-                                prompted.
-                              </li>
-                              <li>
-                                Ensure good lighting and no obstructions for
-                                clear verification.
-                              </li>
-                            </ol>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
-                        <input
-                          type="file"
-                          accept="video/*"
-                          onChange={handleVideoChange}
-                          className="hidden   "
-                          id="video_kyc_upload"
-                        />
-                        <label
-                          htmlFor="video_kyc_upload"
-                          className="cursor-pointer block w-full py-4 px-6 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                        >
-                          <div className="text-lg font-medium text-gray-700">
-                            {memberFormData.video_kyc
-                              ? memberFormData.video_kyc.name
-                              : "Choose file"}
-                          </div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            {memberFormData.video_kyc
-                              ? "Click to change"
-                              : "No file chosen"}
-                          </div>
-                        </label>
-
-                        {errors?.video_kyc && (
-                          <p className="mt-3 text-sm text-red-600">
-                            {errors.video_kyc}
-                          </p>
-                        )}
-
-                        {memberFormData.video_kyc && (
-                          <div className="mt-6">
-                            <video
-                              src={URL.createObjectURL(
-                                memberFormData.video_kyc
-                              )}
-                              controls
-                              className="max-w-full h-auto rounded-lg shadow-md mx-auto max-h-96"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )} */}
-
-                  {/* {currentStep === 4 && (
-                    <div className="space-y-6 mb-6">
-
-                      <p className="text-sm text-gray-600 text-center max-w-2xl mx-auto">
-                        Please upload a short video for identity verification. Make sure your
-                        face and PAN card are clearly visible and the video is recorded in good
-                        lighting.
-                      </p>
-
-                      <div className="border border-gray-200 rounded-2xl p-5 bg-gray-50">
-                        <ul className="list-disc list-inside space-y-2 text-sm text-gray-700">
-                          <li>Look straight into the camera and say your full name</li>
-                          <li>Show your PAN card clearly in the video</li>
-                          <li>Ensure proper lighting and clear audio</li>
-                          <li>Video size should be reasonable (recommended under 50MB)</li>
-                        </ul>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-4 max-w-xl mx-auto">
-                        <div>
-                          <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            Upload Video KYC <span className="text-red-600">*</span>
-                          </label>
-
-                          <input
-                            type="text"
-                            readOnly
-                            placeholder="Upload video file"
-                            value={memberFormData.video_kyc?.name || ""}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#9E7C19]"
-                            onClick={() =>
-                              document.getElementById("video_kyc_input").click()
-                            }
-                          />
-
-                          <input
-                            id="video_kyc_input"
-                            type="file"
-                            accept="video/*"
-                            className="hidden"
-                            onChange={handleVideoChange}
-                          />
-
-                          {errors?.video_kyc && (
-                            <p className="text-red-600 text-xs mt-1 ml-2">
-                              {errors.video_kyc}
-                            </p>
-                          )}
-                        </div>
-
-                        {memberFormData.video_kyc && (
-                          <div className="mt-4">
-                            <p className="text-xs font-semibold text-gray-600 mb-2 ml-2">
-                              Video Preview
-                            </p>
-                            <video
-                              controls
-                              className="w-full rounded-xl border border-gray-300 shadow-sm"
-                              src={URL.createObjectURL(memberFormData.video_kyc)}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )} */}
-
                   {currentStep === 4 && (
                     <div className="space-y-6 mb-6">
-
                       {/* Instruction text (as requested) */}
                       <p className="text-sm text-gray-600 text-center max-w-2xl mx-auto">
-                        Please upload a short video for identity verification. Make sure your
-                        face and PAN card are clearly visible and the video is recorded in good
-                        lighting.
+                        Please upload a short video for identity verification.
+                        Make sure your face and PAN card are clearly visible and
+                        the video is recorded in good lighting.
                       </p>
 
                       {/* Bullet instructions */}
                       <div className="border border-gray-200 rounded-2xl p-5 bg-gray-50 max-w-3xl mx-auto">
                         <ul className="list-disc list-inside space-y-2 text-sm text-gray-700">
-                          <li>Look straight into the camera and say your full name</li>
+                          <li>
+                            Look straight into the camera and say your full name
+                          </li>
                           <li>Show your PAN card clearly in the video</li>
                           <li>Ensure proper lighting and clear audio</li>
-                          <li>Video size should be reasonable (recommended under 50MB)</li>
+                          <li>
+                            Video size should be reasonable (recommended under
+                            50MB)
+                          </li>
                         </ul>
                       </div>
 
@@ -1653,7 +1237,9 @@ export const Kyc = () => {
                             </p>
 
                             <video
-                              src={URL.createObjectURL(memberFormData.video_kyc)}
+                              src={URL.createObjectURL(
+                                memberFormData.video_kyc
+                              )}
                               controls
                               className="
                                 max-w-full
