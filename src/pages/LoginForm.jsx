@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react"; 
+// src/pages/Login.jsx
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import logo from "../images/logo.png";
 import paymentGatewayBg from "../images/login-background.jpg";
 import { usePost } from "../hooks/usePost";
-import { useNavigate } from "react-router-dom";
 import { ConfirmModal } from "../components/ConfirmModal";
 
 const DASHBOARD_LOCK_KEY = "payment_dashboard_logged_in";
@@ -16,19 +17,76 @@ const TAB_ID =
     return id;
   })();
 
+// FloatingInput – same as before
+const FloatingInput = ({
+  placeholder,
+  value,
+  onChange,
+  type = "text",
+  required = false,
+  disabled = false,
+  className = "",
+  error = "",
+  noFloat = false,
+  ...props
+}) => {
+  const hasValue = value && value.length > 0;
+
+  return (
+    <div className="relative w-full">
+      <input
+        {...props}
+        type={type}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        required={required}
+        placeholder={noFloat ? placeholder : " "}
+        className={`
+          peer w-full h-11 px-3.5 rounded-xl border
+          bg-white text-gray-900 text-sm leading-tight
+          focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all duration-200
+          disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
+          ${noFloat ? "py-2.5" : "pt-6 pb-2"}
+          ${error 
+            ? "border-red-500 focus:border-red-500 focus:ring-red-500/30" 
+            : "border-gray-300 focus:border-blue-600 focus:ring-blue-500/20"}
+          ${className}
+        `}
+      />
+
+      {!noFloat && (
+        <label
+          className={`
+            absolute left-3.5 pointer-events-none transition-all duration-200 text-sm
+            ${hasValue || props.autoFocus
+              ? "top-2 text-xs font-medium"
+              : "top-3.5 text-gray-500"}
+            peer-focus:top-2 peer-focus:text-xs peer-focus:font-medium
+            ${error ? "text-red-600" : "text-gray-500 peer-focus:text-blue-600"}
+          `}
+        >
+          {placeholder}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+      )}
+    </div>
+  );
+};
+
 function LoginForm() {
-  const [prekycmodal,setprekycmodal] = useState(false);
+  const [prekycmodal, setprekycmodal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+
   const navigate = useNavigate();
   const channelRef = useRef(null);
+
   const [modalHeading, setModalHeading] = useState("");
   const [modalBody, setModalBody] = useState("");
 
+  const { execute: login, loading, error } = usePost("/login");
 
-  const { execute: login, error, loading } = usePost("/login");
-
-  // BroadcastChannel to notify other tabs
   useEffect(() => {
     if (!window.BroadcastChannel) return;
     const channel = new BroadcastChannel("dashboard_login_channel");
@@ -44,7 +102,6 @@ function LoginForm() {
     return () => channel.close();
   }, [navigate]);
 
-  // Clear lock on tab close
   useEffect(() => {
     const handleUnload = () => {
       const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
@@ -63,136 +120,211 @@ function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
-    // if (lock.userId && lock.userId !== formData.email) {
-    //   alert("Another admin is already logged in on a different tab.");
-    //   return;
-    // }
-
     try {
       const response = await login(formData);
       if (response) {
-        // Save login info
-         const user = response.user;
+        const user = response.user;
         localStorage.setItem("token", response.token);
         localStorage.setItem("email", response.user.email);
         localStorage.setItem("role", btoa(response.user.role_type));
         localStorage.setItem("user", JSON.stringify(response.user));
 
-        // Set dashboard lock
         localStorage.setItem(
           DASHBOARD_LOCK_KEY,
           JSON.stringify({ userId: response.user.id, tabId: TAB_ID })
         );
 
-        // Broadcast login to other tabs
         channelRef.current?.postMessage({ type: "LOGIN", userId: response.user.id });
-        
-        if (user.kyc === 1 && user.pre_kyc === 1){
-             navigate("/dashboard", { replace: true });
-        }else if(user.kyc === 0 && user.pre_kyc === 0){
-             alert("Please complete KYC first!");
-             navigate("/kyc", { replace: true ,state: { user } });
-        }else if (user.pre_kyc === 1 && user.kyc === 0) {
-    // Show modal with dynamic content
-          setModalHeading(user.kyc_rejected === 1 ? "KYC Rejected" : "KYC Pending Approval");
+
+        if (user.kyc === 1 && user.pre_kyc === 1) {
+          navigate("/dashboard", { replace: true });
+        } else if (user.kyc === 0 && user.pre_kyc === 0) {
+          alert("Please complete KYC first!");
+          navigate("/kyc", { replace: true, state: { user } });
+        } else if (user.pre_kyc === 1 && user.kyc === 0) {
+          setModalHeading(
+            user.kyc_rejected === 1 ? "KYC Rejected" : "KYC Pending Approval"
+          );
           setModalBody(
-              user.kyc_rejected === 1
-                  ? "Your KYC has been rejected by the admin. Please contact support or re-submit your documents."
-                  : "Your KYC has been submitted successfully. Please wait up to 24 hours for admin approval."
+            user.kyc_rejected === 1
+              ? "Your KYC has been rejected by the admin. Please contact support or re-submit your documents."
+              : "Your KYC has been submitted successfully. Please wait up to 24 hours for admin approval."
           );
           setprekycmodal(true);
-      }
+        }
       }
     } catch (err) {
       console.log("Login failed:", err);
     }
   };
 
-
-
-
   return (
     <>
-    <section className="bg-gray-100 min-h-screen flex items-center justify-center px-6">
       <div
-        className="absolute inset-0 bg-no-repeat bg-center bg-cover opacity-70"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${paymentGatewayBg})` }}
-      ></div>
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-gray-200 opacity-90">
-        <div className="flex justify-center mb-6">
-          <img className="w-35 mr-2" src={logo} alt="logo" />
-        </div>
-        <h1 className="text-xl font-bold mb-6 text-center text-blue-600">
-          Sign in to your account
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
-          <div className="relative z-0 w-full mb-5">
-            <input
-              type="email"
-              name="email"
-              id="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 peer ${error?.errors?.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-blue-600"}`}
-              placeholder=" "
-              required
-            />
-            <label htmlFor="email" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 peer-focus:text-blue-600">
-              Email
-            </label>
-            {error?.errors?.email && <p className="mt-1 text-sm text-red-500">{error.errors.email}</p>}
-          </div>
-
-          {/* Password */}
-          <div className="relative z-0 w-full mb-5">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              id="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 peer ${error?.errors?.password ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-blue-600"}`}
-              placeholder=" "
-              required
-            />
-            <label htmlFor="password" className="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 peer-focus:text-blue-600">
-              Password
-            </label>
-            <button type="button" className="absolute right-0 top-2.5 text-gray-500 hover:text-gray-700" onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? "Hide" : "Show"}
-            </button>
-            {error?.errors?.password && <p className="mt-1 text-sm text-red-500">{error.errors.password}</p>}
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex justify-center items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition focus:ring-4 focus:ring-blue-300 disabled:opacity-70"
-          >
-            {loading ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Signing in...</span> : "Sign in"}
-          </button>
-          <p className="text-center">New to Spay? <span className="text-blue-800" onClick={() => navigate("/register")}>Create an account</span></p>
-        </form>
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/22 to-black/5" />
       </div>
-    </section>
-    <ConfirmModal
-    showConfirmModal={prekycmodal}
-    handleConfirmModal={setprekycmodal}
-    action={()=>{
-      setprekycmodal(false);
-      navigate("/");
-    } }
-    heading={modalHeading}
-    body={modalBody}
-     confirmText="OK"
-     showCancel={false}
 
-     />
-</>
+      <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8 overflow-y-auto">
+        <div
+          className={`
+            w-full max-w-[360px] sm:max-w-[380px] lg:max-w-[400px]
+            bg-gradient-to-b from-white/98 via-white/96 to-white/93
+            backdrop-blur-lg 
+            rounded-2xl sm:rounded-3xl 
+            shadow-2xl shadow-black/9 
+            border border-gray-100/70 
+            overflow-hidden
+            transition-all duration-700 ease-out
+            hover:shadow-2xl hover:shadow-black/14
+          `}
+        >
+          <div className="p-5 sm:p-6 lg:p-7 space-y-5">
 
+            <div className="text-center space-y-3">
+              <div className="inline-block p-2 bg-gradient-to-br from-blue-50/70 to-indigo-50/50 rounded-xl shadow-sm transition-transform duration-500 hover:scale-105">
+                <img
+                  src={logo}
+                  alt="SPay Logo"
+                  className="w-16 sm:w-20 lg:w-22 h-auto drop-shadow-md transition-all duration-700"
+                />
+              </div>
+
+              <div>
+                <h1 className="
+                  text-xl sm:text-2xl lg:text-[20px] 
+                  font-extrabold 
+                  bg-gradient-to-r from-blue-700 via-blue-500 to-blue-800 
+                  bg-clip-text text-transparent 
+                  tracking-tight leading-tight
+                ">
+                  Sign In to Your Account
+                </h1>
+                <p className="mt-1.5 text-gray-600 text-sm font-medium opacity-90">
+                  Secure • Fast • Trusted
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+
+              {/* Email field – now 80% width, centered */}
+              <div className="mx-auto w-[80%] max-w-full">
+                <FloatingInput
+                  placeholder="Business Email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  error={error?.errors?.email}
+                  className="
+                    h-11 text-sm
+                    transition-all duration-200
+                    hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 
+                    focus-within:shadow-[0_0_0_3px] focus-within:shadow-blue-500/30
+                    focus-within:scale-[1.005]
+                  "
+                />
+              </div>
+
+              {/* Password field – 80% width, centered */}
+              <div className="mx-auto w-[80%] max-w-full relative">
+                <FloatingInput
+                  placeholder="Password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  error={error?.errors?.password}
+                  className="
+                    h-11 text-sm pr-10
+                    transition-all duration-200
+                    hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 
+                    focus-within:shadow-[0_0_0_3px] focus-within:shadow-blue-500/30
+                    focus-within:scale-[1.005]
+                  "
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-[52%] -translate-y-1/2 text-gray-500 hover:text-gray-700 text-sm font-medium z-10"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+
+              {error && !error.errors && (
+                <div className="bg-red-50/80 border-l-4 border-red-500 p-3.5 rounded-xl text-red-800 text-sm shadow-sm mx-auto w-[80%]">
+                  <strong className="block mb-1">Error</strong>
+                  {error.message || "Login failed. Please try again."}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className={`
+                  relative w-[80%] mx-auto block py-3 px-6 font-semibold text-base
+                  rounded-xl overflow-hidden group
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-all duration-300
+                  shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30
+                  active:scale-[0.98]
+                  bg-gradient-to-r from-blue-600 via-blue-650 to-indigo-600
+                  hover:from-blue-650 hover:via-blue-700 hover:to-indigo-700
+                  text-white mt-2
+                `}
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2.5">
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" className="opacity-30"/>
+                        <path fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                      Signing in…
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/18 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+              </button>
+
+            </form>
+
+            <p className="text-center text-sm text-gray-600 pt-2">
+              New to SPay?{" "}
+              <button
+                onClick={() => navigate("/register")}
+                className="font-semibold text-blue-700 hover:text-blue-800 underline-offset-4 hover:underline transition-colors duration-200"
+              >
+                Create an account
+              </button>
+            </p>
+
+          </div>
+        </div>
+      </div>
+
+      <ConfirmModal
+        showConfirmModal={prekycmodal}
+        handleConfirmModal={setprekycmodal}
+        action={() => {
+          setprekycmodal(false);
+          navigate("/");
+        }}
+        heading={modalHeading}
+        body={modalBody}
+        confirmText="OK"
+        showCancel={false}
+      />
+    </>
   );
 }
 
