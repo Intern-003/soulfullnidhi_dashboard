@@ -32,7 +32,6 @@ export const Dashboard = () => {
   // APIs
   const { data: cardData, loading: recordLoading } = useAutoFetch("/collection-record");
   const { data: tableData } = useAutoFetch("/reportrecords-List");
-
   const initialDataOfTransactions = tableData?.data || [];
 
   // Sort by latest

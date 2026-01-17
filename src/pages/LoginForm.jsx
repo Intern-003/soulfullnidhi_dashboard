@@ -147,7 +147,16 @@ function LoginForm() {
           navigate("/dashboard", { replace: true });
         } else if (user.kyc === 0 && user.pre_kyc === 0) {
           alert("Please complete KYC first!");
-          navigate("/kyc", { replace: true, state: { user } });
+          navigate("/kyc", { replace: true, state: { 
+                merchant: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                mobile_no: user.mobile_no,
+              },
+              token: response.token,
+              from: "login",
+            } });
         } else if (user.pre_kyc === 1 && user.kyc === 0) {
           setModalHeading(
             user.kyc_rejected === 1 ? "KYC Rejected" : "KYC Pending Approval"
@@ -233,6 +242,7 @@ function LoginForm() {
                     transition-all duration-200
                     hover:shadow-md
                     focus-within:shadow-lg
+                    mt-2
                   "
                 />
               </div>
@@ -254,6 +264,7 @@ function LoginForm() {
                     transition-all duration-200
                     hover:shadow-md
                     focus-within:shadow-lg
+                    mt-2
                   "
                 />
 
