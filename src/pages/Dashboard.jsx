@@ -13,7 +13,7 @@ export const Dashboard = () => {
   const navigate = useNavigate();
 
   // ──────────────────────────────────────────────────────
-  // 1. Auth checking state – prevents premature redirect
+  // 1. Auth checking state
   // ──────────────────────────────────────────────────────
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,7 +21,7 @@ export const Dashboard = () => {
   // ──────────────────────────────────────────────────────
   // 2. Main dashboard states
   // ──────────────────────────────────────────────────────
-  const [role] = useState(atob(localStorage.getItem("role")) || "admin");
+  const [role] = useState(atob(localStorage.getItem("role") || "") || "admin");
 
   const [transactionData, setTransactionData] = useState([]);
   const [largeTransactionData, setLargeTransactionData] = useState([]);
@@ -45,13 +45,12 @@ export const Dashboard = () => {
   // Status filter logic
   const filteredTableData = useMemo(() => {
     if (statusFilter === "ALL") return processTableData;
-
     return processTableData.filter(
       (item) => item.status?.toUpperCase() === statusFilter
     );
   }, [processTableData, statusFilter]);
 
-  // Top 4 transactions
+  // Top 4 largest transactions
   const processLargeTransactionData = useMemo(() => {
     return [...initialDataOfTransactions]
       .sort((a, b) => b.amount - a.amount)
@@ -59,7 +58,7 @@ export const Dashboard = () => {
   }, [initialDataOfTransactions]);
 
   // ──────────────────────────────────────────────────────
-  // 3. Authentication check (only once on mount)
+  // 3. Authentication check (runs once on mount)
   // ──────────────────────────────────────────────────────
   useEffect(() => {
     const checkAuthentication = () => {
@@ -84,7 +83,6 @@ export const Dashboard = () => {
     };
 
     const timer = setTimeout(checkAuthentication, 150);
-
     return () => clearTimeout(timer);
   }, [navigate]);
 
@@ -98,7 +96,7 @@ export const Dashboard = () => {
   };
 
   // ──────────────────────────────────────────────────────
-  // 5. Format table data (removed status dot)
+  // 5. Format table data
   // ──────────────────────────────────────────────────────
   useEffect(() => {
     const formattedTableData = filteredTableData.map((item, index) => {
@@ -145,7 +143,7 @@ export const Dashboard = () => {
           <span
             className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide border shadow-sm ${statusClass}`}
           >
-            {statusUpper} {/* Dot removed */}
+            {statusUpper}
           </span>
         ),
         time: (
@@ -183,14 +181,33 @@ export const Dashboard = () => {
   }, [recordLoading, cardData]);
 
   const cardsToShow = [
-    { title: "Today Pay-IN Collection", value: cardData?.today_payin ?? 0 },
-    { title: "Total Pay-IN", value: cardData?.total_payin_amount ?? 0 },
+    { title: "Today Pay-IN ", value: cardData?.today_payin ?? 0 },
+    { title: "Total Pay-IN", value: cardData?.total_payin_amount ?? 10056560000 },
     { title: "Today Pay-OUT", value: cardData?.today_payout ?? 0 },
     { title: "Total Pay-OUT", value: cardData?.total_payout_amount ?? 0 },
   ];
 
+  // Optional: human-friendly large number formatting (uncomment if desired)
+  /*
+  const formatAmount = (value) => {
+    if (!value) return "0";
+    const num = Number(value);
+    if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
+    if (num >= 100000)    return `₹${(num / 100000).toFixed(1)} L`;
+    return `₹${num.toLocaleString("en-IN")}`;
+  };
+  */
+
+  const formatRupee = (value) => {
+    const num = Math.round(Number(value || 0));
+    return num.toLocaleString("en-IN", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+  };
+
   // ──────────────────────────────────────────────────────
-  // Render logic
+  // Render
   // ──────────────────────────────────────────────────────
   if (isCheckingAuth) {
     return <DashboardSkeleton />;
@@ -204,42 +221,70 @@ export const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/70 pb-16">
       <div className="mx-auto max-w-[1720px] px-5 sm:px-7 lg:px-10 pt-8 lg:pt-12">
 
-        {/* CARDS - now with enhanced shadow */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 mb-12">
-          {cardsToShow.map((card, i) => (
-            <div
-              key={i}
-              className={`
-                group relative bg-white rounded-tl-3xl rounded-br-3xl 
-                shadow-[0_10px_30px_rgba(0,0,0,0.12)] overflow-hidden 
-                transition-all duration-400 hover:shadow-[0_25px_70px_rgba(0,0,0,0.18)]
-                hover:-translate-y-2 border border-slate-100/80
-              `}
-            >
-              {/* SAME GRADIENT FOR ALL CARDS */}
-              <div 
-                className="absolute top-0 left-0 right-0 h-3 transform -skew-x-12 origin-left"
-                style={{
-                  background: "linear-gradient(90deg, rgba(6, 76, 150, 1) 0%, rgba(40, 142, 214, 1) 100%)"
-                }}
-              />
-              
-              <div className="p-7 pt-10 relative">
-                <h3 className="text-sm font-semibold text-slate-600 mb-3 tracking-wider uppercase">
-                  {card.title}
-                </h3>
-                <div className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight">
-                  ₹{(card.value || 0).toLocaleString("en-IN")}
-                </div>
+        {/* CARDS – improved version: aggressive shrink + overflow control */}
+        {/* CARDS */}
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 mb-12">
+  {cardsToShow.map((card, i) => {
+    const amountStr = formatRupee(card.value);
 
-                {/* Subtle inner glow on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-              </div>
-            </div>
-          ))}
+    // More aggressive and earlier font size reduction
+    let fontClass = "text-xl md:text-2xl";
+
+    const len = amountStr.length;
+    if (len >= 8)  fontClass = "text-2xl md:text-3.5xl";   // ~₹1,23,45,678
+    if (len >= 10) fontClass = "text-2xl md:text-3xl";        // ~₹12,34,56,789
+    if (len >= 12) fontClass = "text-xl md:text-2.5xl";       // ~₹1,23,45,67,890
+    if (len >= 14) fontClass = "text-lg md:text-2xl";         // ~₹12,34,56,78,901
+    if (len >= 16) fontClass = "text-base md:text-xl";        // ~₹1,23,45,67,89,012
+    if (len >= 18) fontClass = "text-sm md:text-lg";          // ~₹12,34,56,78,90,123
+    if (len >= 20) fontClass = "text-xs md:text-base";  
+    if (len >= 22) fontClass = "text-xs md:text-base";  
+    if (len >= 24) fontClass = "text-xs md:text-base";  
+    if (len >= 26) fontClass = "text-xs md:text-base";  
+    if (len >= 28) fontClass = "text-xs md:text-base";  
+    if (len >= 30) fontClass = "text-xs md:text-base";  
+
+    return (
+      <div
+        key={i}
+        className={`
+          group relative bg-white rounded-tl-3xl rounded-br-3xl 
+          shadow-[0_10px_30px_rgba(0,0,0,0.12)] overflow-hidden 
+          transition-all duration-400 hover:shadow-[0_25px_70px_rgba(0,0,0,0.18)]
+          hover:-translate-y-2 border border-slate-100/80
+          min-w-0
+        `}
+      >
+        <div 
+          className="absolute top-0 left-0 right-0 h-3 transform -skew-x-12 origin-left"
+          style={{
+            background: "linear-gradient(90deg, rgba(6, 76, 150, 1) 0%, rgba(40, 142, 214, 1) 100%)"
+          }}
+        />
+        
+        <div className="p-6 pt-9 relative">
+          <h3 className="text-sm font-semibold text-slate-600 mb-2.5 tracking-wider uppercase">
+            {card.title}
+          </h3>
+          <div 
+            className={`
+              ${fontClass} font-extrabold text-slate-800 tracking-tight 
+              whitespace-nowrap overflow-hidden 
+              max-w-full w-full
+            `}
+            title={`₹${amountStr}`}
+          >
+            ₹{amountStr}
+          </div>
+
+          <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
         </div>
+      </div>
+    );
+  })}
+</div>
 
-        {/* CHARTS - modern container */}
+        {/* CHARTS */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-7 mb-12">
           <div className="
             lg:col-span-3 bg-white rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.06)] 
@@ -270,7 +315,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* TABLE - pill header + creative style */}
+        {/* TABLE */}
         <div className="
           bg-white rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.06)] 
           border border-slate-100/80 overflow-hidden
