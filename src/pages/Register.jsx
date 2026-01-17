@@ -440,16 +440,16 @@ const Register = () => {
                       ${emailOtpVerified && mobileOtpVerified 
                         ? 'w-full bg-gradient-to-r from-emerald-500 to-green-500' 
                         : emailOtpVerified 
-                          ? 'w-2/3 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500' 
-                          : 'w-1/3 bg-gradient-to-r from-blue-400 to-indigo-500'}
+                          ? 'w-2/3 bg-gradient-to-r from-[#12319B] to-[#1299D0]' 
+                          : 'w-1/3 bg-gradient-to-r from-[#12319B] to-[#1299D0]'}
                     `}
                     style={{ transition: 'width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
                   />
                 </div>
                 <div className="flex justify-between text-xs text-gray-500 mt-2 font-medium tracking-wide">
-                  <span className={emailOtpVerified ? 'text-green-600 font-semibold' : ''}>Email</span>
-                  <span className={mobileOtpVerified ? 'text-green-600 font-semibold' : ''}>Mobile</span>
-                  <span className={(emailOtpVerified && mobileOtpVerified) ? 'text-green-600 font-semibold' : ''}>Ready</span>
+                  <span className={emailOtpVerified ? 'text-green-600 font-semibold' : ''}>Ready</span>
+                  <span className={mobileOtpVerified ? 'text-green-600 font-semibold' : ''}>Email</span>
+                  <span className={(emailOtpVerified && mobileOtpVerified) ? 'text-green-600 font-semibold' : ''}>Mobile</span>
                 </div>
               </div>
             </div>
@@ -467,7 +467,7 @@ const Register = () => {
                 required
                 error={fieldErrors.companyName || (!isValidCompany && formData.companyName && "3–100 letters only")}
                 className="
-                  h-11 text-sm
+                  h-13 text-base
                   transition-all duration-200
                   hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 
                   focus-within:shadow-[0_0_0_3.5px] focus-within:shadow-blue-500/30
@@ -487,7 +487,7 @@ const Register = () => {
                 disabled={emailOtpVerified}
                 required
                 className={`
-                  h-11 text-sm
+                  h-13 text-base
                   transition-all duration-200
                   ${emailOtpVerified
                     ? "border-green-500 bg-green-50/80 text-green-950 shadow-sm shadow-green-300/30"
@@ -512,7 +512,6 @@ const Register = () => {
                     disabled={mobileOtpVerified}
                     required
                     className={`
-                      h-11 text-sm
                       transition-all duration-200
                       ${mobileOtpVerified
                         ? "border-green-500 bg-green-50/80 text-green-950 shadow-sm shadow-green-300/30"
@@ -534,7 +533,7 @@ const Register = () => {
                         transition-all duration-300 shadow-md
                         ${!isValidMobile || mobileTimer > 0
                           ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                          : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-650 hover:to-indigo-650 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"}
+                          : "bg-gradient-to-r from-[#12319B] to-[#1299D0] text-white hover:from-blue-650 hover:to-indigo-650 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"}
                       `}
                     >
                       <span className="relative z-10">Send Mobile OTP</span>
@@ -579,7 +578,7 @@ const Register = () => {
                     transition-all duration-300 shadow-md
                     ${!isValidCompany || !isValidEmail || emailOtpLoading
                       ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                      : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-650 hover:to-indigo-650 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"}
+                      : "bg-gradient-to-r from-[#12319B] to-[#1299D0] text-white hover:from-blue-650 hover:to-indigo-650 hover:shadow-lg hover:shadow-blue-500/30 active:scale-[0.98]"}
                   `}
                 >
                   <span className="relative z-10">
@@ -602,15 +601,15 @@ const Register = () => {
                 type="submit"
                 disabled={loading || !emailOtpVerified || !mobileOtpVerified}
                 className={`
-                  relative w-full py-3.5 px-6 font-semibold text-base
-                  rounded-xl overflow-hidden group
-                  disabled:opacity-50 disabled:cursor-not-allowed
+                  w-full py-2.5 text-[17px] font-semibold
+                  rounded-xl
                   transition-all duration-300
-                  shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30
-                  active:scale-[0.98]
-                  bg-gradient-to-r from-blue-600 via-blue-650 to-indigo-600
-                  hover:from-blue-650 hover:via-blue-700 hover:to-indigo-700
+                  bg-gradient-to-r from-[#12319B] to-[#1299D0]
+                  hover:brightness-110
                   text-white
+                  shadow-lg shadow-blue-600/25
+                  active:scale-[0.97]
+                  disabled:opacity-50 disabled:cursor-not-allowed
                 `}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2.5">

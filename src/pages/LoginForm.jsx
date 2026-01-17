@@ -43,14 +43,16 @@ const FloatingInput = ({
         required={required}
         placeholder={noFloat ? placeholder : " "}
         className={`
-          peer w-full h-11 px-3.5 rounded-xl border
+          peer w-full h-13 px-4 rounded-xl text-base border
           bg-white text-gray-900 text-sm leading-tight
           focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all duration-200
           disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
           ${noFloat ? "py-2.5" : "pt-6 pb-2"}
-          ${error 
-            ? "border-red-500 focus:border-red-500 focus:ring-red-500/30" 
-            : "border-gray-300 focus:border-blue-600 focus:ring-blue-500/20"}
+          ${
+            error
+              ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+              : "border-gray-300 focus:border-blue-600 focus:ring-blue-500/20"
+          }
           ${className}
         `}
       />
@@ -59,9 +61,11 @@ const FloatingInput = ({
         <label
           className={`
             absolute left-3.5 pointer-events-none transition-all duration-200 text-sm
-            ${hasValue || props.autoFocus
-              ? "top-2 text-xs font-medium"
-              : "top-3.5 text-gray-500"}
+            ${
+              hasValue || props.autoFocus
+                ? "top-2 text-xs font-medium"
+                : "top-3.5 text-gray-500"
+            }
             peer-focus:top-2 peer-focus:text-xs peer-focus:font-medium
             ${error ? "text-red-600" : "text-gray-500 peer-focus:text-blue-600"}
           `}
@@ -134,7 +138,10 @@ function LoginForm() {
           JSON.stringify({ userId: response.user.id, tabId: TAB_ID })
         );
 
-        channelRef.current?.postMessage({ type: "LOGIN", userId: response.user.id });
+        channelRef.current?.postMessage({
+          type: "LOGIN",
+          userId: response.user.id,
+        });
 
         if (user.kyc === 1 && user.pre_kyc === 1) {
           navigate("/dashboard", { replace: true });
@@ -170,18 +177,18 @@ function LoginForm() {
       <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8 overflow-y-auto">
         <div
           className={`
-            w-full max-w-[360px] sm:max-w-[380px] lg:max-w-[400px]
+            w-full max-w-[340px] sm:max-w-[360px]
             bg-gradient-to-b from-white/98 via-white/96 to-white/93
             backdrop-blur-lg 
-            rounded-2xl sm:rounded-3xl 
-            shadow-2xl shadow-black/9 
-            border border-gray-100/70 
+            rounded-3xl
+            shadow-2xl shadow-black/10
+            border border-gray-100/70
             overflow-hidden
-            transition-all duration-700 ease-out
-            hover:shadow-2xl hover:shadow-black/14
           `}
         >
-          <div className="p-5 sm:p-6 lg:p-7 space-y-5">
+          {/* <div className="px-3 py-6 sm:px-4 sm:py-7 space-y-6"> */}
+          <div className="px-4 py-5 sm:px-5 sm:py-7 space-y-6">
+
 
             <div className="text-center space-y-3">
               <div className="inline-block p-2 bg-gradient-to-br from-blue-50/70 to-indigo-50/50 rounded-xl shadow-sm transition-transform duration-500 hover:scale-105">
@@ -193,15 +200,17 @@ function LoginForm() {
               </div>
 
               <div>
-                <h1 className="
-                  text-xl sm:text-2xl lg:text-[20px] 
-                  font-extrabold 
-                  bg-gradient-to-r from-blue-700 via-blue-500 to-blue-800 
-                  bg-clip-text text-transparent 
-                  tracking-tight leading-tight
-                ">
+                <h1
+                  className="
+                  text-xl font-extrabold
+                  bg-gradient-to-r from-blue-700 to-blue-500
+                  bg-clip-text text-transparent
+                  tracking-tight
+                "
+                >
                   Sign In to Your Account
                 </h1>
+
                 <p className="mt-1.5 text-gray-600 text-sm font-medium opacity-90">
                   Secure • Fast • Trusted
                 </p>
@@ -209,9 +218,8 @@ function LoginForm() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-
               {/* Email field – now 80% width, centered */}
-              <div className="mx-auto w-[80%] max-w-full">
+              <div className="w-[92%] mx-auto">
                 <FloatingInput
                   placeholder="Business Email"
                   type="email"
@@ -221,17 +229,18 @@ function LoginForm() {
                   required
                   error={error?.errors?.email}
                   className="
-                    h-11 text-sm
+                    h-13 text-base
                     transition-all duration-200
-                    hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 
-                    focus-within:shadow-[0_0_0_3px] focus-within:shadow-blue-500/30
-                    focus-within:scale-[1.005]
+                    hover:shadow-md
+                    focus-within:shadow-lg
                   "
                 />
               </div>
 
               {/* Password field – 80% width, centered */}
-              <div className="mx-auto w-[80%] max-w-full relative">
+              {/* <div className="w-full relative"> */}
+              <div className="w-[92%] mx-auto relative">
+
                 <FloatingInput
                   placeholder="Password"
                   type={showPassword ? "text" : "password"}
@@ -241,11 +250,10 @@ function LoginForm() {
                   required
                   error={error?.errors?.password}
                   className="
-                    h-11 text-sm pr-10
+                    h-13 text-base pr-11
                     transition-all duration-200
-                    hover:shadow-[0_0_0_1px] hover:shadow-blue-400/40 
-                    focus-within:shadow-[0_0_0_3px] focus-within:shadow-blue-500/30
-                    focus-within:scale-[1.005]
+                    hover:shadow-md
+                    focus-within:shadow-lg
                   "
                 />
 
@@ -268,24 +276,32 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`
-                  relative w-[80%] mx-auto block py-3 px-6 font-semibold text-base
-                  rounded-xl overflow-hidden group
-                  disabled:opacity-50 disabled:cursor-not-allowed
+                className="
+                  w-[92%] mx-auto block
+                  py-2.5 text-[15px] font-semibold
+                  rounded-xl
                   transition-all duration-300
-                  shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30
-                  active:scale-[0.98]
-                  bg-gradient-to-r from-blue-600 via-blue-650 to-indigo-600
-                  hover:from-blue-650 hover:via-blue-700 hover:to-indigo-700
-                  text-white mt-2
-                `}
+                  bg-gradient-to-r from-[#12319B] to-[#1299D0]
+                  hover:brightness-110
+                  text-white
+                  shadow-lg shadow-blue-600/25
+                  active:scale-[0.97]
+                "
               >
                 <span className="relative z-10 flex items-center justify-center gap-2.5">
                   {loading ? (
                     <>
                       <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" className="opacity-30"/>
-                        <path fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                          className="opacity-30"
+                        />
+                        <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                       </svg>
                       Signing in…
                     </>
@@ -295,7 +311,6 @@ function LoginForm() {
                 </span>
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/18 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
               </button>
-
             </form>
 
             <p className="text-center text-sm text-gray-600 pt-2">
@@ -307,7 +322,6 @@ function LoginForm() {
                 Create an account
               </button>
             </p>
-
           </div>
         </div>
       </div>
