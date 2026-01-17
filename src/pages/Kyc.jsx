@@ -59,7 +59,8 @@ export const Kyc = () => {
 
   useEffect(() => {
     const saved = localStorage.getItem("kycFormData");
-    const merchant = location.state?.merchant;
+    const merchant = location.state?.merchant  ||
+    JSON.parse(localStorage.getItem("user"));;
 
     // 1️⃣ Fresh navigation from Register
     if (merchant?.id) {

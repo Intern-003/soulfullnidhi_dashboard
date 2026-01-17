@@ -162,14 +162,14 @@ export const DonutChart = ({ data }) => {
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div
-            style={{
-              width: "12px",
-              height: "12px",
-              borderRadius: "50%",
-              background: accentColor,
-              boxShadow: `0 0 12px ${accentColor}50`,
-              animation: isAnimating ? "breathe 2s infinite ease-in-out" : "none",
-            }}
+            // style={{
+            //   width: "12px",
+            //   height: "12px",
+            //   borderRadius: "50%",
+            //   background: accentColor,
+            //   boxShadow: `0 0 12px ${accentColor}50`,
+            //   animation: isAnimating ? "breathe 2s infinite ease-in-out" : "none",
+            // }}
           />
           <div>
             <h5

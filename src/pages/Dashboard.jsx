@@ -32,7 +32,6 @@ export const Dashboard = () => {
   // APIs
   const { data: cardData, loading: recordLoading } = useAutoFetch("/collection-record");
   const { data: tableData } = useAutoFetch("/reportrecords-List");
-
   const initialDataOfTransactions = tableData?.data || [];
 
   // Sort by latest
@@ -182,7 +181,7 @@ export const Dashboard = () => {
 
   const cardsToShow = [
     { title: "Today Pay-IN ", value: cardData?.today_payin ?? 0 },
-    { title: "Total Pay-IN", value: cardData?.total_payin_amount ?? 10056560000 },
+    { title: "Total Pay-IN", value: cardData?.total_payin_amount ?? 0 },
     { title: "Today Pay-OUT", value: cardData?.today_payout ?? 0 },
     { title: "Total Pay-OUT", value: cardData?.total_payout_amount ?? 0 },
   ];
