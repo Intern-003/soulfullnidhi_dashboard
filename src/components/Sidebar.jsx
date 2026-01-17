@@ -14,14 +14,10 @@ export const Sidebar = ({ open, setOpen }) => {
     setActiveDropdown((prev) => (prev === name ? null : name));
   };
 
-  // -----------------------------------------
-  // MENU CONFIG WITH CRYPTO ROLE SUPPORT
-  // -----------------------------------------
+  // MENU CONFIG - unchanged
   const menu = [
-    // DASHBOARD (visible to all)
     { label: "Dashboard", icon: "fa-chart-pie", link: "/dashboard" },
 
-    // ---------------------- ADMIN MENUS ----------------------
     ...(role === "admin"
       ? [
           {
@@ -51,8 +47,6 @@ export const Sidebar = ({ open, setOpen }) => {
             dropdown: "bank",
             items: [{ label: "Bank", link: "/onboard-bank" }],
           },
-
-          // ADMIN transaction history
           {
             label: "Transaction History",
             icon: "fa-clock-rotate-left",
@@ -60,11 +54,8 @@ export const Sidebar = ({ open, setOpen }) => {
             items: [
               { label: "UPI Statement", link: "/upi-statement" },
               { label: "Payout Statement", link: "/payout-statement" },
-             
             ],
           },
-
-          // ADMIN account statement
           {
             label: "Account Statement",
             icon: "fa-layer-group",
@@ -77,7 +68,6 @@ export const Sidebar = ({ open, setOpen }) => {
         ]
       : []),
 
-    // ---------------------- USER MENUS ----------------------
     ...(role === "user"
       ? [
           {
@@ -128,109 +118,99 @@ export const Sidebar = ({ open, setOpen }) => {
         ]
       : []),
 
-    // ---------------------- CRYPTO ROLE ----------------------
     ...(role === "crypto"
       ? [
           {
             label: "Transaction History",
             icon: "fa-clock-rotate-left",
             dropdown: "txn",
-            items: [
-              { label: "Crypto Statement", link: "/crypto-statement" },
-            ],
+            items: [{ label: "Crypto Statement", link: "/crypto-statement" }],
           },
         ]
       : []),
-
-    // // ---------------------- COMPLAINTS (all roles) ----------------------
-    // {
-    //   label: "Complaints",
-    //   icon: "fa-comment",
-    //   dropdown: "tickets",
-    //   items: [{ label: "View Complain", link: "/view-complain" }],
-    // },
   ];
 
   return (
     <>
-      {/* Overlay */}
+      {/* Mobile Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300 ${
-          open ? "opacity-100 visible" : "opacity-0 invisible"
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300 ${
+          open ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         }`}
         onClick={() => setOpen(false)}
       />
 
-      {/* Sidebar */}
+      {/* Sidebar - Light blue theme */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 flex flex-col
-          bg-cover bg-no-repeat bg-center bg-blend-soft-light 
-          shadow-xl/30 z-40 transform transition-transform duration-300 ease-in-out
+        className={`fixed top-0 left-0 h-full w-64 md:w-72 flex flex-col
+          bg-gradient-to-b from-blue-50 via-blue-100 to-blue-200
+          shadow-2xl shadow-blue-600/20 border-r border-blue-200/60
+          z-40 transform transition-transform duration-400 ease-out
           md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
-          // background: "linear-gradient(10deg, #2e53dbff, #1735a1 )" 
-          // backgroundColor:"#05275c"
-          style={{
-            //  background: "linear-gradient(275deg, #0f203fff, #0d3dc4ff)"
-           background: "linear-gradient(180deg, #ffffff, #e8f0ff, #d6e4ff)"
-
-          }}
       >
-        {/* Close button mobile */}
+        {/* Mobile Close Button */}
         <button
-          className="absolute top-4 right-4 text-2xl md:hidden"
+          className="absolute top-5 right-5 text-blue-700 hover:text-blue-900 transition-colors md:hidden z-10"
           onClick={() => setOpen(false)}
+          aria-label="Close sidebar"
         >
-          <i className="fa-solid fa-xmark text-red-600"></i>
+          <i className="fa-solid fa-xmark text-2xl" />
         </button>
 
-        {/* Logo */}
-        <div className="flex-shrink-0 p-4 ml-1">
-          <div className="ml-3 rounded-full h-24 w-40  flex items-center justify-center">
-            <Link to={"/dashboard"}>
-              <img src={Logo} className="w-50" alt="Spay Logo" />
-            </Link>
-          </div>
+        {/* Logo - Larger size restored */}
+        <div className="flex-shrink-0 py-6 px-6 flex justify-center border-b border-blue-200/50">
+          <Link to="/dashboard">
+            <img
+              src={Logo}
+              className="w-25 md:w-30 h-auto drop-shadow-md hover:scale-105 transition-transform duration-300"
+              alt="Spay Logo"
+            />
+          </Link>
         </div>
 
-        {/* MENU LIST */}
-        <ul className="space-y-2 font-medium sidebar flex-1 overflow-y-auto custom-scrollbar">
+        {/* Menu Items */}
+        <ul className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5 custom-scrollbar">
           {menu.map((item, i) => {
             const isParentActive =
               item.items?.some((sub) => sub.link === currentPath) ?? false;
 
             return (
               <li key={i}>
-                {/* SIMPLE MENU */}
+                {/* Simple Menu Item */}
                 {!item.dropdown ? (
                   <Link
                     to={item.link}
-                    className={` active-menu flex items-center w-full p-3 rounded-xl transition-all duration-300
+                    className={`group flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer
                       ${
                         currentPath === item.link
-                          ? "bg-[ #4189adff] text-[#08327e] shadow-md"
-                          : "text-[#08327e] hover:hover:text-[#08327e] hover:shadow-md"
+                          ? "bg-blue-600/10 text-blue-900 font-semibold shadow-sm border-l-4 border-blue-600"
+                          : "text-blue-800 hover:bg-blue-100/70 hover:text-blue-900 hover:shadow-md hover:border-l-4 hover:border-blue-500"
                       }`}
                   >
-                    <i className={`fa-solid ${item.icon} mr-3`}></i>
-                    <span>{item.label}</span>
+                    <i
+                      className={`fa-solid ${item.icon} w-6 text-center text-blue-600 group-hover:text-blue-700 transition-colors`}
+                    />
+                    <span className="text-sm">{item.label}</span>
                   </Link>
                 ) : (
                   <>
-                    {/* DROPDOWN BUTTON */}
+                    {/* Dropdown Toggle Button */}
                     <button
-                      className={` dropdown-button flex items-center w-full p-3 rounded-xl transition-all duration-300
+                      className={`group flex items-center gap-3.5 w-full px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer
                         ${
-                          isParentActive
-                            ? "active-menu shadow-md"
-                            : "text-[#08327e] hover:shadow-md"
+                          isParentActive || activeDropdown === item.dropdown
+                            ? "bg-blue-600/8 text-blue-900 font-medium shadow-sm border-l-4 border-blue-500"
+                            : "text-blue-800 hover:bg-blue-100/70 hover:text-blue-900 hover:shadow-md hover:border-l-4 hover:border-blue-500"
                         }`}
                       onClick={() => toggleDropdown(item.dropdown)}
                     >
-                      <i className={`fa-solid ${item.icon} mr-3`}></i>
-                      <span>{item.label}</span>
+                      <i
+                        className={`fa-solid ${item.icon} w-6 text-center text-blue-600 group-hover:text-blue-700 transition-colors`}
+                      />
+                      <span className="flex-1 text-left text-sm">{item.label}</span>
 
                       <svg
-                        className={`w-2.5 h-2.5 ml-auto transition-transform duration-300 ${
+                        className={`w-3 h-3 transition-transform duration-300 ${
                           activeDropdown === item.dropdown ? "rotate-180" : ""
                         }`}
                         fill="none"
@@ -239,43 +219,43 @@ export const Sidebar = ({ open, setOpen }) => {
                         <path
                           stroke="currentColor"
                           strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           d="m1 1 4 4 4-4"
                         />
                       </svg>
                     </button>
 
-                    {/* DROPDOWN MENU */}
+                    {/* Dropdown Content */}
                     <div
-                      className={`ml-4 mt-1 rounded-lg p-2 text-[#08327e]  transition-all duration-300 ease-in-out overflow-hidden ${
-                        activeDropdown === item.dropdown
-                          ? "max-h-40 opacity-100"
-                          : "max-h-0 opacity-0"
-                      }`}
+                      className={`transition-all duration-300 ease-in-out overflow-hidden
+                        ${activeDropdown === item.dropdown ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0 mt-0"}`}
                     >
-                      {item.items.map((sub, j) => {
-                        const isActive = currentPath === sub.link;
+                      <div className="space-y-1 py-1 pl-2">
+                        {item.items.map((sub, j) => {
+                          const isActive = currentPath === sub.link;
 
-                        return (
-                          <Link key={j} to={sub.link}>
-                            <div
-                              className={`subdropdown-button flex items-center gap-2 px-4 py-2 mb-3 rounded-lg transition-all duration-300
-                                ${
-                                  isActive
-                                    ? "active-submenu shadow-sm scale-[1.01]"
-                                    : ""
-                                }`}
-                            >
-                              <i
-                                className={`fa-solid fa-circle text-[6px] ${
-                                  isActive ? "active-submenu" : ""
-                                }`}
-                              ></i>
-
-                              {sub.label}
-                            </div>
-                          </Link>
-                        );
-                      })}
+                          return (
+                            <Link key={j} to={sub.link}>
+                              <div
+                                className={`flex items-center gap-2.5 px-5 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer
+                                  ${
+                                    isActive
+                                      ? "bg-blue-50 text-blue-900 font-medium border-l-4 border-blue-500"
+                                      : "text-blue-700 hover:bg-blue-100/80 hover:text-blue-900 hover:border-l-4 hover:border-blue-500"
+                                  }`}
+                              >
+                                <i
+                                  className={`fa-solid fa-circle text-[7px] ${
+                                    isActive ? "text-blue-600" : "text-blue-300"
+                                  }`}
+                                />
+                                {sub.label}
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
                   </>
                 )}
@@ -283,6 +263,11 @@ export const Sidebar = ({ open, setOpen }) => {
             );
           })}
         </ul>
+
+        {/* Footer */}
+        <div className="px-4 py-3 text-xs text-blue-600/70 text-center border-t border-blue-200/50">
+          SPay Fintech Pvt Ltd Dashboard • {new Date().getFullYear()}
+        </div>
       </div>
     </>
   );

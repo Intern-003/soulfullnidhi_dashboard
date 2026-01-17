@@ -180,8 +180,8 @@ export const Dashboard = () => {
   }, [recordLoading, cardData]);
 
   const cardsToShow = [
-    { title: "Today Pay-IN ", value: cardData?.today_payin ?? 0 },
-    { title: "Total Pay-IN", value: cardData?.total_payin_amount ?? 0 },
+    { title: "Today Pay-IN", value: cardData?.today_payin ?? 0 },
+    { title: "Total Pay-IN", value: cardData?.total_payin_amount ?? 0},
     { title: "Today Pay-OUT", value: cardData?.today_payout ?? 0 },
     { title: "Total Pay-OUT", value: cardData?.total_payout_amount ?? 0 },
   ];
@@ -220,68 +220,61 @@ export const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/70 pb-16">
       <div className="mx-auto max-w-[1720px] px-5 sm:px-7 lg:px-10 pt-8 lg:pt-12">
 
-        {/* CARDS – improved version: aggressive shrink + overflow control */}
-        {/* CARDS */}
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 mb-12">
-  {cardsToShow.map((card, i) => {
-    const amountStr = formatRupee(card.value);
+        {/* CARDS – aggressive font shrink per digit length */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 mb-12">
+          {cardsToShow.map((card, i) => {
+            const amountStr = formatRupee(card.value);
+            let fontClass = "text-2xl md:text-xl";
 
-    // More aggressive and earlier font size reduction
-    let fontClass = "text-xl md:text-2xl";
+            const len = amountStr.length;
+            if (len >= 7)  fontClass = "text-2.5xl md:text-3.5xl";
+            if (len >= 9)  fontClass = "text-2xl md:text-3xl";
+            if (len >= 11) fontClass = "text-xl md:text-2.5xl";
+            if (len >= 13) fontClass = "text-lg md:text-2xl";
+            if (len >= 15) fontClass = "text-base md:text-xl";
+            if (len >= 17) fontClass = "text-sm md:text-lg";
+            if (len >= 19) fontClass = "text-xs md:text-base";
+            if (len >= 21) fontClass = "text-xs md:text-sm";
 
-    const len = amountStr.length;
-    if (len >= 8)  fontClass = "text-2xl md:text-3.5xl";   // ~₹1,23,45,678
-    if (len >= 10) fontClass = "text-2xl md:text-3xl";        // ~₹12,34,56,789
-    if (len >= 12) fontClass = "text-xl md:text-2.5xl";       // ~₹1,23,45,67,890
-    if (len >= 14) fontClass = "text-lg md:text-2xl";         // ~₹12,34,56,78,901
-    if (len >= 16) fontClass = "text-base md:text-xl";        // ~₹1,23,45,67,89,012
-    if (len >= 18) fontClass = "text-sm md:text-lg";          // ~₹12,34,56,78,90,123
-    if (len >= 20) fontClass = "text-xs md:text-base";  
-    if (len >= 22) fontClass = "text-xs md:text-base";  
-    if (len >= 24) fontClass = "text-xs md:text-base";  
-    if (len >= 26) fontClass = "text-xs md:text-base";  
-    if (len >= 28) fontClass = "text-xs md:text-base";  
-    if (len >= 30) fontClass = "text-xs md:text-base";  
+            return (
+              <div
+                key={i}
+                className={`
+                  group relative bg-white rounded-tl-3xl rounded-br-3xl 
+                  shadow-[0_10px_30px_rgba(0,0,0,0.12)] overflow-hidden 
+                  transition-all duration-400 hover:shadow-[0_25px_70px_rgba(0,0,0,0.18)]
+                  hover:-translate-y-2 border border-slate-100/80
+                  min-w-0
+                `}
+              >
+                <div 
+                  className="absolute top-0 left-0 right-0 h-3 transform -skew-x-12 origin-left"
+                  style={{
+                    background: "linear-gradient(90deg, rgba(6, 76, 150, 1) 0%, rgba(40, 142, 214, 1) 100%)"
+                  }}
+                />
+                
+                <div className="p-6 pt-9 relative">
+                  <h3 className="text-sm font-semibold text-slate-600 mb-2.5 tracking-wider uppercase">
+                    {card.title}
+                  </h3>
+                  <div 
+                    className={`
+                      ${fontClass} font-extrabold text-slate-800 tracking-tight 
+                      whitespace-nowrap overflow-hidden 
+                      max-w-full w-full
+                    `}
+                    title={`₹${amountStr}`}
+                  >
+                    ₹{amountStr}
+                  </div>
 
-    return (
-      <div
-        key={i}
-        className={`
-          group relative bg-white rounded-tl-3xl rounded-br-3xl 
-          shadow-[0_10px_30px_rgba(0,0,0,0.12)] overflow-hidden 
-          transition-all duration-400 hover:shadow-[0_25px_70px_rgba(0,0,0,0.18)]
-          hover:-translate-y-2 border border-slate-100/80
-          min-w-0
-        `}
-      >
-        <div 
-          className="absolute top-0 left-0 right-0 h-3 transform -skew-x-12 origin-left"
-          style={{
-            background: "linear-gradient(90deg, rgba(6, 76, 150, 1) 0%, rgba(40, 142, 214, 1) 100%)"
-          }}
-        />
-        
-        <div className="p-6 pt-9 relative">
-          <h3 className="text-sm font-semibold text-slate-600 mb-2.5 tracking-wider uppercase">
-            {card.title}
-          </h3>
-          <div 
-            className={`
-              ${fontClass} font-extrabold text-slate-800 tracking-tight 
-              whitespace-nowrap overflow-hidden 
-              max-w-full w-full
-            `}
-            title={`₹${amountStr}`}
-          >
-            ₹{amountStr}
-          </div>
-
-          <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
-    );
-  })}
-</div>
 
         {/* CHARTS */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-7 mb-12">
@@ -337,7 +330,7 @@ export const Dashboard = () => {
                     appearance-none cursor-pointer
                   "
                 >
-                  <option value="ALL">All Statuses</option>
+                  <option value="ALL">All Status</option>
                   <option value="SUCCESS">Success</option>
                   <option value="FAILED">Failed</option>
                   <option value="PENDING">Pending</option>

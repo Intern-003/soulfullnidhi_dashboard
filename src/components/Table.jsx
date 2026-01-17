@@ -27,7 +27,7 @@ const Table = ({
 
   const [search, setSearch] = useState("");
   const [recordId, setRecordId] = useState(null);
-  const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const [entriesPerPage, setEntriesPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [startDate, setStartDate] = useState(null);
@@ -528,7 +528,7 @@ const customHeader = ({ date, changeMonth, changeYear }) => (
                 }}
                 className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-sky-400 outline-none"
               >
-                {[10, 50, 100, 150].map((num) => (
+                {[ 50, 100, 150, 200].map((num) => (
                   <option key={num} value={num}>
                     {num}
                   </option>

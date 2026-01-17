@@ -389,13 +389,18 @@ const Register = () => {
       </div>
 
       {/* Content wrapper */}
-      <div className="relative min-h-screen w-full flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8 overflow-y-auto">
+      <div className="relative min-h-screen w-full flex items-center justify-center px-5 py-8 sm:px-8 sm:py-12 lg:px-12 lg:py-16 overflow-y-auto">
         <div 
           className={`
-            w-full max-w-md lg:max-w-lg 
+            w-full 
+            max-w-md 
+            sm:max-w-lg 
+            md:max-w-xl 
+            lg:max-w-2xl 
+            xl:max-w-3xl
             bg-gradient-to-b from-white/98 via-white/96 to-white/93
             backdrop-blur-lg 
-            rounded-2xl sm:rounded-3xl 
+            rounded-2xl sm:rounded-3xl lg:rounded-3xl 
             shadow-2xl shadow-black/9 
             border border-gray-100/70 
             overflow-hidden
@@ -405,7 +410,7 @@ const Register = () => {
               : 'hover:shadow-2xl hover:shadow-black/14'}
           `}
         >
-          <div className="p-5 sm:p-7 lg:p-9 space-y-7">
+          <div className="p-6 sm:p-8 lg:p-10 xl:p-12 space-y-8 lg:space-y-10">
 
             {/* Header + progress */}
             <div className="text-center space-y-5">
@@ -413,13 +418,14 @@ const Register = () => {
                 <img
                   src={logo}
                   alt="SPay Logo"
-                  className="w-20 sm:w-24 lg:w-28 h-auto drop-shadow-md transition-all duration-700"
+                  className="w-20 sm:w-28 lg:w-32 xl:w-36 h-auto drop-shadow-md transition-all duration-700"
                 />
               </div>
 
               <div>
                 <h1 className="
-                  text-xl sm:text-2xl lg:text-[28px] 
+                  text-xl sm:text-2xl 
+                  lg:text-3xl xl:text-[2rem]
                   font-extrabold 
                   bg-gradient-to-r from-blue-700 via-blue-500 to-blue-800 
                   bg-clip-text text-transparent 
