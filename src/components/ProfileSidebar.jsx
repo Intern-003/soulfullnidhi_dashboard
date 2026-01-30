@@ -10,7 +10,7 @@ export const ProfileSidebar = ({
   payingAmount,
   Payoutwallet,
 }) => {
-  console.log("user data received:", data);
+  // console.log("user data received:", data);
 
   const [PayAmountVisible, setPayAmountVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -30,7 +30,7 @@ export const ProfileSidebar = ({
     setIsLoggingOut(true);
     try {
       await logoutApi();
-      console.log("Logout successful");
+      // console.log("Logout successful");
     } catch (err) {
       console.error("Logout API failed:", err);
     } finally {
@@ -75,17 +75,23 @@ export const ProfileSidebar = ({
     if (!open) setPayAmountVisible(false);
   }, [open]);
 
-  // Safe name/email handling
-  const userName = data?.name?.trim() || 
-                  (data?.email ? data.email.split('@')[0] : "User");
+const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-  const displayName = userName
-    .split(' ')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(' ');
+// Prefer prop data, fallback to stored user (admin case)
+const effectiveUser = data && Object.keys(data).length ? data : storedUser;
 
-  const displayEmail = data?.email?.trim() || "No email available";
-  const displayInitial = displayName.charAt(0).toUpperCase() || "U";
+const userName =
+  effectiveUser?.name?.trim() ||
+  (effectiveUser?.email ? effectiveUser.email.split("@")[0] : "User");
+
+const displayName = userName
+  .split(" ")
+  .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+  .join(" ");
+
+const displayEmail = effectiveUser?.email?.trim() || "No email available";
+const displayInitial = displayName.charAt(0).toUpperCase() || "U";
+
 
   return (
     <>

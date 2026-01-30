@@ -7,11 +7,9 @@
 // const Acc_topup_settlement = () => {
 //   const [topupPayoutData, setTopupPayoutData] = useState([]);
 
-
 //   const { data, loading, error } = useGet(
 //     "/reportrecords-List?product[]=topup_payout&product[]=take_back_from_wallet"
 //   );
-
 
 //   useEffect(() => {
 
@@ -42,7 +40,6 @@
 //             year: "2-digit",
 //           });
 
-
 //           const formattedTime = d.toLocaleTimeString("en-US", {
 //             hour: "2-digit",
 //             minute: "2-digit",
@@ -56,8 +53,6 @@
 //             </div>
 //           );
 //         })(),
-
-
 
 //         amount: item.amount ?? "N/A",
 //         numericAmount: parseFloat(item.amount) || 0, // ✅ for calculations
@@ -126,7 +121,7 @@
 
 // export default Acc_topup_settlement;
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Table from "../components/Table";
 import { useGet } from "../hooks/useGet";
 import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
@@ -135,12 +130,93 @@ import { TableSkeleton } from "../components/TableSkeleton";
 const Acc_topup_settlement = () => {
   const [topupPayoutData, setTopupPayoutData] = useState([]);
 
-  const { data, loading, error } = useGet(
-    "/reportrecords-List?product[]=topup_payout&product[]=take_back_from_wallet"
-  );
+  // Cursor pagination states
+  // ─────────────────────────────────────
+  const [rawData, setRawData] = useState([]);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [entriesPerPage, setEntriesPerPage] = useState(50);
+  const lastCursorRef = useRef(null);
+
+  // ─────────────────────────────────────
+  // Cursor-based API fetch
+  // ─────────────────────────────────────
+  const fetchTopupReports = async () => {
+    if (!hasMore || loading) return;
+
+    if (cursor !== null && lastCursorRef.current === cursor) return;
+    lastCursorRef.current = cursor;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const params = new URLSearchParams();
+      params.append("product[]", "topup_payout");
+      params.append("product[]", "take_back_from_wallet");
+      params.append("per_page", entriesPerPage);
+      if (cursor) params.append("cursor", cursor);
+
+      const query = params.toString();
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      const json = await res.json();
+
+      if (json?.status) {
+        setRawData((prev) => {
+          const ids = new Set(prev.map((i) => i.id));
+          const unique = json.data.filter((i) => !ids.has(i.id));
+          return [...prev, ...unique];
+        });
+
+        setCursor(json.next_cursor);
+        if (!json.next_cursor) setHasMore(false);
+      } else {
+        throw new Error("Invalid response");
+      }
+    } catch (e) {
+      console.error(e);
+      setError("Failed to load Topup statements");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // First load
+  useEffect(() => {
+    fetchTopupReports();
+  }, []);
 
   useEffect(() => {
-    if (!data?.data) return;
+    setRawData([]);
+    setCursor(null);
+    setHasMore(true);
+    setError(null);
+
+    fetchTopupReports();
+  }, [entriesPerPage]);
+
+  const handleLoadMore = () => {
+    if (!hasMore || loading) return;
+    fetchTopupReports();
+  };
+
+  // const { data, loading, error } = useGet(
+  //   "/reportrecords-List?product[]=topup_payout&product[]=take_back_from_wallet"
+  // );
+
+  useEffect(() => {
+    if (!rawData.length) return;
 
     const statusClasses = {
       pending: "bg-[#dfaf03ff] text-white",
@@ -152,48 +228,40 @@ const Acc_topup_settlement = () => {
       refunded: "bg-gray-400 text-white",
     };
 
-    const formattedData = data.data.map((item, index) => {
+    const formattedData = rawData.map((item, index) => {
       const d = new Date(item.created_at);
 
-      const formattedDate = d.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "2-digit",
-      });
-
-      const formattedTime = d.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-
       return {
-        /* ================= REQUIRED BY TABLE ================= */
         id: item.id,
         user_id: item.user_id,
-        merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
+        merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id})`,
         status: item.status,
-
-        /* ================= RAW DATE (VERY IMPORTANT) ================= */
         created_at: item.created_at,
-
-        /* ================= UI FIELDS ================= */
         sqno: index + 1,
-
         txnid: item.txnid,
-
         product_type: item.product ?? "N/A",
 
         date: (
           <div className="flex flex-col w-28">
-            <span className="text-sm font-medium">{formattedDate}</span>
-            <span className="text-sm text-gray-500">{formattedTime}</span>
+            <span className="text-sm font-medium">
+              {d.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "2-digit",
+              })}
+            </span>
+            <span className="text-sm text-gray-500">
+              {d.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </span>
           </div>
         ),
 
         amount: item.amount ?? "N/A",
         numericAmount: parseFloat(item.amount) || 0,
-
         payout_opening_balance: item.payout_opening_balance ?? "0.0",
         payout_closing_balance: item.payout_closing_balance ?? "0.0",
 
@@ -203,16 +271,14 @@ const Acc_topup_settlement = () => {
               statusClasses[item.status] ?? "bg-gray-100 text-gray-800"
             }`}
           >
-            {item?.status
-              ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
-              : "N/A"}
+            {item.status}
           </span>
         ),
       };
     });
 
     setTopupPayoutData(formattedData);
-  }, [data]);
+  }, [rawData]);
 
   const topupPayoutColumn = [
     { header: "SQ NO", accessor: "id" },
@@ -241,12 +307,10 @@ const Acc_topup_settlement = () => {
       </div>
 
       {/* Table */}
-      {loading ? (
+      {loading && rawData.length === 0 ? (
         <TableSkeleton />
       ) : error ? (
-        <div className="text-center py-6 text-red-500">
-          Error: {error}
-        </div>
+        <div className="text-center py-6 text-red-500">Error: {error}</div>
       ) : (
         <Table
           columns={topupPayoutColumn}
@@ -257,6 +321,12 @@ const Acc_topup_settlement = () => {
           showSelectUserFilter={true}
           showDeleteColumn={false}
           statusList={REPORT_STATUSES}
+          isServerPaginated={true}
+          hasMore={hasMore}
+          isLoadingMore={loading}
+          onLoadNext={handleLoadMore}
+          entriesPerPage={entriesPerPage}
+          setEntriesPerPage={setEntriesPerPage}
         />
       )}
     </div>

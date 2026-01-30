@@ -1,16 +1,112 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Table from "../components/Table";
-import { useGet } from "../hooks/useGet";
 import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
+
 
 const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
 
-  const { data, loading, error } = useGet("/reportrecords-List?product=payout");
+  // ─────────────────────────────────────
+  // Cursor pagination states
+  // ─────────────────────────────────────
+  const [rawData, setRawData] = useState([]);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [entriesPerPage, setEntriesPerPage] = useState(50);
+  const lastCursorRef = useRef(null);
+
+  // ─────────────────────────────────────
+  // Cursor-based API fetch
+  // ─────────────────────────────────────
+  const fetchPayoutReports = async () => {
+    if (!hasMore || loading) return;
+
+      if (cursor !== null && lastCursorRef.current === cursor) return;
+  lastCursorRef.current = cursor;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const query = new URLSearchParams({
+        product: "payout",
+        // per_page: 5000,
+        per_page: entriesPerPage,
+        ...(cursor && { cursor }),
+      }).toString();
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const json = await res.json();
+
+      if (json?.status) {
+        setRawData((prev) => {
+          const existingIds = new Set(prev.map((item) => item.id));
+
+          const uniqueNewData = (json.data || []).filter(
+            (item) => !existingIds.has(item.id),
+          );
+
+          return [...prev, ...uniqueNewData];
+        });
+
+        setCursor(json.next_cursor);
+
+        if (!json.next_cursor) {
+          setHasMore(false); // all data loaded
+        }
+      } else {
+        throw new Error("Invalid API response");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load payout statements");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // First load
+  useEffect(() => {
+    fetchPayoutReports();
+  }, []);
 
   useEffect(() => {
-    if (!data?.data) return;
+    setRawData([]);
+    setCursor(null);
+    setHasMore(true);
+    setError(null);
+
+    fetchPayoutReports();
+  }, [entriesPerPage]);
+
+  const handleLoadMore = () => {
+    if (!hasMore || loading) return;
+    fetchPayoutReports();
+  };
+
+  // Auto-load next chunks
+  // useEffect(() => {
+  //   if (cursor) fetchPayoutReports();
+  // }, [cursor]);
+
+  // ─────────────────────────────────────
+  // Data formatting (UNCHANGED LOGIC)
+  // ─────────────────────────────────────
+  useEffect(() => {
+    if (!rawData.length) return;
 
     const statusClasses = {
       pending: "bg-[#dfaf03ff] text-white",
@@ -22,8 +118,8 @@ const PayoutStatement = () => {
       refunded: "bg-[#ff3366] text-white",
     };
 
-    const sortedData = [...data.data].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    const sortedData = [...rawData].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at),
     );
 
     const formattedData = sortedData.map((item) => {
@@ -42,7 +138,9 @@ const PayoutStatement = () => {
         /* ================= UI FIELDS ================= */
         sqno: (
           <div className="flex flex-col text-left">
-            <span><b>{item.id}</b></span>
+            <span>
+              <b>{item.id}</b>
+            </span>
             <span>
               {d.getDate()} {MONTH_NAMES[d.getMonth()]} {d.getFullYear()}
             </span>
@@ -54,20 +152,39 @@ const PayoutStatement = () => {
 
         txnid: (
           <div className="flex flex-col text-left">
-            <span>Holder: <b>{item.payer_name}</b></span>
-            <span>Account: <b>{item.payer_acc_no}</b></span>
-            <span>IFSC: <b>{item.payer_ifsc}</b></span>
-            <span>UPI Id: <b>{item.payer_upi ?? "N/A"}</b></span>
-            <span>Mobile: <b>{item.payer_mobile}</b></span>
+            <span>
+              Holder: <b>{item.payer_name}</b>
+            </span>
+            <span>
+              Account: <b>{item.payer_acc_no}</b>
+            </span>
+            <span>
+              IFSC: <b>{item.payer_ifsc}</b>
+            </span>
+            <span>
+              UPI Id: <b>{item.payer_upi ?? "N/A"}</b>
+            </span>
+            <span>
+              Mobile: <b>{item.payer_mobile}</b>
+            </span>
           </div>
         ),
 
         reference_details: (
           <div className="flex flex-col text-left">
-            <span>Payment Mode: <b>{item.payout_mode ?? "null"}</b></span>
-            <span>Ref No: <b>{item.refno ?? "null"}</b></span>
-            <span>Order ID: <b>{item.mytxnid}</b></span>
-            <span>Txnid: <br /><b>{item.txnid}</b></span>
+            <span>
+              Payment Mode: <b>{item.payout_mode ?? "null"}</b>
+            </span>
+            <span>
+              Ref No: <b>{item.refno ?? "null"}</b>
+            </span>
+            <span>
+              Order ID: <b>{item.mytxnid}</b>
+            </span>
+            <span>
+              Txnid: <br />
+              <b>{item.txnid}</b>
+            </span>
           </div>
         ),
 
@@ -85,7 +202,9 @@ const PayoutStatement = () => {
             <span>
               Total Debited Amount:{" "}
               <b>
-                {(Number(item.amount ?? 0) + Number(item.charge ?? 0)).toFixed(2)}
+                {(Number(item.amount ?? 0) + Number(item.charge ?? 0)).toFixed(
+                  2,
+                )}
               </b>
             </span>
             <span>
@@ -95,7 +214,9 @@ const PayoutStatement = () => {
               Note:{" "}
               <b>
                 Debit{" "}
-                {(Number(item.amount ?? 0) + Number(item.charge ?? 0)).toFixed(2)}{" "}
+                {(Number(item.amount ?? 0) + Number(item.charge ?? 0)).toFixed(
+                  2,
+                )}{" "}
                 to Payout Wallet
               </b>
             </span>
@@ -119,8 +240,11 @@ const PayoutStatement = () => {
     });
 
     setPayoutData(formattedData);
-  }, [data]);
+  }, [rawData]);
 
+  // ─────────────────────────────────────
+  // Table columns
+  // ─────────────────────────────────────
   const payoutColumn = [
     { header: "Order ID", accessor: "sqno" },
     { header: "Merchant Details", accessor: "merchant_details" },
@@ -141,13 +265,21 @@ const PayoutStatement = () => {
         <h4 className="font-bold text-white text-xl">Payout Statement</h4>
       </div>
 
-      {loading ? (
+      {loading && rawData.length === 0 ? (
         <TableSkeleton />
       ) : error ? (
-        <div className="text-center py-6 text-red-500">
-          Error: {error}
-        </div>
+        <div className="text-center py-6 text-red-500">{error}</div>
       ) : (
+        // <Table
+        //   columns={payoutColumn}
+        //   data={payoutData}
+        //   showStatusFilter={true}
+        //   showExport={true}
+        //   showSearch={false}
+        //   showSelectUserFilter={true}
+        //   showDeleteColumn={false}
+        //   statusList={REPORT_STATUSES}
+        // />
         <Table
           columns={payoutColumn}
           data={payoutData}
@@ -157,10 +289,22 @@ const PayoutStatement = () => {
           showSelectUserFilter={true}
           showDeleteColumn={false}
           statusList={REPORT_STATUSES}
+          isServerPaginated={true}
+          hasMore={hasMore}
+          isLoadingMore={loading}
+          onLoadNext={handleLoadMore}
+          entriesPerPage={entriesPerPage}
+          setEntriesPerPage={setEntriesPerPage}
         />
+      )}
+
+      {loading && rawData.length > 0 && (
+        <div className="text-center text-sm text-gray-500 py-4 hidden">
+          Loading more payout records…
+        </div>
       )}
     </div>
   );
 };
 
-export default PayoutStatement
+export default PayoutStatement;

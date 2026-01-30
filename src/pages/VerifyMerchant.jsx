@@ -18,14 +18,14 @@ export const VerifyMerchant = () => {
     const [airpayMids, setAirpayMids] = useState([]);
     const toast = useToast();
   const { id } = useParams();
-  console.log("Merchant ID:", id);
+  // console.log("Merchant ID:", id);
 
   const navigate = useNavigate();
 
   const { data: response, loading, error } = useGet(
     id ? `/show-merchant/${id}` : null
   );
-  console.log("merchant response",response);
+  // console.log("merchant response",response);
     const { execute: updateMerchant } = usePost("/update-merchant-scheme");
 // Payin Banks (for "Payin at Onboard")
 const { data: payinBanks, refetch: refetchPayin } = useGet(

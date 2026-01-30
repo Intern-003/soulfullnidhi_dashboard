@@ -21,7 +21,7 @@ export const PayinRequest = () => {
   const { data } = useAutoFetch("/collection-record");
   const { execute: executePayin, loading } = usePost("/Airpay/request");
   const { execute: executeCheckStatus } = usePost("/payin/status");
-  console.log("collection records", data);
+  // console.log("collection records", data);
   // const payin_wallet = collection_data?.data;
 
   const payingAmount = data?.PayingAmount ?? "0.00";

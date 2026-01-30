@@ -22,12 +22,21 @@ const Table = ({
   refreshTable,
   setData,
   statusList,
+
+  // New props for server-side pagination
+  isServerPaginated = false,
+  hasMore = false,
+  isLoadingMore = false,
+  onLoadNext = () => {},
+
+    entriesPerPage,
+  setEntriesPerPage,
 }) => {
   const toast = useToast();
 
   const [search, setSearch] = useState("");
   const [recordId, setRecordId] = useState(null);
-  const [entriesPerPage, setEntriesPerPage] = useState(50);
+  // const [entriesPerPage, setEntriesPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [startDate, setStartDate] = useState(null);
@@ -41,14 +50,14 @@ const Table = ({
     // 🔍 DEBUG DATE FORMAT (TEMPORARY)
   useEffect(() => {
     if (data?.length) {
-      console.log("FULL FIRST ROW:", data[0]);
+      // console.log("FULL FIRST ROW:", data[0]);
 
-      console.log("date:", data[0]?.date);
-      console.log("created_at:", data[0]?.created_at);
-      console.log("txnid.created_at:", data[0]?.txnid?.created_at);
-      console.log("txnid.txn_date:", data[0]?.txnid?.txn_date);
+      // console.log("date:", data[0]?.date);
+      // console.log("created_at:", data[0]?.created_at);
+      // console.log("txnid.created_at:", data[0]?.txnid?.created_at);
+      // console.log("txnid.txn_date:", data[0]?.txnid?.txn_date);
 
-      console.log("TYPE OF created_at:", typeof data[0]?.created_at);
+      // console.log("TYPE OF created_at:", typeof data[0]?.created_at);
     }
   }, [data]);
 
@@ -146,6 +155,7 @@ const Table = ({
 
   /* ================= FILTERED DATA (FIXED) ================= */
 
+/* ================= FILTERED DATA ================= */
   const filteredData = useMemo(() => {
     return data.filter((row) => {
       const matchesSearch = Object.values(row).some((val) =>
@@ -171,6 +181,8 @@ const Table = ({
       return matchesSearch && matchesStatus && matchesDate && matchesMerchant;
     });
   }, [search, statusFilter, startDate, endDate, selectedMerchant, data]);
+
+
 
   /* ================= TOTAL SUCCESS ================= */
 
@@ -455,50 +467,43 @@ const customHeader = ({ date, changeMonth, changeYear }) => (
 
             {/* BODY */}
             <tbody>
-              {filteredData.length ? (
-                filteredData
-                  .slice(
-                    (currentPage - 1) * entriesPerPage,
-                    currentPage * entriesPerPage
-                  )
-                  .map((row, idx) => (
-                    <tr
-                      key={row.id || idx}
-                      className={`transition-all duration-150 ${
-                        idx % 2 === 0 ? "bg-[#e6efff]" : "bg-white"
-                      } hover:bg-blue-100`}
-                    >
-                      {columns.map((col, ci) => (
-                        <td
-                          key={ci}
-                          className="px-4 py-2 text-gray-700 font-normal text-[13px] leading-5 break-words"
-                          style={{ fontFamily: "Inter, sans-serif" }}
-                        >
-                          {col.Cell
-                            ? col.Cell({ value: row[col.accessor], row })
-                            : row[col.accessor]}
-                        </td>
-                      ))}
+ {filteredData.length ? (
+                filteredData.map((row, idx) => (
+                  <tr
+                    key={row.id || idx}
+                    className={`transition-all duration-150 ${
+                      idx % 2 === 0 ? "bg-[#e6efff]" : "bg-white"
+                    } hover:bg-blue-100`}
+                  >
+                    {columns.map((col, ci) => (
+                      <td
+                        key={ci}
+                        className="px-4 py-2 text-gray-700 font-normal text-[13px] leading-5 break-words"
+                        style={{ fontFamily: "Inter, sans-serif" }}
+                      >
+                        {col.Cell
+                          ? col.Cell({ value: row[col.accessor], row })
+                          : row[col.accessor]}
+                      </td>
+                    ))}
 
-                      {showDeleteColumn && (
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleConfirmModal(row.id)}
-                            className="text-red-600 hover:text-red-800 transition"
-                          >
-                            <i className="fa-solid fa-trash fa-lg"></i>
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  ))
+                    {showDeleteColumn && (
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleConfirmModal(row.id)}
+                          className="text-red-600 hover:text-red-800 transition"
+                        >
+                          <i className="fa-solid fa-trash fa-lg"></i>
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))
               ) : (
                 <tr>
                   <td
-                    colSpan={
-                      showDeleteColumn ? columns.length + 1 : columns.length
-                    }
+                    colSpan={showDeleteColumn ? columns.length + 1 : columns.length}
                     className="text-center text-gray-600 py-10 bg-white"
                   >
                     <img
@@ -515,65 +520,77 @@ const customHeader = ({ date, changeMonth, changeYear }) => (
         </div>
 
         {/* PAGINATION */}
-        {showPagination && filteredData.length > 0 && (
+  {showPagination && filteredData.length > 0 && (
           <div className="flex flex-col md:flex-row justify-between items-center px-4 py-3 bg-gray-200 rounded-b-2xl border-t border-gray-300 shadow-inner">
-            {/* LEFT RECORDS PER PAGE */}
+            {/* LEFT – entries per page (optional for server-side) */}
             <div className="flex items-center gap-2 text-sm text-gray-800 font-medium">
               <span>Show</span>
-              <select
-                value={entriesPerPage}
-                onChange={(e) => {
-                  setEntriesPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-sky-400 outline-none"
-              >
-                {[ 50, 100, 150, 200].map((num) => (
-                  <option key={num} value={num}>
-                    {num}
-                  </option>
-                ))}
-              </select>
+<select
+  value={entriesPerPage}
+  onChange={(e) => setEntriesPerPage(Number(e.target.value))}
+  className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-sky-400 outline-none"
+>
+  {[50, 100, 150,200].map((num) => (
+    <option key={num} value={num}>
+      {num}
+    </option>
+  ))}
+</select>
               <span>entries</span>
             </div>
 
-            {/* RIGHT PAGINATION BUTTONS */}
+            {/* RIGHT – Prev / Page / Next – customized */}
             <div className="flex items-center gap-3 mt-2 md:mt-0">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
+                disabled={currentPage === 1 || isServerPaginated} // disable Prev if server-side
                 className={`px-3 py-1 text-sm rounded-md font-medium transition
-            ${
-              currentPage === 1
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }
-          `}
+                  ${currentPage === 1 || isServerPaginated
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700"}`}
               >
                 Prev
               </button>
 
               <span className="text-sm font-medium text-gray-800">
-                Page <span className="font-semibold">{currentPage}</span> of{" "}
-                {totalPages}
+                {/* For server-side, show loaded status instead of page number */}
+                {isServerPaginated ? (
+                  "Loaded: " + filteredData.length + " records"
+                ) : (
+                  <>
+                    Page <span className="font-semibold">{currentPage}</span> of {totalPages}
+                  </>
+                )}
               </span>
 
               <button
-                onClick={() =>
+                onClick={isServerPaginated ? onLoadNext : () =>
                   setCurrentPage((prev) =>
                     prev < totalPages ? prev + 1 : prev
                   )
                 }
-                disabled={currentPage === totalPages}
-                className={`px-3 py-1 text-sm rounded-md font-medium transition
-            ${
-              currentPage === totalPages
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }
-          `}
+                disabled={
+                  isServerPaginated
+                    ? !hasMore || isLoadingMore
+                    : currentPage === totalPages
+                }
+                className={`px-3 py-1 text-sm rounded-md font-medium transition flex items-center gap-2
+                  ${
+                    (isServerPaginated ? !hasMore || isLoadingMore : currentPage === totalPages)
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
               >
-                Next
+                {isServerPaginated && (isLoadingMore) ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    </svg>
+                    Loading...
+                  </>
+                ) : (
+                  "Next"
+                )}
               </button>
             </div>
           </div>

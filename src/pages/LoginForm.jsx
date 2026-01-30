@@ -143,6 +143,11 @@ function LoginForm() {
           userId: response.user.id,
         });
 
+      if (user.role_type === "admin") {
+        navigate("dashboard", { replace: true });
+        return;
+      }
+
         if (user.kyc === 1 && user.pre_kyc === 1) {
           navigate("/dashboard", { replace: true });
         } else if (user.kyc === 0 && user.pre_kyc === 0) {

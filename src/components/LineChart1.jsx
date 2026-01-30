@@ -79,7 +79,7 @@ export const LineChart1 = ({ data }) => {
 
       const key = `${month}-${year}`;
 
-      console.log(`[LineChart1] Parsed item #${index}: raw_month="${rawMonth}", month="${month}", year=${year}, key="${key}"`);
+      // console.log(`[LineChart1] Parsed item #${index}: raw_month="${rawMonth}", month="${month}", year=${year}, key="${key}"`);
 
       map[key] = {
         payinAmount: Number(item.payin_amount) || 0,
@@ -89,7 +89,7 @@ export const LineChart1 = ({ data }) => {
       };
     });
 
-    console.log("[LineChart1] All parsed keys:", Object.keys(map));
+    // console.log("[LineChart1] All parsed keys:", Object.keys(map));
 
     return map;
   }, [data]);

@@ -1,16 +1,112 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Table from "../components/Table";
-import { useGet } from "../hooks/useGet";
 import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 
 const UpiStatement = () => {
   const [upiData, setUpiData] = useState([]);
 
-  const { data, loading, error } = useGet("/reportrecords-List?product=UPI");
+  // ─────────────────────────────────────
+  // Cursor pagination states
+  // ─────────────────────────────────────
+  const [rawData, setRawData] = useState([]);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+    const [entriesPerPage, setEntriesPerPage] = useState(50);
+      const lastCursorRef = useRef(null);
+
+
+  // ─────────────────────────────────────
+  // Cursor-based API fetch
+  // ─────────────────────────────────────
+  const fetchUpiReports = async () => {
+    if (!hasMore || loading) return;
+
+        if (cursor !== null && lastCursorRef.current === cursor) return;
+  lastCursorRef.current = cursor;  
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const query = new URLSearchParams({
+        product: "UPI",
+        // per_page: 5000,
+        per_page:entriesPerPage,
+        ...(cursor && { cursor }),
+      }).toString();
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const json = await res.json();
+
+      if (json?.status) {
+          setRawData((prev) => {
+          const existingIds = new Set(prev.map((item) => item.id));
+
+          const uniqueNewData = (json.data || []).filter(
+            (item) => !existingIds.has(item.id),
+          );
+
+          return [...prev, ...uniqueNewData];
+        });
+
+        setCursor(json.next_cursor);
+
+        if (!json.next_cursor) {
+          setHasMore(false); // all data loaded
+        }
+      } else {
+        throw new Error("Invalid API response");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load UPI statements");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // First load
+  useEffect(() => {
+    fetchUpiReports();
+  }, []);
 
   useEffect(() => {
-    if (!data?.data) return;
+    setRawData([]);
+    setCursor(null);
+    setHasMore(true);
+    setError(null);
+
+      fetchUpiReports(); 
+  }, [entriesPerPage]);
+
+    const handleLoadMore = () => {
+    if (!hasMore || loading) return;
+    fetchUpiReports();
+  };
+
+  // Auto-load next chunks
+  // useEffect(() => {
+  //   if (cursor) fetchUpiReports();
+  // }, [cursor]);
+
+  // ─────────────────────────────────────
+  // Data formatting (unchanged logic)
+  // ─────────────────────────────────────
+  useEffect(() => {
+    if (!rawData.length) return;
 
     const statusClasses = {
       pending: "bg-[#dfaf03ff] text-white",
@@ -22,7 +118,7 @@ const UpiStatement = () => {
       refunded: "bg-gray-400 text-white",
     };
 
-    const sortedData = [...data.data].sort(
+    const sortedData = [...rawData].sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
 
@@ -30,16 +126,12 @@ const UpiStatement = () => {
       const d = new Date(item.created_at);
 
       return {
-        /* ================= REQUIRED BY TABLE (DO NOT REMOVE) ================= */
         id: item.id,
         user_id: item.user_id,
         merchant_details: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
         status: item.status,
-
-        /* ================= RAW DATE (FILTER / EXPORT USES THIS) ================= */
         created_at: item.created_at,
 
-        /* ================= UI FIELDS ================= */
         sqno: (
           <div className="flex flex-col text-left">
             <span><b>{item.id}</b></span>
@@ -66,7 +158,9 @@ const UpiStatement = () => {
             <span>Amount: <b>{item.amount}</b></span>
             <span>Charges: <b>{item.charge}</b></span>
             <span>GST: <b>{item.gst}</b></span>
-            <span>Payin Rolling Amount: <b>{item.payin_rolling_amount}</b></span>
+            <span>
+              Payin Rolling Amount: <b>{item.payin_rolling_amount}</b>
+            </span>
           </div>
         ),
 
@@ -87,8 +181,11 @@ const UpiStatement = () => {
     });
 
     setUpiData(formattedData);
-  }, [data]);
+  }, [rawData]);
 
+  // ─────────────────────────────────────
+  // Table columns
+  // ─────────────────────────────────────
   const upiColumn = [
     { header: "Order Id", accessor: "sqno" },
     { header: "Merchant Details", accessor: "merchant_details" },
@@ -106,16 +203,16 @@ const UpiStatement = () => {
           background: "linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)",
         }}
       >
-        <h4 className="font-bold text-white text-xl">Upi Statement</h4>
+        <h4 className="font-bold text-white text-xl">
+          UPI Statement 
+        </h4>
       </div>
 
       {/* Table */}
-      {loading ? (
+      {loading && rawData.length === 0 ? (
         <TableSkeleton />
       ) : error ? (
-        <div className="text-center py-6 text-red-500">
-          Error: {error}
-        </div>
+        <div className="text-center py-6 text-red-500">{error}</div>
       ) : (
         <Table
           columns={upiColumn}
@@ -126,7 +223,21 @@ const UpiStatement = () => {
           showDeleteColumn={false}
           showSelectUserFilter={true}
           statusList={REPORT_STATUSES}
+
+          isServerPaginated={true}
+          hasMore={hasMore}
+          isLoadingMore={loading}
+          onLoadNext={handleLoadMore}
+          entriesPerPage={entriesPerPage}
+          setEntriesPerPage={setEntriesPerPage}
         />
+      )}
+
+      {/* Loading indicator for next chunks */}
+      {loading && rawData.length > 0 && (
+        <div className="text-center text-sm text-gray-500 py-4 hidden">
+          Loading more UPI records…
+        </div>
       )}
     </div>
   );

@@ -9,9 +9,9 @@ export const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
   const location = useLocation(); // ✅ get current route
   const { execute: logout } = usePost("/logout");
-  const { data } = useAutoFetch("/collection-record");
+  const { data } = useAutoFetch("/collection-cashfree");
   const { data: merchantData } = useGet("/show-merchant");
-  console.log("payout data : ", merchantData);
+  // console.log("payout data : ", merchantData);
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);

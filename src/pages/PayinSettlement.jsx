@@ -79,7 +79,14 @@ const PayinSettlement = () => {
       }
     } catch (err) {
       console.log(err);
-      toast.error("Something went wrong!");
+      // toast.error("Something went wrong!");
+            const errorMessage =
+        err?.response?.data?.message ||  // Axios-style
+        err?.data?.message ||            // Custom hook style
+        err?.message ||                  // JS error
+        "Something went wrong!";
+
+      toast.error(errorMessage);
     }
   };
 

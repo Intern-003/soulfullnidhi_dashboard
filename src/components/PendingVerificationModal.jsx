@@ -19,9 +19,9 @@ export const PendingVerificationModal = () => {
   
   const toast = useToast();
   const user = location.state?.user || {};
-  console.log("user data", user);
+  // console.log("user data", user);
   const singlemerchant = location.state?.merchant || {};
-  console.log("single merchant", singlemerchant);
+  // console.log("single merchant", singlemerchant);
 
   const [memberFormData, setMemberFormData] = useState({
     id: user.id || singlemerchant.id || "",
