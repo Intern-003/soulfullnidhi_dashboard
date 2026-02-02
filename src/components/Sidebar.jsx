@@ -132,6 +132,15 @@ export const Sidebar = ({ open, setOpen }) => {
 
   return (
     <>
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;  /* Chrome, Safari, and Opera */
+        }
+      `}</style>
       {/* Mobile Overlay */}
       <div
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300 ${
@@ -146,7 +155,7 @@ export const Sidebar = ({ open, setOpen }) => {
           bg-gradient-to-b from-blue-50 via-blue-100 to-blue-200
           shadow-2xl shadow-blue-600/20 border-r border-blue-200/60
           z-40 transform transition-transform duration-400 ease-out
-          md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+          md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"} scrollbar-hide`}
       >
         {/* Mobile Close Button */}
         <button
@@ -169,7 +178,7 @@ export const Sidebar = ({ open, setOpen }) => {
         </div>
 
         {/* Menu Items */}
-        <ul className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5 custom-scrollbar">
+        <ul className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5 scrollbar-hide">
           {menu.map((item, i) => {
             const isParentActive =
               item.items?.some((sub) => sub.link === currentPath) ?? false;
@@ -229,7 +238,7 @@ export const Sidebar = ({ open, setOpen }) => {
                     {/* Dropdown Content */}
                     <div
                       className={`transition-all duration-300 ease-in-out overflow-hidden
-                        ${activeDropdown === item.dropdown ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0 mt-0"}`}
+                        ${activeDropdown === item.dropdown ? "max-h-96 opacity-100 mt-1" : "max-h-0 opacity-0 mt-0"} scrollbar-hide`}
                     >
                       <div className="space-y-1 py-1 pl-2">
                         {item.items.map((sub, j) => {

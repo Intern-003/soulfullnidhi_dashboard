@@ -29,14 +29,14 @@ const Table = ({
   isLoadingMore = false,
   onLoadNext = () => {},
 
-    entriesPerPage,
+  entriesPerPage,
   setEntriesPerPage,
 }) => {
   const toast = useToast();
-
+  const [role] = useState(atob(localStorage.getItem("role") || "") || "admin");
   const [search, setSearch] = useState("");
+  const [txnSearch, setTxnSearch] = useState("");
   const [recordId, setRecordId] = useState(null);
-  // const [entriesPerPage, setEntriesPerPage] = useState(50);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [startDate, setStartDate] = useState(null);
@@ -47,7 +47,7 @@ const Table = ({
   const [openExport, setOpenExport] = useState(false);
   const exportRef = useRef(null);
 
-    // 🔍 DEBUG DATE FORMAT (TEMPORARY)
+  // 🔍 DEBUG DATE FORMAT (TEMPORARY)
   useEffect(() => {
     if (data?.length) {
       // console.log("FULL FIRST ROW:", data[0]);
@@ -153,15 +153,61 @@ const Table = ({
     }
   };
 
-  /* ================= FILTERED DATA (FIXED) ================= */
+  /* ================= DEEP SEARCH HELPERS ================= */
 
-/* ================= FILTERED DATA ================= */
+  const getAllStrings = (value) => {
+    if (typeof value === "string" || typeof value === "number") {
+      return [String(value).toLowerCase()];
+    }
+    if (Array.isArray(value)) {
+      return value.flatMap(getAllStrings);
+    }
+    if (value && typeof value === "object") {
+      return Object.values(value).flatMap(getAllStrings);
+    }
+    return [];
+  };
+
+  /* ================= FILTERED DATA ================= */
+
   const filteredData = useMemo(() => {
     return data.filter((row) => {
-      const matchesSearch = Object.values(row).some((val) =>
-        String(val).toLowerCase().includes(search.toLowerCase())
-      );
-      
+      const allValues = getAllStrings(row);
+      const matchesSearch = !search || allValues.some((val) => val.includes(search.toLowerCase()));
+
+      // Updated to include all possible fields from screenshot for comprehensive search
+      const txnRelevantFields = [
+        row.order_id || row.id || row['ORDER ID'],
+        row.merchant_details || row['MERCHANT DETAILS'],
+        row.bank_details || row['BANK DETAILS'],
+        row.reference_details || row['REFERENCE DETAILS'],
+        row.amount_commission || row['AMOUNT / COMMISSION'],
+        row.txnid,
+        row.amount || row.numericAmount || row['Amount'] || row['Pay Amount'],
+        row.charges || row['Charges'] || row['Total Charges'],
+        row.gst || row['GST'],
+        row.payin_rolling_amount || row['Payin Rolling Amount'] || row['Opening Wallet Amount'] || row['Closing Wallet Amount'] || row['Total Debited Amount'],
+        row.transaction_details,
+        row.ref_no || row['Ref No'],
+        row.payee_txnid || row['Payee Txnid'],
+        row.payee_vpa || row['Payee VPA'],
+        row.status || row['STATUS'],
+        row.holder || row['Holder'],
+        row.account || row['Account'],
+        row.ifsc || row['IFSC'],
+        row.mode || row['Mode'],
+        row.mobile || row['Mobile'],
+        row.payment_mode || row['Payment Mode'],
+        row.u_pi_id || row['UPI Id'],
+        row.soulbox || row['SOULBOX'],
+        row.note || row['Note'],
+        row.opening_wallet_amount || row['Opening Wallet Amount'],
+        row.closing_wallet_amount || row['Closing Wallet Amount'],
+        row.total_debited_amount || row['Total Debited Amount']
+      ];
+      const txnValues = txnRelevantFields.flatMap(getAllStrings);
+      const matchesTxn = !txnSearch || txnValues.some((val) => val.includes(txnSearch.toLowerCase()));
+
       const matchesStatus =
         statusFilter === "all" ||
         String(row.status).toLowerCase() === statusFilter.toLowerCase();
@@ -178,10 +224,9 @@ const Table = ({
       const matchesMerchant =
         !selectedMerchant || row.user_id === selectedMerchant.value;
 
-      return matchesSearch && matchesStatus && matchesDate && matchesMerchant;
+      return matchesSearch && matchesTxn && matchesStatus && matchesDate && matchesMerchant;
     });
-  }, [search, statusFilter, startDate, endDate, selectedMerchant, data]);
-
+  }, [search, txnSearch, statusFilter, startDate, endDate, selectedMerchant, data]);
 
 
   /* ================= TOTAL SUCCESS ================= */
@@ -256,41 +301,41 @@ const Table = ({
 
   /* ================= DATE PICKER HEADER ================= */
 
-const months = [
-  "Jan","Feb","Mar","Apr","May","Jun",
-  "Jul","Aug","Sep","Oct","Nov","Dec"
-];
+  const months = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+  ];
 
-const years = Array.from({ length: 25 }, (_, i) => 2015 + i);
+  const years = Array.from({ length: 25 }, (_, i) => 2015 + i);
 
-const customHeader = ({ date, changeMonth, changeYear }) => (
-  <div className="flex justify-between items-center px-2 py-1 bg-gradient-to-r from-sky-200 to-indigo-200 rounded-t-lg">
-    <select
-      value={months[date.getMonth()]}
-      onChange={(e) => changeMonth(months.indexOf(e.target.value))}
-      className="bg-white text-sky-800 rounded px-2 py-1 border border-sky-300 text-sm"
-    >
-      {months.map((m) => (
-        <option key={m} value={m}>{m}</option>
-      ))}
-    </select>
+  const customHeader = ({ date, changeMonth, changeYear }) => (
+    <div className="flex justify-between items-center px-2 py-1 bg-gradient-to-r from-sky-200 to-indigo-200 rounded-t-lg">
+      <select
+        value={months[date.getMonth()]}
+        onChange={(e) => changeMonth(months.indexOf(e.target.value))}
+        className="bg-white text-sky-800 rounded px-2 py-1 border border-sky-300 text-sm"
+      >
+        {months.map((m) => (
+          <option key={m} value={m}>{m}</option>
+        ))}
+      </select>
 
-    <select
-      value={date.getFullYear()}
-      onChange={(e) => changeYear(Number(e.target.value))}
-      className="bg-white text-sky-800 rounded px-2 py-1 border border-sky-300 text-sm"
-    >
-      {years.map((y) => (
-        <option key={y} value={y}>{y}</option>
-      ))}
-    </select>
-  </div>
-);
+      <select
+        value={date.getFullYear()}
+        onChange={(e) => changeYear(Number(e.target.value))}
+        className="bg-white text-sky-800 rounded px-2 py-1 border border-sky-300 text-sm"
+      >
+        {years.map((y) => (
+          <option key={y} value={y}>{y}</option>
+        ))}
+      </select>
+    </div>
+  );
 
-  /* ================= UI (UNCHANGED) ================= */
+  /* ================= UI ================= */
 
   return (
-        <div className="w-full  mx-auto px-2 sm:px-0">
+    <div className="w-full  mx-auto px-2 sm:px-0">
       {/* FILTER BAR */}
       {(showSearch ||
         showStatusFilter ||
@@ -301,18 +346,29 @@ const customHeader = ({ date, changeMonth, changeYear }) => (
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 w-full">
             <div className="flex flex-wrap items-center gap-4 lg:max-w-[65%]">
               {showSearch && (
-                <div className="relative w-56">
+                <div className="relative w-64">
                   <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
                   <input
                     type="text"
-                    placeholder="Search..."
+                    placeholder="Search anything..."
                     className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-sky-400 outline-none"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
               )}
-              {showSelectUserFilter && (
+              <div className="relative w-64">
+                <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
+                <input
+                  type="text"
+                  placeholder="Search Order ID / Txn / Ref / Payee Txnid..."
+                  className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-sky-400 outline-none"
+                  value={txnSearch}
+                  onChange={(e) => setTxnSearch(e.target.value)}
+                />
+              </div>
+               {role === "admin" && showSelectUserFilter && (
+            
                 <div className="w-56">
                   <CustomSelect
                     options={selectData}
@@ -403,6 +459,7 @@ const customHeader = ({ date, changeMonth, changeYear }) => (
                   setEndDate(null);
                   setStatusFilter("all");
                   setSearch("");
+                  setTxnSearch("");
                   setSelectedMerchant(null);
                 }}
                 style={{
@@ -467,7 +524,7 @@ const customHeader = ({ date, changeMonth, changeYear }) => (
 
             {/* BODY */}
             <tbody>
- {filteredData.length ? (
+              {filteredData.length ? (
                 filteredData.map((row, idx) => (
                   <tr
                     key={row.id || idx}
@@ -520,30 +577,30 @@ const customHeader = ({ date, changeMonth, changeYear }) => (
         </div>
 
         {/* PAGINATION */}
-  {showPagination && filteredData.length > 0 && (
+        {showPagination && filteredData.length > 0 && (
           <div className="flex flex-col md:flex-row justify-between items-center px-4 py-3 bg-gray-200 rounded-b-2xl border-t border-gray-300 shadow-inner">
-            {/* LEFT – entries per page (optional for server-side) */}
+            {/* LEFT – entries per page */}
             <div className="flex items-center gap-2 text-sm text-gray-800 font-medium">
               <span>Show</span>
-<select
-  value={entriesPerPage}
-  onChange={(e) => setEntriesPerPage(Number(e.target.value))}
-  className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-sky-400 outline-none"
->
-  {[50, 100, 150,200].map((num) => (
-    <option key={num} value={num}>
-      {num}
-    </option>
-  ))}
-</select>
+              <select
+                value={entriesPerPage}
+                onChange={(e) => setEntriesPerPage(Number(e.target.value))}
+                className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-sky-400 outline-none"
+              >
+                {[50, 100, 150,200].map((num) => (
+                  <option key={num} value={num}>
+                    {num}
+                  </option>
+                ))}
+              </select>
               <span>entries</span>
             </div>
 
-            {/* RIGHT – Prev / Page / Next – customized */}
+            {/* RIGHT – Prev / Page / Next */}
             <div className="flex items-center gap-3 mt-2 md:mt-0">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1 || isServerPaginated} // disable Prev if server-side
+                disabled={currentPage === 1 || isServerPaginated}
                 className={`px-3 py-1 text-sm rounded-md font-medium transition
                   ${currentPage === 1 || isServerPaginated
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -553,7 +610,6 @@ const customHeader = ({ date, changeMonth, changeYear }) => (
               </button>
 
               <span className="text-sm font-medium text-gray-800">
-                {/* For server-side, show loaded status instead of page number */}
                 {isServerPaginated ? (
                   "Loaded: " + filteredData.length + " records"
                 ) : (
@@ -581,10 +637,11 @@ const customHeader = ({ date, changeMonth, changeYear }) => (
                       : "bg-blue-600 text-white hover:bg-blue-700"
                   }`}
               >
-                {isServerPaginated && (isLoadingMore) ? (
+                {isServerPaginated && isLoadingMore ? (
                   <>
                     <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z" fill="currentColor" />
                     </svg>
                     Loading...
                   </>
