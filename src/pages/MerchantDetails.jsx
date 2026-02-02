@@ -24,7 +24,7 @@ useEffect(() => {
 const { data: getMerchant } = useGet(
   id ? `/show-merchant/${id}` : null
 );
- const {data:record} = useGet(`/Merchant-Collection?merchant_id=${id}`);
+ const {data:record} = useGet(id ? `/Merchant-Collection?merchant_id=${id}`: null);
 // console.log("records data: ",record);
 //  const {data:getMerchant} = useGet(`/show-merchant/${id}`);
 

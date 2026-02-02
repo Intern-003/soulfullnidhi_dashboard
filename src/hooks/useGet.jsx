@@ -51,6 +51,7 @@ export function useGet(endpoint) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
 
   const fetchData = useCallback(async () => {
     setLoading(true);

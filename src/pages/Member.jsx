@@ -32,6 +32,10 @@
     //     navigate("/member-list");
     //   };
 
+const [currentPage, setCurrentPage] = useState(1);
+// const ITEMS_PER_PAGE = 10; // change if needed
+const [itemsPerPage, setItemsPerPage] = useState(50);
+
 
     const { executePut: updateSingle } = usePut("/update-user-statuses");
     const { executePut: updateAll } = usePut("/payin-payout-statuses");
@@ -267,6 +271,21 @@
       ),
     }));
 
+const totalPages = Math.ceil(tableDataWithActions.length / itemsPerPage);
+
+const paginatedData = useMemo(() => {
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return tableDataWithActions.slice(start, end);
+}, [tableDataWithActions, currentPage, itemsPerPage]);
+
+
+
+useEffect(() => {
+  setCurrentPage(1);
+}, [merchantData.length,itemsPerPage]);
+
+
     return (
       <div className="p-4 space-y-4">
         {/* Header */}
@@ -313,7 +332,8 @@
         ) : (
           <Table
             columns={memberColumns}
-            data={tableDataWithActions}
+            // data={tableDataWithActions}
+            data={paginatedData}
             className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
             rowClassName={(rowIndex) =>
               rowIndex % 2 === 0 ? "bg-white hover:bg-blue-50" : "bg-gray-50 hover:bg-blue-50"
@@ -330,6 +350,53 @@
           />
         )}
 
+{tableDataWithActions.length > 0 && (
+  <div className="flex justify-between items-center mt-4">
+    
+    {/* Page size selector */}
+    <div className="flex items-center gap-2">
+      <span className="text-sm font-medium">Show</span>
+      <select
+        value={itemsPerPage}
+        onChange={(e) => setItemsPerPage(Number(e.target.value))}
+        className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+      >
+        <option value={50}>50</option>
+        <option value={100}>100</option>
+        <option value={150}>150</option>
+      </select>
+      <span className="text-sm font-medium">entries</span>
+    </div>
+
+    {/* Pagination buttons */}
+    {totalPages > 1 && (
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-3 py-1 border rounded text-sm disabled:opacity-50"
+        >
+          Prev
+        </button>
+
+        <span className="text-sm font-semibold">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 border rounded text-sm disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+    )}
+  </div>
+)}
+
+
+  
         <SchemeModal showModal={showModal} handleModal={() => setShowModal(!showModal)} />
 
 

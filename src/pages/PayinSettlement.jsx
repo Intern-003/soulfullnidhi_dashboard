@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Table from "../components/Table";
 import Button from "../components/Button";
 import { useToast } from "../contexts/ToastContext";
@@ -10,26 +10,119 @@ const PayinSettlement = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const toast = useToast();
-  const [payinSettlementData, setPayinSettlementData] = useState([]);
+  // const [payinSettlementData, setPayinSettlementData] = useState([]);
   const [payinFormData, setPayinFormData] = useState({
     payin_wallet: "",
     remark: "",
   });
 
-  const { data: tableData, refetch, loading } = useGet("/get-merchants");
+const [rawData, setRawData] = useState([]);
+const [payinSettlementData, setPayinSettlementData] = useState([]);
+
+const [cursor, setCursor] = useState(null);
+const [hasMore, setHasMore] = useState(true);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState(null);
+
+const [entriesPerPage, setEntriesPerPage] = useState(50);
+const lastCursorRef = useRef(null);
+
+const fetchMerchantsPayin = async (force = false) => {
+  if (!force) {
+    if (loading || !hasMore) return;
+    if (cursor !== null && lastCursorRef.current === cursor) return;
+  }
+
+  lastCursorRef.current = cursor;
+  setLoading(true);
+
+  try {
+    const token = localStorage.getItem("token");
+
+  const query = new URLSearchParams({ 
+    per_page: entriesPerPage,
+    ...(cursor && !force ? { cursor } : {}),
+  }).toString();
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/get-merchants?${query}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const json = await res.json();
+
+    if (json?.status) {
+      setRawData((prev) => {
+        const ids = new Set(prev.map((i) => i.id));
+        const unique = json.data.filter((i) => !ids.has(i.id));
+        return [...prev, ...unique];
+      });
+
+      setCursor(json.next_cursor);
+      setHasMore(Boolean(json.next_cursor));
+    } else {
+      throw new Error("Invalid response");
+    }
+  } catch (err) {
+    console.error(err);
+    setError("Failed to load merchants");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+useEffect(() => {
+  fetchMerchantsPayin();
+}, []);
+
+
+
+useEffect(() => {
+  setRawData([]);
+  setCursor(null);
+  setHasMore(true);
+  lastCursorRef.current = null;
+  // fetchMerchants();
+  setTimeout(() => {
+    fetchMerchantsPayin(true);
+  }, 0);
+}, [entriesPerPage]);
+  // const { data: tableData, refetch, loading } = useGet("/get-merchants");
   const { execute: payinSettlement } = usePost("/payin-settlement");
 
-  const initialDataOfPayinWallet = tableData?.data;
+  // const initialDataOfPayinWallet = tableData?.data;
 
-  useEffect(() => {
-    const formattedData = initialDataOfPayinWallet?.map((item, index) => ({
-      sqno: index + 1,
-      id: item.id,
-      name: item.name,
-      payin_wallet: item.payin_wallet,
-    }));
-    setPayinSettlementData(formattedData || []);
-  }, [initialDataOfPayinWallet]);
+useEffect(() => {
+  if (!rawData.length) return;
+
+  const formatted = rawData.map((item, index) => ({
+    sqno: index + 1,
+    id: item.id,
+    name: item.name,
+    payin_wallet: item.payin_wallet,
+  }));
+
+  setPayinSettlementData(formatted);
+}, [rawData]);
+
+const handleLoadMore = () => {
+  if (!hasMore || loading) return;
+  fetchMerchants();
+};
+
+  
+  // useEffect(() => {
+  //   const formattedData = initialDataOfPayinWallet?.map((item, index) => ({
+  //     sqno: index + 1,
+  //     id: item.id,
+  //     name: item.name,
+  //     payin_wallet: item.payin_wallet,
+  //   }));
+  //   setPayinSettlementData(formattedData || []);
+  // }, [initialDataOfPayinWallet]);
 
   const membercolumn = [
     { header: "User Id", accessor: "id" },
@@ -70,11 +163,18 @@ const PayinSettlement = () => {
       const res = await payinSettlement(payload);
       if (res) {
         toast.success("Settlement done successfully!!");
-        refetch();
-        setPayinFormData({
-          payin_wallet: "",
-          remark: "",
-        });
+        // refetch();
+          setRawData([]);
+        setPayinSettlementData([]);
+        setCursor(null);
+        setHasMore(true);
+        lastCursorRef.current = null;
+
+        fetchMerchantsPayin();
+        // setPayinFormData({
+        //   payin_wallet: "",
+        //   remark: "",
+        // });
         setShowModal(false);
       }
     } catch (err) {
@@ -108,11 +208,17 @@ const PayinSettlement = () => {
           showDeleteColumn={false}
           showDateFilter={false}
           showStatusFilter={false}
-          className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
-          paginationClassName="flex justify-end gap-2 mt-4"
-          previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
-          nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+          // className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
+          // paginationClassName="flex justify-end gap-2 mt-4"
+          // previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+          // nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
            showExport={false}
+            isServerPaginated
+          hasMore={hasMore}
+          isLoadingMore={loading}
+          onLoadNext={handleLoadMore}
+          entriesPerPage={entriesPerPage}
+          setEntriesPerPage={setEntriesPerPage}
         />
       )}
 

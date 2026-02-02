@@ -426,7 +426,7 @@ const DocumentPreview = ({ label, filePath }) => {
           onChange={handleChange}
         >
           <option value="">Select Bank</option>
-          {payinBanks?.data?.map((item) => (
+          {payinBanks?.data?.data?.map((item) => (
             <option key={item.id} value={item.onboard_payin_bank}>
               {item.onboard_payin_bank}
             </option>
@@ -501,7 +501,7 @@ const DocumentPreview = ({ label, filePath }) => {
           onChange={handleChange}
         >
           <option value="">Select Bank</option>
-          {payoutBanks?.data?.map((item) => (
+          {payoutBanks?.data?.data?.map((item) => (
             <option key={item.id} value={item.onboard_payout_bank}>
               {item.onboard_payout_bank}
             </option>

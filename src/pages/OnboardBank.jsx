@@ -64,7 +64,7 @@ const OnboardBank = () => {
   useEffect(() => {
     if (activeTab === "payin") {
       const mapped =
-        payinbanks?.data?.map((item, index) => ({
+        payinbanks?.data?.data?.map((item, index) => ({
           sqno: index + 1,
           id: item.id,
           bank_name: item.onboard_payin_bank,
@@ -73,7 +73,7 @@ const OnboardBank = () => {
       setBankData(mapped);
     } else {
       const mapped =
-        payoutbanks?.data?.map((item, index) => ({
+        payoutbanks?.data?.data?.map((item, index) => ({
           sqno: index + 1,
           id: item.id,
           bank_name: item.onboard_payout_bank,

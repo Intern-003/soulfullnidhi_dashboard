@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Table from "../components/Table";
 import Button from "../components/Button";
 import { useGet } from "../hooks/useGet";
@@ -6,10 +6,12 @@ import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
 import { TableSkeleton } from "../components/TableSkeleton";
 
+
+
 const LoadWallet = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [walletData, setWalletData] = useState([]);
+  // const [walletData, setWalletData] = useState([]);
   const [modalType, setModalType] = useState("load");
 
   const toast = useToast();
@@ -18,23 +20,113 @@ const LoadWallet = () => {
     remark: "",
   });
 
-  const { data: tableData, refetch, loading } = useGet("/get-merchants");
+
+  const [rawData, setRawData] = useState([]);
+const [walletData, setWalletData] = useState([]);
+
+const [cursor, setCursor] = useState(null);
+const [hasMore, setHasMore] = useState(true);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState(null);
+
+const [entriesPerPage, setEntriesPerPage] = useState(50);
+const lastCursorRef = useRef(null);
+
+
+  // const { data: tableData, refetch, loading } = useGet("/get-merchants");
   // console.log( "load Wallet data",tableData);   
+
+const fetchMerchants = async (force = false) => {
+  if (!force) {
+    if (loading || !hasMore) return;
+    if (cursor !== null && lastCursorRef.current === cursor) return;
+  }
+
+  lastCursorRef.current = cursor;
+  setLoading(true);
+
+  try {
+    const token = localStorage.getItem("token");
+
+  const query = new URLSearchParams({ 
+    per_page: entriesPerPage,
+    ...(cursor && !force ? { cursor } : {}),
+  }).toString();
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/get-merchants?${query}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const json = await res.json();
+
+    if (json?.status) {
+      setRawData((prev) => {
+        const ids = new Set(prev.map((i) => i.id));
+        const unique = json.data.filter((i) => !ids.has(i.id));
+        return [...prev, ...unique];
+      });
+
+      setCursor(json.next_cursor);
+      setHasMore(Boolean(json.next_cursor));
+    } else {
+      throw new Error("Invalid response");
+    }
+  } catch (err) {
+    console.error(err);
+    setError("Failed to load merchants");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+useEffect(() => {
+  fetchMerchants();
+}, []);
+
+
+
+useEffect(() => {
+  setRawData([]);
+  setWalletData([]);
+  setCursor(null);
+  setHasMore(true);
+  lastCursorRef.current = null;
+  // fetchMerchants();
+  setTimeout(() => {
+    fetchMerchants(true);
+  }, 0);
+}, [entriesPerPage]);
+
+
+
 
   const { execute: loadWallet } = usePost("/payout-load-wallet");
   const { execute: reverseTopup } = usePost("/payout-take-back");
 
-  const initialDataOfWallet = tableData?.data;
+  // const initialDataOfWallet = tableData?.data;
 
   useEffect(() => {
-    const formattedTableData = initialDataOfWallet?.map((item, index) => ({
-      sqno: index + 1,
-      id: item.id,
-      name: item.name,
-      payout_wallet: item.payout_wallet,
-    }));
-    setWalletData(formattedTableData || []);
-  }, [initialDataOfWallet]);
+  if (!rawData.length) return;
+
+  const formatted = rawData.map((item, index) => ({
+    sqno: index + 1,
+    id: item.id,
+    name: item.name,
+    payout_wallet: item.payout_wallet,
+  }));
+
+  setWalletData(formatted);
+}, [rawData]);
+
+const handleLoadMore = () => {
+  if (!hasMore || loading) return;
+  fetchMerchants();
+};
+
 
   const handleChange = (e) => {
     setWalletFormData({ ...walletFormData, [e.target.name]: e.target.value });
@@ -52,7 +144,14 @@ const LoadWallet = () => {
       const res = await loadWallet(payload);
       if (res) {
         toast.success("Wallet loaded successfully!!");
-        refetch();
+        // refetch();
+        setRawData([]);
+        setWalletData([]);
+        setCursor(null);
+        setHasMore(true);
+        lastCursorRef.current = null;
+        fetchMerchants();
+
         setShowModal(false);
       }
     } catch (err) {
@@ -73,7 +172,14 @@ const LoadWallet = () => {
       const res = await reverseTopup(payload);
       if (res) {
         toast.success("Deducted balance from wallet successfully!!");
-        refetch();
+        // refetch();
+        setRawData([]);
+        setWalletData([]);
+        setCursor(null);
+        setHasMore(true);
+        lastCursorRef.current = null;
+        fetchMerchants();
+
         setShowModal(false);
       }
     } catch (err) {
@@ -136,6 +242,13 @@ const LoadWallet = () => {
           showDeleteColumn={false}
           className="shadow-lg rounded-lg overflow-hidden"
            showExport={false}
+
+          isServerPaginated
+          hasMore={hasMore}
+          isLoadingMore={loading}
+          onLoadNext={handleLoadMore}
+          entriesPerPage={entriesPerPage}
+          setEntriesPerPage={setEntriesPerPage}
         />
       )}
 

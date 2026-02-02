@@ -115,7 +115,7 @@ export const Header = ({ onMenuClick }) => {
           <span>
             ₹
             {Number(
-              role === "admin" ? data?.cashfree_balance : data?.payout_wallet
+              role === "admin" ? data?.cashfree_balance : data?.cashfree_balance
             ).toFixed(2)}
           </span>
         </div>
