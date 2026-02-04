@@ -20,9 +20,16 @@ export const CustomSelect = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // const filteredOptions = options.filter((opt) =>
+  //   opt.label.toLowerCase().includes(search.toLowerCase())
+  // );
+
   const filteredOptions = options.filter((opt) =>
-    opt.label.toLowerCase().includes(search.toLowerCase())
-  );
+  String(opt?.label ?? "")
+    .toLowerCase()
+    .includes(search.toLowerCase())
+);
+
 
   const handleSelect = (option) => {
     onChange?.(option);

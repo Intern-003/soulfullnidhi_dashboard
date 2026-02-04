@@ -128,7 +128,8 @@ const Scheme = () => {
           endPoint="/delete-scheme"
           refreshTable={refetch}
           statusList={TOGGLE_STATUSES}
-           showExport={false}
+          showExport={false}
+          showSearch={false}
         />
       )}
     </div>

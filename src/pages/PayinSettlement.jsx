@@ -219,6 +219,7 @@ const handleLoadMore = () => {
           onLoadNext={handleLoadMore}
           entriesPerPage={entriesPerPage}
           setEntriesPerPage={setEntriesPerPage}
+          
         />
       )}
 
