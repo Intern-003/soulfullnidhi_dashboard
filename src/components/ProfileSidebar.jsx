@@ -10,8 +10,6 @@ export const ProfileSidebar = ({
   payingAmount,
   Payoutwallet,
 }) => {
-  // console.log("user data received:", data);
-
   const [PayAmountVisible, setPayAmountVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -30,7 +28,6 @@ export const ProfileSidebar = ({
     setIsLoggingOut(true);
     try {
       await logoutApi();
-      // console.log("Logout successful");
     } catch (err) {
       console.error("Logout API failed:", err);
     } finally {
@@ -55,6 +52,11 @@ export const ProfileSidebar = ({
     }
   };
 
+  // New handler to close modal when clicking backdrop
+  const closeLogoutModal = () => {
+    setShowLogoutConfirm(false);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -75,35 +77,52 @@ export const ProfileSidebar = ({
     if (!open) setPayAmountVisible(false);
   }, [open]);
 
-const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  // Blur left sidebar only
+  useEffect(() => {
+    const leftSidebar = document.querySelector('[data-testid="left-sidebar"]') || 
+                       document.querySelector('.fixed.left-0.h-full.w-64, .fixed.left-0.h-full.w-72') ||
+                       document.querySelector('aside.left-sidebar');
 
-// Prefer prop data, fallback to stored user (admin case)
-const effectiveUser = data && Object.keys(data).length ? data : storedUser;
+    if (open && leftSidebar) {
+      leftSidebar.classList.add('blur-md', 'pointer-events-none');
+    } else if (leftSidebar) {
+      leftSidebar.classList.remove('blur-md', 'pointer-events-none');
+    }
 
-const userName =
-  effectiveUser?.name?.trim() ||
-  (effectiveUser?.email ? effectiveUser.email.split("@")[0] : "User");
+    return () => {
+      if (leftSidebar) {
+        leftSidebar.classList.remove('blur-md', 'pointer-events-none');
+      }
+    };
+  }, [open]);
 
-const displayName = userName
-  .split(" ")
-  .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-  .join(" ");
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-const displayEmail = effectiveUser?.email?.trim() || "No email available";
-const displayInitial = displayName.charAt(0).toUpperCase() || "U";
+  const effectiveUser = data && Object.keys(data).length ? data : storedUser;
 
+  const userName =
+    effectiveUser?.name?.trim() ||
+    (effectiveUser?.email ? effectiveUser.email.split("@")[0] : "User");
+
+  const displayName = userName
+    .split(" ")
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+
+  const displayEmail = effectiveUser?.email?.trim() || "No email available";
+  const displayInitial = displayName.charAt(0).toUpperCase() || "U";
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Profile Sidebar Backdrop */}
       {open && (
         <div
           onClick={onClose}
-          className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity duration-300"
+          className="fixed inset-0 bg-black/50 z-45 backdrop-blur-sm transition-opacity duration-300"
         />
       )}
 
-      {/* Sidebar - Blue theme */}
+      {/* Profile Sidebar */}
       <div
         ref={sidebarRef}
         onClick={(e) => e.stopPropagation()}
@@ -119,7 +138,6 @@ const displayInitial = displayName.charAt(0).toUpperCase() || "U";
         aria-modal="true"
         aria-label="User Profile Sidebar"
       >
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-blue-700 hover:text-blue-900 transition-colors duration-200 z-10"
@@ -128,7 +146,6 @@ const displayInitial = displayName.charAt(0).toUpperCase() || "U";
           <i className="fa-solid fa-xmark text-2xl" />
         </button>
 
-        {/* Profile Header - Blue accent */}
         <div className="px-7 py-10 border-b border-blue-300/40 bg-gradient-to-r from-blue-600/5 to-transparent">
           <div className="flex flex-col items-center text-center gap-4">
             <div
@@ -162,7 +179,6 @@ const displayInitial = displayName.charAt(0).toUpperCase() || "U";
           </div>
         </div>
 
-        {/* Wallet Section */}
         {role !== "admin" && (
           <div className="px-7 py-7 border-b border-blue-300/40">
             <p className="text-xs font-semibold text-blue-600 uppercase mb-5 tracking-wider">
@@ -186,7 +202,6 @@ const displayInitial = displayName.charAt(0).toUpperCase() || "U";
           </div>
         )}
 
-        {/* Actions */}
         <div className="px-7 py-8 flex flex-col gap-4 flex-grow">
           {role !== "admin" && (
             <Link
@@ -209,37 +224,52 @@ const displayInitial = displayName.charAt(0).toUpperCase() || "U";
           </button>
         </div>
 
-        {/* Logout Confirmation */}
-        {showLogoutConfirm && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl p-8 w-11/12 max-w-sm shadow-2xl border border-blue-100">
-              <h3 className="text-xl font-semibold text-blue-900 mb-3">Sign Out?</h3>
-              <p className="text-blue-700 mb-6">You will be logged out of your account.</p>
-              <div className="flex gap-4">
-                <button
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className="flex-1 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-60 transition flex items-center justify-center gap-2"
-                >
-                  {isLoggingOut ? <i className="fa-solid fa-spinner fa-spin" /> : null}
-                  {isLoggingOut ? "Signing out..." : "Yes, Sign Out"}
-                </button>
-                <button
-                  onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 py-3 bg-blue-100 text-blue-900 rounded-xl hover:bg-blue-200 transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Footer */}
         <div className="px-7 py-5 text-center text-xs text-blue-600/70 border-t border-blue-300/40 mt-auto">
           SPay Fintech Pvt Ltd Dashboard • © 2026
         </div>
       </div>
+
+      {/* Logout Confirmation Modal - with backdrop click to close */}
+      {showLogoutConfirm && (
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md transition-opacity duration-300"
+          onClick={closeLogoutModal}  // ← This closes when clicking outside the modal box
+        >
+          {/* Stop propagation so clicking inside modal doesn't close it */}
+          <div 
+            className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-md mx-4 shadow-2xl border border-blue-100/50 transform scale-100 transition-all duration-300 ease-out animate-in fade-in zoom-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 mt-0.5">
+                <i className="fa-solid fa-triangle-exclamation text-yellow-500 text-xl" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-blue-900 mb-1">Confirm Sign Out</h3>
+                <p className="text-sm text-blue-700 leading-relaxed">
+                  Are you sure you want to log out? You'll need to sign in again to access your account.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+              >
+                {isLoggingOut && <i className="fa-solid fa-spinner fa-spin w-4 h-4" />}
+                {isLoggingOut ? "Signing out..." : "Yes, Sign Out"}
+              </button>
+              <button
+                onClick={closeLogoutModal}
+                className="flex-1 py-3 px-4 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-medium transition-all duration-200 border border-blue-200 hover:border-blue-300 text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
