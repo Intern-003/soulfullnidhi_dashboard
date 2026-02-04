@@ -3,7 +3,6 @@ import Table from "../components/Table";
 import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 
-
 const PayoutStatement = () => {
   const [payoutData, setPayoutData] = useState([]);
 
@@ -24,8 +23,8 @@ const PayoutStatement = () => {
   const fetchPayoutReports = async () => {
     if (!hasMore || loading) return;
 
-      if (cursor !== null && lastCursorRef.current === cursor) return;
-  lastCursorRef.current = cursor;
+    if (cursor !== null && lastCursorRef.current === cursor) return;
+    lastCursorRef.current = cursor;
 
     setLoading(true);
     setError(null);
@@ -144,8 +143,17 @@ const PayoutStatement = () => {
             <span>
               {d.getDate()} {MONTH_NAMES[d.getMonth()]} {d.getFullYear()}
             </span>
-            <span className="text-sm text-gray-500">
+            {/* <span className="text-sm text-gray-500">
               {d.toLocaleTimeString()}
+            </span> */}
+            <span className="text-sm text-gray-500">
+              {d
+                .toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+                .toUpperCase()}
             </span>
           </div>
         ),

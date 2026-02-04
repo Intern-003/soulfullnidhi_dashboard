@@ -14,9 +14,8 @@ const UpiStatement = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-    const [entriesPerPage, setEntriesPerPage] = useState(50);
-      const lastCursorRef = useRef(null);
-
+  const [entriesPerPage, setEntriesPerPage] = useState(50);
+  const lastCursorRef = useRef(null);
 
   // ─────────────────────────────────────
   // Cursor-based API fetch
@@ -24,8 +23,8 @@ const UpiStatement = () => {
   const fetchUpiReports = async () => {
     if (!hasMore || loading) return;
 
-        if (cursor !== null && lastCursorRef.current === cursor) return;
-  lastCursorRef.current = cursor;  
+    if (cursor !== null && lastCursorRef.current === cursor) return;
+    lastCursorRef.current = cursor;
 
     setLoading(true);
     setError(null);
@@ -36,7 +35,7 @@ const UpiStatement = () => {
       const query = new URLSearchParams({
         product: "UPI",
         // per_page: 5000,
-        per_page:entriesPerPage,
+        per_page: entriesPerPage,
         ...(cursor && { cursor }),
       }).toString();
 
@@ -46,13 +45,13 @@ const UpiStatement = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const json = await res.json();
 
       if (json?.status) {
-          setRawData((prev) => {
+        setRawData((prev) => {
           const existingIds = new Set(prev.map((item) => item.id));
 
           const uniqueNewData = (json.data || []).filter(
@@ -89,10 +88,10 @@ const UpiStatement = () => {
     setHasMore(true);
     setError(null);
 
-      fetchUpiReports(); 
+    fetchUpiReports();
   }, [entriesPerPage]);
 
-    const handleLoadMore = () => {
+  const handleLoadMore = () => {
     if (!hasMore || loading) return;
     fetchUpiReports();
   };
@@ -119,7 +118,7 @@ const UpiStatement = () => {
     };
 
     const sortedData = [...rawData].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      (a, b) => new Date(b.created_at) - new Date(a.created_at),
     );
 
     const formattedData = sortedData.map((item) => {
@@ -134,30 +133,55 @@ const UpiStatement = () => {
 
         sqno: (
           <div className="flex flex-col text-left">
-            <span><b>{item.id}</b></span>
+            <span>
+              <b>{item.id}</b>
+            </span>
             <span>
               {d.getDate()} {MONTH_NAMES[d.getMonth()]} {d.getFullYear()}
             </span>
-            <span className="text-sm text-gray-500">
+            {/* <span className="text-sm text-gray-500">
               {d.toLocaleTimeString()}
+            </span> */}
+            <span className="text-sm text-gray-500">
+              {d
+                .toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+                .toUpperCase()}
             </span>
           </div>
         ),
 
         txnid: (
           <div className="flex flex-col text-left">
-            <span>Payee VPA: <b>{item.payee_vpa ?? "null"}</b></span>
-            <span>Ref No: <b>{item.refno ?? "null"}</b></span>
-            <span>Payee Txnid: <b>{item.mytxnid}</b></span>
-            <span>TxnId: <b>{item.txnid}</b></span>
+            <span>
+              Payee VPA: <b>{item.payee_vpa ?? "null"}</b>
+            </span>
+            <span>
+              Ref No: <b>{item.refno ?? "null"}</b>
+            </span>
+            <span>
+              Payee Txnid: <b>{item.mytxnid}</b>
+            </span>
+            <span>
+              TxnId: <b>{item.txnid}</b>
+            </span>
           </div>
         ),
 
         amount: (
           <div className="flex flex-col text-left">
-            <span>Amount: <b>{item.amount}</b></span>
-            <span>Charges: <b>{item.charge}</b></span>
-            <span>GST: <b>{item.gst}</b></span>
+            <span>
+              Amount: <b>{item.amount}</b>
+            </span>
+            <span>
+              Charges: <b>{item.charge}</b>
+            </span>
+            <span>
+              GST: <b>{item.gst}</b>
+            </span>
             <span>
               Payin Rolling Amount: <b>{item.payin_rolling_amount}</b>
             </span>
@@ -203,9 +227,7 @@ const UpiStatement = () => {
           background: "linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)",
         }}
       >
-        <h4 className="font-bold text-white text-xl">
-          UPI Statement 
-        </h4>
+        <h4 className="font-bold text-white text-xl">UPI Statement</h4>
       </div>
 
       {/* Table */}
@@ -223,7 +245,6 @@ const UpiStatement = () => {
           showDeleteColumn={false}
           showSelectUserFilter={true}
           statusList={REPORT_STATUSES}
-
           isServerPaginated={true}
           hasMore={hasMore}
           isLoadingMore={loading}
