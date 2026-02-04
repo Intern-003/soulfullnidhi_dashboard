@@ -15,6 +15,9 @@
 
 
 
+
+
+
   export const Member = () => {
     const toast = useToast();
     const [showModal, setShowModal] = useState(false);
@@ -347,6 +350,9 @@ useEffect(() => {
              showDateFilter={false}
              showExport={false}
              showPagination={false}
+             showSearch = {false}
+             showSelectUserFilter   = {true}
+
           />
         )}
 

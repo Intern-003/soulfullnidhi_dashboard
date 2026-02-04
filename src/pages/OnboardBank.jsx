@@ -160,7 +160,7 @@ const OnboardBank = () => {
             showPagination={true}
             showStatusFilter={true}
             showExport={false}
-            showSearch={true}
+            showSearch={false}
             showDateFilter={false}
             setData={setBankData}
             endPoint={

@@ -156,61 +156,102 @@ const Table = ({
   /* ================= DEEP SEARCH HELPERS ================= */
 
   const getAllStrings = (value) => {
+      if (value === null || value === undefined) return [];
+
     if (typeof value === "string" || typeof value === "number") {
       return [String(value).toLowerCase()];
     }
     if (Array.isArray(value)) {
       return value.flatMap(getAllStrings);
     }
+      if (typeof value === "object" && value.$$typeof) {
+        return [];
+      }
+
     if (value && typeof value === "object") {
       return Object.values(value).flatMap(getAllStrings);
     }
     return [];
   };
 
+  /* ================= EXTRACT TEXT FOR JSX ================= */
+  const extractTextFromElement = (element) => {
+    if (!element || typeof element !== "object" || !element.$$typeof) return "";
+    if (element.props?.children) {
+      if (typeof element.props.children === "string") return element.props.children;
+      if (Array.isArray(element.props.children)) {
+        return element.props.children.map(extractTextFromElement).join(" ");
+      }
+      return extractTextFromElement(element.props.children);
+    }
+    return "";
+  };
+
   /* ================= FILTERED DATA ================= */
 
   const filteredData = useMemo(() => {
+    // DEBUG: Log for troubleshooting
+    if (txnSearch) {
+      console.log("DEBUG - txnSearch:", txnSearch);
+      console.log("DEBUG - Sample row keys:", data[0] ? Object.keys(data[0]) : 'No data');
+      const sampleName = data[0]?.name || data[0]?.NAME || data[0]?.['NAME'] || data[0]?.name;
+      console.log("DEBUG - Sample row NAME raw:", sampleName);
+      console.log("DEBUG - Sample row NAME extracted:", extractTextFromElement(sampleName));
+    }
+
     return data.filter((row) => {
       const allValues = getAllStrings(row);
       const matchesSearch = !search || allValues.some((val) => val.includes(search.toLowerCase()));
 
       // Updated to include all possible fields from screenshot for comprehensive search
+      // Enhanced name matching for robustness - handle JSX elements
+      let rawNameValue = row.name || row.NAME || row['NAME'] || row['name'] || row.user || row['user'] || row.merchant_name || row['merchant_name'] || row['MERCHANT NAME'] || row['merchant name'] || '';
+      const nameValue = typeof rawNameValue === 'string' ? rawNameValue : extractTextFromElement(rawNameValue);
+      const userIdValue = String(row.user_id || row['USER ID'] || row['userId'] || row.id || '');
+
       const txnRelevantFields = [
-        row.order_id || row.id || row['ORDER ID'],
-        row.merchant_details || row['MERCHANT DETAILS'],
-        row.bank_details || row['BANK DETAILS'],
-        row.reference_details || row['REFERENCE DETAILS'],
-        row.amount_commission || row['AMOUNT / COMMISSION'],
-        row.txnid,
-        row.amount || row.numericAmount || row['Amount'] || row['Pay Amount'],
-        row.charges || row['Charges'] || row['Total Charges'],
-        row.gst || row['GST'],
-        row.payin_rolling_amount || row['Payin Rolling Amount'] || row['Opening Wallet Amount'] || row['Closing Wallet Amount'] || row['Total Debited Amount'],
-        row.transaction_details,
-        row.ref_no || row['Ref No'],
-        row.payee_txnid || row['Payee Txnid'],
-        row.payee_vpa || row['Payee VPA'],
-        row.status || row['STATUS'],
-        row.holder || row['Holder'],
-        row.account || row['Account'],
-        row.ifsc || row['IFSC'],
-        row.mode || row['Mode'],
-        row.mobile || row['Mobile'],
-        row.payment_mode || row['Payment Mode'],
-        row.u_pi_id || row['UPI Id'],
-        row.soulbox || row['SOULBOX'],
-        row.note || row['Note'],
-        row.opening_wallet_amount || row['Opening Wallet Amount'],
-        row.closing_wallet_amount || row['Closing Wallet Amount'],
-        row.total_debited_amount || row['Total Debited Amount']
+        userIdValue,  // Explicitly add user ID
+        nameValue,    // Explicitly add name (extracted text)
+        String(row.order_id || row.id || row['ORDER ID'] || ''),
+        String(row.merchant_details || row['MERCHANT DETAILS'] || extractTextFromElement(row.merchant_details || row['MERCHANT DETAILS'] || '')),
+        String(row.bank_details || row['BANK DETAILS'] || extractTextFromElement(row.bank_details || row['BANK DETAILS'] || '')),
+        String(row.bank_name || row['BANK NAME'] || row['Bank Name'] || row.bank || ''),
+        String(row.reference_details || row['REFERENCE DETAILS'] || extractTextFromElement(row.reference_details || row['REFERENCE DETAILS'] || '')),
+        String(row.amount_commission || row['AMOUNT / COMMISSION'] || ''),
+        String(row.txnid || ''),
+        String(row.amount || row.numericAmount || row['Amount'] || row['Pay Amount'] || ''),
+        String(row.charges || row['Charges'] || row['Total Charges'] || ''),
+        String(row.gst || row['GST'] || ''),
+        String(row.payin_rolling_amount || row['Payin Rolling Amount'] || row['Opening Wallet Amount'] || row['Closing Wallet Amount'] || row['Total Debited Amount'] || ''),
+        String(row.transaction_details || extractTextFromElement(row.transaction_details || '')),
+        String(row.ref_no || row['Ref No'] || ''),
+        String(row.payee_txnid || row['Payee Txnid'] || ''),
+        String(row.payee_vpa || row['Payee VPA'] || ''),
+        String(row.status || row['STATUS'] || ''),
+        String(row.holder || row['Holder'] || extractTextFromElement(row.holder || row['Holder'] || '')),
+        String(row.account || row['Account'] || ''),
+        String(row.ifsc || row['IFSC'] || ''),
+        String(row.mode || row['Mode'] || ''),
+        String(row.mobile || row['Mobile'] || ''),
+        String(row.payment_mode || row['Payment Mode'] || ''),
+        String(row.u_pi_id || row['UPI Id'] || ''),
+        String(row.soulbox || row['SOULBOX'] || ''),
+        String(row.note || row['Note'] || ''),
+        String(row.opening_wallet_amount || row['Opening Wallet Amount'] || ''),
+        String(row.closing_wallet_amount || row['Closing Wallet Amount'] || ''),
+        String(row.total_debited_amount || row['Total Debited Amount'] || '')
       ];
-      const txnValues = txnRelevantFields.flatMap(getAllStrings);
+      const txnValues = txnRelevantFields.flatMap(getAllStrings).filter(Boolean);
       const matchesTxn = !txnSearch || txnValues.some((val) => val.includes(txnSearch.toLowerCase()));
+
+      // DEBUG: Log for specific row if searching
+      if (txnSearch && nameValue.toLowerCase().includes(txnSearch.toLowerCase())) {
+        console.log("DEBUG - Match found for row:", row);
+      }
 
       const matchesStatus =
         statusFilter === "all" ||
-        String(row.status).toLowerCase() === statusFilter.toLowerCase();
+        String(row.status || '').toLowerCase() === statusFilter.toLowerCase();
 
       const rawDate = getRowDate(row);
       const rowDate = parseDate(rawDate);
@@ -233,7 +274,7 @@ const Table = ({
 
   const totalSuccessAmount = useMemo(() => {
     return filteredData
-      .filter((row) => String(row.status).toLowerCase() === "success")
+      .filter((row) => String(row.status || '').toLowerCase() === "success")
       .reduce((sum, row) => sum + (Number(row.numericAmount) || 0), 0);
   }, [filteredData]);
 
@@ -274,29 +315,96 @@ const Table = ({
     return result;
   };
 
-  const exportCSV = () => {
-    if (!filteredData.length) return;
-    const normalizedRows = filteredData.map(flattenObject);
-    const headers = Array.from(new Set(normalizedRows.flatMap(Object.keys)));
-    const csv = [
-      headers.join(","),
-      ...normalizedRows.map((row) => headers.map((h) => `"${row[h] || ""}"`).join(",")),
-    ].join("\n");
+  // CSV escape helper - improved to handle newlines too
+  const escapeCSV = (field) => {
+    const string = String(field || '');
+    if (string.includes('"') || string.includes(',') || string.includes('\n') || string.includes('\r')) {
+      return '"' + string.replace(/"/g, '""') + '"';
+    }
+    return string;
+  };
 
+  // Generic download helper using data URI
+  const downloadFile = (content, filename, mimeType) => {
+    const encodedUri = `data:${mimeType};charset=utf-8,` + encodeURIComponent(content);
     const link = document.createElement("a");
-    link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
-    link.download = "table_export.csv";
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportCSV = () => {
+    if (!filteredData.length) {
+      toast.error("No data to export.");
+      setOpenExport(false);
+      return;
+    }
+    const normalizedRows = filteredData.map(flattenObject);
+    const headers = Array.from(new Set(normalizedRows.flatMap(Object.keys))).sort();
+    const escapedHeaders = headers.map(escapeCSV);
+    const csv = [
+      escapedHeaders.join(","),
+      ...normalizedRows.map((row) => headers.map((h) => escapeCSV(row[h] || '')).join(",")),
+    ].join("\n");
+    downloadFile(csv, "table_export.csv", "text/csv");
+    setOpenExport(false);
+    toast.success("CSV exported successfully!");
   };
 
   const exportJSON = () => {
-    const blob = new Blob([JSON.stringify(filteredData, null, 2)], {
-      type: "application/json",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "table_export.json";
-    link.click();
+    if (!filteredData.length) {
+      toast.error("No data to export.");
+      setOpenExport(false);
+      return;
+    }
+    const jsonContent = JSON.stringify(filteredData, null, 2);
+    downloadFile(jsonContent, "table_export.json", "application/json");
+    setOpenExport(false);
+    toast.success("JSON exported successfully!");
+  };
+
+  const exportTXT = () => {
+    if (!filteredData.length) {
+      toast.error("No data to export.");
+      setOpenExport(false);
+      return;
+    }
+    const normalizedRows = filteredData.map(flattenObject);
+    const headers = Array.from(new Set(normalizedRows.flatMap(Object.keys))).sort();
+    const txtContent = [
+      headers.join("\t"),
+      ...normalizedRows.map((row) => headers.map((h) => String(row[h] || '')).join("\t")),
+    ].join("\n");
+    downloadFile(txtContent, "table_export.txt", "text/plain");
+    setOpenExport(false);
+    toast.success("TXT exported successfully!");
+  };
+
+  const exportSQL = () => {
+    if (!filteredData.length) {
+      toast.error("No data to export.");
+      setOpenExport(false);
+      return;
+    }
+    const normalizedRows = filteredData.map(flattenObject);
+    const headers = Array.from(new Set(normalizedRows.flatMap(Object.keys))).sort();
+    const columns = headers.map(h => `\`${h.replace(/`/g, '\\`')}\``).join(', ');
+    const valuesRows = normalizedRows.map(row => {
+      const values = headers.map(h => {
+        let val = String(row[h] || '');
+        val = val.replace(/'/g, "''");
+        if (val === '' || val.toLowerCase() === 'null') return 'NULL';
+        return `'${val}'`;
+      }).join(', ');
+      return `INSERT INTO table_name (${columns}) VALUES (${values});`;
+    }).join('\n');
+
+    const sqlContent = `-- Export from Table\n-- Table: table_name\n-- Columns: ${headers.join(', ')}\n\n${valuesRows}`;
+    downloadFile(sqlContent, "table_export.sql", "text/plain");
+    setOpenExport(false);
+    toast.success("SQL exported successfully!");
   };
 
   /* ================= DATE PICKER HEADER ================= */
@@ -345,39 +453,29 @@ const Table = ({
         <div className="w-full bg-white shadow-md rounded-xl p-4 mb-4">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 w-full">
             <div className="flex flex-wrap items-center gap-4 lg:max-w-[65%]">
-              {showSearch && (
-                <div className="relative w-64">
-                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
-                  <input
-                    type="text"
-                    placeholder="Search anything..."
-                    className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-sky-400 outline-none"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-              )}
+              {/* {role === "user"  && ( */}
               <div className="relative w-64">
                 <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
                 <input
                   type="text"
-                  placeholder="Search Order ID / Txn / Ref / Payee Txnid..."
+                  placeholder="Search User ID / Name / Order ID / Txn / Ref / Payee Txnid / Bank Name..."
                   className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-sky-400 outline-none"
                   value={txnSearch}
                   onChange={(e) => setTxnSearch(e.target.value)}
                 />
               </div>
-               {role === "admin" && showSelectUserFilter && (
+              {/* )} */}
+               {/* {role === "admin" && showSelectUserFilter && ( */}
             
-                <div className="w-56">
+                {/* <div className="w-56">
                   <CustomSelect
                     options={selectData}
                     placeholder="Select Merchant"
                     value={selectedMerchant}
                     onChange={(option) => setSelectedMerchant(option)}
                   />
-                </div>
-              )}
+                </div> */}
+              {/* )} */}
               {showDateFilter && (
                 <div className="flex items-center gap-2">
                   <DatePicker
@@ -446,6 +544,18 @@ const Table = ({
                         className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md"
                       >
                         JSON
+                      </button>
+                      <button
+                        onClick={exportTXT}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md"
+                      >
+                        TXT
+                      </button>
+                      <button
+                        onClick={exportSQL}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md"
+                      >
+                        SQL
                       </button>
                     </div>
                   )}
@@ -665,4 +775,4 @@ const Table = ({
   );
 };
 
-export default Table;
+export default Table;    
