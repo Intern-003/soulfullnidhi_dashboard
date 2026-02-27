@@ -75,9 +75,9 @@ const Register = () => {
   const toast = useToast();
 
   const { execute: register, loading } = usePost("/create-merchant");
-  const { execute: sendEmailOtpApi, loading: emailOtpLoading } = usePost("/send-otp-mail");
+  const { execute: sendEmailOtpApi, loading: emailOtpLoading } = usePost("/otp/send-email");
   const { execute: verifyEmailOtpApi } = usePost("/verify-email-otp");
-  const { execute: sendMobileOtpApi } = usePost("/send-otp-mail");
+  const { execute: sendMobileOtpApi } = usePost("/otp/send-custom-mobile");
   const { execute: verifyMobileOtpApi } = usePost("/verify-email-otp");
 
   const [formData, setFormData] = useState({
@@ -182,7 +182,7 @@ const Register = () => {
       setEmailTimer(OTP_TIMER);
       setEmailOtp("");
       setEmailExpired(false);
-      alert(`Email OTP (dev): ${res.otp || "—"}`);
+      // alert(`Email OTP (dev): ${res.otp || "—"}`);
     } catch (err) {
       const msg = err?.message || "Failed to send OTP";
       setServerErrorMessage(msg);
@@ -226,7 +226,7 @@ const Register = () => {
       setMobileTimer(OTP_TIMER);
       setMobileOtp("");
       setMobileExpired(false);
-      alert(`Mobile OTP (dev): ${res.otp || "—"}`);
+      // alert(`Mobile OTP (dev): ${res.otp || "—"}`);
     } catch (err) {
       const msg = err?.message || "Failed to send OTP";
       setServerErrorMessage(msg);
