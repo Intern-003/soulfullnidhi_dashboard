@@ -209,8 +209,11 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
   totalwalletpayout: Number(item.total_amount?.payout || 0).toFixed(2),
   totalwallet: Number(item.total_payout || 0).toFixed(2),
           account: item.account_status,
-
-          walletpayin: item.payin_wallet,
+      walletpayin : (
+        <div>
+        <span>payin wallet:<b>{item.payin_wallet}</b></span></div>
+      ),
+         
           walletpayout: item.payout_wallet,
           date:
             new Date(item.created_at).getDate() +

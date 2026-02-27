@@ -46,7 +46,7 @@ const { data: cashfreeData, loading: cashfreeLoading } = useAutoFetch("/collecti
       // per_page: "50",   // ← changed to 150 (good balance)
        per_page: entriesPerPage.toString(),
       ...(currentCursor && { cursor: currentCursor }),
-      // ...(statusFilter !== "ALL" && { status: statusFilter }),
+      ...(statusFilter !== "ALL" && { status: statusFilter }),
     });
     return `/reportrecords-List?${params.toString()}`;
   };
@@ -249,6 +249,8 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
   }
   if (!isAuthenticated) return null;
 
+
+  
   return (
     <div className="bg-gradient-to-b from-slate-50 to-slate-100/70 pb-16">
       <div className="mx-auto px-5 sm:px-7 lg:px-10 pt-8 lg:pt-12">
