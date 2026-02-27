@@ -81,7 +81,7 @@ const FloatingInput = ({
 function LoginForm() {
   const [prekycmodal, setprekycmodal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ mobile_no: "", password: "" });
 
   const navigate = useNavigate();
   const channelRef = useRef(null);
@@ -117,9 +117,24 @@ function LoginForm() {
     return () => window.removeEventListener("beforeunload", handleUnload);
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "mobile_no") {
+    // Allow only numbers and max 10 digits
+    const cleanedValue = value.replace(/\D/g, "").slice(0, 10);
+
+    setFormData({
+      ...formData,
+      [name]: cleanedValue,
+    });
+  } else {
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -129,7 +144,7 @@ function LoginForm() {
       if (response) {
         const user = response.user;
         localStorage.setItem("token", response.token);
-        localStorage.setItem("email", response.user.email);
+        localStorage.setItem("email", response.user.mobile_no);
         localStorage.setItem("role", btoa(response.user.role_type));
         localStorage.setItem("user", JSON.stringify(response.user));
 
@@ -235,13 +250,13 @@ function LoginForm() {
               {/* Email field – now 80% width, centered */}
               <div className="w-[92%] mx-auto">
                 <FloatingInput
-                  placeholder="Business Email"
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  placeholder="Business Mobile No"
+                  type="tel"
+                  name="mobile_no"
+                  value={formData.mobile_no}
                   onChange={handleChange}
                   required
-                  error={error?.errors?.email}
+                  error={error?.errors?.mobile_no}
                   className="
                     h-13 text-base
                     transition-all duration-200
