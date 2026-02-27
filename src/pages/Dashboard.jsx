@@ -35,6 +35,7 @@ export const Dashboard = () => {
 
   
   const { data: summaryData, loading: summaryLoading } = useAutoFetch("/collection-summary");
+  
 const { data: statusCounts, loading: statusLoading } = useAutoFetch("/collection-statuscounts");
 const { data: monthwiseData, loading: monthLoading } = useAutoFetch("/collection-monthwise");
 const { data: cashfreeData, loading: cashfreeLoading } = useAutoFetch("/collection-cashfree");

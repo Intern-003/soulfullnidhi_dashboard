@@ -12,6 +12,10 @@
   import { usePost } from "../hooks/usePost";
   import { useToast } from "../contexts/ToastContext";
   import { VerifyModal } from "../components/VerifyModal";
+import ActionDropdown from "../components/actionDropdown";
+import WalletModal from "../components/WalletModal";
+
+  
 
 
 
@@ -26,7 +30,18 @@
     const memberVerify = useNavigate();
     const [merchantData, setMerchantData] = useState([]);
     const [initialLoad, setInitialLoad] = useState(true);
+    
+const [showWalletModal, setShowWalletModal] = useState(false);
+const [selectedUser, setSelectedUser] = useState(null);
+const [selectedMerchant, setSelectedMerchant] = useState(null);
+const [modalType, setModalType] = useState("load");
 
+const [walletFormData, setWalletFormData] = useState({
+  payout_wallet: "",
+  remark: "",
+});
+const { execute: loadWallet } = usePost("/payout-load-wallet");
+const { execute: reverseTopup } = usePost("/payout-take-back");
     // const [showVerifyModal, setShowVerifyModal] = useState(false);
     //   const handleVerifyConfirm = () => {
     // // Your verify/onboard logic here
@@ -43,7 +58,43 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
     const { executePut: updateSingle } = usePut("/update-user-statuses");
     const { executePut: updateAll } = usePut("/payin-payout-statuses");
     const { execute: updateCredential } = usePost("/update-credential");
+      const { data: summaryData, loading: summaryLoading } = useAutoFetch("/collection-summary");
+      const {data:Bank_payin} = useGet("/payinbanks-List");
+      console.log(Bank_payin);
+         const { executePut: updatepayinbank } = usePut("/update-user-payin-bank");
 
+
+         const handleChange = (e) => {
+  setWalletFormData({
+    ...walletFormData,
+    [e.target.name]: e.target.value,
+  });
+};
+
+const handleSubmitWallet = async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    user_id: selectedUser.id,
+    payout_wallet: walletFormData.payout_wallet,
+    remark: walletFormData.remark,
+  };
+
+  try {
+    const res =
+      modalType === "load"
+        ? await loadWallet(payload)
+        : await reverseTopup(payload);
+
+    if (res) {
+      toast.success("Wallet updated successfully");
+      setShowWalletModal(false);
+    }
+  } catch (err) {
+    toast.error("Something went wrong");
+  }
+};
+// console.log("Bank_payin data",Bank_payin);
     const handleCredentialChange = async (merchantId, credentialId) => {
       try {
         const res = await updateCredential({
@@ -57,7 +108,7 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
         toast.error("Error updating MID");
       }
     };
-
+const bankList = Bank_payin?.data?.data || [];
     const { data: dataOfMerchants, refetch: refetchOfMerchants, loading: merchantLoading } =
       useAutoFetch("/get-merchants", 20000);
       // console.log(dataOfMerchants);
@@ -71,6 +122,24 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
     useEffect(() => {
       if (!merchantLoading && dataOfMerchants) setInitialLoad(false);
     }, [merchantLoading, dataOfMerchants]);
+const handlePayinBankChange = async (userId, bankId) => {
+  try {
+
+    await updatepayinbank({
+      user_id: userId,
+      payin_bank: Number(bankId),
+    });
+
+    toast.success("Payin bank updated");
+
+    refetchOfMerchants(); // reload data
+
+  } catch (err) {
+    console.log(err);
+    toast.error("Failed to update bank");
+  }
+};
+
 
     const handlePayinToggle = async (v, rowId, accountStatus) => {
       try {
@@ -145,7 +214,9 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
         const credential = credentialsList.find((cred) => cred.id === item.credentials_id);
 
         const payinBank =
+
           item.payin_at_onboard === "Airpay" ? (
+          // item.payin_bank?.onboard_payin_bank === "Airpay" ? (
             <div className="flex items-center space-x-2">
               <span className="font-medium text-gray-700">Airpay</span>
               <select
@@ -163,8 +234,52 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
             </div>
           ) : (
             item.payin_at_onboard
+            // item.payin_bank?.onboard_payin_bank
           );
 
+
+//         const payinBank = (
+//   <div className="flex items-center space-x-2">
+
+//     {/* ✅ PAYIN BANK DROPDOWN */}
+//     <select
+//       value={item.payin_bank?.id || ""}
+//       onChange={(e) =>
+//         handlePayinBankChange(item.id, e.target.value)
+//       }
+//       className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+//     >
+//       <option value="">Select Bank</option>
+
+//       {Bank_payin?.data?.data?.map((bank) => (
+//         <option key={bank.id} value={bank.id}>
+//           {bank.onboard_payin_bank}
+//         </option>
+//       ))}
+//     </select>
+
+
+//     {/* ✅ SHOW CREDENTIAL ONLY FOR AIRPAY */}
+//     {item.payin_bank?.onboard_payin_bank === "Airpay" && (
+//       <select
+//         value={item.credentials_id || ""}
+//         onChange={(e) =>
+//           handleCredentialChange(item.id, e.target.value)
+//         }
+//         className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+//       >
+//         <option value="">Select MID</option>
+
+//         {credentialsData?.data?.map((cred) => (
+//           <option key={cred.id} value={cred.id}>
+//             {cred.name}
+//           </option>
+//         ))}
+//       </select>
+//     )}
+
+//   </div>
+// );
         return {
           sqno: item.id,
           id: item.id,
@@ -179,16 +294,16 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
           </span>
           ),
           kyc:item.kyc === 1 ? (
-          <span className="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
+          <span className="py-2 mb-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
             Verified
           </span>
         ) : item.kyc_rejected === 1 ? (
-          <span className="px-3 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded-full">
+          <span className="py-2 mb-1 text-sm font-semibold text-red-700 bg-red-100 rounded-full">
             Rejected
           </span>
         ) : (
           <button
-            className="px-3 py-1 text-sm font-semibold text-orange-700 bg-orange-100 rounded-full hover:bg-orange-200 cursor-pointer transition"
+            className=" py-2 mb-1 text-sm font-semibold text-orange-700 rounded-full hover:bg-orange-200 cursor-pointer transition"
             onClick={() => {
               localStorage.setItem("merchantId", item.id);
               memberVerify(`/VerifyMerchant/${item.id}`);
@@ -201,20 +316,30 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
           payin: item.payin_status,
         
           payout: item.payout_status,
-      payincharge: Number(item.total_charge?.UPI || 0).toFixed(2),
-  payoutcharge: Number(item.total_charge?.payout || 0).toFixed(2),
-  cryptocharge: Number(item.total_charge?.CRYPTO || 0).toFixed(2),
+      // payincharge: Number(item.total_charge?.UPI || 0).toFixed(2),
+  // payoutcharge: Number(item.total_charge?.payout || 0).toFixed(2),
+  // cryptocharge: Number(item.total_charge?.CRYPTO || 0).toFixed(2),
 
-    totalwalletpayin: Number(item.total_amount?.UPI || 0).toFixed(2),
-  totalwalletpayout: Number(item.total_amount?.payout || 0).toFixed(2),
-  totalwallet: Number(item.total_payout || 0).toFixed(2),
+    // totalwalletpayin: Number(item.total_amount?.UPI || 0).toFixed(2),
+  // totalwalletpayout: Number(item.total_amount?.payout || 0).toFixed(2),
+  // totalwallet: Number(item.total_payout || 0).toFixed(2),
           account: item.account_status,
+          
       walletpayin : (
-        <div>
-        <span>payin wallet:<b>{item.payin_wallet}</b></span></div>
+        <div  style={{width:"200px"}}>
+        <span>payin wallet:<b>{Number(item.payin_wallet || 0).toFixed(2)}</b></span><br/>
+        <span>Payin Rolling Amount:<b>{Number(item.rolling_amount || 0).toFixed(2)}</b></span><br/>
+        <span>Payin Total Charges:<b>{Number(item.total_charge?.UPI || 0).toFixed(2)}</b></span><br/>
+        <span>Today Payin Amount:<b>{summaryData?.today_payin}</b></span><br/>
+        </div>
       ),
          
-          walletpayout: item.payout_wallet,
+          walletpayout:(
+            <div  style={{width:"200px"}}>
+               <span>payout wallet:<b>{Number(item.payout_wallet || 0).toFixed(2)}</b></span><br/>
+                 <span>payout Bank:<b>{item.payout_at_onboard}</b></span><br/>
+            </div>
+          ),
           date:
             new Date(item.created_at).getDate() +
             " " +
@@ -225,26 +350,27 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
       });
 
       setMerchantData(formattedMerchantData);
-    }, [initialDataOfMerchants, credentialsData]);
+    }, [initialDataOfMerchants, credentialsData,summaryData]);
 
     const memberColumns = [
       { header: "User id", accessor: "sqno"},
       { header: "Name", accessor: "name" },
-      {header: "KYC", accessor:"kyc"},
+      // {header: "KYC", accessor:"kyc"},
       { header: "Payin", accessor: "payin" },
   
       { header: "Payout", accessor: "payout" },
       
       { header: "Payin Wallet", accessor: "walletpayin" },
       { header: "Payout Wallet", accessor: "walletpayout" },
-      { header: "Total Payin", accessor: "totalwalletpayin" },
-          { header: "Payin Charge", accessor: "payincharge" },
-        { header: "Total Payout", accessor: "totalwalletpayout" },
-          { header: "Payout Charge", accessor: "payoutcharge" },
-        { header: "Total Wallet", accessor: "totalwallet" },
+      // { header: "Total Payin", accessor: "totalwalletpayin" },
+          // { header: "Payin Charge", accessor: "payincharge" },
+        // { header: "Total Payout", accessor: "totalwalletpayout" },
+          // { header: "Payout Charge", accessor: "payoutcharge" },
+        // { header: "Total Wallet", accessor: "totalwallet" },
 
 
       { header: "Payin Onboarded Bank", accessor: "payin_bank" },
+       { header: "Action", accessor: "action",width: "220px"   },
 
     ];
 
@@ -266,16 +392,40 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
       ),
       sqno: (
         <div className="flex flex-col" style={{width:"100px"}}>
+            <div className="flex items-left gap-3">
           <span className="text-sm font-semibold">{row.sqno}</span>
           <Toggle
             defaultChecked={row.account}
             onChange={(v) => handleAccountToggle(v, row.id)}
             className="mt-1"
-          />
-          <span className="text-xs text-blue-400 font-semibold mt-1">{row.date}</span>
+          /></div>
+          <span className="text-xs text-blue-400 font-semibold mt-2">{row.date}</span>
+          <span className="text-xs text-blue-400 font-semibold mt-1">{row.kyc}</span>
         </div>
       ),
-    }));
+
+  //     action: <ActionDropdown
+  //      merchantId={row.id}  
+  // onFundReturn={() => {
+  //   setSelectedUser(row);
+  //   setModalType("reverse");
+  //   setShowWalletModal(true);
+  // }}/>
+
+  action: (
+  <ActionDropdown
+    merchantId={row.id}
+    merchant={row}                           // ← important: pass full object
+    onFundReturn={(merchant) => {
+      setSelectedMerchant(merchant);
+      setShowWalletModal(true);
+      // You can set default mode here if you want
+      // setModalType("load");   // or leave it to modal default
+    }}
+  />
+),
+    }
+  ));
 
 const totalPages = Math.ceil(tableDataWithActions.length / itemsPerPage);
 
@@ -407,7 +557,13 @@ useEffect(() => {
 
   
         <SchemeModal showModal={showModal} handleModal={() => setShowModal(!showModal)} />
-
+<WalletModal
+  isOpen={showWalletModal}
+  onClose={() => setShowWalletModal(false)}
+  merchant={selectedMerchant}
+  defaultMode="load"                     // or "reverse" — your choice
+  onSuccess={refetchOfMerchants}         // refresh list after success
+/>
 
       </div>
     );
