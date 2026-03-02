@@ -11,9 +11,13 @@ import paymentGatewayBg from "../images/login-background.jpg";
 
 export const Kyc = () => {
   const location = useLocation();
-  const [errors, setErrors] = useState();
+  // const [errors, setErrors] = useState();
+  const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+const [gstLoading, setGstLoading] = useState(false);
+const [gstVerified, setGstVerified] = useState(false);
+const [gstCompanyName, setGstCompanyName] = useState("");
 
   const toast = useToast();
 
@@ -36,6 +40,7 @@ export const Kyc = () => {
     ifsc_code: "",
     website_url: "",
     company_type: "",
+    company_name: "",
     date_of_incorporation: "",
     cancel_cheque_doc: null,
     company_pan_no_doc: null,
@@ -367,6 +372,82 @@ export const Kyc = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+const verifyGST = async (gstNumber) => {
+  const gst = String(gstNumber || "")
+    .toUpperCase()
+    .replace(/\s/g, "")
+    .trim();
+
+  // ✅ reset status before verify
+  setGstVerified(false);
+  setGstCompanyName("");
+
+  // ✅ format validation using your existing gstRegex
+  if (!gstRegex.test(gst)) {
+    setErrors((prev) => ({
+      ...(prev || {}),
+      company_gst_no: "GST is not valid (e.g. 27AAAPZ1234C1Z1)",
+    }));
+    return;
+  }
+
+  // ✅ clear error before API call
+  setErrors((prev) => ({ ...(prev || {}), company_gst_no: "" }));
+
+  try {
+    setGstLoading(true);
+
+    const res = await fetch("https://uatfintech.spay.live/api/gst/advance-verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        business_gstin_number: gst,
+        financial_year: "2023-24",
+      }),
+    });
+
+    const data = await res.json();
+
+    // ✅ DEBUG (keep for now, remove later)
+    console.log("GST API RESPONSE:", data);
+
+    if (!res.ok) {
+      setErrors((prev) => ({
+        ...(prev || {}),
+        company_gst_no: data?.message || "GST verification failed",
+      }));
+      return;
+    }
+
+    // ✅ get company name from many possible keys (covers most GST APIs)
+  const legalName =
+  data?.api_response?.response?.result?.legal_name ||
+  data?.api_response?.response?.result?.trade_name ||
+  data?.api_response?.response?.result?.gstin || // fallback (optional)
+  "";
+
+    const cleanName = String(legalName || "").trim();
+
+    // ✅ success
+    setGstVerified(true);
+    setGstCompanyName(cleanName);
+
+    // ✅ store in form (optional but useful for submit)
+    if (cleanName) {
+      setMemberFormData((prev) => ({ ...prev, company_name: cleanName }));
+    }
+
+    toast.success("GST Verified ✅");
+  } catch (err) {
+    setErrors((prev) => ({
+      ...(prev || {}),
+      company_gst_no: "Network error / server issue",
+    }));
+  } finally {
+    setGstLoading(false);
+  }
+};
 
   const handleNext = () => {
     if (validateStep()) {
@@ -803,23 +884,60 @@ export const Kyc = () => {
                           )}
                         </div>
 
-                        {/* GST Number */}
-                        <div>
-                          <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            GST Number <span className="text-red-600">*</span>
-                          </label>
-                          <input
-                            name="company_gst_no"
-                            value={memberFormData.company_gst_no || ""}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
-                          />
-                          {errors?.company_gst_no && (
-                            <p className="text-red-600 text-xs mt-1">
-                              {errors.company_gst_no}
-                            </p>
-                          )}
-                        </div>
+{/* GST Number */}
+<div>
+  <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
+    GST Number <span className="text-red-600">*</span>
+  </label>
+
+  <input
+    name="company_gst_no"
+    value={memberFormData.company_gst_no || ""}
+    maxLength={15}
+    readOnly={gstVerified}
+    disabled={gstVerified}
+    onChange={(e) => {
+      const value = e.target.value.toUpperCase().replace(/\s/g, "");
+
+      // update form
+      setMemberFormData((prev) => ({ ...prev, company_gst_no: value }));
+
+      // clear error
+      setErrors((prev) => ({ ...(prev || {}), company_gst_no: "" }));
+
+      // reset verified when editing
+      setGstVerified(false);
+      setGstCompanyName("");
+
+      // verify at 15 chars
+      if (value.length === 15) verifyGST(value);
+    }}
+    className={`w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4] ${
+      gstVerified ? "bg-gray-100 cursor-not-allowed" : ""
+    }`}
+  />
+
+  {/* loading */}
+  {gstLoading && (
+    <p className="text-blue-600 text-xs mt-1">Verifying GST...</p>
+  )}
+
+  {/* verified + company name */}
+{gstVerified && !gstLoading && (
+  <div className="mt-2 p-2 rounded-lg bg-green-50 border border-green-200">
+    <p className="text-xs text-gray-600">Company Name (as per GST):</p>
+    <p className="text-sm font-semibold text-green-700">
+      {gstCompanyName || "Company name not returned by API"}
+    </p>
+  </div>
+)}
+
+
+  {/* error */}
+  {errors?.company_gst_no && (
+    <p className="text-red-600 text-xs mt-1">{errors.company_gst_no}</p>
+  )}
+</div>
 
                         {/* GST Document */}
                         <div>
