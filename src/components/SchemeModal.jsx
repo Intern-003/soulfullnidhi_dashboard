@@ -2,12 +2,16 @@ import { useEffect, useState } from "react";
 import Button from "./Button";
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
+import { useGet } from "../hooks/useGet";
+
 
 export const SchemeModal = ({
   showModal,
   handleModal,
   editData,
   refreshTable,
+    merchant, 
+  
 }) => {
   const toast = useToast();
 
@@ -37,55 +41,78 @@ export const SchemeModal = ({
     editData ? `/update-scheme/${editData.id}` : ""
   );
 
+  // const { data: merchantScheme } =
+  // useGet(merchant ? `/show-scheme/${merchant.id}` : null);
+
+  // get merchant full data using merchant.id
+const { data: merchantDetails } = useGet(
+  showModal && merchant?.id
+    ? `/show-merchant/${merchant.id}`
+    : null
+);
+const schemeId = merchantDetails?.data?.scheme_id;
+const { data: merchantScheme } = useGet(
+  showModal && schemeId
+    ? `/show-scheme/${schemeId}`
+    : null
+);
+
+const schemeData = editData || merchantScheme?.data || null;  
+
   // Initialize modal state when it opens
-  useEffect(() => {
-    if (showModal) {
-      if (editData) {
-        // Pre-fill with edit data
-        setName(editData.name || "");
-        setPayin({
-          type: editData.payin_commision_type,
-          amount: editData.payin_commision_amount,
-        });
-        setPayout({
-          below700: {
-            type: editData.payout_commision_type_below,
-            amount: editData.payout_commision_amount_below,
-          },
-          above700: {
-            type: editData.payout_commision_type_above,
-            amount: editData.payout_commision_amount_above,
-          },
-        });
-        setRollingPayin({
-          type: editData.rolling_payin_type || "percent",
-          amount: editData.rolling_payin_amount || 0,
-          amountStr: String(editData.rolling_payin_amount || 0),
-        });
-        setRollingFixed({
-          type: editData.rolling_fixed_type || "percent",
-          amount: editData.rolling_fixed_amount || 0,
-          amountStr: String(editData.rolling_fixed_amount || 0),
-        });
-        setSelectedRolling(
-          editData.rolling_payin_amount > 0 ? "payin" : "fixed"
-        );
-        setPercentage(editData.gst_amount || 18);
-      } else {
-        // Reset for adding new scheme
-        setName("");
-        setPayin({ type: "percent", amount: "" });
-        setPayout({
-          below700: { type: "flat", amount: "" },
-          above700: { type: "percent", amount: "" },
-        });
-        setRollingPayin({ type: "percent", amount: "", amountStr: "" });
-        setRollingFixed({ type: "percent", amount: "", amountStr: "" });
-        setSelectedRolling("payin");
-        setPercentage(18);
-      }
-    }
-  }, [showModal, editData]);
+useEffect(() => {
+  if (!showModal) return;
+
+  if (schemeData) {
+    setName(schemeData.name || "");
+
+    setPayin({
+      type: schemeData.payin_commision_type,
+      amount: schemeData.payin_commision_amount,
+    });
+
+    setPayout({
+      below700: {
+        type: schemeData.payout_commision_type_below,
+        amount: schemeData.payout_commision_amount_below,
+      },
+      above700: {
+        type: schemeData.payout_commision_type_above,
+        amount: schemeData.payout_commision_amount_above,
+      },
+    });
+
+    setRollingPayin({
+      type: schemeData.rolling_payin_type || "percent",
+      amount: schemeData.rolling_payin_amount || 0,
+      amountStr: String(schemeData.rolling_payin_amount || ""),
+    });
+
+    setRollingFixed({
+      type: schemeData.rolling_fixed_type || "percent",
+      amount: schemeData.rolling_fixed_amount || 0,
+      amountStr: String(schemeData.rolling_fixed_amount || ""),
+    });
+
+    setSelectedRolling(
+      schemeData.rolling_payin_amount > 0 ? "payin" : "fixed"
+    );
+
+    setPercentage(schemeData.gst_amount || 18);
+  } else {
+    // reset form
+    setName("");
+    setPayin({ type: "percent", amount: "" });
+    setPayout({
+      below700: { type: "flat", amount: "" },
+      above700: { type: "percent", amount: "" },
+    });
+    setRollingPayin({ type: "percent", amount: "", amountStr: "" });
+    setRollingFixed({ type: "percent", amount: "", amountStr: "" });
+    setSelectedRolling("payin");
+    setPercentage(18);
+  }
+}, [showModal, schemeData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -167,7 +194,7 @@ export const SchemeModal = ({
     };
 
     try {
-      if (editData) {
+      if (schemeData ) {
         await updateScheme(payload);
         toast.success("Scheme updated successfully!");
       } else {
@@ -199,7 +226,7 @@ export const SchemeModal = ({
         <div className="text-white font-medium rounded-t-lg px-5 py-3 flex justify-between items-center"
         style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
           <h3 className="text-lg font-semibold">
-            {editData ? "Edit Scheme" : "Add New Scheme"}
+            {schemeData  ? "Edit Scheme" : "Add New Scheme"}
           </h3>
           <Button
             onClick={handleModal}
