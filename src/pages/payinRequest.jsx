@@ -15,15 +15,23 @@ export const PayinRequest = () => {
   const [qrUrl, setQrUrl] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
+  const [tokens, setTokens] = useState([]);
+const [selectedToken, setSelectedToken] = useState("");
 
   const intervalRef = useRef(null);
 
   const { data } = useAutoFetch("/collection-record");
-  const { execute: executePayin, loading } = usePost("/Airpay/request");
+  // const { execute: executePayin, loading } = usePost("/Airpay/request");
+  const { execute: executePayin, loading } = usePost("/payin/request");
   const { execute: executeCheckStatus } = usePost("/payin/status");
   // console.log("collection records", data);
   // const payin_wallet = collection_data?.data;
-
+const { data: tokenData } = useAutoFetch("/get-tokens");
+useEffect(() => {
+  if (tokenData?.data) {
+    setTokens(tokenData.data);
+  }
+}, [tokenData]);
   const payingAmount = data?.PayingAmount ?? "0.00";
   // Generate unique order ID on mount
   useEffect(() => {
@@ -59,6 +67,7 @@ export const PayinRequest = () => {
     }
   }, [showSuccess, showFailed]);
 
+  
   const handlePayinSubmit = async () => {
     if (qrUrl || orderId) return;
     if (Number(amount) < 10) {
@@ -67,9 +76,10 @@ export const PayinRequest = () => {
     }
     try {
       const payload = {
-        buyer_name: payerName,
-        buyer_phone: payerMobile,
-        buyer_email: payerEmail,
+        token :selectedToken,
+        name: payerName,
+        phone: payerMobile,
+        email: payerEmail,
         amount,
         orderid: payerOrderId,
       };
@@ -307,6 +317,26 @@ export const PayinRequest = () => {
                 Email
               </label>
             </div>
+
+            <div className="relative w-full">
+  <select
+    value={selectedToken}
+    onChange={(e) => setSelectedToken(e.target.value)}
+    className="block w-full text-sm text-gray-500 border-b-2 border-gray-300 py-2 px-0 bg-transparent focus:outline-none focus:border-blue-600"
+  >
+    <option value="">Select Token</option>
+
+    {tokens.map((item) => (
+      <option key={item.id} value={item.token}>
+        {item.token}
+      </option>
+    ))}
+  </select>
+
+  <label className="absolute -top-3 text-blue-600 text-xs">
+    Token
+  </label>
+</div>
           </div>
 
           <div className="flex justify-center mt-4">

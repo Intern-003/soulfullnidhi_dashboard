@@ -233,7 +233,7 @@ export const DonutChart = ({ data }) => {
                 textOverflow: "ellipsis",
               }}
             >
-              {mode === "UPI" ? "Pay-in" : "Pay-out"}
+              {mode === "UPI" ? "PayIn" : "PayOut"}
             </h5>
             {/* Removed "Transactions" as per request */}
           </div>

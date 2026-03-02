@@ -14,7 +14,7 @@
   import { VerifyModal } from "../components/VerifyModal";
 import ActionDropdown from "../components/actionDropdown";
 import WalletModal from "../components/WalletModal";
-
+import PayinSettlementModal from "../components/PayinSettlementModal";
   
 
 
@@ -31,7 +31,8 @@ import WalletModal from "../components/WalletModal";
     const [merchantData, setMerchantData] = useState([]);
     const [initialLoad, setInitialLoad] = useState(true);
     
-const [showWalletModal, setShowWalletModal] = useState(false);
+const [showWalletModal, setShowWalletModal] = useState(false);  
+const [showPayinModal, setShowPayinModal] = useState(false);
 const [selectedUser, setSelectedUser] = useState(null);
 const [selectedMerchant, setSelectedMerchant] = useState(null);
 const [modalType, setModalType] = useState("load");
@@ -213,10 +214,10 @@ const handlePayinBankChange = async (userId, bankId) => {
       const formattedMerchantData = initialDataOfMerchants.map((item, index) => {
         const credential = credentialsList.find((cred) => cred.id === item.credentials_id);
 
-        const payinBank =
+        // const payinBank =
 
-          item.payin_at_onboard === "Airpay" ? (
-          // item.payin_bank?.onboard_payin_bank === "Airpay" ? (
+          // item.payin_at_onboard === "Airpay" ? (
+          item.payin_bank?.onboard_payin_bank === "Airpay" ? (
             <div className="flex items-center space-x-2">
               <span className="font-medium text-gray-700">Airpay</span>
               <select
@@ -233,53 +234,53 @@ const handlePayinBankChange = async (userId, bankId) => {
               </select>
             </div>
           ) : (
-            item.payin_at_onboard
-            // item.payin_bank?.onboard_payin_bank
+            // item.payin_at_onboard
+            item.payin_bank?.onboard_payin_bank
           );
 
 
-//         const payinBank = (
-//   <div className="flex items-center space-x-2">
+        const payinBank = (
+  <div className="flex items-center space-x-2">
 
-//     {/* ✅ PAYIN BANK DROPDOWN */}
-//     <select
-//       value={item.payin_bank?.id || ""}
-//       onChange={(e) =>
-//         handlePayinBankChange(item.id, e.target.value)
-//       }
-//       className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
-//     >
-//       <option value="">Select Bank</option>
+    {/* ✅ PAYIN BANK DROPDOWN */}
+    <select
+      value={item.payin_bank?.id || ""}
+      onChange={(e) =>
+        handlePayinBankChange(item.id, e.target.value)
+      }
+      className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+    >
+      <option value="">Select Bank</option>
 
-//       {Bank_payin?.data?.data?.map((bank) => (
-//         <option key={bank.id} value={bank.id}>
-//           {bank.onboard_payin_bank}
-//         </option>
-//       ))}
-//     </select>
+      {Bank_payin?.data?.data?.map((bank) => (
+        <option key={bank.id} value={bank.id}>
+          {bank.onboard_payin_bank}
+        </option>
+      ))}
+    </select>
 
 
-//     {/* ✅ SHOW CREDENTIAL ONLY FOR AIRPAY */}
-//     {item.payin_bank?.onboard_payin_bank === "Airpay" && (
-//       <select
-//         value={item.credentials_id || ""}
-//         onChange={(e) =>
-//           handleCredentialChange(item.id, e.target.value)
-//         }
-//         className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
-//       >
-//         <option value="">Select MID</option>
+    {/* ✅ SHOW CREDENTIAL ONLY FOR AIRPAY */}
+    {item.payin_bank?.onboard_payin_bank === "Airpay" && (
+      <select
+        value={item.credentials_id || ""}
+        onChange={(e) =>
+          handleCredentialChange(item.id, e.target.value)
+        }
+        className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+      >
+        <option value="">Select MID</option>
 
-//         {credentialsData?.data?.map((cred) => (
-//           <option key={cred.id} value={cred.id}>
-//             {cred.name}
-//           </option>
-//         ))}
-//       </select>
-//     )}
+        {credentialsData?.data?.map((cred) => (
+          <option key={cred.id} value={cred.id}>
+            {cred.name}
+          </option>
+        ))}
+      </select>
+    )}
 
-//   </div>
-// );
+  </div>
+);
         return {
           sqno: item.id,
           id: item.id,
@@ -422,6 +423,18 @@ const handlePayinBankChange = async (userId, bankId) => {
       // You can set default mode here if you want
       // setModalType("load");   // or leave it to modal default
     }}
+     onPayinSettlement={(merchant) => {
+      setSelectedMerchant(merchant);
+      setShowPayinModal(true);
+      // You can set default mode here if you want
+      // setModalType("load");   // or leave it to modal default
+    }}
+         onScheme={(merchant) => {
+      setSelectedMerchant(merchant);
+      setShowModal(true);
+      // You can set default mode here if you want
+      // setModalType("load");   // or leave it to modal default
+    }}
   />
 ),
     }
@@ -556,7 +569,10 @@ useEffect(() => {
 
 
   
-        <SchemeModal showModal={showModal} handleModal={() => setShowModal(!showModal)} />
+        <SchemeModal showModal={showModal} 
+        handleModal={() => setShowModal(!showModal)} 
+          merchant={selectedMerchant}
+      refreshTable={refetchOfMerchants} />
 <WalletModal
   isOpen={showWalletModal}
   onClose={() => setShowWalletModal(false)}
@@ -564,7 +580,12 @@ useEffect(() => {
   defaultMode="load"                     // or "reverse" — your choice
   onSuccess={refetchOfMerchants}         // refresh list after success
 />
-
+<PayinSettlementModal
+  isOpen={showPayinModal}
+  onClose={() => setShowPayinModal(false)}
+  merchant={selectedMerchant}              
+  onSuccess={refetchOfMerchants}         // refresh list after success
+/>
       </div>
     );
   };
