@@ -35,6 +35,11 @@ const { data: getMerchant } = useGet(
 
  const chartCount  =record?.transactionStatusCounts || {};
  const [filter,setFilter] =  useState('payin');
+ const {data:Bank_payin} = useGet("/payinbanks-List");
+const bankList = Bank_payin?.data?.data || [];
+const payinBankName =
+  bankList.find((bank) => bank.id == merchant?.payin_bank)?.onboard_payin_bank || "N/A";
+// console.log(bankList);
 
 const MerchantTable = ({ merchant }) => {
   const schemeId = merchant?.scheme_id;
@@ -60,7 +65,7 @@ return (
         ["Company CIN Number", merchant.cin_llpin],
         ["Date of Incorporation", merchant.date_of_incorporation],
         ["Website URL", merchant.website_url],
-        ["Onboarded Payin Bank", merchant.payin_bank],
+        ["Onboarded Payin Bank", payinBankName],
         ["Onboarded Payout Bank", merchant.payout_at_onboard],
         ["Scheme Name", scheme?.name ?? "null"],
         ["payin scheme", scheme?.payin_commision_amount || "00"], 
@@ -89,6 +94,7 @@ return (
 
 
 };
+
 
 // const chartSeries = chartCount
 //   ? [

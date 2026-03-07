@@ -96,6 +96,10 @@ const handleChange = (e) => {
     setActiveTab("payin");
   };
 
+  const filteredCredentials = midCredentials?.data?.filter(
+  (cred) => cred.bank_id === Number(memberFormData.payin_at_onboard)
+);
+
 const handleApproveOnboard = async () => {
   try {
     setErrors(null);
@@ -110,12 +114,14 @@ const handleApproveOnboard = async () => {
     if (!memberFormData.scheme_id) {
       return setErrors({ scheme_id: "Required" });
     }
-    if (
-      memberFormData.payin_at_onboard === "Airpay" &&
-      !memberFormData.credentials_id
-    ) {
-      return setErrors({ credentials_id: "Airpay MID is required" });
-    }
+    // if (
+    //   memberFormData.payin_at_onboard === "Airpay" &&
+    //   !memberFormData.credentials_id
+    // ) {
+    //   return setErrors({ credentials_id: "Airpay MID is required" });
+    // }
+    if (!memberFormData.payin_at_onboard) return;
+
 
     const payload = {
       id: memberFormData.id,
@@ -426,11 +432,16 @@ const DocumentPreview = ({ label, filePath }) => {
           onChange={handleChange}
         >
           <option value="">Select Bank</option>
-          {payinBanks?.data?.data?.map((item) => (
+          {/* {payinBanks?.data?.data?.map((item) => (
             <option key={item.id} value={item.onboard_payin_bank}>
               {item.onboard_payin_bank}
             </option>
-          ))}
+          ))} */}
+          {payinBanks?.data?.data?.map((bank) => (
+  <option key={bank.id} value={bank.id}>
+    {bank.onboard_payin_bank}
+  </option>
+))}
         </select>
 
         {errors?.payin_at_onboard && (
@@ -451,7 +462,8 @@ const DocumentPreview = ({ label, filePath }) => {
     </div>
 
     {/* ==================== Airpay MID (Conditional) ==================== */}
-    {memberFormData.payin_at_onboard === "Airpay" && (
+    {/* {memberFormData.payin_at_onboard === "Airpay" && ( */}
+    {filteredCredentials?.length > 0 && (
       <div className="flex items-center gap-4 mb-4 md:col-span-2">
         <div className="relative flex-1">
           <label
@@ -461,7 +473,7 @@ const DocumentPreview = ({ label, filePath }) => {
             Airpay MID <span className="text-red-600">*</span>
           </label>
 
-          <select
+          {/* <select
             id="credentials_id"
             name="credentials_id"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
@@ -474,7 +486,23 @@ const DocumentPreview = ({ label, filePath }) => {
                 {mid.name}
               </option>
             ))}
-          </select>
+          </select> */}
+
+          <select
+  id="credentials_id"
+  name="credentials_id"
+  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5"
+  value={memberFormData.credentials_id || ""}
+  onChange={handleChange}
+>
+  <option value="">Select Credential</option>
+
+  {filteredCredentials.map((cred) => (
+    <option key={cred.id} value={cred.id}>
+      {cred.name}
+    </option>
+  ))}
+</select>
         </div>
       </div>
     )}

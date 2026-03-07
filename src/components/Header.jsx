@@ -12,7 +12,7 @@ export const Header = ({ onMenuClick }) => {
   const { data } = useAutoFetch("/collection-cashfree");
   const { data: merchantData } = useGet("/show-merchant");
 
-  console.log("payin data : ", merchantData);
+  // console.log("payin data : ", merchantData);
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);

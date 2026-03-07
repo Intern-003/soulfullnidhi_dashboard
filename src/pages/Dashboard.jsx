@@ -215,10 +215,10 @@ const { data: cashfreeData, loading: cashfreeLoading } = useAutoFetch("/collecti
   }, [recordLoading, cardData]);
 
 const cardsToShow = useMemo(() => [
-  { title: "Today Pay-IN", value: summaryData?.today_payin1 ?? 64735784375765756756756756 },
-  { title: "Total Pay-IN", value: summaryData?.total_payin1 ?? 64735784375765756756756756 },
-  { title: "Today Pay-OUT", value: summaryData?.today_payout1 ?? 64735784375765756756756756},
-  { title: "Total Pay-OUT", value: summaryData?.total_payout1 ?? 64735784375765756756756756 },
+  { title: "Today Pay-IN", value: summaryData?.today_payin ?? "00" },
+  { title: "Total Pay-IN", value: summaryData?.total_payin ?? "00" },
+  { title: "Today Pay-OUT", value: summaryData?.today_payout ?? "00"},
+  { title: "Total Pay-OUT", value: summaryData?.total_payout ?? "00" },
 ], [summaryData]);
 
 const donutData = useMemo(() => statusCounts || [], [statusCounts]);
@@ -232,6 +232,20 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
       maximumFractionDigits: 0,
     });
   };
+
+//   const formatRupee = (value) => {
+//   const num = Number(value || 0);
+
+//   if (num >= 10000000) {
+//     return `${(num / 10000000).toFixed(2).replace(/\.00$/, "")} Cr`;
+//   }
+
+//   if (num >= 100000) {
+//     return `${(num / 100000).toFixed(2).replace(/\.00$/, "")} L`;
+//   }
+
+//   return `${num.toLocaleString("en-IN")}`;
+// };
 
   const transactioncolumn = [
     { header: "TXN Id", accessor: "txnid" },
@@ -259,7 +273,7 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 mb-12">
           {cardsToShow.map((card, i) => {
             const amountStr = formatRupee(card.value);
-            let fontClass = "text-2xl md:text-xl";
+            let fontClass = "text-xl md:text-xl";
             // const len = amountStr.length;
 
             // if (len >= 7) fontClass = "text-2.5xl md:text-3.5xl";
@@ -288,7 +302,8 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
                   </h3>
                   <div
                     // className={`${fontClass} font-extrabold text-slate-800 tracking-tight whitespace-nowrap overflow-hidden max-w-full w-full`}
-                     className="text-2xl font-bold text-slate-800 break-words leading-tight"
+    className="font-bold text-slate-800 whitespace-nowrap w-full tabular-nums text-[clamp(10px,1.5vw,20px)]"
+
                     title={`₹${amountStr}`}
                   >
                     ₹{amountStr}
