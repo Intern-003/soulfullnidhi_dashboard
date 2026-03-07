@@ -41,13 +41,16 @@ const TableFilters = ({
   const selectData = useMemo(() => {
     return Array.from(
       new Map(
-        rawData?.map((item) => [
-          item.user_id,
-          {
-            value: item.user_id,
-            label: item.merchant_details_text || `${item.merchant_name} (${item.user_id})`,
-          },
-        ])
+        rawData?.map((item) => {
+          const value = item.user_id ?? item.id;
+          const label =
+            item.merchant_details_text ||
+            (item.merchant_name && `${item.merchant_name} (${value})`) ||
+            (item.raw_name && `${item.raw_name} (${value})`) ||
+            `User ${value}`;
+
+          return [value, { value, label }];
+        })
       ).values()
     );
   }, [rawData]);
@@ -95,7 +98,7 @@ const TableFilters = ({
             <i className="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
             <input
               type="text"
-              placeholder="Search Merchant / TxnId / Payee Txnid / Ref / User ID"
+              placeholder="Search Merchant / TxnId / Payee"
               className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-sky-400 outline-none"
               value={txnSearch}
               onChange={(e) => setTxnSearch(e.target.value)}
@@ -157,7 +160,7 @@ const TableFilters = ({
                 );
                 setSelectedMerchant(selected || null);
               }}
-              className="border border-gray-300 bg-white rounded-lg px-3 py-2 shadow-sm font-medium min-w-[200px]"
+              className="border border-gray-300 bg-white rounded-lg px-3 py-2 shadow-sm font-medium min-w-[220px]"
             >
               <option value="">Select Merchant</option>
               {selectData.map((item) => (
@@ -210,7 +213,7 @@ const TableFilters = ({
         </div>
       </div>
 
-      {showSelectUserFilter && (
+      {showSelectUserFilter && totalSuccessAmount > 0 && (
         <div className="flex justify-end w-full mt-3">
           <div className="flex items-center gap-2 text-sm md:text-base font-semibold text-green-700 bg-green-50 px-3 py-2 rounded-lg shadow-sm">
             <i className="fa-solid fa-circle-check text-green-600"></i>
