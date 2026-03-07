@@ -5,6 +5,7 @@ import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import DashboardSkeleton from "../components/DashboardSkeleton";
 import { useNavigate } from "react-router-dom";
+// import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
 
 export const Dashboard = () => {
   const DASHBOARD_LOCK_KEY = "payment_dashboard_logged_in";
@@ -185,6 +186,7 @@ const { data: cashfreeData, loading: cashfreeLoading } = useAutoFetch("/collecti
     const checkAuthentication = () => {
       const lock = JSON.parse(localStorage.getItem(DASHBOARD_LOCK_KEY) || "{}");
       const user = JSON.parse(localStorage.getItem("user") || "{}");
+      // const user = getSafeItem("user");
 
       const isValid =
         lock?.userId &&

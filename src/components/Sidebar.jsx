@@ -132,7 +132,7 @@ export const Sidebar = ({ open, setOpen }) => {
 
   return (
     <>
-      <style jsx>{`
+      <style >{`
         .scrollbar-hide {
           -ms-overflow-style: none;  /* IE and Edge */
           scrollbar-width: none;  /* Firefox */

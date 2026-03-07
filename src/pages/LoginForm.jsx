@@ -5,6 +5,7 @@ import logo from "../images/logo.png";
 import paymentGatewayBg from "../images/login-background.jpg";
 import { usePost } from "../hooks/usePost";
 import { ConfirmModal } from "../components/ConfirmModal";
+import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
 
 const DASHBOARD_LOCK_KEY = "payment_dashboard_logged_in";
 
@@ -156,10 +157,16 @@ const response = await login(payload);
       if (response) {
         const user = response.user;
         localStorage.setItem("token", response.token);
-        localStorage.setItem("email", response.user.mobile_no);
+        localStorage.setItem("email", btoa(response.user.mobile_no));
         localStorage.setItem("login_id", response.user.login_id);
         localStorage.setItem("role", btoa(response.user.role_type));
         localStorage.setItem("user", JSON.stringify(response.user));
+ 
+        // setSafeItem("token", response.token);
+        // setSafeItem("email", response.user.mobile_no);
+        // setSafeItem("login_id", response.user.login_id);
+        // setSafeItem("role", btoa(response.user.role_type));
+        // setSafeItem("user", JSON.stringify(response.user));
 
         localStorage.setItem(
           DASHBOARD_LOCK_KEY,

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { usePost } from "../hooks/usePost";
 import { useState, useEffect, useRef } from "react";
+import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
 
 export const ProfileSidebar = ({
   open,
@@ -100,6 +101,7 @@ export const ProfileSidebar = ({
   }, [open]);
 
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  // const storedUser = getSafeItem("user");
 
   const effectiveUser = data && Object.keys(data).length ? data : storedUser;
 

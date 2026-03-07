@@ -61,7 +61,7 @@ const [itemsPerPage, setItemsPerPage] = useState(50);
     const { execute: updateCredential } = usePost("/update-credential");
       const { data: summaryData, loading: summaryLoading } = useAutoFetch("/collection-summary");
       const {data:Bank_payin} = useGet("/payinbanks-List");
-      // console.log(Bank_payin);
+      console.log(Bank_payin);
          const { executePut: updatepayinbank } = usePut("/update-user-payin-bank");
 
 
