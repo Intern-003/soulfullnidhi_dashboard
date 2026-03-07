@@ -1,23 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import Table from "../components/Table";
 import Button from "../components/Button";
-import { useToast } from "../contexts/ToastContext";
 import { useGet } from "../hooks/useGet";
 import { usePost } from "../hooks/usePost";
+import { useToast } from "../contexts/ToastContext";
 import { TableSkeleton } from "../components/TableSkeleton";
+import  WalletModal  from "../components/WalletModal";
 
-const PayinSettlement = () => {
+
+const LoadWallet = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  // const [walletData, setWalletData] = useState([]);
+  const [modalType, setModalType] = useState("load");
+
+const [walletModalOpen, setWalletModalOpen] = useState(false);
+const [selectedMerchant, setSelectedMerchant] = useState(null);
+const [modalMode, setModalMode] = useState("load");
+
+
   const toast = useToast();
-  // const [payinSettlementData, setPayinSettlementData] = useState([]);
-  const [payinFormData, setPayinFormData] = useState({
-    payin_wallet: "",
+  const [walletFormData, setWalletFormData] = useState({
+    payout_wallet: "",
     remark: "",
   });
 
-const [rawData, setRawData] = useState([]);
-const [payinSettlementData, setPayinSettlementData] = useState([]);
+
+  const [rawData, setRawData] = useState([]);
+const [walletData, setWalletData] = useState([]);
 
 const [cursor, setCursor] = useState(null);
 const [hasMore, setHasMore] = useState(true);
@@ -27,7 +37,11 @@ const [error, setError] = useState(null);
 const [entriesPerPage, setEntriesPerPage] = useState(50);
 const lastCursorRef = useRef(null);
 
-const fetchMerchantsPayin = async (force = false) => {
+
+  // const { data: tableData, refetch, loading } = useGet("/get-merchants");
+  // console.log( "load Wallet data",tableData);   
+
+const fetchMerchants = async (force = false) => {
   if (!force) {
     if (loading || !hasMore) return;
     if (cursor !== null && lastCursorRef.current === cursor) return;
@@ -75,37 +89,42 @@ const fetchMerchantsPayin = async (force = false) => {
 
 
 useEffect(() => {
-  fetchMerchantsPayin();
+  fetchMerchants();
 }, []);
 
 
 
 useEffect(() => {
   setRawData([]);
+  setWalletData([]);
   setCursor(null);
   setHasMore(true);
   lastCursorRef.current = null;
   // fetchMerchants();
   setTimeout(() => {
-    fetchMerchantsPayin(true);
+    fetchMerchants(true);
   }, 0);
 }, [entriesPerPage]);
-  // const { data: tableData, refetch, loading } = useGet("/get-merchants");
-  const { execute: payinSettlement } = usePost("/payin-settlement");
 
-  // const initialDataOfPayinWallet = tableData?.data;
 
-useEffect(() => {
+
+
+  const { execute: loadWallet } = usePost("/payout-load-wallet");
+  const { execute: reverseTopup } = usePost("/payout-take-back");
+
+  // const initialDataOfWallet = tableData?.data;
+
+  useEffect(() => {
   if (!rawData.length) return;
 
   const formatted = rawData.map((item, index) => ({
     sqno: index + 1,
     id: item.id,
     name: item.name,
-    payin_wallet: item.payin_wallet,
+    payout_wallet: item.payout_wallet,
   }));
 
-  setPayinSettlementData(formatted);
+  setWalletData(formatted);
 }, [rawData]);
 
 const handleLoadMore = () => {
@@ -113,107 +132,140 @@ const handleLoadMore = () => {
   fetchMerchants();
 };
 
-  
-  // useEffect(() => {
-  //   const formattedData = initialDataOfPayinWallet?.map((item, index) => ({
-  //     sqno: index + 1,
-  //     id: item.id,
-  //     name: item.name,
-  //     payin_wallet: item.payin_wallet,
-  //   }));
-  //   setPayinSettlementData(formattedData || []);
-  // }, [initialDataOfPayinWallet]);
-
-  const membercolumn = [
-    { header: "User Id", accessor: "id" },
-    { header: "Merchant", accessor: "name" },
-    { header: "Payin Wallet", accessor: "payin_wallet" },
-    { header: "Action", accessor: "action" },
-  ];
-
-  const tableDataWithActions = payinSettlementData?.map((row) => ({
-    ...row,
-    action: (
-      <Button
-        onClick={() => {
-          setSelectedUser(row);
-          setShowModal(true);
-        }}
-        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
-      >
-        Payin Settlement
-      </Button>
-    ),
-  }));
 
   const handleChange = (e) => {
-    setPayinFormData({ ...payinFormData, [e.target.name]: e.target.value });
+    setWalletFormData({ ...walletFormData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmitLoadWallet = async (e) => {
     e.preventDefault();
-
     const payload = {
       user_id: selectedUser.id,
-      payin_wallet: payinFormData.payin_wallet,
-      remark: payinFormData.remark,
+      payout_wallet: walletFormData.payout_wallet,
+      remark: walletFormData.remark,
     };
 
     try {
-      const res = await payinSettlement(payload);
+      const res = await loadWallet(payload);
       if (res) {
-        toast.success("Settlement done successfully!!");
+        toast.success("Wallet loaded successfully!!");
         // refetch();
-        //   setRawData([]);
-        // setPayinSettlementData([]);
-        // setCursor(null);
-        // setHasMore(true);
-        // lastCursorRef.current = null;
+        setRawData([]);
+        setWalletData([]);
+        setCursor(null);
+        setHasMore(true);
+        lastCursorRef.current = null;
+        fetchMerchants();
 
-        fetchMerchantsPayin();
-        // setPayinFormData({
-        //   payin_wallet: "",
-        //   remark: "",
-        // });
         setShowModal(false);
       }
     } catch (err) {
       console.log(err);
-      // toast.error("Something went wrong!");
-            const errorMessage =
-        err?.response?.data?.message ||  // Axios-style
-        err?.data?.message ||            // Custom hook style
-        err?.message ||                  // JS error
-        "Something went wrong!";
-
-      toast.error(errorMessage);
+      toast.error("Something went wrong!!");
     }
   };
+
+  const handleSubmitReverseTopup = async (e) => {
+    e.preventDefault();
+    const payload = {
+      user_id: selectedUser.id,
+      payout_wallet: walletFormData.payout_wallet,
+      remark: walletFormData.remark,
+    };
+
+    try {
+      const res = await reverseTopup(payload);
+      if (res) {
+        toast.success("Deducted balance from wallet successfully!!");
+        // refetch();
+        // setRawData([]);
+        // setWalletData([]);
+        // setCursor(null);
+        // setHasMore(true);  
+        // lastCursorRef.current = null;
+        // fetchMerchants();
+          setRawData((prev) =>
+          prev.map((item) =>
+            item.id === selectedUser.id
+              ? { ...item, payout_wallet: res.data?.payout_wallet ?? item.payout_wallet }
+              : item
+          )
+        );
+
+        setShowModal(false);
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Something went wrong!!");
+    }
+  };
+
+  const membercolumn = [
+    { header: "User Id", accessor: "id" },
+    { header: "Merchant", accessor: "name" },
+    { header: "Payout Wallet", accessor: "payout_wallet" },
+    { header: "Action", accessor: "action" },
+  ];
+
+  const tableDataWithActions = walletData?.map((row) => ({
+    ...row,
+   action: (
+  <div className="flex items-center justify-start gap-2">
+    <Button
+      // onClick={() => {
+      //   setSelectedUser(row);
+      //   setModalType("load");
+      //   setShowModal(true);
+      // }}
+            onClick={() => {
+        setSelectedMerchant(row);
+        setModalMode("load");
+        setWalletModalOpen(true);
+      }}
+      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+    >
+      Load Wallet
+    </Button>
+    <Button
+      // onClick={() => {
+      //   setSelectedUser(row);
+      //   setModalType("reverse");
+      //   setShowModal(true);
+      // }}
+            onClick={() => {
+        setSelectedMerchant(row);
+        setModalMode("reverse");
+        setWalletModalOpen(true);
+      }}
+      className="bg-blue-400 hover:bg-blue-500 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+    >
+      Reverse Top-up
+    </Button>
+  </div>
+),}));
 
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className="rounded-lg flex justify-between items-center p-4 shadow-md"
+      <div className=" rounded-lg flex justify-between items-center p-4 shadow-md"
       style={{ background: 'linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)' }}>
-        <h4 className="font-bold text-white text-xl">Payin Settlement</h4>
+        <h4 className="font-bold text-white text-xl">Load Wallet</h4>
       </div>
 
       {/* Table */}
       {loading ? (
         <TableSkeleton />
-      ) : ( 
+      ) : (
         <Table
           columns={membercolumn}
           data={tableDataWithActions}
-          showDeleteColumn={false}
-          showDateFilter={false}
           showStatusFilter={false}
-          // className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
-          // paginationClassName="flex justify-end gap-2 mt-4"
-          // previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
-          // nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
+          showDateFilter={false}
+          showDeleteColumn={false}
+          className="shadow-lg rounded-lg overflow-hidden"
            showExport={false}
-            isServerPaginated
+
+          isServerPaginated
           hasMore={hasMore}
           isLoadingMore={loading}
           onLoadNext={handleLoadMore}
@@ -236,7 +288,9 @@ const handleLoadMore = () => {
             {/* Modal Header */}
             <div className="flex justify-between items-center bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white rounded-t-lg px-5 py-3">
               <h3 className="text-lg font-semibold">
-                Payin Settlement for {selectedUser?.name}
+                {modalType === "load"
+                  ? `Wallet Topup for ${selectedUser?.name}`
+                  : `Reverse Topup for ${selectedUser?.name}`}
               </h3>
               <Button
                 onClick={() => setShowModal(false)}
@@ -249,14 +303,20 @@ const handleLoadMore = () => {
             {/* Modal Body */}
             <form
               className="p-6 space-y-4"
-              onSubmit={handleSubmit}
+              onSubmit={
+                modalType === "load"
+                  ? handleSubmitLoadWallet
+                  : handleSubmitReverseTopup
+              }
             >
               <div>
-                <label className="block mb-1 text-sm font-medium">Amount</label>
+                <label className="block mb-1 text-sm font-medium">
+                  Amount
+                </label>
                 <input
+                  name="payout_wallet"
                   type="number"
-                  name="payin_wallet"
-                  value={payinFormData.payin_wallet}
+                  value={walletFormData.payout_wallet}
                   onChange={handleChange}
                   placeholder="Enter Amount"
                   className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
@@ -268,7 +328,7 @@ const handleLoadMore = () => {
                 <textarea
                   rows="3"
                   name="remark"
-                  value={payinFormData.remark}
+                  value={walletFormData.remark}
                   onChange={handleChange}
                   placeholder="Enter Remark"
                   className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
@@ -277,17 +337,42 @@ const handleLoadMore = () => {
 
               <Button
                 type="submit"
-                onClick={handleSubmit}
+                onClick={
+                  modalType === "load"
+                    ? handleSubmitLoadWallet
+                    : handleSubmitReverseTopup
+                }
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg shadow-md transition"
               >
                 Submit
               </Button>
+
+              
             </form>
           </div>
         </div>
       )}
+
+
+<WalletModal
+  isOpen={walletModalOpen}
+  onClose={() => setWalletModalOpen(false)}
+  merchant={selectedMerchant}
+  defaultMode={modalMode}
+  onSuccess={() => {
+    // optional refresh logic
+    setRawData([]);
+    setWalletData([]);
+    setCursor(null);
+    setHasMore(true);
+    lastCursorRef.current = null;
+    fetchMerchants(true);
+  }}
+/>
     </div>
+
   );
+  
 };
 
-export default PayinSettlement;
+export default LoadWallet;

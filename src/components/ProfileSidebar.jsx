@@ -9,6 +9,9 @@ export const ProfileSidebar = ({
   role,
   payingAmount,
   Payoutwallet,
+  PayinTotalCharges,
+  PayinRollingAmount
+
 }) => {
   const [PayAmountVisible, setPayAmountVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -184,7 +187,7 @@ export const ProfileSidebar = ({
             <p className="text-xs font-semibold text-blue-600 uppercase mb-5 tracking-wider">
               Wallet Balance
             </p>
-            <div className="flex items-center justify-between text-base text-blue-900">
+            <div className="flex items-center justify-between text-base text-blue-900 mb-2">
               <span className="font-medium">Payin Wallet</span>
               <div className="flex items-center gap-4">
                 <span className={`font-bold transition-all duration-300 ${PayAmountVisible ? "text-emerald-600 scale-105" : "text-blue-800 blur-sm"}`}>
@@ -198,7 +201,18 @@ export const ProfileSidebar = ({
                   <i className={`fa-solid ${PayAmountVisible ? "fa-eye-slash" : "fa-eye"} text-lg`} />
                 </button>
               </div>
+
+
+
             </div>
+            <div className="flex items-center justify-between text-base text-blue-900 mb-2">
+  <span>Payin Rolling</span>
+  <span>{PayinRollingAmount}</span>
+  </div>
+  <div className="flex items-center justify-between text-base text-blue-900 mb-2">
+  <span>Payin Total Chanrges</span>
+  <span>{PayinTotalCharges}</span>
+  </div>
           </div>
         )}
 

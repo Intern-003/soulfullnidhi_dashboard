@@ -13,7 +13,7 @@ const PayinDoc = () => {
     id: "airpay-request",
     title: "Create Payin Payment Request",
     type: "api",
-    endpoint: "POST https://uatfintech.spay.live/api/payin/request ",
+    endpoint: "POST https://uatfintech.spay.live/api/payin/upi/request ",
     headers: "Content-Type: application/json",
     parameters: [
       { field: "token", type: "String", required: "Yes", description: "API key/token provided by Spay" },
@@ -24,7 +24,7 @@ const PayinDoc = () => {
     ],
     request: {
       curl: `
-curl--location "https://uatfintech.spay.live/api/payin/request"
+curl--location "https://uatfintech.spay.live/api/payin/upi/request"
 --form 'token="Sha6Nplm0pXXXXXxp8ABGQKUE6g"
 --form 'orderid="TESTXXXX3117xX"
 --form 'amount="10.00"

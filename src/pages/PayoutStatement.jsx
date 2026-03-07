@@ -205,12 +205,12 @@ const PayoutStatement = () => {
               Pay Amount: <b>{item.amount}</b>
             </span>
             <span>
-              Total Charges: <b>{item.charge ?? 0}</b>
+              Total Charges: <b>{item.profit ?? 0}</b>
             </span>
             <span>
               Total Debited Amount:{" "}
               <b>
-                {(Number(item.amount ?? 0) + Number(item.charge ?? 0)).toFixed(
+                {(Number(item.amount ?? 0) + Number(item.profit ?? 0)).toFixed(
                   2,
                 )}
               </b>
@@ -222,7 +222,7 @@ const PayoutStatement = () => {
               Note:{" "}
               <b>
                 Debit{" "}
-                {(Number(item.amount ?? 0) + Number(item.charge ?? 0)).toFixed(
+                {(Number(item.amount ?? 0) + Number(item.profit ?? 0)).toFixed(
                   2,
                 )}{" "}
                 to Payout Wallet

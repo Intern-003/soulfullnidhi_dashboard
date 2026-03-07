@@ -1,5 +1,5 @@
 // src/components/WalletModal.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "./Button";           // adjust path if needed
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
@@ -13,6 +13,9 @@ export default function WalletModal({
 }) {
   const toast = useToast();
   const [mode, setMode] = useState(defaultMode);
+  useEffect(() => {
+  setMode(defaultMode);
+}, [defaultMode]);
   const [form, setForm] = useState({ payout_wallet: "", remark: "" });
 
   const { execute: loadWallet } = usePost("/payout-load-wallet");
@@ -119,14 +122,14 @@ export default function WalletModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
+              className="flex-1 py-2.5 bg-red-400 hover:bg-red-300 rounded-lg transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               className={`flex-1 py-2.5 text-white font-medium rounded-lg transition ${
-                mode === "load" ? "bg-blue-600 hover:bg-blue-700" : "bg-red-600 hover:bg-red-700"
+                mode === "load" ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-400 hover:bg-blue-700"
               }`}
             >
               {mode === "load" ? "Load Wallet" : "Return Funds"}

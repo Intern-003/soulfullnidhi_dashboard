@@ -215,10 +215,10 @@ const { data: cashfreeData, loading: cashfreeLoading } = useAutoFetch("/collecti
   }, [recordLoading, cardData]);
 
 const cardsToShow = useMemo(() => [
-  { title: "Today Pay-IN", value: summaryData?.today_payin ?? 0 },
-  { title: "Total Pay-IN", value: summaryData?.total_payin ?? 0 },
-  { title: "Today Pay-OUT", value: summaryData?.today_payout ?? 0 },
-  { title: "Total Pay-OUT", value: summaryData?.total_payout ?? 0 },
+  { title: "Today Pay-IN", value: summaryData?.today_payin1 ?? 64735784375765756756756756 },
+  { title: "Total Pay-IN", value: summaryData?.total_payin1 ?? 64735784375765756756756756 },
+  { title: "Today Pay-OUT", value: summaryData?.today_payout1 ?? 64735784375765756756756756},
+  { title: "Total Pay-OUT", value: summaryData?.total_payout1 ?? 64735784375765756756756756 },
 ], [summaryData]);
 
 const donutData = useMemo(() => statusCounts || [], [statusCounts]);
@@ -260,16 +260,16 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
           {cardsToShow.map((card, i) => {
             const amountStr = formatRupee(card.value);
             let fontClass = "text-2xl md:text-xl";
-            const len = amountStr.length;
+            // const len = amountStr.length;
 
-            if (len >= 7) fontClass = "text-2.5xl md:text-3.5xl";
-            if (len >= 9) fontClass = "text-2xl md:text-3xl";
-            if (len >= 11) fontClass = "text-xl md:text-2.5xl";
-            if (len >= 13) fontClass = "text-lg md:text-2xl";
-            if (len >= 15) fontClass = "text-base md:text-xl";
-            if (len >= 17) fontClass = "text-sm md:text-lg";
-            if (len >= 19) fontClass = "text-xs md:text-base";
-            if (len >= 21) fontClass = "text-xs md:text-sm";
+            // if (len >= 7) fontClass = "text-2.5xl md:text-3.5xl";
+            // if (len >= 9) fontClass = "text-2xl md:text-3xl";
+            // if (len >= 11) fontClass = "text-xl md:text-2.5xl";
+            // if (len >= 13) fontClass = "text-lg md:text-2xl";
+            // if (len >= 15) fontClass = "text-base md:text-xl";
+            // if (len >= 17) fontClass = "text-sm md:text-lg";
+            // if (len >= 19) fontClass = "text-xs md:text-base";
+            // if (len >= 21) fontClass = "text-xs md:text-sm";
 
             return (
               <div
@@ -287,7 +287,8 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
                     {card.title}
                   </h3>
                   <div
-                    className={`${fontClass} font-extrabold text-slate-800 tracking-tight whitespace-nowrap overflow-hidden max-w-full w-full`}
+                    // className={`${fontClass} font-extrabold text-slate-800 tracking-tight whitespace-nowrap overflow-hidden max-w-full w-full`}
+                     className="text-2xl font-bold text-slate-800 break-words leading-tight"
                     title={`₹${amountStr}`}
                   >
                     ₹{amountStr}
@@ -297,8 +298,7 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
             );
           })}
         </div>
-
-        {/* Charts */}
+  {role === "admin" && (
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-7 mb-12">
           {/* Line chart */}
           <div className="lg:col-span-3 bg-white rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.06)] border border-slate-100/80 p-6 lg:p-8 overflow-hidden transition-all duration-400 hover:shadow-[0_25px_70px_rgb(0,0,0,0.09)]">
@@ -306,12 +306,13 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
               Monthly Performance
               <span className="absolute -bottom-2.5 left-0 w-16 h-1 bg-gradient-to-r from-blue-500/50 to-indigo-500/50 rounded-full" />
             </h3>
+           
             <div className="h-[400px] lg:h-[440px] -mx-2">
               {/* <LineChart1 data={cardData?.monthWiseStatusCounts} /> */}
               < LineChart1 data={lineChartData}/>
             </div>
+             
           </div>
-
           {/* Donut chart */}
           <div className="lg:col-span-2 bg-white rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.06)] border border-slate-100/80 p-6 lg:p-8 transition-all duration-400 hover:shadow-[0_25px_70px_rgb(0,0,0,0.09)]">
             <h3 className="text-2xl font-semibold text-slate-800 mb-8 relative inline-block">
@@ -324,6 +325,7 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
             </div>
           </div>
         </div>
+       )}
 
         {/* TABLE SECTION */}
         <div className="bg-white rounded-3xl shadow-[0_10px_40px_rgb(0,0,0,0.06)] border border-slate-100/80 overflow-hidden">

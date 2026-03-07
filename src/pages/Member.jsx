@@ -217,68 +217,109 @@ const handlePayinBankChange = async (userId, bankId) => {
         // const payinBank =
 
           // item.payin_at_onboard === "Airpay" ? (
-          item.payin_bank?.onboard_payin_bank === "Airpay" ? (
-            <div className="flex items-center space-x-2">
-              <span className="font-medium text-gray-700">Airpay</span>
-              <select
-                value={item.credentials_id || ""}
-                onChange={(e) => handleCredentialChange(item.id, e.target.value)}
-                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
-              >
-                <option value="">Select MID</option>
-                {credentialsData?.data?.map((cred) => (
-                  <option key={cred.id} value={cred.id}>
-                    {cred.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            // item.payin_at_onboard
-            item.payin_bank?.onboard_payin_bank
-          );
+          // item.payin_bank?.onboard_payin_bank === "Airpay" ? (
+          //   <div className="flex items-center space-x-2">
+          //     <span className="font-medium text-gray-700">Airpay</span>
+          //     <select
+          //       value={item.credentials_id || ""}
+          //       onChange={(e) => handleCredentialChange(item.id, e.target.value)}
+          //       className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+          //     >
+          //       <option value="">Select MID</option>
+          //       {credentialsData?.data?.map((cred) => (
+          //         <option key={cred.id} value={cred.id}>
+          //           {cred.name}
+          //         </option>
+          //       ))}
+          //     </select>
+          //   </div>
+          // ) : (
+          //   // item.payin_at_onboard
+          //   item.payin_bank?.onboard_payin_bank
+          // );
 
 
-        const payinBank = (
+  //       const payinBank = (
+  // <div className="flex items-center space-x-2">
+
+  //   {/* ✅ PAYIN BANK DROPDOWN */}
+  //   <select
+  //     value={item.payin_bank?.id || ""}
+  //     onChange={(e) =>
+  //       handlePayinBankChange(item.id, e.target.value)
+  //     }
+  //     className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+  //   >
+  //     <option value="">Select Bank</option>
+
+  //     {Bank_payin?.data?.data?.map((bank) => (
+  //       <option key={bank.id} value={bank.id}>
+  //         {bank.onboard_payin_bank}
+  //       </option>
+  //     ))}
+  //   </select>
+
+
+  //   {/* ✅ SHOW CREDENTIAL ONLY FOR AIRPAY */}
+  //   {item.payin_bank?.onboard_payin_bank === "Airpay" && (
+  //     <select
+  //       value={item.credentials_id || ""}
+  //       onChange={(e) =>
+  //         handleCredentialChange(item.id, e.target.value)
+  //       }
+  //       className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+  //     >
+  //       <option value="">Select MID</option>
+
+  //       {credentialsData?.data?.map((cred) => (
+  //         <option key={cred.id} value={cred.id}>
+  //           {cred.name}
+  //         </option>
+  //       ))}
+  //     </select>
+  //   )}
+
+  // </div>
+// );
+
+const filteredCredentials = credentialsData?.data?.filter(
+  (cred) => cred.bank_id === item.payin_bank?.id
+);
+
+const payinBank = (
   <div className="flex items-center space-x-2">
 
-    {/* ✅ PAYIN BANK DROPDOWN */}
+    {/* BANK DROPDOWN */}
     <select
       value={item.payin_bank?.id || ""}
-      onChange={(e) =>
-        handlePayinBankChange(item.id, e.target.value)
-      }
-      className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+      onChange={(e) => handlePayinBankChange(item.id, e.target.value)}
+      className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400"
     >
       <option value="">Select Bank</option>
 
-      {Bank_payin?.data?.data?.map((bank) => (
+      {bankList.map((bank) => (
         <option key={bank.id} value={bank.id}>
           {bank.onboard_payin_bank}
         </option>
       ))}
     </select>
 
-
-    {/* ✅ SHOW CREDENTIAL ONLY FOR AIRPAY */}
-    {item.payin_bank?.onboard_payin_bank === "Airpay" && (
+    {/* CREDENTIAL DROPDOWN */}
+    {filteredCredentials?.length > 0 && (
       <select
         value={item.credentials_id || ""}
-        onChange={(e) =>
-          handleCredentialChange(item.id, e.target.value)
-        }
-        className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400 focus:outline-none"
+        onChange={(e) => handleCredentialChange(item.id, e.target.value)}
+        className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-sky-400"
       >
-        <option value="">Select MID</option>
+        <option value="">Select Credential</option>
 
-        {credentialsData?.data?.map((cred) => (
+        {filteredCredentials.map((cred) => (
           <option key={cred.id} value={cred.id}>
             {cred.name}
           </option>
         ))}
       </select>
     )}
-
   </div>
 );
         return {

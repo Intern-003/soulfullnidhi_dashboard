@@ -7,7 +7,7 @@ import paymentGatewayBg from "../images/login-background.jpg";
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
 
-const OTP_TIMER = 30;
+const OTP_TIMER = 300;
 
 // Strong email regex - prevents unrealistic TLDs like .commmmmmm
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,12}$/i;

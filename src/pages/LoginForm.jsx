@@ -81,7 +81,9 @@ const FloatingInput = ({
 function LoginForm() {
   const [prekycmodal, setprekycmodal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ mobile_no: "", password: "" });
+  // const [formData, setFormData] = useState({ mobile_no: "", password: "" });
+    const [formData, setFormData] = useState({ login_id: "", password: "" });
+
 
   const navigate = useNavigate();
   const channelRef = useRef(null);
@@ -119,32 +121,43 @@ function LoginForm() {
 
 const handleChange = (e) => {
   const { name, value } = e.target;
+  
+  setFormData({
+    ...formData,
+    [name]: value,
+  });
+  // if (name === "mobile_no") {
+  //   // Allow only numbers and max 10 digits
+  //   const cleanedValue = value.replace(/\D/g, "").slice(0, 10);
 
-  if (name === "mobile_no") {
-    // Allow only numbers and max 10 digits
-    const cleanedValue = value.replace(/\D/g, "").slice(0, 10);
-
-    setFormData({
-      ...formData,
-      [name]: cleanedValue,
-    });
-  } else {
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  }
+  //   setFormData({
+  //     ...formData,
+  //     [name]: cleanedValue,
+  //   });
+  // } else {
+  //   setFormData({
+  //     ...formData,
+  //     [name]: value,
+  //   });
+  // }
 };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await login(formData);
+      // const response = await login(formData);
+      const payload = {
+  username: formData.login_id,
+  password: formData.password
+};
+
+const response = await login(payload);
       if (response) {
         const user = response.user;
         localStorage.setItem("token", response.token);
         localStorage.setItem("email", response.user.mobile_no);
+        localStorage.setItem("login_id", response.user.login_id);
         localStorage.setItem("role", btoa(response.user.role_type));
         localStorage.setItem("user", JSON.stringify(response.user));
 
@@ -191,6 +204,9 @@ const handleChange = (e) => {
       }
     } catch (err) {
       console.log("Login failed:", err);
+        if (/^\d+$/.test(formData.login_id)) {
+    alert("Please login using your email.");
+  }
     }
   };
 
@@ -250,13 +266,13 @@ const handleChange = (e) => {
               {/* Email field – now 80% width, centered */}
               <div className="w-[92%] mx-auto">
                 <FloatingInput
-                  placeholder="Business Mobile No"
-                  type="tel"
-                  name="mobile_no"
-                  value={formData.mobile_no}
+                  placeholder="Business Email"
+                  type="text"
+                  name="login_id"
+                  value={formData.login_id}
                   onChange={handleChange}
                   required
-                  error={error?.errors?.mobile_no}
+                  error={error?.errors?.login_id}
                   className="
                     h-13 text-base
                     transition-all duration-200

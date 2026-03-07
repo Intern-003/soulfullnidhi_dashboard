@@ -11,7 +11,8 @@ export const Header = ({ onMenuClick }) => {
   const { execute: logout } = usePost("/logout");
   const { data } = useAutoFetch("/collection-cashfree");
   const { data: merchantData } = useGet("/show-merchant");
-  // console.log("payout data : ", merchantData);
+
+  console.log("payin data : ", merchantData);
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -19,9 +20,11 @@ export const Header = ({ onMenuClick }) => {
 
   // payin wallet
 
-  const payingAmount = data?.PayingAmount ?? "0.00";
-  const Payoutwallet = data?.payout_wallet ?? "0.00";
-
+  const payingAmount = merchantData?.data?.payin_wallet ?? "0.00";
+  const Payoutwallet = merchantData?.payout_wallet ?? "0.00";
+   const PayinRollingAmount = merchantData?.data?.rolling_amount ?? "0.00";
+    const PayinTotalCharges = merchantData?.data?.total_charges ?? "0.00";
+// console.log(PayinRollingAmount);
   // State for role
   const [role, setRole] = useState(atob(localStorage.getItem("role"))); // admin / user / crypto
   const email = localStorage.getItem("email");
@@ -29,16 +32,6 @@ export const Header = ({ onMenuClick }) => {
   // ✅ Show button only for specific email AND only on dashboard page
   const showButton =
     email === "saad.sayyed@example.com" && location.pathname === "/dashboard";
-
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-  //       setOpen(false);
-  //     }
-  //   };
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => document.removeEventListener("mousedown", handleClickOutside);
-  // }, []);
 
   const userStats = [
     {
@@ -67,18 +60,6 @@ export const Header = ({ onMenuClick }) => {
     },
   ];
 
-  // const handleLogout = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     await logout();
-  //     localStorage.removeItem(DASHBOARD_LOCK_KEY);
-  //     localStorage.removeItem("token");
-  //     localStorage.removeItem("role");
-  //     navigate("/");
-  //   } catch (err) {
-  //     console.error("Logout failed:", err);
-  //   }
-  // };
 
   return (
     <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-indigo-500/50">
@@ -90,10 +71,31 @@ export const Header = ({ onMenuClick }) => {
         >
           ☰
         </button>
+
+          {/* {role === "user" && (
+    <div className="hidden lg:flex items-center gap-6 ml-6">
+      {userStats.map((stat) => (
+        <div
+          key={stat.id}
+          className="flex items-center gap-2 text-sm font-medium text-gray-700"
+        >
+          <i className={stat.icon}></i>
+          <span>{stat.label}:</span>
+          <span className="font-semibold text-gray-900">
+            ₹{stat.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  )} */}
       </div>
 
       {/* right side */}
+      
+
+    
       <div className="flex items-center justify-end gap-4">
+        {/* {role === "admin" && ( */}
         <div className="text-gray-800 font-semibold flex items-center gap-1">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +121,7 @@ export const Header = ({ onMenuClick }) => {
             ).toFixed(2)}
           </span>
         </div>
-
+{/* )} */}
         {/* Profile Icon */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -134,7 +136,7 @@ export const Header = ({ onMenuClick }) => {
           </button>
         </div>
       </div>
-
+  
       {/* Profile Sidebar */}
       <ProfileSidebar
         open={open}
@@ -142,6 +144,8 @@ export const Header = ({ onMenuClick }) => {
         data={merchantData?.data}
         role={role}
         payingAmount={payingAmount}
+        PayinRollingAmount = {PayinRollingAmount}
+        PayinTotalCharges = {PayinTotalCharges}
       />
     </nav>
   );

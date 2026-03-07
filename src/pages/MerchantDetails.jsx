@@ -60,7 +60,7 @@ return (
         ["Company CIN Number", merchant.cin_llpin],
         ["Date of Incorporation", merchant.date_of_incorporation],
         ["Website URL", merchant.website_url],
-        ["Onboarded Payin Bank", merchant.payin_at_onboard],
+        ["Onboarded Payin Bank", merchant.payin_bank],
         ["Onboarded Payout Bank", merchant.payout_at_onboard],
         ["Scheme Name", scheme?.name ?? "null"],
         ["payin scheme", scheme?.payin_commision_amount || "00"], 
