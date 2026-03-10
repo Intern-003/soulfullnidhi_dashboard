@@ -54,26 +54,28 @@ export const Member = () => {
   const { execute: updateCredential } = usePost("/update-credential");
   const { data: Bank_payin } = useGet("/payinbanks-List");
   const { executePut: updatepayinbank } = usePut("/update-user-payin-bank");
-  
+
   const {
     data: dataOfMerchants,
     refetch: refetchOfMerchants,
     loading: merchantLoading,
   } = useAutoFetch("/get-merchants", 20000);
-const m_id = dataOfMerchants?.data?.map(m => m.id).join(",");
+
+  const m_id = dataOfMerchants?.data?.map((m) => m.id).join(",");
   const { data: credentialsData } = useGet("/credentials");
 
   const initialDataOfMerchants = useMemo(
     () => dataOfMerchants?.data ?? [],
     [dataOfMerchants]
   );
-  // const { data: summaryData } = useAutoFetch("/collection-summary");
-const { data: summaryData } = useAutoFetch(`/collection-summary?user_ids=${m_id}`);
+
+  const { data: summaryData } = useAutoFetch(`/collection-summary?user_ids=${m_id}`);
+
   useEffect(() => {
     if (!merchantLoading && dataOfMerchants) setInitialLoad(false);
   }, [merchantLoading, dataOfMerchants]);
 
-  const bankList = Bank_payin?.data?.data || [];  
+  const bankList = Bank_payin?.data?.data || [];
 
   const handleChange = (e) => {
     setWalletFormData({
@@ -306,9 +308,8 @@ const { data: summaryData } = useAutoFetch(`/collection-summary?user_ids=${m_id}
             </span>
             <br />
             <span>
-              {/* Today Payin Amount:<b>{summaryData?.today_payin}</b> */}
-              Today Payin Amount:<b>{summaryData?.specific_user_today_payin?.[item.id] || 0}</b>
-              {/* Today Payin Amount:<b>{item?.today_payin}</b> */}
+              Today Payin Amount:
+              <b>{summaryData?.specific_user_today_payin?.[item.id] || 0}</b>
             </span>
             <br />
           </div>
@@ -442,16 +443,48 @@ const { data: summaryData } = useAutoFetch(`/collection-summary?user_ids=${m_id}
       document.body.removeChild(link);
     };
 
-    const csvRows = filteredMerchantData.map((row) => ({
-      "User ID": row.id,
-      "Name": row.raw_name,
-      "Merchant Details": row.merchant_details_text,
-      "Account Status": row.account ? "Active" : "Inactive",
-      "Payin Status": row.payin ? "On" : "Off",
-      "Payout Status": row.payout ? "On" : "Off",
-      "KYC Status": row.kyc_status,
-      "Created Date": row.created_at,
-    }));
+    const formatExportDateTime = (value) => {
+      if (!value) {
+        return { date: "", time: "" };
+      }
+
+      const d = new Date(value);
+
+      if (isNaN(d.getTime())) {
+        const raw = String(value).trim();
+        const parts = raw.split(" ");
+        return {
+          date: parts[0] || "",
+          time: parts[1] || "",
+        };
+      }
+
+      return {
+        date: d.toLocaleDateString("en-GB"),
+        time: d.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        }),
+      };
+    };
+
+    const csvRows = filteredMerchantData.map((row) => {
+      const { date, time } = formatExportDateTime(row.created_at);
+
+      return {
+        "User ID": row.id,
+        Name: row.raw_name,
+        "Merchant Details": row.merchant_details_text,
+        "Account Status": row.account ? "Active" : "Inactive",
+        "Payin Status": row.payin ? "On" : "Off",
+        "Payout Status": row.payout ? "On" : "Off",
+        "KYC Status": row.kyc_status,
+        "Created Date": date,
+        "Created Time": time,
+      };
+    });
 
     const headers = Object.keys(csvRows[0]);
     const csv = [

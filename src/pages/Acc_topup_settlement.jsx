@@ -313,25 +313,57 @@ const Acc_topup_settlement = () => {
     document.body.removeChild(link);
   };
 
+  const formatExportDateTime = (value) => {
+    if (!value) {
+      return { date: "", time: "" };
+    }
+
+    const d = new Date(value);
+
+    if (isNaN(d.getTime())) {
+      const raw = String(value).trim();
+      const parts = raw.split(" ");
+      return {
+        date: parts[0] || "",
+        time: parts[1] || "",
+      };
+    }
+
+    return {
+      date: d.toLocaleDateString("en-GB"), // DD/MM/YYYY
+      time: d.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }),
+    };
+  };
+
   const exportCSV = () => {
     if (!filteredData.length) {
       alert("No data to export.");
       return;
     }
 
-    const csvRows = filteredData.map((row) => ({
-      "Order ID": row.id,
-      "User ID": row.user_id,
-      "Merchant Name": row.merchant_name,
-      "Merchant Details": row.merchant_details_text,
-      "Transaction ID": row.txnid,
-      "Product Type": row.product_type,
-      "Amount": row.amount,
-      "Status": row.status,
-      "Created At": row.created_at,
-      "Opening Bal": row.payout_opening_balance,
-      "Closing Bal": row.payout_closing_balance,
-    }));
+    const csvRows = filteredData.map((row) => {
+      const { date, time } = formatExportDateTime(row.created_at);
+
+      return {
+        "Order ID": row.id,
+        "User ID": row.user_id,
+        "Merchant Name": row.merchant_name,
+        "Merchant Details": row.merchant_details_text,
+        "Transaction ID": row.txnid,
+        "Product Type": row.product_type,
+        "Amount": row.amount,
+        "Status": row.status,
+        "Date": date,
+        "Time": time,
+        "Opening Bal": row.payout_opening_balance,
+        "Closing Bal": row.payout_closing_balance,
+      };
+    });
 
     const headers = Object.keys(csvRows[0]);
 

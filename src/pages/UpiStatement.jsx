@@ -313,28 +313,60 @@ const UpiStatement = () => {
     document.body.removeChild(link);
   };
 
+  const formatExportDateTime = (value) => {
+    if (!value) {
+      return { date: "", time: "" };
+    }
+
+    const d = new Date(value);
+
+    if (isNaN(d.getTime())) {
+      const raw = String(value).trim();
+      const parts = raw.split(" ");
+      return {
+        date: parts[0] || "",
+        time: parts[1] || "",
+      };
+    }
+
+    return {
+      date: d.toLocaleDateString("en-GB"),
+      time: d.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }),
+    };
+  };
+
   const exportCSV = () => {
     if (!filteredData.length) {
       alert("No data to export.");
       return;
     }
 
-    const csvRows = filteredData.map((row) => ({
-      "Order ID": row.id,
-      "User ID": row.user_id,
-      "Merchant Name": row.merchant_name,
-      "Merchant Details": row.merchant_details_text,
-      "Payee VPA": row.payee_vpa,
-      "Ref No": row.refno,
-      "Payee Txnid": row.mytxnid,
-      "TxnId": row.txnid,
-      "Amount": row.amount,
-      "Charges": row.charge,
-      "GST": row.gst,
-      "Payin Rolling Amount": row.payin_rolling_amount,
-      "Status": row.status,
-      "Created At": row.created_at,
-    }));
+    const csvRows = filteredData.map((row) => {
+      const { date, time } = formatExportDateTime(row.created_at);
+
+      return {
+        "Order ID": row.id,
+        "User ID": row.user_id,
+        "Merchant Name": row.merchant_name,
+        "Merchant Details": row.merchant_details_text,
+        "Payee VPA": row.payee_vpa,
+        "Ref No": row.refno,
+        "Payee Txnid": row.mytxnid,
+        "TxnId": row.txnid,
+        "Amount": row.amount,
+        "Charges": row.charge,
+        "GST": row.gst,
+        "Payin Rolling Amount": row.payin_rolling_amount,
+        "Status": row.status,
+        "Date": date,
+        "Time": time,
+      };
+    });
 
     const headers = Object.keys(csvRows[0]);
 
