@@ -29,17 +29,25 @@ export const Dashboard = () => {
   const [transactionData, setTransactionData] = useState([]);
   const [largeTransactionData, setLargeTransactionData] = useState([]);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("SUCCESS");
+  // const [statusFilter, setStatusFilter] = useState("SUCCESS");
+  const [statusFilter, setStatusFilter] = useState(() => {
+  return localStorage.getItem("dashboard_status_filter") || "SUCCESS";
+});
+
 
   // ─── APIs ───
-  const { data: cardData, loading: recordLoading } = useAutoFetch("/collection-record");
+  const { data: cardData, loading: recordLoading } = useAutoFetch("/collection-record",90000);
 
   
-  const { data: summaryData, loading: summaryLoading } = useAutoFetch("/collection-summary");
+  const { data: summaryData, loading: summaryLoading } = useAutoFetch("/collection-summary",60000);
   
-const { data: statusCounts, loading: statusLoading } = useAutoFetch("/collection-statuscounts");
-const { data: monthwiseData, loading: monthLoading } = useAutoFetch("/collection-monthwise");
+const { data: statusCounts, loading: statusLoading } = useAutoFetch("/collection-statuscounts",120000);
+const { data: monthwiseData, loading: monthLoading } = useAutoFetch("/collection-monthwise",120000);
 const { data: cashfreeData, loading: cashfreeLoading } = useAutoFetch("/collection-cashfree");
+
+useEffect(() => {
+  localStorage.setItem("dashboard_status_filter", statusFilter);
+}, [statusFilter]);
 
 
   // Dynamic URL for cursor-based pagination
@@ -111,6 +119,7 @@ const { data: cashfreeData, loading: cashfreeLoading } = useAutoFetch("/collecti
       .sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0))
       .slice(0, 4);
   }, [rawRecords]);
+
 
   // ─── Format table rows + large transactions ───
   useEffect(() => {
@@ -199,18 +208,19 @@ const { data: cashfreeData, loading: cashfreeLoading } = useAutoFetch("/collecti
 
       if (!isValid) {
         navigate("/", { replace: true });
-      }
+}else {
+  const savedFilter = localStorage.getItem("dashboard_status_filter");
+
+  if (!savedFilter) {
+    localStorage.setItem("dashboard_status_filter", "SUCCESS");
+    setStatusFilter("SUCCESS");
+  }
+}
     };
 
     const timer = setTimeout(checkAuthentication, 150);
     return () => clearTimeout(timer);
   }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem(DASHBOARD_LOCK_KEY);
-    navigate("/", { replace: true });
-  };
 
   useEffect(() => {
     if (!recordLoading && cardData) setInitialLoad(false);
@@ -235,20 +245,6 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
     });
   };
 
-//   const formatRupee = (value) => {
-//   const num = Number(value || 0);
-
-//   if (num >= 10000000) {
-//     return `${(num / 10000000).toFixed(2).replace(/\.00$/, "")} Cr`;
-//   }
-
-//   if (num >= 100000) {
-//     return `${(num / 100000).toFixed(2).replace(/\.00$/, "")} L`;
-//   }
-
-//   return `${num.toLocaleString("en-IN")}`;
-// };
-
   const transactioncolumn = [
     { header: "TXN Id", accessor: "txnid" },
     { header: "Merchant", accessor: "name" },
@@ -258,10 +254,7 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
     { header: "Date/Time", accessor: "time" },
   ];
 
-  // ─── Render ───
-  // if (isCheckingAuth) return <DashboardSkeleton />;
-  // if (!isAuthenticated) return null;
-  if(isCheckingAuth || recordLoading || initialLoad){
+  if(isCheckingAuth  || initialLoad){
     return <DashboardSkeleton />
   }
   if (!isAuthenticated) return null;
@@ -275,18 +268,6 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7 mb-12">
           {cardsToShow.map((card, i) => {
             const amountStr = formatRupee(card.value);
-            let fontClass = "text-xl md:text-xl";
-            // const len = amountStr.length;
-
-            // if (len >= 7) fontClass = "text-2.5xl md:text-3.5xl";
-            // if (len >= 9) fontClass = "text-2xl md:text-3xl";
-            // if (len >= 11) fontClass = "text-xl md:text-2.5xl";
-            // if (len >= 13) fontClass = "text-lg md:text-2xl";
-            // if (len >= 15) fontClass = "text-base md:text-xl";
-            // if (len >= 17) fontClass = "text-sm md:text-lg";
-            // if (len >= 19) fontClass = "text-xs md:text-base";
-            // if (len >= 21) fontClass = "text-xs md:text-sm";
-
             return (
               <div
                 key={i}
@@ -303,7 +284,6 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
                     {card.title}
                   </h3>
                   <div
-                    // className={`${fontClass} font-extrabold text-slate-800 tracking-tight whitespace-nowrap overflow-hidden max-w-full w-full`}
     className="font-bold text-slate-800 whitespace-nowrap w-full tabular-nums text-[clamp(10px,1.5vw,20px)]"
 
                     title={`₹${amountStr}`}

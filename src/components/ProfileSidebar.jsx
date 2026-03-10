@@ -41,6 +41,7 @@ export const ProfileSidebar = ({
       localStorage.removeItem("role");
       localStorage.removeItem("user");
       sessionStorage.removeItem("tabId");
+      localStorage.removeItem("dashboard_status_filter"); 
 
       if (window.BroadcastChannel) {
         const channel = new BroadcastChannel("dashboard_login_channel");

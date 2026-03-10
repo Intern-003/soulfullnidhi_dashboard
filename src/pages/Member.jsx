@@ -52,28 +52,28 @@ export const Member = () => {
   const { executePut: updateSingle } = usePut("/update-user-statuses");
   const { executePut: updateAll } = usePut("/payin-payout-statuses");
   const { execute: updateCredential } = usePost("/update-credential");
-  const { data: summaryData } = useAutoFetch("/collection-summary");
   const { data: Bank_payin } = useGet("/payinbanks-List");
   const { executePut: updatepayinbank } = usePut("/update-user-payin-bank");
-
+  
   const {
     data: dataOfMerchants,
     refetch: refetchOfMerchants,
     loading: merchantLoading,
   } = useAutoFetch("/get-merchants", 20000);
-
+const m_id = dataOfMerchants?.data?.map(m => m.id).join(",");
   const { data: credentialsData } = useGet("/credentials");
 
   const initialDataOfMerchants = useMemo(
     () => dataOfMerchants?.data ?? [],
     [dataOfMerchants]
   );
-
+  // const { data: summaryData } = useAutoFetch("/collection-summary");
+const { data: summaryData } = useAutoFetch(`/collection-summary?user_ids=${m_id}`);
   useEffect(() => {
     if (!merchantLoading && dataOfMerchants) setInitialLoad(false);
   }, [merchantLoading, dataOfMerchants]);
 
-  const bankList = Bank_payin?.data?.data || [];
+  const bankList = Bank_payin?.data?.data || [];  
 
   const handleChange = (e) => {
     setWalletFormData({
@@ -306,7 +306,9 @@ export const Member = () => {
             </span>
             <br />
             <span>
-              Today Payin Amount:<b>{summaryData?.today_payin}</b>
+              {/* Today Payin Amount:<b>{summaryData?.today_payin}</b> */}
+              Today Payin Amount:<b>{summaryData?.specific_user_today_payin?.[item.id] || 0}</b>
+              {/* Today Payin Amount:<b>{item?.today_payin}</b> */}
             </span>
             <br />
           </div>

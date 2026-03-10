@@ -110,19 +110,10 @@ useEffect(() => {
 
 const handleLoadMore = () => {
   if (!hasMore || loading) return;
-  fetchMerchants();
+  fetchMerchantsPayin();
 };
 
-  
-  // useEffect(() => {
-  //   const formattedData = initialDataOfPayinWallet?.map((item, index) => ({
-  //     sqno: index + 1,
-  //     id: item.id,
-  //     name: item.name,
-  //     payin_wallet: item.payin_wallet,
-  //   }));
-  //   setPayinSettlementData(formattedData || []);
-  // }, [initialDataOfPayinWallet]);
+
 
   const membercolumn = [
     { header: "User Id", accessor: "id" },
@@ -163,18 +154,8 @@ const handleLoadMore = () => {
       const res = await payinSettlement(payload);
       if (res) {
         toast.success("Settlement done successfully!!");
-        // refetch();
-        //   setRawData([]);
-        // setPayinSettlementData([]);
-        // setCursor(null);
-        // setHasMore(true);
-        // lastCursorRef.current = null;
 
         fetchMerchantsPayin();
-        // setPayinFormData({
-        //   payin_wallet: "",
-        //   remark: "",
-        // });
         setShowModal(false);
       }
     } catch (err) {
@@ -208,10 +189,6 @@ const handleLoadMore = () => {
           showDeleteColumn={false}
           showDateFilter={false}
           showStatusFilter={false}
-          // className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
-          // paginationClassName="flex justify-end gap-2 mt-4"
-          // previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
-          // nextClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"
            showExport={false}
             isServerPaginated
           hasMore={hasMore}
