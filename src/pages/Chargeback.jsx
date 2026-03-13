@@ -1,17 +1,17 @@
+import React from 'react'
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import Table from "../components/Table";
 import TableFilters from "../components/TableFilters";
-import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
+import { REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
 
 const BATCH_SIZE = 3000;
 const FETCH_DELAY = 150;
-const CACHE_TTL_MS = 1000 * 60 * 30; // 30 minutes
+const CACHE_TTL_MS = 1000 * 60 * 30; // 30 min
 
-
-const UpiStatement = () => {
-  const [allUpiData, setAllUpiData] = useState([]);
+const Chargeback = () => {
+ const [allPayinSettlementData, setAllPayinSettlementData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [allLoaded, setAllLoaded] = useState(false);
@@ -24,15 +24,10 @@ const UpiStatement = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [selectedMerchant, setSelectedMerchant] = useState(null);
-  //  const [role] = useState(atob(localStorage.getItem("role") || "") || "admin");
 
   const nextCursorRef = useRef(null);
   const stopFetchingRef = useRef(false);
   const seenIdsRef = useRef(new Set());
-
-  const role = atob(localStorage.getItem("role"));
-
-  const [acceptedChargebacks, setAcceptedChargebacks] = useState(new Set());
 
   const userId =
     localStorage.getItem("user_id") ||
@@ -40,34 +35,25 @@ const UpiStatement = () => {
     localStorage.getItem("userid") ||
     "default_user";
 
-  const CACHE_KEY = `upi_statement_cache_${userId}`;
+  const CACHE_KEY = `chargeback_cache_${userId}`;
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const normalizeRows = useCallback((rows) => {
     return rows
-        .filter((item) => item.product === "UPI")
-    .map((item) => ({
-      // .map((item) => ({
-         product: item.product ?? "N/A",
+      .map((item) => ({
         id: item.id,
         user_id: item.user_id,
         merchant_name: item.user?.name ?? "N/A",
         merchant_details_text: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
-        payee_vpa: item.payee_vpa ?? "null",
-        refno: item.refno ?? "null",
-        mytxnid: item.mytxnid ?? "null",
-        txnid: item.txnid ?? "null",
+        txnid: item.txnid ?? "N/A",
+        product_type: item.product ?? "N/A",
         amount: item.amount ?? "0",
-        charge: item.charge ?? "0",
-        gst: item.gst ?? "0",
-        payin_rolling_amount: item.payin_rolling_amount ?? "0",
+        numericAmount: parseFloat(item.amount) || 0,
+        payin_opening_balance: item.payin_opening ?? "0.0",
+        payin_closing_balance: item.payin_closing ?? "0.0",
         status: item.status ?? "N/A",
         created_at: item.created_at,
-        numericAmount: parseFloat(item.amount) || 0,
-        apitxnid: item.apitxnid || "N/A",
-        mid: item.option4 || "N/A",
-         chargeback_status: item.chargeback_status || "N/A",
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
@@ -123,7 +109,7 @@ const UpiStatement = () => {
         const token = localStorage.getItem("token");
 
         const query = new URLSearchParams({
-          product: "UPI",
+          product: "chargeback",
           per_page: String(BATCH_SIZE),
           ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {}),
         }).toString();
@@ -144,7 +130,7 @@ const UpiStatement = () => {
         }
 
         const rows = Array.isArray(json.data) ? json.data : [];
-// console.log(json.data);
+
         const uniqueRows = rows.filter((item) => {
           if (!item?.id) return false;
           if (seenIdsRef.current.has(item.id)) return false;
@@ -154,7 +140,7 @@ const UpiStatement = () => {
 
         const formattedRows = normalizeRows(uniqueRows);
 
-        setAllUpiData((prev) => {
+        setAllPayinSettlementData((prev) => {
           const merged = [...prev, ...formattedRows].sort(
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
           );
@@ -163,7 +149,6 @@ const UpiStatement = () => {
           const finished = !nextCursor;
 
           saveCache(merged, nextCursor, finished);
-
           return merged;
         });
 
@@ -175,7 +160,7 @@ const UpiStatement = () => {
         }
       } catch (err) {
         console.error(err);
-        setError("Failed to load UPI statements");
+        setError("Failed to load Payin Settlement");
         stopFetchingRef.current = true;
       } finally {
         setLoading(false);
@@ -194,39 +179,28 @@ const UpiStatement = () => {
     while (!stopFetchingRef.current && nextCursorRef.current) {
       await sleep(FETCH_DELAY);
       await fetchBatch(false);
-      
     }
   }, [fetchBatch]);
 
   useEffect(() => {
     const cached = loadCache();
 
-    // if (cached) {
-    //   setAllUpiData(cached.data || []);
-    //   setAllLoaded(Boolean(cached.allLoaded));
-    //   nextCursorRef.current = cached.nextCursor || null;
-    //   seenIdsRef.current = new Set((cached.data || []).map((item) => item.id));
-    //   setLoading(false);
-
-    //   if (!cached.allLoaded && cached.nextCursor) {
-    //     startProgressiveFetch();
-    //   }
-
-    //   return;
-    // }
     if (cached) {
-  setAllUpiData(cached.data || []);
-  setAllLoaded(Boolean(cached.allLoaded));
-  nextCursorRef.current = cached.nextCursor || null;
-  seenIdsRef.current = new Set((cached.data || []).map((item) => item.id));
-  setLoading(false);
-}
+      setAllPayinSettlementData(cached.data || []);
+      setAllLoaded(Boolean(cached.allLoaded));
+      nextCursorRef.current = cached.nextCursor || null;
+      seenIdsRef.current = new Set((cached.data || []).map((item) => item.id));
+      setLoading(false);
 
-// ALWAYS fetch fresh data
-startProgressiveFetch();
+      if (!cached.allLoaded && cached.nextCursor) {
+        startProgressiveFetch();
+      }
+
+      return;
+    }
 
     nextCursorRef.current = null;
-    setAllUpiData([]);
+    setAllPayinSettlementData([]);
     setAllLoaded(false);
     startProgressiveFetch();
 
@@ -270,7 +244,7 @@ startProgressiveFetch();
   };
 
   const filteredData = useMemo(() => {
-    return allUpiData.filter((row) => {
+    return allPayinSettlementData.filter((row) => {
       const searchValue = txnSearch.trim().toLowerCase();
 
       const searchText = [
@@ -279,13 +253,8 @@ startProgressiveFetch();
         row.merchant_name,
         row.merchant_details_text,
         row.txnid,
-        row.mytxnid,
-        row.refno,
-        row.payee_vpa,
-        row.apitxnid,
-          row.mid,
-           row.product,
-
+        row.product_type,
+        row.amount,
       ]
         .map((v) => String(v || "").toLowerCase())
         .join(" ");
@@ -309,11 +278,21 @@ startProgressiveFetch();
 
       return matchesTxn && matchesStatus && matchesDate && matchesMerchant;
     });
-  }, [allUpiData, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
+  }, [
+    allPayinSettlementData,
+    txnSearch,
+    statusFilter,
+    startDate,
+    endDate,
+    selectedMerchant,
+  ]);
 
   const totalSuccessAmount = useMemo(() => {
     return filteredData
-      .filter((row) => String(row.status || "").toLowerCase() === "success")
+      .filter((row) => {
+        const status = String(row.status || "").toLowerCase();
+        return status === "success" || status === "completed";
+      })
       .reduce((sum, row) => sum + (Number(row.numericAmount) || 0), 0);
   }, [filteredData]);
 
@@ -351,16 +330,13 @@ startProgressiveFetch();
       "User ID": row.user_id,
       "Merchant Name": row.merchant_name,
       "Merchant Details": row.merchant_details_text,
-      "Payee VPA": row.payee_vpa,
-      "Ref No": row.refno,
-      "Payee Txnid": row.mytxnid,
-      "TxnId": row.txnid,
+      "Transaction ID": row.txnid,
+      "Product Type": row.product_type,
       "Amount": row.amount,
-      "Charges": row.charge,
-      "GST": row.gst,
-      "Payin Rolling Amount": row.payin_rolling_amount,
       "Status": row.status,
       "Created At": row.created_at,
+      "Opening Bal": row.payin_opening_balance,
+      "Closing Bal": row.payin_closing_balance,
     }));
 
     const headers = Object.keys(csvRows[0]);
@@ -372,7 +348,7 @@ startProgressiveFetch();
       ),
     ].join("\n");
 
-    downloadFile(csv, "upi_statement_filtered.csv", "text/csv");
+    downloadFile(csv, "payin_settlement_filtered.csv", "text/csv");
   };
 
   const handleClearAll = () => {
@@ -389,7 +365,7 @@ startProgressiveFetch();
 
     nextCursorRef.current = null;
     seenIdsRef.current = new Set();
-    setAllUpiData([]);
+    setAllPayinSettlementData([]);
     setAllLoaded(false);
 
     await startProgressiveFetch();
@@ -397,89 +373,19 @@ startProgressiveFetch();
 
   const statusClasses = {
     pending: "bg-[#dfaf03ff] text-white",
-    initiated: "bg-[#0f3cb9ff] text-white",
+    initiated: "bg-blue-400 text-white",
     success: "bg-[#057034ff] text-white",
-    complete: "bg-[#057034ff] text-white",
+    completed: "bg-[#057034ff] text-white",
     failed: "bg-[#ff3366] text-white",
     reversed: "bg-[#ff3366] text-white",
     refunded: "bg-gray-400 text-white",
   };
 
-const handleAccept = async (row) => {
-  const token = localStorage.getItem("token");
-
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/chargeback`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          order_id: row.id,
-        }),
-      }
-    );
-
-    const data = await res.json();
-
-    if (res.ok && data.status) {
-
-      setAcceptedChargebacks((prev) => {
-        const updated = new Set(prev);
-        updated.add(row.id);
-        return updated;
-      });
-
-      setAllUpiData((prev) =>
-        prev.map((item) =>
-          item.id === row.id
-            ? { ...item, chargeback_status: "accepted" }
-            : item
-        )
-      );
-
-    } else {
-      alert(data.message || "Chargeback update failed");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("API error while updating chargeback");
-  }
-};
-
-  const upiColumn = [
+  const payinSettlementColumn = [
     {
-      header: "Order Id",
+      header: "SQ NO",
       accessor: "id",
-      Cell: ({ row }) => {
-        const d = new Date(row.created_at);
-        return (
-          <div className="flex flex-col text-left">
-            <span>
-              <b>{row.id}</b>
-            </span>
-            <span>
-              {isNaN(d)
-                ? "N/A"
-                : `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`}
-            </span>
-            <span className="text-sm text-gray-500">
-              {isNaN(d)
-                ? "N/A"
-                : d
-                    .toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })
-                    .toUpperCase()}
-            </span>
-          </div>
-        );
-      },
+      Cell: ({ row }) => <span>{row.id}</span>,
     },
     {
       header: "Merchant Details",
@@ -494,61 +400,16 @@ const handleAccept = async (row) => {
       ),
     },
     {
-      header: "Transaction Details",
+      header: "Transaction Id",
       accessor: "txnid",
-      Cell: ({ row }) => (
-        <>
-        <div className="flex flex-col text-left">
-          <span>
-            Payee VPA: <b>{row.payee_vpa}</b>
-          </span>
-          <span>
-            Ref No: <b>{row.refno}</b>
-          </span>
-          <span>
-            Payee Txnid: <b>{row.mytxnid}</b>
-          </span>
-          <span>
-            TxnId: <b>{row.txnid}</b>
-          </span>
-{role === "admin" && (
-  <>
-          <span>
-            Airpay id: <b>{row.apitxnid}</b>
-          </span>    
-
-          <span>
-            MID: <b>{row.mid}</b>
-          </span> 
-          <span>
-            product: <b>{row.product}</b>
-          </span>  
-        </> 
-      
-)}      
-        </div>
-        </>
-      ),
     },
     {
-      header: "Amount / Commission",
+      header: "Product Type",
+      accessor: "product_type",
+    },
+    {
+      header: "Amount",
       accessor: "amount",
-      Cell: ({ row }) => (
-        <div className="flex flex-col text-left">
-          <span>
-            Amount: <b>{row.amount}</b>
-          </span>
-          <span>
-            Charges: <b>{row.charge}</b>
-          </span>
-          <span>
-            GST: <b>{row.gst}</b>
-          </span>
-          <span>
-            Payin Rolling Amount: <b>{row.payin_rolling_amount}</b>
-          </span>
-        </div>
-      ),
     },
     {
       header: "Status",
@@ -556,38 +417,50 @@ const handleAccept = async (row) => {
       Cell: ({ row }) => (
         <span
           className={`px-2 py-1 rounded-full text-sm font-medium ${
-            statusClasses[String(row.status || "").toLowerCase()] ?? "bg-gray-600 text-white"
+            statusClasses[String(row.status || "").toLowerCase()] ?? "bg-gray-100 text-gray-800"
           }`}
         >
-          {row?.status
-            ? row.status.charAt(0).toUpperCase() + row.status.slice(1)
-            : "N/A"}
+          {row.status}
         </span>
       ),
     },
-{
-  header: "Chargeback",
-  accessor: "chargeback",
-  Cell: ({ row }) => {
-// console.log("chargeback",row);
-    const isAccepted =
-      row.chargeback_status === "accepted" ||
-      acceptedChargebacks.has(row.id);
-
-    return isAccepted ? (
-      <span className="px-3 py-1 bg-gray-400 text-white rounded-2xl text-sm">
-        Accepted
-      </span>
-    ) : (
-      <button
-        className="px-3 py-1 bg-purple-500 text-white rounded-2xl"
-        onClick={() => handleAccept(row)}
-      >
-        Accept
-      </button>
-    );
-  },
-}
+    {
+      header: "Date",
+      accessor: "created_at",
+      Cell: ({ row }) => {
+        const d = new Date(row.created_at);
+        return (
+          <div className="flex flex-col w-28">
+            <span className="text-sm font-medium">
+              {isNaN(d)
+                ? "N/A"
+                : d.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "2-digit",
+                  })}
+            </span>
+            <span className="text-sm text-gray-500">
+              {isNaN(d)
+                ? "N/A"
+                : d.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+            </span>
+          </div>
+        );
+      },
+    },
+    // {
+    //   header: "Opening Bal",
+    //   accessor: "payin_opening_balance",
+    // },
+    // {
+    //   header: "Closing Bal",
+    //   accessor: "payin_closing_balance",
+    // },
   ];
 
   return (
@@ -599,9 +472,11 @@ const handleAccept = async (row) => {
         }}
       >
         <div>
-          <h4 className="font-bold text-white text-xl">UPI Statement</h4>
+          <h4 className="font-bold text-white text-lg sm:text-xl">
+            Chargeback Statement
+          </h4>
           <p className="text-white/90 text-sm mt-1 hidden">
-            Loaded: {allUpiData.length}{" "}
+            Loaded: {allPayinSettlementData.length}{" "}
             {allLoaded ? "(All records loaded)" : "(Loading in background...)"}
           </p>
         </div>
@@ -615,7 +490,7 @@ const handleAccept = async (row) => {
       </div>
 
       <TableFilters
-        rawData={allUpiData}
+        rawData={allPayinSettlementData}
         txnSearch={txnSearch}
         setTxnSearch={setTxnSearch}
         statusFilter={statusFilter}
@@ -636,14 +511,14 @@ const handleAccept = async (row) => {
         totalSuccessAmount={totalSuccessAmount}
       />
 
-      {loading && allUpiData.length === 0 ? (
+      {loading && allPayinSettlementData.length === 0 ? (
         <TableSkeleton />
       ) : error ? (
         <div className="text-center py-6 text-red-500">{error}</div>
       ) : (
         <>
           <Table
-            columns={upiColumn}
+            columns={payinSettlementColumn}
             data={filteredData}
             showPagination={true}
             showDeleteColumn={false}
@@ -663,4 +538,5 @@ const handleAccept = async (row) => {
   );
 };
 
-export default UpiStatement;
+
+export default Chargeback

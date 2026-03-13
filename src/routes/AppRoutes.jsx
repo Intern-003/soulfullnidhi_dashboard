@@ -29,6 +29,7 @@ import Register from "../pages/Register";
 import { Kyc } from "../pages/Kyc";
 import { VerifyMerchant } from "../pages/VerifyMerchant";
 import { PendingVerificationModal } from "../components/PendingVerificationModal";
+import Chargeback from "../pages/Chargeback";
 
 const AppRoutes = () => {
     return(
@@ -108,6 +109,10 @@ const AppRoutes = () => {
                         </PrivateRoute>
                     } 
                 />
+                <Route path="/Chargeback" element={
+                     <PrivateRoute role={"admin"}>
+                    <Chargeback/>
+                    </PrivateRoute>} />
                 <Route
                     path="/load-wallet"
                     element={
