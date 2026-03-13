@@ -336,35 +336,67 @@ const PayoutStatement = () => {
     document.body.removeChild(link);
   };
 
+  const formatExportDateTime = (value) => {
+    if (!value) {
+      return { date: "", time: "" };
+    }
+
+    const d = new Date(value);
+
+    if (isNaN(d.getTime())) {
+      const raw = String(value).trim();
+      const parts = raw.split(" ");
+      return {
+        date: parts[0] || "",
+        time: parts[1] || "",
+      };
+    }
+
+    return {
+      date: d.toLocaleDateString("en-GB"),
+      time: d.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }),
+    };
+  };
+
   const exportCSV = () => {
     if (!filteredData.length) {
       alert("No data to export.");
       return;
     }
 
-    const csvRows = filteredData.map((row) => ({
-      "Order ID": row.id,
-      "User ID": row.user_id,
-      "Merchant Name": row.merchant_name,
-      "Merchant Details": row.merchant_details_text,
-      "Holder": row.holder,
-      "Account": row.account,
-      "IFSC": row.ifsc,
-      "UPI Id": row.upi_id,
-      "Mobile": row.mobile,
-      "Payment Mode": row.payment_mode,
-      "Ref No": row.refno,
-      "Order Ref ID": row.mytxnid,
-      "TxnId": row.txnid,
-      "Opening Wallet Amount": row.opening_wallet_amount,
-      "Pay Amount": row.pay_amount,
-      "Total Charges": row.total_charges,
-      "Total Debited Amount": row.total_debited_amount,
-      "Closing Wallet Amount": row.closing_wallet_amount,
-      "Note": row.note,
-      "Status": row.status,
-      "Created At": row.created_at,
-    }));
+    const csvRows = filteredData.map((row) => {
+      const { date, time } = formatExportDateTime(row.created_at);
+
+      return {
+        "Order ID": row.id,
+        "User ID": row.user_id,
+        "Merchant Name": row.merchant_name,
+        "Merchant Details": row.merchant_details_text,
+        Holder: row.holder,
+        Account: row.account,
+        IFSC: row.ifsc,
+        "UPI Id": row.upi_id,
+        Mobile: row.mobile,
+        "Payment Mode": row.payment_mode,
+        "Ref No": row.refno,
+        "Order Ref ID": row.mytxnid,
+        TxnId: row.txnid,
+        "Opening Wallet Amount": row.opening_wallet_amount,
+        "Pay Amount": row.pay_amount,
+        "Total Charges": row.total_charges,
+        "Total Debited Amount": row.total_debited_amount,
+        "Closing Wallet Amount": row.closing_wallet_amount,
+        Note: row.note,
+        Status: row.status,
+        Date: date,
+        Time: time,
+      };
+    });
 
     const headers = Object.keys(csvRows[0]);
 
