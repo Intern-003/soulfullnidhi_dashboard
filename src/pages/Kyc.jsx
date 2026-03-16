@@ -1,25 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { Stepper } from "../components/Stepper";
 import Button from "../components/Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ConfirmModal } from "../components/ConfirmModal";
-import { useGet } from "../hooks/useGet";
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
-import { useLocation } from "react-router-dom";
 import paymentGatewayBg from "../images/login-background.jpg";
 
 export const Kyc = () => {
   const location = useLocation();
-  // const [errors, setErrors] = useState();
+  const navigate = useNavigate();
+  const toast = useToast();
+
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-const [gstLoading, setGstLoading] = useState(false);
-const [gstVerified, setGstVerified] = useState(false);
-const [gstCompanyName, setGstCompanyName] = useState("");
 
-  const toast = useToast();
+  const [gstLoading, setGstLoading] = useState(false);
+  const [gstVerified, setGstVerified] = useState(false);
+  const [gstCompanyName, setGstCompanyName] = useState("");
+
+  // director digilocker states
+  const [directorVerifyLoading, setDirectorVerifyLoading] = useState({});
+  const [directorVerifyStatus, setDirectorVerifyStatus] = useState({});
+  const [directorVerifyError, setDirectorVerifyError] = useState({});
 
   const [memberFormData, setMemberFormData] = useState({
     id: "",
@@ -62,12 +66,13 @@ const [gstCompanyName, setGstCompanyName] = useState("");
     scheme_id: "",
   });
 
+  const { execute: executeMember } = usePost("/kyc-merchant");
+
   useEffect(() => {
     const saved = localStorage.getItem("kycFormData");
-    const merchant = location.state?.merchant  ||
-    JSON.parse(localStorage.getItem("user"));;
+    const merchant =
+      location.state?.merchant || JSON.parse(localStorage.getItem("user"));
 
-    // 1️⃣ Fresh navigation from Register
     if (merchant?.id) {
       setMemberFormData((prev) => ({
         ...prev,
@@ -79,7 +84,6 @@ const [gstCompanyName, setGstCompanyName] = useState("");
       return;
     }
 
-    // 2️⃣ Refresh case
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -94,7 +98,7 @@ const [gstCompanyName, setGstCompanyName] = useState("");
   }, [location.state]);
 
   useEffect(() => {
-    if (!memberFormData.id) return; // 🔥 MOST IMPORTANT LINE
+    if (!memberFormData.id) return;
 
     const savable = { ...memberFormData };
     delete savable.video_kyc;
@@ -118,41 +122,34 @@ const [gstCompanyName, setGstCompanyName] = useState("");
       "name",
       "mobile_no",
       "email",
-      "business_mcc",
-      "website_url",
-      "city",
-      "district",
-      "state",
-      "pin_code",
+      "company_gst_no",
+      "company_gst_no_doc",
       "address",
+      "city",
+      "state",
+      "district",
+      "pin_code",
     ],
     2: [
+      "business_mcc",
+      "website_url",
       "company_pan_no",
-      "company_gst_no",
+      "company_pan_no_doc",
       "cin_llpin",
       "company_type",
-      "company_pan_no_doc",
-      "company_gst_no_doc",
       "cancel_cheque_doc",
-      // "account_holder_name",
-      // "bank_account_no",
-      // "ifsc_code",
-      // "date_of_incorporation",
     ],
     3: [
       "director_name",
-      "director_pan_no",
-      "director_aadhar_no",
       "director_gender",
       "director_dob",
-      "user_pan_doc", // add director files here if required
+      "director_pan_no",
+      "user_pan_doc",
+      "director_aadhar_no",
       "user_addhar_doc",
     ],
     4: ["video_kyc"],
   };
-  const navigate = useNavigate();
-
-  const { execute: executeMember } = usePost("/kyc-merchant");
 
   const handlePrev = () => {
     if (currentStep > 1) {
@@ -160,19 +157,16 @@ const [gstCompanyName, setGstCompanyName] = useState("");
     }
   };
 
-  const phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/;
   const nameRegex = /^[A-Za-z ]+$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const textRegex = /^[A-Za-z]+$/;
-  const textNumberRegex = /^[A-Za-z0-9]+$/;
   const numberRegex = /^[0-9]{4}$/;
   const pinnumberRegex = /^[0-9]{6}$/;
   const aadharRegex = /^[0-9]{12}$/;
-  const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  const gstRegex =
+    /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
   const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
   const websiteRegex =
     /^(https?:\/\/)(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/;
-  const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
   const cinRegex = /^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/;
 
   const validationRules = {
@@ -214,7 +208,6 @@ const [gstCompanyName, setGstCompanyName] = useState("");
       minLength: 10,
       message: "Address must be at least 10 characters",
     },
-
     pin_code: {
       required: true,
       pattern: pinnumberRegex,
@@ -225,66 +218,40 @@ const [gstCompanyName, setGstCompanyName] = useState("");
       pattern: websiteRegex,
       message: "Website URL must be like https://example.com",
     },
-
-    account_holder_name: {
-      required: true,
-      pattern: nameRegex,
-      message: "Account holder name is not valid",
-    },
-
-    bank_account_no: {
-      required: true,
-      pattern: /^[0-9]{9,18}$/,
-      message: "Bank account number must be 9–18 digits",
-    },
-
-    ifsc_code: {
-      required: true,
-      pattern: ifscRegex,
-      message: "IFSC is not valid (e.g. HDFC0001234)",
-    },
-
     cin_llpin: {
       required: true,
       pattern: cinRegex,
       message: "CIN is not valid (e.g. L12345MH2010PLC123456)",
     },
-
     company_pan_no: {
       required: true,
       pattern: panRegex,
       message: "Company PAN is not valid (e.g. ABCDE1234F)",
     },
-
     company_gst_no: {
       required: true,
       pattern: gstRegex,
       message: "GST is not valid (e.g. 27AAAPZ1234C1Z1)",
     },
-
-    // 👤 Director
     director_name: {
       required: true,
       pattern: nameRegex,
       message: "Director name is not valid",
     },
-
     director_pan_no: {
       required: true,
       pattern: panRegex,
       message: "Director PAN is not valid (e.g. ABCDE1234F)",
     },
-
     director_aadhar_no: {
       required: true,
       pattern: aadharRegex,
-      message: "Aadhaar must be 12 digits   ",
+      message: "Aadhaar must be 12 digits",
     },
     user_pan_doc: {
       required: true,
       message: "PAN document is required",
     },
-
     user_addhar_doc: {
       required: true,
       message: "Aadhaar document is required",
@@ -292,10 +259,6 @@ const [gstCompanyName, setGstCompanyName] = useState("");
     company_type: {
       required: true,
       message: "Please select company type",
-    },
-    date_of_incorporation: {
-      required: true,
-      message: "Date of incorporation is required",
     },
     director_gender: {
       required: true,
@@ -305,11 +268,21 @@ const [gstCompanyName, setGstCompanyName] = useState("");
       required: true,
       message: "Date of birth is required",
     },
-
-    // 🎥 Video KYC
     video_kyc: {
       required: true,
       message: "Please upload your Video KYC recording",
+    },
+    company_pan_no_doc: {
+      required: true,
+      message: "Company PAN document is required",
+    },
+    company_gst_no_doc: {
+      required: true,
+      message: "GST document is required",
+    },
+    cancel_cheque_doc: {
+      required: true,
+      message: "Cancel cheque document is required",
     },
   };
 
@@ -320,16 +293,14 @@ const [gstCompanyName, setGstCompanyName] = useState("");
     const validateValue = (value, field) => {
       const rules = validationRules[field];
 
-      // required check
       if (
         value === undefined ||
         value === null ||
         (typeof value === "string" && value.trim() === "")
       ) {
-        return "This field is required";
+        return rules?.message || "This field is required";
       }
 
-      // regex check (only if rule exists)
       if (rules?.pattern && typeof value === "string") {
         if (!rules.pattern.test(value.trim())) {
           return rules.message || "Invalid format";
@@ -339,7 +310,6 @@ const [gstCompanyName, setGstCompanyName] = useState("");
       return null;
     };
 
-    // 👤 STEP 3 — Directors
     if (currentStep === 3) {
       memberFormData.director_info.forEach((director, idx) => {
         requiredFields.forEach((field) => {
@@ -354,15 +324,10 @@ const [gstCompanyName, setGstCompanyName] = useState("");
           }
         });
       });
-    }
-    // 🧾 Other steps
-    else {
+    } else {
       requiredFields.forEach((field) => {
-        const value =
-          field === "video_kyc"
-            ? memberFormData.video_kyc
-            : memberFormData[field];
-        const error = validateValue(value, field); // ← Use 'value', not memberFormData[field]
+        const value = memberFormData[field];
+        const error = validateValue(value, field);
         if (error) {
           newErrors[field] = error;
         }
@@ -373,81 +338,250 @@ const [gstCompanyName, setGstCompanyName] = useState("");
     return Object.keys(newErrors).length === 0;
   };
 
-const verifyGST = async (gstNumber) => {
-  const gst = String(gstNumber || "")
-    .toUpperCase()
-    .replace(/\s/g, "")
-    .trim();
+  const extractPincode = (text = "") => {
+    const match = String(text).match(/\b\d{6}\b/);
+    return match ? match[0] : "";
+  };
 
-  // ✅ reset status before verify
-  setGstVerified(false);
-  setGstCompanyName("");
+  const splitAddressParts = (rawAddress = "") => {
+    const cleaned = String(rawAddress || "").replace(/\s+/g, " ").trim();
+    if (!cleaned) {
+      return {
+        fullAddress: "",
+        city: "",
+        district: "",
+        state: "",
+        pin_code: "",
+      };
+    }
 
-  // ✅ format validation using your existing gstRegex
-  if (!gstRegex.test(gst)) {
-    setErrors((prev) => ({
-      ...(prev || {}),
-      company_gst_no: "GST is not valid (e.g. 27AAAPZ1234C1Z1)",
-    }));
-    return;
-  }
+    const pin = extractPincode(cleaned);
+    const parts = cleaned
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
 
-  // ✅ clear error before API call
-  setErrors((prev) => ({ ...(prev || {}), company_gst_no: "" }));
+    return {
+      fullAddress: cleaned,
+      city: parts[parts.length - 3] || "",
+      district: parts[parts.length - 2] || "",
+      state: parts[parts.length - 1]?.replace(pin, "").trim() || "",
+      pin_code: pin || "",
+    };
+  };
 
-  try {
-    setGstLoading(true);
+  const getGstResultNode = (data) => {
+    return (
+      data?.api_response?.response?.result ||
+      data?.api_response?.result ||
+      data?.response?.result ||
+      data?.result ||
+      data?.data?.result ||
+      data?.data ||
+      {}
+    );
+  };
 
-    const res = await fetch("https://uatfintech.spay.live/api/gst/advance-verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        business_gstin_number: gst,
-        financial_year: "2023-24",
-      }),
-    });
+  const verifyGST = async (gstNumber) => {
+    const gst = String(gstNumber || "")
+      .toUpperCase()
+      .replace(/\s/g, "")
+      .trim();
 
-    const data = await res.json();
+    setGstVerified(false);
+    setGstCompanyName("");
 
-    // ✅ DEBUG (keep for now, remove later)
-    console.log("GST API RESPONSE:", data);
-
-    if (!res.ok) {
+    if (!gstRegex.test(gst)) {
       setErrors((prev) => ({
         ...(prev || {}),
-        company_gst_no: data?.message || "GST verification failed",
+        company_gst_no: "GST is not valid (e.g. 27AAAPZ1234C1Z1)",
       }));
       return;
     }
 
-    // ✅ get company name from many possible keys (covers most GST APIs)
-  const legalName =
-  data?.api_response?.response?.result?.legal_name ||
-  data?.api_response?.response?.result?.trade_name ||
-  data?.api_response?.response?.result?.gstin || // fallback (optional)
-  "";
+    setErrors((prev) => ({ ...(prev || {}), company_gst_no: "" }));
 
-    const cleanName = String(legalName || "").trim();
+    try {
+      setGstLoading(true);
 
-    // ✅ success
-    setGstVerified(true);
-    setGstCompanyName(cleanName);
+      const res = await fetch(
+        "https://uatfintech.spay.live/api/gst/advance-verify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            business_gstin_number: gst,
+            financial_year: "2023-24",
+          }),
+        }
+      );
 
-    // ✅ store in form (optional but useful for submit)
-    if (cleanName) {
-      setMemberFormData((prev) => ({ ...prev, company_name: cleanName }));
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors((prev) => ({
+          ...(prev || {}),
+          company_gst_no: data?.message || "GST verification failed",
+        }));
+        return;
+      }
+
+      const resultNode = getGstResultNode(data);
+
+      const legalName =
+        resultNode?.legal_name ||
+        resultNode?.trade_name ||
+        resultNode?.business_name ||
+        "";
+
+      const rawAddress =
+        resultNode?.principal_place_address ||
+        resultNode?.principal_address ||
+        resultNode?.address ||
+        resultNode?.trade_address ||
+        resultNode?.business_address ||
+        resultNode?.principalPlaceOfBusiness ||
+        "";
+
+      const city =
+        resultNode?.city ||
+        resultNode?.principal_place_city ||
+        resultNode?.trade_city ||
+        "";
+
+      const district =
+        resultNode?.district ||
+        resultNode?.principal_place_district ||
+        resultNode?.trade_district ||
+        "";
+
+      const state =
+        resultNode?.state ||
+        resultNode?.principal_place_state ||
+        resultNode?.trade_state ||
+        "";
+
+      const pin_code =
+        resultNode?.pincode ||
+        resultNode?.pin_code ||
+        resultNode?.principal_place_pincode ||
+        resultNode?.trade_pincode ||
+        "";
+
+      const parsedAddress = splitAddressParts(rawAddress);
+
+      setGstVerified(true);
+      setGstCompanyName(String(legalName || "").trim());
+
+      setMemberFormData((prev) => ({
+        ...prev,
+        company_gst_no: gst,
+        company_name: String(legalName || "").trim() || prev.company_name,
+        address: rawAddress || prev.address || parsedAddress.fullAddress,
+        city: city || prev.city || parsedAddress.city,
+        district: district || prev.district || parsedAddress.district,
+        state: state || prev.state || parsedAddress.state,
+        pin_code: pin_code || prev.pin_code || parsedAddress.pin_code,
+      }));
+
+      toast.success("GST Verified and address fetched ✅");
+    } catch (err) {
+      setErrors((prev) => ({
+        ...(prev || {}),
+        company_gst_no: "Network error / server issue",
+      }));
+    } finally {
+      setGstLoading(false);
+    }
+  };
+
+  const verifyDirectorDigilocker = async (index) => {
+    const director = memberFormData.director_info[index];
+
+    const pan = String(director?.director_pan_no || "")
+      .toUpperCase()
+      .trim();
+
+    const aadhaar = String(director?.director_aadhar_no || "").trim();
+
+    if (!panRegex.test(pan)) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        if (!updated.director) updated.director = [];
+        updated.director[index] = {
+          ...(updated.director?.[index] || {}),
+          director_pan_no: "Director PAN is not valid (e.g. ABCDE1234F)",
+        };
+        return updated;
+      });
+      return;
     }
 
-    toast.success("GST Verified ✅");
-  } catch (err) {
-    setErrors((prev) => ({
-      ...(prev || {}),
-      company_gst_no: "Network error / server issue",
-    }));
-  } finally {
-    setGstLoading(false);
-  }
-};
+    if (!aadharRegex.test(aadhaar)) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        if (!updated.director) updated.director = [];
+        updated.director[index] = {
+          ...(updated.director?.[index] || {}),
+          director_aadhar_no: "Aadhaar must be 12 digits",
+        };
+        return updated;
+      });
+      return;
+    }
+
+    setDirectorVerifyLoading((prev) => ({ ...prev, [index]: true }));
+    setDirectorVerifyStatus((prev) => ({ ...prev, [index]: "" }));
+    setDirectorVerifyError((prev) => ({ ...prev, [index]: "" }));
+
+    try {
+      const res = await fetch(
+        "https://uatfintech.spay.live/api/digilocker/init-aadhaar-pan",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            director_pan_no: pan,
+            director_aadhar_no: aadhaar,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        const msg =
+          data?.message ||
+          data?.error ||
+          "DigiLocker verification failed";
+        setDirectorVerifyError((prev) => ({ ...prev, [index]: msg }));
+        return;
+      }
+
+      const successMsg =
+        data?.message ||
+        data?.data?.message ||
+        data?.status ||
+        "DigiLocker verification initialized successfully";
+
+      setDirectorVerifyStatus((prev) => ({
+        ...prev,
+        [index]: successMsg,
+      }));
+
+      toast.success(`Director ${index + 1} DigiLocker verify started ✅`);
+    } catch (error) {
+      setDirectorVerifyError((prev) => ({
+        ...prev,
+        [index]: "Network error / server issue",
+      }));
+    } finally {
+      setDirectorVerifyLoading((prev) => ({ ...prev, [index]: false }));
+    }
+  };
 
   const handleNext = () => {
     if (validateStep()) {
@@ -455,79 +589,51 @@ const verifyGST = async (gstNumber) => {
         setCurrentStep(currentStep + 1);
       }
     }
-    console.log("Errors:", errors);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Convert credentials_id to integer
-    const newValue =
-      name === "credentials_id" ? parseInt(value, 10) || "" : value;
-
-    if (name === "payin_at_onboard" && value === "Airpay") {
-      refetchCredentials();
-    }
 
     setMemberFormData((prev) => ({
       ...prev,
-      [name]: newValue,
+      [name]: value,
     }));
-  };
 
-  const handleFileChange = (key, file) => {
-    if (!file) return;
-
-    // ✅ Allowed file types
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "application/pdf",
-    ];
-
-    // ❌ Invalid type
-    if (!allowedTypes.includes(file.type)) {
-      setErrors((prev) => ({
-        ...prev,
-        [key]: "Only JPG, PNG, WEBP images or PDF files are allowed",
-      }));
-      return;
-    }
-
-    // ❌ Size limit: 5MB
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      setErrors((prev) => ({
-        ...prev,
-        [key]: "File size must be under 5MB",
-      }));
-      return;
-    }
-
-    // ✅ Clear error for this field
     setErrors((prev) => ({
       ...prev,
-      [key]: null,
-    }));
-
-    // ✅ Save file in companyDocs state
-    setCompanyDocs((prev) => ({
-      ...prev,
-      [key]: file,
+      [name]: "",
     }));
   };
 
   const handleDirectorChange = (index, e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
+
     setMemberFormData((prev) => {
       const updatedDirectors = [...prev.director_info];
       updatedDirectors[index] = {
         ...updatedDirectors[index],
-        [name]: files ? files[0] : value,
+        [name]:
+          name === "director_pan_no"
+            ? value.toUpperCase()
+            : name === "director_aadhar_no"
+            ? value.replace(/\D/g, "").slice(0, 12)
+            : value,
       };
       return { ...prev, director_info: updatedDirectors };
     });
-    // console.log(`Director ${index} ${name}:`, files ? files[0] : value);
+
+    setErrors((prev) => {
+      const updated = { ...prev };
+      if (!updated.director) updated.director = [];
+      updated.director[index] = {
+        ...(updated.director?.[index] || {}),
+        [name]: "",
+      };
+      return updated;
+    });
+
+    setDirectorVerifyStatus((prev) => ({ ...prev, [index]: "" }));
+    setDirectorVerifyError((prev) => ({ ...prev, [index]: "" }));
   };
 
   const addDirector = () => {
@@ -539,7 +645,6 @@ const verifyGST = async (gstNumber) => {
           director_name: "",
           director_gender: "",
           director_pan_no: "",
-
           director_aadhar_no: "",
           user_pan_doc: null,
           user_addhar_doc: null,
@@ -554,7 +659,26 @@ const verifyGST = async (gstNumber) => {
       ...prev,
       director_info: prev.director_info.filter((_, i) => i !== index),
     }));
+
+    setDirectorVerifyLoading((prev) => {
+      const updated = { ...prev };
+      delete updated[index];
+      return updated;
+    });
+
+    setDirectorVerifyStatus((prev) => {
+      const updated = { ...prev };
+      delete updated[index];
+      return updated;
+    });
+
+    setDirectorVerifyError((prev) => {
+      const updated = { ...prev };
+      delete updated[index];
+      return updated;
+    });
   };
+
   const handleCompanyFileChange = (e) => {
     const { name, files } = e.target;
     const file = files?.[0];
@@ -564,14 +688,12 @@ const verifyGST = async (gstNumber) => {
       return;
     }
 
-    // Allow only PDF
     if (file.type !== "application/pdf") {
       toast.error(`Only PDF files are allowed for ${name.replace(/_/g, " ")}`);
-      e.target.value = ""; // Clear input
+      e.target.value = "";
       return;
     }
 
-    // Optional: Size limit (e.g., 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("File size should be less than 5MB");
       e.target.value = "";
@@ -581,6 +703,11 @@ const verifyGST = async (gstNumber) => {
     setMemberFormData((prev) => ({
       ...prev,
       [name]: file,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
     }));
   };
 
@@ -607,13 +734,23 @@ const verifyGST = async (gstNumber) => {
       updated[index][name] = file;
       return { ...prev, director_info: updated };
     });
+
+    setErrors((prev) => {
+      const updatedErrors = { ...prev };
+      if (!updatedErrors.director) updatedErrors.director = [];
+      updatedErrors.director[index] = {
+        ...(updatedErrors.director?.[index] || {}),
+        [name]: "",
+      };
+      return updatedErrors;
+    });
   };
 
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("video/")) {
       setMemberFormData((prev) => ({ ...prev, video_kyc: file }));
-      setErrors((prev) => ({ ...prev, video_kyc: null })); // Clear error
+      setErrors((prev) => ({ ...prev, video_kyc: null }));
     } else {
       toast.error("Please upload a valid video file");
     }
@@ -632,9 +769,9 @@ const verifyGST = async (gstNumber) => {
         toast.error("Merchant ID missing – cannot submit KYC");
         return;
       }
+
       formData.append("id", merchantId);
 
-      // Append text fields (excluding files and directors)
       Object.keys(memberFormData).forEach((key) => {
         if (
           ![
@@ -642,51 +779,43 @@ const verifyGST = async (gstNumber) => {
             "company_pan_no_doc",
             "company_gst_no_doc",
             "cancel_cheque_doc",
+            "video_kyc",
           ].includes(key)
         ) {
-          formData.append(key, memberFormData[key]);
-          // console.log(`[Text] ${key}:`, memberFormData[key]);
+          formData.append(key, memberFormData[key] ?? "");
         }
       });
 
-      // Append company files
       ["company_pan_no_doc", "company_gst_no_doc", "cancel_cheque_doc"].forEach(
         (fileKey) => {
           if (memberFormData[fileKey] instanceof File) {
             formData.append(fileKey, memberFormData[fileKey]);
-            // console.log(`[File] ${fileKey}:`, memberFormData[fileKey].name);
           }
         }
       );
 
-      // Video KYC file
       if (memberFormData.video_kyc instanceof File) {
         formData.append("video_kyc", memberFormData.video_kyc);
       }
 
-      // Append directors correctly
       memberFormData.director_info.forEach((director, idx) => {
         Object.keys(director).forEach((field) => {
           const value = director[field];
           if (value instanceof File) {
             formData.append(`director_info[${idx}][${field}]`, value);
-            // console.log(`[File] director_info[${idx}][${field}]:`, value.name);
           } else {
-            formData.append(`director_info[${idx}][${field}]`, value);
-            // console.log(`[Text] director_info[${idx}][${field}]:`, value);
+            formData.append(`director_info[${idx}][${field}]`, value ?? "");
           }
         });
       });
-
-      // console.log("===== Form Submission End =====");
 
       await executeMember(formData);
       toast.success("Form submitted successfully!");
       navigate("/member-list");
     } catch (err) {
-      const errors = err?.response?.data?.errors;
-      const msg = errors
-        ? Object.values(errors)[0][0]
+      const backendErrors = err?.response?.data?.errors;
+      const msg = backendErrors
+        ? Object.values(backendErrors)[0][0]
         : err?.response?.data?.message || "Something went wrong";
       toast.error(msg);
     }
@@ -698,8 +827,8 @@ const verifyGST = async (gstNumber) => {
       subtitle: "Basic business information",
     },
     2: {
-      title: "Company & Bank Details",
-      subtitle: "Legal and banking information",
+      title: "Business & Company Details",
+      subtitle: "Business and legal information",
     },
     3: {
       title: "Director Details",
@@ -707,7 +836,7 @@ const verifyGST = async (gstNumber) => {
     },
     4: {
       title: "Video KYC",
-      subtitle: "video kyc information",
+      subtitle: "Video KYC information",
     },
   };
 
@@ -717,17 +846,13 @@ const verifyGST = async (gstNumber) => {
         className="min-h-screen w-screen bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${paymentGatewayBg})` }}
       >
-        {/* dark overlay */}
         <div className="absolute inset-0 bg-black/30" />
 
-        {/* centered content */}
         <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
           <div className="w-full max-w-5xl">
-            <div className=" shadow-2xl overflow-hidden">
-              {/* FORM — 3/4 */}
+            <div className="shadow-2xl overflow-hidden">
               <div className="w-full max-w-3xl mx-auto rounded-2xl bg-white p-8">
                 <div className="relative mb-10">
-                  {/* glow / blur */}
                   <div
                     className="absolute inset-0 rounded-xl blur-md opacity-70"
                     style={{
@@ -736,7 +861,6 @@ const verifyGST = async (gstNumber) => {
                     }}
                   />
 
-                  {/* HEADER ROW */}
                   <div
                     className="relative rounded-xl px-6 py-4 flex items-center justify-between"
                     style={{
@@ -744,17 +868,13 @@ const verifyGST = async (gstNumber) => {
                         "linear-gradient(275deg, #4b76eb, #1E40FF, #4F6FFF)",
                     }}
                   >
-                    {/* LEFT: HEADING */}
                     <h4 className="text-2xl md:text-2xl font-bold text-white tracking-wide ml-52">
                       Complete Your KYC
                     </h4>
-
-                    {/* RIGHT: STEPPER */}
                     <Stepper currentStep={currentStep} />
                   </div>
                 </div>
 
-                {/* Dynamic Step Heading */}
                 <div className="border-b pb-3 mb-6">
                   <h2 className="text-xl font-semibold text-gray-800 mt-6 text-center">
                     {stepHeadings[currentStep].title}
@@ -762,65 +882,227 @@ const verifyGST = async (gstNumber) => {
                 </div>
 
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
-                
                   {currentStep === 1 && (
                     <div className="space-y-4 mb-8">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[
-                          {
-                            name: "name",
-                            label: "Business Name",
-                            readOnly: true,
-                          },
-                          {
-                            name: "mobile_no",
-                            label: "Business Mobile",
-                            readOnly: true,
-                          },
-                          {
-                            name: "email",
-                            label: "Business Email",
-                            readOnly: true,
-                          },
-                          { name: "business_mcc", label: "Business MCC" },
-                          { name: "city", label: "City" },
-                          { name: "state", label: "State" },
-                          { name: "district", label: "District" },
-                          { name: "pin_code", label: "Pincode" },
-                          { name: "address", label: "Address" },
-                          { name: "website_url", label: "Website URL" },
-                        ].map((field) => (
-                          <div key={field.name}>
-                            <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
-                              {field.label}{" "}
-                              <span className="text-red-600">*</span>
-                            </label>
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                            Business Name <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="name"
+                            readOnly
+                            value={memberFormData.name || ""}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
+                          />
+                          {errors?.name && (
+                            <p className="text-red-600 text-xs mt-1">{errors.name}</p>
+                          )}
+                        </div>
 
-                            <input
-                              name={field.name}
-                              readOnly={field.readOnly}
-                              value={memberFormData?.[field.name] || ""}
-                              onChange={handleChange}
-                              className={`
-                                w-full px-3 py-2
-                                rounded-lg
-                                border border-gray-300
-                                focus:outline-none focus:ring-1 focus:ring-[#375EF4]
-                                ${
-                                  field.readOnly
-                                    ? "bg-gray-100 cursor-not-allowed"
-                                    : ""
-                                }
-                              `}
-                            />
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                            Business Mobile <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="mobile_no"
+                            readOnly
+                            value={memberFormData.mobile_no || ""}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
+                          />
+                          {errors?.mobile_no && (
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.mobile_no}
+                            </p>
+                          )}
+                        </div>
 
-                            {errors?.[field.name] && (
-                              <p className="text-red-600 text-xs mt-1">
-                                {errors[field.name]}
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                            Business Email <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="email"
+                            readOnly
+                            value={memberFormData.email || ""}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
+                          />
+                          {errors?.email && (
+                            <p className="text-red-600 text-xs mt-1">{errors.email}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
+                            GST Number <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="company_gst_no"
+                            value={memberFormData.company_gst_no || ""}
+                            maxLength={15}
+                            readOnly={gstVerified}
+                            disabled={gstVerified}
+                            onChange={(e) => {
+                              const value = e.target.value
+                                .toUpperCase()
+                                .replace(/\s/g, "");
+
+                              setMemberFormData((prev) => ({
+                                ...prev,
+                                company_gst_no: value,
+                              }));
+
+                              setErrors((prev) => ({
+                                ...(prev || {}),
+                                company_gst_no: "",
+                              }));
+
+                              setGstVerified(false);
+                              setGstCompanyName("");
+
+                              if (value.length === 15) verifyGST(value);
+                            }}
+                            className={`w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4] ${
+                              gstVerified ? "bg-gray-100 cursor-not-allowed" : ""
+                            }`}
+                          />
+
+                          {gstLoading && (
+                            <p className="text-blue-600 text-xs mt-1">
+                              Verifying GST...
+                            </p>
+                          )}
+
+                          {gstVerified && !gstLoading && (
+                            <div className="mt-2 p-2 rounded-lg bg-green-50 border border-green-200">
+                              <p className="text-xs text-gray-600">
+                                Company Name (as per GST):
                               </p>
-                            )}
-                          </div>
-                        ))}
+                              <p className="text-sm font-semibold text-green-700">
+                                {gstCompanyName || "Company name not returned by API"}
+                              </p>
+                            </div>
+                          )}
+
+                          {errors?.company_gst_no && (
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.company_gst_no}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                            Address <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="address"
+                            value={memberFormData.address || ""}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
+                          />
+                          {errors?.address && (
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.address}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                            City <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="city"
+                            value={memberFormData.city || ""}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
+                          />
+                          {errors?.city && (
+                            <p className="text-red-600 text-xs mt-1">{errors.city}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                            State <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="state"
+                            value={memberFormData.state || ""}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
+                          />
+                          {errors?.state && (
+                            <p className="text-red-600 text-xs mt-1">{errors.state}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                            District <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="district"
+                            value={memberFormData.district || ""}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
+                          />
+                          {errors?.district && (
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.district}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
+                            Pincode <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="pin_code"
+                            value={memberFormData.pin_code || ""}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
+                          />
+                          {errors?.pin_code && (
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.pin_code}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
+                            GST Document <span className="text-red-600">*</span>
+                          </label>
+
+                          <input
+                            type="text"
+                            readOnly
+                            placeholder="Upload GST document"
+                            value={memberFormData.company_gst_no_doc?.name || ""}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
+                            onClick={() =>
+                              document.getElementById("company_gst_no_doc").click()
+                            }
+                          />
+
+                          <input
+                            id="company_gst_no_doc"
+                            name="company_gst_no_doc"
+                            type="file"
+                            accept="application/pdf"
+                            className="hidden"
+                            onChange={handleCompanyFileChange}
+                          />
+
+                          {errors?.company_gst_no_doc && (
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.company_gst_no_doc}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -828,16 +1110,53 @@ const verifyGST = async (gstNumber) => {
                   {currentStep === 2 && (
                     <div className="space-y-4 mb-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Company PAN */}
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            Company PAN Number{" "}
-                            <span className="text-red-600">*</span>
+                            Business MCC <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="business_mcc"
+                            value={memberFormData.business_mcc || ""}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
+                          />
+                          {errors?.business_mcc && (
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.business_mcc}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
+                            Website URL <span className="text-red-600">*</span>
+                          </label>
+                          <input
+                            name="website_url"
+                            value={memberFormData.website_url || ""}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
+                          />
+                          {errors?.website_url && (
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.website_url}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
+                            Company PAN Number <span className="text-red-600">*</span>
                           </label>
                           <input
                             name="company_pan_no"
                             value={memberFormData.company_pan_no || ""}
-                            onChange={handleChange}
+                            onChange={(e) =>
+                              setMemberFormData((prev) => ({
+                                ...prev,
+                                company_pan_no: e.target.value.toUpperCase(),
+                              }))
+                            }
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                           />
                           {errors?.company_pan_no && (
@@ -847,24 +1166,20 @@ const verifyGST = async (gstNumber) => {
                           )}
                         </div>
 
-                        {/* PAN Document */}
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            PAN Document <span className="text-red-600">*</span>
+                            Company PAN Document{" "}
+                            <span className="text-red-600">*</span>
                           </label>
 
                           <input
                             type="text"
                             readOnly
                             placeholder="Upload PAN document"
-                            value={
-                              memberFormData.company_pan_no_doc?.name || ""
-                            }
+                            value={memberFormData.company_pan_no_doc?.name || ""}
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                             onClick={() =>
-                              document
-                                .getElementById("company_pan_no_doc")
-                                .click()
+                              document.getElementById("company_pan_no_doc").click()
                             }
                           />
 
@@ -884,99 +1199,6 @@ const verifyGST = async (gstNumber) => {
                           )}
                         </div>
 
-{/* GST Number */}
-<div>
-  <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-    GST Number <span className="text-red-600">*</span>
-  </label>
-
-  <input
-    name="company_gst_no"
-    value={memberFormData.company_gst_no || ""}
-    maxLength={15}
-    readOnly={gstVerified}
-    disabled={gstVerified}
-    onChange={(e) => {
-      const value = e.target.value.toUpperCase().replace(/\s/g, "");
-
-      // update form
-      setMemberFormData((prev) => ({ ...prev, company_gst_no: value }));
-
-      // clear error
-      setErrors((prev) => ({ ...(prev || {}), company_gst_no: "" }));
-
-      // reset verified when editing
-      setGstVerified(false);
-      setGstCompanyName("");
-
-      // verify at 15 chars
-      if (value.length === 15) verifyGST(value);
-    }}
-    className={`w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4] ${
-      gstVerified ? "bg-gray-100 cursor-not-allowed" : ""
-    }`}
-  />
-
-  {/* loading */}
-  {gstLoading && (
-    <p className="text-blue-600 text-xs mt-1">Verifying GST...</p>
-  )}
-
-  {/* verified + company name */}
-{gstVerified && !gstLoading && (
-  <div className="mt-2 p-2 rounded-lg bg-green-50 border border-green-200">
-    <p className="text-xs text-gray-600">Company Name (as per GST):</p>
-    <p className="text-sm font-semibold text-green-700">
-      {gstCompanyName || "Company name not returned by API"}
-    </p>
-  </div>
-)}
-
-
-  {/* error */}
-  {errors?.company_gst_no && (
-    <p className="text-red-600 text-xs mt-1">{errors.company_gst_no}</p>
-  )}
-</div>
-
-                        {/* GST Document */}
-                        <div>
-                          <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            GST Document <span className="text-red-600">*</span>
-                          </label>
-
-                          <input
-                            type="text"
-                            readOnly
-                            placeholder="Upload GST document"
-                            value={
-                              memberFormData.company_gst_no_doc?.name || ""
-                            }
-                            className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
-                            onClick={() =>
-                              document
-                                .getElementById("company_gst_no_doc")
-                                .click()
-                            }
-                          />
-
-                          <input
-                            id="company_gst_no_doc"
-                            name="company_gst_no_doc"
-                            type="file"
-                            accept="application/pdf"
-                            className="hidden"
-                            onChange={handleCompanyFileChange}
-                          />
-
-                          {errors?.company_gst_no_doc && (
-                            <p className="text-red-600 text-xs mt-1">
-                              {errors.company_gst_no_doc}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* CIN */}
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
                             CIN / LLPIN <span className="text-red-600">*</span>
@@ -994,7 +1216,6 @@ const verifyGST = async (gstNumber) => {
                           )}
                         </div>
 
-                        {/* Company Type */}
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
                             Company Type <span className="text-red-600">*</span>
@@ -1017,11 +1238,9 @@ const verifyGST = async (gstNumber) => {
                           )}
                         </div>
 
-                        {/* Cancel Cheque */}
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            Cancel Cheque{" "}
-                            <span className="text-red-600">*</span>
+                            Cancel Cheque <span className="text-red-600">*</span>
                           </label>
 
                           <input
@@ -1031,9 +1250,7 @@ const verifyGST = async (gstNumber) => {
                             value={memberFormData.cancel_cheque_doc?.name || ""}
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                             onClick={() =>
-                              document
-                                .getElementById("cancel_cheque_doc")
-                                .click()
+                              document.getElementById("cancel_cheque_doc").click()
                             }
                           />
 
@@ -1063,7 +1280,6 @@ const verifyGST = async (gstNumber) => {
                           key={index}
                           className="border border-gray-200 rounded-2xl p-5 space-y-4"
                         >
-                          {/* Header */}
                           <div className="flex justify-between items-center">
                             <h3 className="text-base font-semibold text-gray-700">
                               Director {index + 1}
@@ -1081,11 +1297,9 @@ const verifyGST = async (gstNumber) => {
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Director Name */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Director Name{" "}
-                                <span className="text-red-600">*</span>
+                                Director Name <span className="text-red-600">*</span>
                               </label>
                               <input
                                 name="director_name"
@@ -1100,7 +1314,6 @@ const verifyGST = async (gstNumber) => {
                               )}
                             </div>
 
-                            {/* Gender */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
                                 Gender <span className="text-red-600">*</span>
@@ -1123,16 +1336,33 @@ const verifyGST = async (gstNumber) => {
                               )}
                             </div>
 
-                            {/* PAN Number */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                PAN Number{" "}
-                                <span className="text-red-600">*</span>
+                                Date of Birth <span className="text-red-600">*</span>
+                              </label>
+                              <input
+                                type="date"
+                                name="director_dob"
+                                value={director.director_dob || ""}
+                                onChange={(e) => handleDirectorChange(index, e)}
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
+                              />
+                              {errors?.director?.[index]?.director_dob && (
+                                <p className="text-red-600 text-xs mt-1">
+                                  {errors.director[index].director_dob}
+                                </p>
+                              )}
+                            </div>
+
+                            <div>
+                              <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
+                                PAN Number <span className="text-red-600">*</span>
                               </label>
                               <input
                                 name="director_pan_no"
                                 value={director.director_pan_no || ""}
                                 onChange={(e) => handleDirectorChange(index, e)}
+                                maxLength={10}
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                               />
                               {errors?.director?.[index]?.director_pan_no && (
@@ -1142,11 +1372,9 @@ const verifyGST = async (gstNumber) => {
                               )}
                             </div>
 
-                            {/* PAN Document (Fake Input) */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                PAN Document{" "}
-                                <span className="text-red-600">*</span>
+                                PAN Document <span className="text-red-600">*</span>
                               </label>
 
                               <input
@@ -1166,7 +1394,7 @@ const verifyGST = async (gstNumber) => {
                                 id={`director-pan-${index}`}
                                 name="user_pan_doc"
                                 type="file"
-                                accept="image/*,application/pdf"
+                                accept="application/pdf"
                                 className="hidden"
                                 onChange={(e) =>
                                   handleDirectorFileChange(index, e)
@@ -1180,31 +1408,27 @@ const verifyGST = async (gstNumber) => {
                               )}
                             </div>
 
-                            {/* Aadhaar Number */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Aadhaar Number{" "}
-                                <span className="text-red-600">*</span>
+                                Aadhaar Number <span className="text-red-600">*</span>
                               </label>
                               <input
                                 name="director_aadhar_no"
                                 value={director.director_aadhar_no || ""}
                                 onChange={(e) => handleDirectorChange(index, e)}
+                                maxLength={12}
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                               />
-                              {errors?.director?.[index]
-                                ?.director_aadhar_no && (
+                              {errors?.director?.[index]?.director_aadhar_no && (
                                 <p className="text-red-600 text-xs mt-1">
                                   {errors.director[index].director_aadhar_no}
                                 </p>
                               )}
                             </div>
 
-                            {/* Aadhaar Document (Fake Input) */}
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Aadhaar Document{" "}
-                                <span className="text-red-600">*</span>
+                                Aadhaar Document <span className="text-red-600">*</span>
                               </label>
 
                               <input
@@ -1224,7 +1448,7 @@ const verifyGST = async (gstNumber) => {
                                 id={`director-aadhaar-${index}`}
                                 name="user_addhar_doc"
                                 type="file"
-                                accept="image/*,application/pdf"
+                                accept="application/pdf"
                                 className="hidden"
                                 onChange={(e) =>
                                   handleDirectorFileChange(index, e)
@@ -1237,26 +1461,35 @@ const verifyGST = async (gstNumber) => {
                                 </p>
                               )}
                             </div>
+                          </div>
 
-                            {/* DOB */}
-                            <div>
-                              <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Date of Birth{" "}
-                                <span className="text-red-600">*</span>
-                              </label>
-                              <input
-                                type="date"
-                                name="director_dob"
-                                value={director.director_dob || ""}
-                                onChange={(e) => handleDirectorChange(index, e)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
-                              />
-                              {errors?.director?.[index]?.director_dob && (
-                                <p className="text-red-600 text-xs mt-1">
-                                  {errors.director[index].director_dob}
-                                </p>
-                              )}
-                            </div>
+                          <div className="flex items-center gap-3 pt-2 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => verifyDirectorDigilocker(index)}
+                              disabled={directorVerifyLoading[index]}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium text-white ${
+                                directorVerifyLoading[index]
+                                  ? "bg-gray-400 cursor-not-allowed"
+                                  : "bg-green-600 hover:bg-green-700"
+                              }`}
+                            >
+                              {directorVerifyLoading[index]
+                                ? "Verifying..."
+                                : "Verify PAN + Aadhaar"}
+                            </button>
+
+                            {directorVerifyStatus[index] && (
+                              <p className="text-green-700 text-sm font-medium">
+                                {directorVerifyStatus[index]}
+                              </p>
+                            )}
+
+                            {directorVerifyError[index] && (
+                              <p className="text-red-600 text-sm font-medium">
+                                {directorVerifyError[index]}
+                              </p>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -1265,43 +1498,22 @@ const verifyGST = async (gstNumber) => {
 
                   {currentStep === 4 && (
                     <div className="space-y-6 mb-6">
-                      {/* Instruction text (as requested) */}
                       <p className="text-sm text-gray-600 text-center max-w-2xl mx-auto">
                         Please upload a short video for identity verification.
                         Make sure your face and PAN card are clearly visible and
                         the video is recorded in good lighting.
                       </p>
 
-                      {/* Bullet instructions */}
                       <div className="border border-gray-200 rounded-2xl p-5 bg-gray-50 max-w-3xl mx-auto">
                         <ul className="list-disc list-inside space-y-2 text-sm text-gray-700">
-                          <li>
-                            Look straight into the camera and say your full name
-                          </li>
+                          <li>Look straight into the camera and say your full name</li>
                           <li>Show your PAN card clearly in the video</li>
                           <li>Ensure proper lighting and clear audio</li>
-                          <li>
-                            Video size should be reasonable (recommended under
-                            50MB)
-                          </li>
+                          <li>Video size should be reasonable (recommended under 50MB)</li>
                         </ul>
                       </div>
 
-                      {/* Upload box */}
-                      <div
-                        className="
-                          border-2 border-dashed border-gray-300
-                          rounded-xl
-                          p-6
-                          text-center
-                          transition
-                          hover:border-blue-500
-                          hover:bg-blue-50
-                          max-w-3xl
-                          mx-auto
-                        "
-                      >
-                        {/* Hidden input */}
+                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center transition hover:border-blue-500 hover:bg-blue-50 max-w-3xl mx-auto">
                         <input
                           type="file"
                           accept="video/*"
@@ -1310,23 +1522,9 @@ const verifyGST = async (gstNumber) => {
                           id="video_kyc_upload"
                         />
 
-                        {/* Clickable fake input */}
                         <label
                           htmlFor="video_kyc_upload"
-                          className="
-                            cursor-pointer
-                            block
-                            w-full
-                            py-3
-                            px-4
-                            bg-white
-                            border border-gray-300
-                            rounded-lg
-                            transition
-                            hover:border-blue-500
-                            hover:bg-blue-50
-                            focus-within:border-blue-600
-                          "
+                          className="cursor-pointer block w-full py-3 px-4 bg-white border border-gray-300 rounded-lg transition hover:border-blue-500 hover:bg-blue-50 focus-within:border-blue-600"
                         >
                           <div className="text-base font-medium text-gray-700">
                             {memberFormData.video_kyc
@@ -1341,14 +1539,12 @@ const verifyGST = async (gstNumber) => {
                           </div>
                         </label>
 
-                        {/* Error */}
                         {errors?.video_kyc && (
                           <p className="mt-3 text-sm text-red-600">
                             {errors.video_kyc}
                           </p>
                         )}
 
-                        {/* Video preview */}
                         {memberFormData.video_kyc && (
                           <div className="mt-5">
                             <p className="text-xs font-semibold text-gray-600 mb-2">
@@ -1356,19 +1552,9 @@ const verifyGST = async (gstNumber) => {
                             </p>
 
                             <video
-                              src={URL.createObjectURL(
-                                memberFormData.video_kyc
-                              )}
+                              src={URL.createObjectURL(memberFormData.video_kyc)}
                               controls
-                              className="
-                                max-w-full
-                                h-auto
-                                rounded-lg
-                                shadow-md
-                                mx-auto
-                                max-h-72
-                                border border-gray-300
-                              "
+                              className="max-w-full h-auto rounded-lg shadow-md mx-auto max-h-72 border border-gray-300"
                             />
                           </div>
                         )}
@@ -1409,6 +1595,7 @@ const verifyGST = async (gstNumber) => {
                         </button>
                       )}
                     </div>
+
                     <div className="flex justify-between">
                       {currentStep === 3 && (
                         <Button
@@ -1419,6 +1606,7 @@ const verifyGST = async (gstNumber) => {
                           + Add Director
                         </Button>
                       )}
+
                       <Button
                         onClick={() => setShowConfirmModal(!showConfirmModal)}
                         type="button"
@@ -1434,6 +1622,7 @@ const verifyGST = async (gstNumber) => {
           </div>
         </div>
       </div>
+
       <ConfirmModal
         showConfirmModal={showConfirmModal}
         heading={"Are you sure you want to go back?"}
