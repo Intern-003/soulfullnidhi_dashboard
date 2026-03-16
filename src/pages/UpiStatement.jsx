@@ -68,6 +68,7 @@ const UpiStatement = () => {
         apitxnid: item.apitxnid || "N/A",
         mid: item.option4 || "N/A",
          chargeback_status: item.chargeback_status || "N/A",
+          option2: item.option2 || "N/A",
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
@@ -390,6 +391,7 @@ startProgressiveFetch();
         "GST": row.gst,
         "Payin Rolling Amount": row.payin_rolling_amount,
         "Status": row.status,
+         "Reason": row.option2,
         "Date": date,
         "Time": time,
       };
@@ -555,6 +557,9 @@ const handleAccept = async (row) => {
           <span>
             product: <b>{row.product}</b>
           </span>  
+          {/* <span>
+            reason: <b>{row.option2}</b>
+          </span> */}
         </> 
       
 )}      

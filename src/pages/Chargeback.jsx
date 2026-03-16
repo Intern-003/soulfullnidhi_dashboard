@@ -56,9 +56,12 @@ useEffect(() => {
         txnid: item.txnid ?? "N/A",
         product_type: item.product ?? "N/A",
         amount: item.amount ?? "0",
+         gst: item.gst ?? "0",
+         option2:item.option2 ?? "0",
+          charge: item.charge ?? "0",
         numericAmount: parseFloat(item.amount) || 0,
-        payin_opening_balance: item.payin_opening ?? "0.0",
-        payin_closing_balance: item.payin_closing ?? "0.0",
+        payout_closing_balance: item.payout_closing_balance ?? "0.0",
+        payout_opening_balance: item.payout_opening_balance ?? "0.0",
         status: item.status ?? "N/A",
         created_at: item.created_at,
       }))
@@ -355,7 +358,7 @@ useEffect(() => {
       ),
     ].join("\n");
 
-    downloadFile(csv, "payin_settlement_filtered.csv", "text/csv");
+    downloadFile(csv, "chargeback_settlement_filtered.csv", "text/csv");
   };
 
   const handleClearAll = () => {
@@ -417,6 +420,28 @@ useEffect(() => {
     {
       header: "Amount",
       accessor: "amount",
+      Cell: ({ row }) => (
+        <div className="flex flex-col text-left w-50">
+          <span>
+            Payout Opening Amount: <b>{row.payout_opening_balance}</b>
+          </span>
+          <span>
+            Pay Amount: <b>{row.amount}</b>
+          </span>
+          <span>
+            Total Charges: <b>{row.charge}</b>
+          </span>
+          <span>
+            GST: <b>{row.gst}</b>
+          </span>
+          <span>
+           Payout Closing Amount: <b>{row.payout_closing_balance}</b>
+          </span>
+          <span>
+            Total Debited Amount: <b>{row.option2}</b>
+          </span>
+        </div>
+      ),
     },
     {
       header: "Status",
