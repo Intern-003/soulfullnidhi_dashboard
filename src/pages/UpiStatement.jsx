@@ -39,7 +39,7 @@ const UpiStatement = () => {
     localStorage.getItem("auth") ||
     localStorage.getItem("userid") ||
     "default_user";
-
+// console.log(userId);
   const CACHE_KEY = `upi_statement_cache_${userId}`;
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -597,6 +597,8 @@ const handleAccept = async (row) => {
         </span>
       ),
     },
+    ...(role === "admin"
+    ? [
 {
   header: "Chargeback",
   accessor: "chargeback",
@@ -620,6 +622,8 @@ const handleAccept = async (row) => {
     );
   },
 }
+      ]
+    : [])
   ];
 
   return (

@@ -65,11 +65,6 @@ export const Sidebar = ({ open, setOpen }) => {
               { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
             ],
           },
-           { 
-            label: "Chargeback Statement", 
-            icon: "fa-chart-pie", 
-            link: "/Chargeback" 
-          },
         ]
       : []),
 
@@ -122,7 +117,11 @@ export const Sidebar = ({ open, setOpen }) => {
           },
         ]
       : []),
-
+           { 
+            label: "Chargeback Statement", 
+            icon: "fa-chart-pie", 
+            link: "/Chargeback" 
+          },
     ...(role === "crypto"
       ? [
           {
