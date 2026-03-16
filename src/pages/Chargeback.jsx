@@ -34,8 +34,15 @@ const Chargeback = () => {
     localStorage.getItem("auth") ||
     localStorage.getItem("userid") ||
     "default_user";
-
+// console.log(userId);
   const CACHE_KEY = `chargeback_cache_${userId}`;
+useEffect(() => {
+  const interval = setInterval(() => {
+    handleRefreshData();
+  }, 30000);
+
+  return () => clearInterval(interval);
+}, []);
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 

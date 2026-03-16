@@ -161,6 +161,8 @@ const response = await login(payload);
         localStorage.setItem("login_id", response.user.login_id);
         localStorage.setItem("role", btoa(response.user.role_type));
         localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("user_id", JSON.stringify(response.user.id));
+
  
         // setSafeItem("token", response.token);
         // setSafeItem("email", response.user.mobile_no);

@@ -155,7 +155,12 @@ const handleLoadMore = () => {
       if (res) {
         toast.success("Settlement done successfully!!");
 
-        fetchMerchantsPayin();
+        setRawData([]);
+setCursor(null);
+setHasMore(true);
+lastCursorRef.current = null;
+
+fetchMerchantsPayin(true);
         setShowModal(false);
       }
     } catch (err) {

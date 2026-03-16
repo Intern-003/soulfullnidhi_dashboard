@@ -85,6 +85,7 @@ const AppRoutes = () => {
                         </PrivateRoute>
                     }
                 />
+                 <Route path="/Chargeback" element={  <PrivateRoute><Chargeback/></PrivateRoute>}/>
                 <Route
                     path="/payout-request"
                     element={
@@ -109,10 +110,7 @@ const AppRoutes = () => {
                         </PrivateRoute>
                     } 
                 />
-                <Route path="/Chargeback" element={
-                     <PrivateRoute role={"admin"}>
-                    <Chargeback/>
-                    </PrivateRoute>} />
+               
                 <Route
                     path="/load-wallet"
                     element={
