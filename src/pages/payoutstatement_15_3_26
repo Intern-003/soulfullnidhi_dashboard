@@ -1,18 +1,16 @@
-import React from 'react'
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import Table from "../components/Table";
 import TableFilters from "../components/TableFilters";
-import { REPORT_STATUSES } from "../constants/Constants";
+import { MONTH_NAMES, REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
-import { usePost } from '../hooks/usePost';
 
-const BATCH_SIZE = 3000;
+const BATCH_SIZE = 5000;
 const FETCH_DELAY = 150;
 const CACHE_TTL_MS = 1000 * 60 * 30; // 30 min
 
-const Chargeback = () => {
- const [allPayinSettlementData, setAllPayinSettlementData] = useState([]);
+const PayoutStatement = () => {
+  const [allPayoutData, setAllPayoutData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [allLoaded, setAllLoaded] = useState(false);
@@ -26,9 +24,6 @@ const Chargeback = () => {
   const [endDate, setEndDate] = useState(null);
   const [selectedMerchant, setSelectedMerchant] = useState(null);
 
-  const { execute: executReverse } = usePost("/reverse/chargeback");
-    const role = atob(localStorage.getItem("role"));
-// console.log("api called", executReverse);
   const nextCursorRef = useRef(null);
   const stopFetchingRef = useRef(false);
   const seenIdsRef = useRef(new Set());
@@ -38,16 +33,9 @@ const Chargeback = () => {
     localStorage.getItem("auth") ||
     localStorage.getItem("userid") ||
     "default_user";
-// console.log(userId);
-  const CACHE_KEY = `chargeback_cache_${userId}`;
-useEffect(() => {
-  const interval = setInterval(() => {
-    handleRefreshData();
-  }, 30000);
 
-  return () => clearInterval(interval);
-}, []);
-
+  const CACHE_KEY = `payout_statement_cache_${userId}`;
+console.log("caschekey",userId);
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const normalizeRows = useCallback((rows) => {
@@ -57,19 +45,32 @@ useEffect(() => {
         user_id: item.user_id,
         merchant_name: item.user?.name ?? "N/A",
         merchant_details_text: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
-        txnid: item.txnid ?? "N/A",
-        product_type: item.product ?? "N/A",
-        amount: item.amount ?? "0",
-         gst: item.gst ?? "0",
-         option2:item.option2 ?? "0",
-          charge: item.charge ?? "0",
-        numericAmount: parseFloat(item.amount) || 0,
-        payout_closing_balance: item.payout_closing_balance ?? "0.0",
-        payout_opening_balance: item.payout_opening_balance ?? "0.0",
-        status: item.chargeback_status ?? "N/A",
-        option3: item.option3 ?? "N/A",
+
+        holder: item.payer_name ?? "N/A",
+        account: item.payer_acc_no ?? "N/A",
+        ifsc: item.payer_ifsc ?? "N/A",
+        upi_id: item.payer_upi ?? "N/A",
+        mobile: item.payer_mobile ?? "N/A",
+
+        payment_mode: item.payout_mode ?? "null",
+        refno: item.refno ?? "null",
+        mytxnid: item.mytxnid ?? "null",
+        txnid: item.txnid ?? "null",
+
+        opening_wallet_amount: item.payout_opening_balance ?? 0,
+        pay_amount: item.amount ?? 0,
+        total_charges: item.profit ?? 0,
+        total_debited_amount: (
+          Number(item.amount ?? 0) + Number(item.profit ?? 0)
+        ).toFixed(2),
+        closing_wallet_amount: item.payout_closing_balance ?? 0,
+        note: `Debit ${(
+          Number(item.amount ?? 0) + Number(item.profit ?? 0)
+        ).toFixed(2)} to Payout Wallet`,
+
+        status: item.status ?? "N/A",
         created_at: item.created_at,
-        chargeback_id: item.glide_uiwidget_sessionid ?? "N/A",
+        numericAmount: parseFloat(item.amount) || 0,
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
@@ -125,7 +126,7 @@ useEffect(() => {
         const token = localStorage.getItem("token");
 
         const query = new URLSearchParams({
-          product: "chargeback",
+          product: "payout",
           per_page: String(BATCH_SIZE),
           ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {}),
         }).toString();
@@ -156,7 +157,7 @@ useEffect(() => {
 
         const formattedRows = normalizeRows(uniqueRows);
 
-        setAllPayinSettlementData((prev) => {
+        setAllPayoutData((prev) => {
           const merged = [...prev, ...formattedRows].sort(
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
           );
@@ -165,6 +166,7 @@ useEffect(() => {
           const finished = !nextCursor;
 
           saveCache(merged, nextCursor, finished);
+
           return merged;
         });
 
@@ -176,7 +178,7 @@ useEffect(() => {
         }
       } catch (err) {
         console.error(err);
-        setError("Failed to load Payin Settlement");
+        setError("Failed to load payout statements");
         stopFetchingRef.current = true;
       } finally {
         setLoading(false);
@@ -202,7 +204,7 @@ useEffect(() => {
     const cached = loadCache();
 
     if (cached) {
-      setAllPayinSettlementData(cached.data || []);
+      setAllPayoutData(cached.data || []);
       setAllLoaded(Boolean(cached.allLoaded));
       nextCursorRef.current = cached.nextCursor || null;
       seenIdsRef.current = new Set((cached.data || []).map((item) => item.id));
@@ -216,7 +218,7 @@ useEffect(() => {
     }
 
     nextCursorRef.current = null;
-    setAllPayinSettlementData([]);
+    setAllPayoutData([]);
     setAllLoaded(false);
     startProgressiveFetch();
 
@@ -260,7 +262,7 @@ useEffect(() => {
   };
 
   const filteredData = useMemo(() => {
-    return allPayinSettlementData.filter((row) => {
+    return allPayoutData.filter((row) => {
       const searchValue = txnSearch.trim().toLowerCase();
 
       const searchText = [
@@ -268,9 +270,15 @@ useEffect(() => {
         row.user_id,
         row.merchant_name,
         row.merchant_details_text,
+        row.holder,
+        row.account,
+        row.ifsc,
+        row.upi_id,
+        row.mobile,
+        row.payment_mode,
+        row.refno,
+        row.mytxnid,
         row.txnid,
-        row.product_type,
-        row.amount,
       ]
         .map((v) => String(v || "").toLowerCase())
         .join(" ");
@@ -294,14 +302,7 @@ useEffect(() => {
 
       return matchesTxn && matchesStatus && matchesDate && matchesMerchant;
     });
-  }, [
-    allPayinSettlementData,
-    txnSearch,
-    statusFilter,
-    startDate,
-    endDate,
-    selectedMerchant,
-  ]);
+  }, [allPayoutData, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
 
   const totalSuccessAmount = useMemo(() => {
     return filteredData
@@ -335,25 +336,67 @@ useEffect(() => {
     document.body.removeChild(link);
   };
 
+  const formatExportDateTime = (value) => {
+    if (!value) {
+      return { date: "", time: "" };
+    }
+
+    const d = new Date(value);
+
+    if (isNaN(d.getTime())) {
+      const raw = String(value).trim();
+      const parts = raw.split(" ");
+      return {
+        date: parts[0] || "",
+        time: parts[1] || "",
+      };
+    }
+
+    return {
+      date: d.toLocaleDateString("en-GB"),
+      time: d.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }),
+    };
+  };
+
   const exportCSV = () => {
     if (!filteredData.length) {
       alert("No data to export.");
       return;
     }
 
-    const csvRows = filteredData.map((row) => ({
-      "Order ID": row.id,
-      "User ID": row.user_id,
-      "Merchant Name": row.merchant_name,
-      "Merchant Details": row.merchant_details_text,
-      "Transaction ID": row.txnid,
-      "Product Type": row.product_type,
-      "Amount": row.amount,
-      "Status": row.status,
-      "Created At": row.created_at,
-      "Opening Bal": row.payin_opening_balance,
-      "Closing Bal": row.payin_closing_balance,
-    }));
+    const csvRows = filteredData.map((row) => {
+      const { date, time } = formatExportDateTime(row.created_at);
+
+      return {
+        "Order ID": row.id,
+        "User ID": row.user_id,
+        "Merchant Name": row.merchant_name,
+        "Merchant Details": row.merchant_details_text,
+        Holder: row.holder,
+        Account: row.account,
+        IFSC: row.ifsc,
+        "UPI Id": row.upi_id,
+        Mobile: row.mobile,
+        "Payment Mode": row.payment_mode,
+        "Ref No": row.refno,
+        "Order Ref ID": row.mytxnid,
+        TxnId: row.txnid,
+        "Opening Wallet Amount": row.opening_wallet_amount,
+        "Pay Amount": row.pay_amount,
+        "Total Charges": row.total_charges,
+        "Total Debited Amount": row.total_debited_amount,
+        "Closing Wallet Amount": row.closing_wallet_amount,
+        Note: row.note,
+        Status: row.status,
+        Date: date,
+        Time: time,
+      };
+    });
 
     const headers = Object.keys(csvRows[0]);
 
@@ -364,7 +407,7 @@ useEffect(() => {
       ),
     ].join("\n");
 
-    downloadFile(csv, "chargeback_settlement_filtered.csv", "text/csv");
+    downloadFile(csv, "payout_statement_filtered.csv", "text/csv");
   };
 
   const handleClearAll = () => {
@@ -381,7 +424,7 @@ useEffect(() => {
 
     nextCursorRef.current = null;
     seenIdsRef.current = new Set();
-    setAllPayinSettlementData([]);
+    setAllPayoutData([]);
     setAllLoaded(false);
 
     await startProgressiveFetch();
@@ -394,81 +437,39 @@ useEffect(() => {
     completed: "bg-[#057034ff] text-white",
     failed: "bg-[#ff3366] text-white",
     reversed: "bg-[#ff3366] text-white",
-    refunded: "bg-gray-400 text-white",
-    accepted: "bg-orange-400 text-white",
-    reverse: "bg-red-900 text-white",
-
+    refunded: "bg-[#ff3366] text-white",
   };
 
-// const handleReverseChargeback = async (row) => {
-//   try {
-//     const payload = {
-//       chargeback_id: row.chargeback_id, // or txnid if required
-//     };
-
-//     const res = await executReverse(payload);
-
-//     if (!res?.status) {
-//       throw new Error(res?.message || "Reverse failed");
-//     }
-
-//     alert("Chargeback reversed successfully ✅");
-
-//     // refresh data
-//     handleRefreshData();
-
-//   } catch (err) {
-//     console.error(err);
-//     alert("Reverse failed ❌");
-//   }
-// };
-
-
-
-const handleReverseChargeback = async (row) => {
-  try {
-    const payload = {
-      chargeback_id: row.chargeback_id,
-    };
-
-    const res = await executReverse(payload);
-
-    if (!res?.status) {
-      throw new Error(res?.message || "Reverse failed");
-    }
-
-    // ✅ 1. Update the status of this specific row locally
-    setAllPayinSettlementData((prev) =>
-      prev.map((r) =>
-        r.chargeback_id === row.chargeback_id
-          ? { ...r, status: "reverse" } // mark as reversed
-          : r
-      )
-    );
-
-    // ✅ 2. Update the cache so the icon stays gone after refresh
-    const cached = getSafeItem(CACHE_KEY);
-    if (cached?.data) {
-      const updatedCacheData = cached.data.map((r) =>
-        r.chargeback_id === row.chargeback_id
-          ? { ...r, status: "reverse" }
-          : r
-      );
-      setSafeItem(CACHE_KEY, { ...cached, data: updatedCacheData });
-    }
-
-    alert("Chargeback reversed successfully ✅");
-
-  } catch (err) {
-    console.error(err);
-    alert("Reverse failed ❌");
-  }
-};  
-  const payinSettlementColumn = [
+  const payoutColumn = [
     {
-      header: "SQ NO",
+      header: "Order ID",
       accessor: "id",
-      Cell: ({ row }) => <span>{row.id}</span>,
+      Cell: ({ row }) => {
+        const d = new Date(row.created_at);
+        return (
+          <div className="flex flex-col text-left">
+            <span>
+              <b>{row.id}</b>
+            </span>
+            <span>
+              {isNaN(d)
+                ? "N/A"
+                : `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`}
+            </span>
+            <span className="text-sm text-gray-500">
+              {isNaN(d)
+                ? "N/A"
+                : d
+                    .toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })
+                    .toUpperCase()}
+            </span>
+          </div>
+        );
+      },
     },
     {
       header: "Merchant Details",
@@ -483,44 +484,72 @@ const handleReverseChargeback = async (row) => {
       ),
     },
     {
-      header: "Transaction Id",
-      accessor: "txnid",
-      Cell: ({row}) => (
-       <div className="w-70 flex flex-col">
-        <span>txnid: <b>{row.txnid}</b></span>
-        <span>chargeback id : <b>{row.chargeback_id}</b></span>
-       </div>
+      header: "Bank Details",
+      accessor: "holder",
+      Cell: ({ row }) => (
+        <div className="flex flex-col text-left">
+          <span>
+            Holder: <b>{row.holder}</b>
+          </span>
+          <span>
+            Account: <b>{row.account}</b>
+          </span>
+          <span>
+            IFSC: <b>{row.ifsc}</b>
+          </span>
+          <span>
+            UPI Id: <b>{row.upi_id}</b>
+          </span>
+          <span>
+            Mobile: <b>{row.mobile}</b>
+          </span>
+        </div>
       ),
     },
     {
-      header: "Product Type",
-      accessor: "product_type",
+      header: "Reference Details",
+      accessor: "payment_mode",
+      Cell: ({ row }) => (
+        <div className="flex flex-col text-left">
+          <span>
+            Payment Mode: <b>{row.payment_mode}</b>
+          </span>
+          <span>
+            Ref No: <b>{row.refno}</b>
+          </span>
+          <span>
+            Order ID: <b>{row.mytxnid}</b>
+          </span>
+          <span>
+            Txnid: <br />
+            <b>{row.txnid}</b>
+          </span>
+        </div>
+      ),
     },
     {
-      header: "Amount",
-      accessor: "amount",
+      header: "Amount / Commission",
+      accessor: "pay_amount",
       Cell: ({ row }) => (
-        <div className="flex flex-col text-left w-50">
+        <div className="flex flex-col text-left">
           <span>
-            Payout Opening Amount: <b>{row.payout_opening_balance}</b>
+            Opening Wallet Amount: <b>{row.opening_wallet_amount}</b>
           </span>
           <span>
-            Pay Amount: <b>{row.amount}</b>
+            Pay Amount: <b>{row.pay_amount}</b>
           </span>
           <span>
-            Total Charges: <b>{row.charge}</b>
+            Total Charges: <b>{row.total_charges}</b>
           </span>
           <span>
-            GST: <b>{row.gst}</b>
+            Total Debited Amount: <b>{row.total_debited_amount}</b>
           </span>
           <span>
-           Payout Closing Amount: <b>{row.payout_closing_balance}</b>
+            Closing Wallet Amount: <b>{row.closing_wallet_amount}</b>
           </span>
           <span>
-        {row.status.toLowerCase().trim() === "reverse" ? "Total Credited Amount" : "Total Debited Amount"}: 
-            <b>{row.option2}</b>
+            Note: <b>{row.note}</b>
           </span>
-          
         </div>
       ),
     },
@@ -529,76 +558,16 @@ const handleReverseChargeback = async (row) => {
       accessor: "status",
       Cell: ({ row }) => (
         <span
-className={`px-2 py-1 rounded-full text-sm font-medium ${
-  statusClasses[String(row.status || "").toLowerCase().trim()] ??
-  "bg-gray-100 text-gray-800"
-}`}
+          className={`px-2 py-1 rounded-full text-sm font-medium ${
+            statusClasses[String(row.status || "").toLowerCase()] ?? "bg-gray-600 text-white"
+          }`}
         >
-          {row.status}
+          {row?.status
+            ? row.status.charAt(0).toUpperCase() + row.status.slice(1)
+            : "N/A"}
         </span>
       ),
     },
-    {
-      header: "Date",
-      accessor: "created_at",
-      Cell: ({ row }) => {
-        const d = new Date(row.created_at);
-        return (
-<div className="flex items-center justify-between w-30">
-  {/* Date & Time */}
-  <div>
-    <span className="text-sm font-medium block">
-      {isNaN(d)
-        ? "N/A"
-        : d.toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "2-digit",
-          })}
-    </span>
-
-    <span className="text-sm text-gray-500 block">
-      {isNaN(d)
-        ? "N/A"
-        : d.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          })}
-    </span>
-  </div>
-{role === "admin" && row.status.toLowerCase().trim() !== "reverse" && row.option3 !== "reverse" && (
-  <div className="relative group">
-    <span 
- onClick={() => {
-    if (window.confirm("Are you sure to reverse this chargeback?")) {
-      handleReverseChargeback(row);
-    }
-  }}
-  className="flex items-center justify-center w-10 h-10 bg-blue-600/50 text-black rounded-full cursor-pointer hover:bg-blue-700 hover:text-white transition"
->
-  <i className="fas fa-undo"></i>
-</span>
-    {/* Tooltip */}
-    <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
-      Reverse Chargeback
-    </div>
-  </div>
-      )}
-
-
-</div>
-        );
-      },
-    },
-    // {
-    //   header: "Opening Bal",
-    //   accessor: "payin_opening_balance",
-    // },
-    // {
-    //   header: "Closing Bal",
-    //   accessor: "payin_closing_balance",
-    // },
   ];
 
   return (
@@ -610,11 +579,9 @@ className={`px-2 py-1 rounded-full text-sm font-medium ${
         }}
       >
         <div>
-          <h4 className="font-bold text-white text-lg sm:text-xl">
-            Chargeback Statement
-          </h4>
+          <h4 className="font-bold text-white text-xl">Payout Statement</h4>
           <p className="text-white/90 text-sm mt-1 hidden">
-            Loaded: {allPayinSettlementData.length}{" "}
+            Loaded: {allPayoutData.length}{" "}
             {allLoaded ? "(All records loaded)" : "(Loading in background...)"}
           </p>
         </div>
@@ -628,7 +595,7 @@ className={`px-2 py-1 rounded-full text-sm font-medium ${
       </div>
 
       <TableFilters
-        rawData={allPayinSettlementData}
+        rawData={allPayoutData}
         txnSearch={txnSearch}
         setTxnSearch={setTxnSearch}
         statusFilter={statusFilter}
@@ -649,14 +616,14 @@ className={`px-2 py-1 rounded-full text-sm font-medium ${
         totalSuccessAmount={totalSuccessAmount}
       />
 
-      {loading && allPayinSettlementData.length === 0 ? (
+      {loading && allPayoutData.length === 0 ? (
         <TableSkeleton />
       ) : error ? (
         <div className="text-center py-6 text-red-500">{error}</div>
       ) : (
         <>
           <Table
-            columns={payinSettlementColumn}
+            columns={payoutColumn}
             data={filteredData}
             showPagination={true}
             showDeleteColumn={false}
@@ -667,7 +634,7 @@ className={`px-2 py-1 rounded-full text-sm font-medium ${
 
           {loadingMore && (
             <div className="text-center py-3 text-sm text-gray-500">
-              Loading next records...
+              Loading next 50 records...
             </div>
           )}
         </>
@@ -676,5 +643,4 @@ className={`px-2 py-1 rounded-full text-sm font-medium ${
   );
 };
 
-
-export default Chargeback
+export default PayoutStatement;

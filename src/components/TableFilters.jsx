@@ -23,6 +23,7 @@ const TableFilters = ({
   onExportCSV,
   onClearAll,
   totalSuccessAmount = 0,
+    merchantOptions = [],   
 }) => {
   const [openExport, setOpenExport] = useState(false);
   const exportRef = useRef(null);
@@ -38,22 +39,22 @@ const TableFilters = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const selectData = useMemo(() => {
-    return Array.from(
-      new Map(
-        rawData?.map((item) => {
-          const value = item.user_id ?? item.id;
-          const label =
-            item.merchant_details_text ||
-            (item.merchant_name && `${item.merchant_name} (${value})`) ||
-            (item.raw_name && `${item.raw_name} (${value})`) ||
-            `User ${value}`;
+  // const selectData = useMemo(() => {
+  //   return Array.from(
+  //     new Map(
+  //       rawData?.map((item) => {
+  //         const value = item.user_id ?? item.id;
+  //         const label =
+  //           item.merchant_details_text ||
+  //           (item.merchant_name && `${item.merchant_name} (${value})`) ||
+  //           (item.raw_name && `${item.raw_name} (${value})`) ||
+  //           `User ${value}`;
 
-          return [value, { value, label }];
-        })
-      ).values()
-    );
-  }, [rawData]);
+  //         return [value, { value, label }];
+  //       })
+  //     ).values()
+  //   );
+  // }, [rawData]);
 
   const months = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -155,7 +156,7 @@ const TableFilters = ({
             <select
               value={selectedMerchant?.value || ""}
               onChange={(e) => {
-                const selected = selectData.find(
+                const selected = merchantOptions.find(
                   (item) => String(item.value) === e.target.value
                 );
                 setSelectedMerchant(selected || null);
@@ -163,7 +164,7 @@ const TableFilters = ({
               className="border border-gray-300 bg-white rounded-lg px-3 py-2 shadow-sm font-medium min-w-[220px]"
             >
               <option value="">Select Merchant</option>
-              {selectData.map((item) => (
+              {merchantOptions.map((item) => (
                 <option key={item.value} value={item.value}>
                   {item.label}
                 </option>

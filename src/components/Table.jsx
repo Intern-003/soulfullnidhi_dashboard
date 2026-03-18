@@ -18,16 +18,16 @@ const Table = ({
   onLoadNext = () => {},
   entriesPerPage = 50,
   setEntriesPerPage = () => {},
+    currentPage = 1,
+  totalPages = 1,
+  onPageChange = () => {},
 }) => {
   const toast = useToast();
 
   const [recordId, setRecordId] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [data]);
+
 
   const handleConfirmModal = (id) => {
     setRecordId(id);
@@ -56,15 +56,15 @@ const Table = ({
     }
   };
 
-  const totalPages = Math.ceil(data.length / entriesPerPage) || 1;
+  // const totalPages = Math.ceil(data.length / entriesPerPage) || 1;
 
-  const paginatedData = useMemo(() => {
-    if (isServerPaginated) return data;
-
-    const startIndex = (currentPage - 1) * entriesPerPage;
-    const endIndex = startIndex + entriesPerPage;
-    return data.slice(startIndex, endIndex);
-  }, [data, currentPage, entriesPerPage, isServerPaginated]);
+const paginatedData = useMemo(() => {
+  if (isServerPaginated) return data;
+  return data.slice(
+    (currentPage - 1) * entriesPerPage,
+    currentPage * entriesPerPage
+  );
+}, [data, currentPage, entriesPerPage, isServerPaginated]);
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -146,97 +146,66 @@ const Table = ({
           </tbody>
         </table>
       </div>
+{showPagination && data.length > 0 && (
+  <div className="flex flex-col md:flex-row justify-between items-center px-4 py-3 bg-gray-200 rounded-b-2xl border-t border-gray-300 shadow-inner">
+    
+    {/* Entries selector */}
+    <div className="flex items-center gap-2 text-sm text-gray-800 font-medium">
+      <span>Show</span>
+      <select
+        value={entriesPerPage}
+        onChange={(e) => {
+          setEntriesPerPage(Number(e.target.value));
+          onPageChange(1); // reset to first page
+        }}
+        className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-sky-400 outline-none"
+      >
+        {[50, 100, 150, 200].map((num) => (
+          <option key={num} value={num}>
+            {num}
+          </option>
+        ))}
+      </select>
+      <span>entries</span>
+    </div>
 
-      {showPagination && data.length > 0 && (
-        <div className="flex flex-col md:flex-row justify-between items-center px-4 py-3 bg-gray-200 rounded-b-2xl border-t border-gray-300 shadow-inner">
-          <div className="flex items-center gap-2 text-sm text-gray-800 font-medium">
-            <span>Show</span>
-            <select
-              value={entriesPerPage}
-              onChange={(e) => {
-                setEntriesPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-sky-400 outline-none"
-            >
-              {[50, 100, 150, 200].map((num) => (
-                <option key={num} value={num}>
-                  {num}
-                </option>
-              ))}
-            </select>
-            <span>entries</span>
-          </div>
+    {/* Pagination controls */}
+    <div className="flex items-center gap-3 mt-2 md:mt-0">
 
-          <div className="flex items-center gap-3 mt-2 md:mt-0">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1 || isServerPaginated}
-              className={`px-3 py-1 text-sm rounded-md font-medium transition ${
-                currentPage === 1 || isServerPaginated
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-            >
-              Prev
-            </button>
+      {/* Prev Button */}
+      <button
+        onClick={() => {
+          if (currentPage > 1) {
+            onPageChange(currentPage - 1);
+          }
+        }}
+        disabled={currentPage === 1}
+        className="px-3 py-1 text-sm rounded-md font-medium bg-blue-600 text-white disabled:bg-gray-300"
+      >
+        Prev
+      </button>
 
-            <span className="text-sm font-medium text-gray-800">
-              {isServerPaginated ? (
-                <>Loaded: {data.length} records</>
-              ) : (
-                <>
-                  Page <span className="font-semibold">{currentPage}</span> of {totalPages}
-                </>
-              )}
-            </span>
+      {/* Page Info */}
+      <span className="text-sm font-medium text-gray-800">
+        Page {currentPage} of {totalPages}
+      </span>
 
-            <button
-              onClick={
-                isServerPaginated
-                  ? onLoadNext
-                  : () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev))
-              }
-              disabled={
-                isServerPaginated
-                  ? !hasMore || isLoadingMore
-                  : currentPage === totalPages
-              }
-              className={`px-3 py-1 text-sm rounded-md font-medium transition flex items-center gap-2 ${
-                isServerPaginated
-                  ? !hasMore || isLoadingMore
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
-                  : currentPage === totalPages
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-            >
-              {isServerPaginated && isLoadingMore ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  Loading...
-                </>
-              ) : (
-                "Next"
-              )}
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Next Button */}
+      <button
+        onClick={() => {
+          if (currentPage < totalPages) {
+            onPageChange(currentPage + 1);
+          }
+        }}
+        disabled={currentPage === totalPages}
+        className="px-3 py-1 text-sm rounded-md font-medium bg-blue-600 text-white disabled:bg-gray-300"
+      >
+        Next
+      </button>
+
+    </div>
+  </div>
+)}
 
       <ConfirmModal
         showConfirmModal={showConfirmModal}
