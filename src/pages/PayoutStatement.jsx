@@ -10,23 +10,28 @@ const FETCH_DELAY = 150;
 const CACHE_TTL_MS = 1000 * 60 * 30; // 30 min
 
 const PayoutStatement = () => {
-  const [allPayoutData, setAllPayoutData] = useState([]);
+  const [merchantOptions, setMerchantOptions] = useState([]);
+
+
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [allLoaded, setAllLoaded] = useState(false);
   const [error, setError] = useState(null);
+  const [totalSuccessAmount, setTotalSuccessAmount] = useState(0);
 
   const [entriesPerPage, setEntriesPerPage] = useState(50);
+// const [perPage] = useState(50);
+
+const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
+const [totalRecords, setTotalRecords] = useState(0);
 
   const [txnSearch, setTxnSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [selectedMerchant, setSelectedMerchant] = useState(null);
-
-  const nextCursorRef = useRef(null);
-  const stopFetchingRef = useRef(false);
-  const seenIdsRef = useRef(new Set());
+const [filteredData, setFilteredData] = useState([]);
 
   const userId =
     localStorage.getItem("user_id") ||
@@ -34,10 +39,7 @@ const PayoutStatement = () => {
     localStorage.getItem("userid") ||
     "default_user";
 
-  const CACHE_KEY = `payout_statement_cache_${userId}`;
-console.log("caschekey",userId);
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
+  
   const normalizeRows = useCallback((rows) => {
     return rows
       .map((item) => ({
@@ -75,243 +77,172 @@ console.log("caschekey",userId);
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
 
-  const saveCache = useCallback(
-    (data, nextCursor, finished) => {
-      try {
-        setSafeItem(CACHE_KEY, {
-          data,
-          nextCursor,
-          allLoaded: finished,
-          savedAt: Date.now(),
-        });
-      } catch (err) {
-        console.error("Cache save error:", err);
+useEffect(() => {
+  fetchMerchants();
+}, []);
+
+const fetchMerchants = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/get-merchants`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    },
-    [CACHE_KEY]
-  );
+    );
 
-  const loadCache = useCallback(() => {
-    try {
-      const parsed = getSafeItem(CACHE_KEY);
-      if (!parsed?.data || !Array.isArray(parsed.data)) return null;
+    const result = await res.json();
 
-      const isExpired = Date.now() - (parsed.savedAt || 0) > CACHE_TTL_MS;
-      if (isExpired) {
-        removeSafeItem(CACHE_KEY);
-        return null;
-      }
-
-      return parsed;
-    } catch (err) {
-      console.error("Cache read error:", err);
-      return null;
-    }
-  }, [CACHE_KEY]);
-
-  const clearCache = useCallback(() => {
-    removeSafeItem(CACHE_KEY);
-  }, [CACHE_KEY]);
-
-  const fetchBatch = useCallback(
-    async (isFirstLoad = false) => {
-      try {
-        if (isFirstLoad) {
-          setLoading(true);
-          setError(null);
-        } else {
-          setLoadingMore(true);
-        }
-
-        const token = localStorage.getItem("token");
-
-        const query = new URLSearchParams({
-          product: "payout",
-          per_page: String(BATCH_SIZE),
-          ...(nextCursorRef.current ? { cursor: nextCursorRef.current } : {}),
-        }).toString();
-
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const json = await res.json();
-
-        if (!res.ok || !json?.status) {
-          throw new Error(json?.message || "Invalid API response");
-        }
-
-        const rows = Array.isArray(json.data) ? json.data : [];
-
-        const uniqueRows = rows.filter((item) => {
-          if (!item?.id) return false;
-          if (seenIdsRef.current.has(item.id)) return false;
-          seenIdsRef.current.add(item.id);
-          return true;
-        });
-
-        const formattedRows = normalizeRows(uniqueRows);
-
-        setAllPayoutData((prev) => {
-          const merged = [...prev, ...formattedRows].sort(
-            (a, b) => new Date(b.created_at) - new Date(a.created_at)
-          );
-
-          const nextCursor = json.next_cursor || null;
-          const finished = !nextCursor;
-
-          saveCache(merged, nextCursor, finished);
-
-          return merged;
-        });
-
-        nextCursorRef.current = json.next_cursor || null;
-
-        if (!json.next_cursor) {
-          setAllLoaded(true);
-          stopFetchingRef.current = true;
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load payout statements");
-        stopFetchingRef.current = true;
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [normalizeRows, saveCache]
-  );
-
-  const startProgressiveFetch = useCallback(async () => {
-    stopFetchingRef.current = false;
-    seenIdsRef.current = new Set();
-
-    await fetchBatch(true);
-
-    while (!stopFetchingRef.current && nextCursorRef.current) {
-      await sleep(FETCH_DELAY);
-      await fetchBatch(false);
-    }
-  }, [fetchBatch]);
-
-  useEffect(() => {
-    const cached = loadCache();
-
-    if (cached) {
-      setAllPayoutData(cached.data || []);
-      setAllLoaded(Boolean(cached.allLoaded));
-      nextCursorRef.current = cached.nextCursor || null;
-      seenIdsRef.current = new Set((cached.data || []).map((item) => item.id));
-      setLoading(false);
-
-      if (!cached.allLoaded && cached.nextCursor) {
-        startProgressiveFetch();
-      }
-
-      return;
+    if (!res.ok || !result?.status) {
+      throw new Error(result?.message);
     }
 
-    nextCursorRef.current = null;
-    setAllPayoutData([]);
-    setAllLoaded(false);
-    startProgressiveFetch();
+    // ✅ Convert to dropdown format
+    const options = (result.data || []).map((m) => ({
+      label: m.name,   // or m.business_name depending on API
+      value: m.id,
+    }));
 
-    return () => {
-      stopFetchingRef.current = true;
+    setMerchantOptions(options);
+
+  } catch (err) {
+    console.error("Merchant fetch error:", err);
+    setMerchantOptions([]);
+  }
+};
+useEffect(() => {
+  fetchFilteredData();
+}, [page, entriesPerPage, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
+
+const fetchFilteredData = async () => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+
+    const params = {
+      page,
+      per_page: entriesPerPage,
+      status: statusFilter !== "all" ? statusFilter : undefined,
+  from_date: startDate
+  ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
+      .toISOString()
+      .split("T")[0]
+  : undefined,
+
+  to_date: endDate
+  ? new Date(
+      new Date(endDate).setHours(23, 59, 59, 999)
+    ).toISOString().split("T")[0]
+  : undefined,
+      product: "payout",
+      searchdata: txnSearch || undefined,
+      user_id: selectedMerchant?.value || undefined,
     };
-  }, [loadCache, startProgressiveFetch]);
 
-  const parseDate = (value) => {
-    if (!value) return null;
+    const query = new URLSearchParams(
+      Object.entries(params).filter(([_, v]) => v !== undefined)
+    ).toString();
 
-    if (value instanceof Date && !isNaN(value)) {
-      const d = new Date(value);
-      d.setHours(0, 0, 0, 0);
-      return d;
-    }
-
-    const d = new Date(value);
-    if (!isNaN(d)) {
-      d.setHours(0, 0, 0, 0);
-      return d;
-    }
-
-    if (typeof value === "string") {
-      const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
-      if (match) {
-        const fixed = new Date(match[1]);
-        fixed.setHours(0, 0, 0, 0);
-        return fixed;
+    const res = await fetch(
+      `https://uatfintech.spay.live/api/reportrecords-List?${query}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok || !result?.status) {
+      throw new Error(result?.message);
     }
 
-    return null;
-  };
+    // ✅ IMPORTANT
+    setTotalSuccessAmount(result.success_amount || 0);
 
-  const parseEndDate = (value) => {
-    const d = parseDate(value);
-    if (!d) return null;
-    d.setHours(23, 59, 59, 999);
-    return d;
-  };
+    const formatted = normalizeRows(result.data || []);
+    setFilteredData(formatted);
 
-  const filteredData = useMemo(() => {
-    return allPayoutData.filter((row) => {
-      const searchValue = txnSearch.trim().toLowerCase();
+    // ✅ SET PAGINATION FROM API
+    setTotalPages(result.pagination?.last_page || 1);
+    setTotalRecords(result.pagination?.total || 0);
 
-      const searchText = [
-        row.id,
-        row.user_id,
-        row.merchant_name,
-        row.merchant_details_text,
-        row.holder,
-        row.account,
-        row.ifsc,
-        row.upi_id,
-        row.mobile,
-        row.payment_mode,
-        row.refno,
-        row.mytxnid,
-        row.txnid,
-      ]
-        .map((v) => String(v || "").toLowerCase())
-        .join(" ");
+  } catch (err) {
+    console.error(err);
+    setFilteredData([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const matchesTxn = !searchValue || searchText.includes(searchValue);
+const fetchAllDataForExport = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        String(row.status || "").toLowerCase() === statusFilter.toLowerCase();
+    let currentPage = 1;
+    let lastPage = 1;
+    let allData = [];
 
-      const rowDate = parseDate(row.created_at);
-      const start = parseDate(startDate);
-      const end = parseEndDate(endDate);
+    do {
+      const params = {
+        page: currentPage,
+        per_page: entriesPerPage, // ✅ use same pagination size
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        from_date: startDate
+          ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
+              .toISOString()
+              .split("T")[0]
+          : undefined,
+        to_date: endDate
+          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+              .toISOString()
+              .split("T")[0]
+          : undefined,
+        product: "payout",
+        searchdata: txnSearch || undefined,
+        user_id: selectedMerchant?.value || undefined,
+      };
 
-      const matchesDate =
-        (!start || (rowDate && rowDate >= start)) &&
-        (!end || (rowDate && rowDate <= end));
+      const query = new URLSearchParams(
+        Object.entries(params).filter(([_, v]) => v !== undefined)
+      ).toString();
 
-      const matchesMerchant =
-        !selectedMerchant || String(row.user_id) === String(selectedMerchant.value);
+      const res = await fetch(
+        `https://uatfintech.spay.live/api/reportrecords-List?${query}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      return matchesTxn && matchesStatus && matchesDate && matchesMerchant;
-    });
-  }, [allPayoutData, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
+      const result = await res.json();
 
-  const totalSuccessAmount = useMemo(() => {
-    return filteredData
-      .filter((row) => {
-        const status = String(row.status || "").toLowerCase();
-        return status === "success" || status === "completed";
-      })
-      .reduce((sum, row) => sum + (Number(row.numericAmount) || 0), 0);
-  }, [filteredData]);
+      if (!res.ok || !result?.status) {
+        throw new Error(result?.message);
+      }
+
+      const formatted = normalizeRows(result.data || []);
+
+      allData = [...allData, ...formatted];
+
+      // ✅ update loop control
+      lastPage = result.pagination?.last_page || 1;
+      currentPage++;
+
+    } while (currentPage <= lastPage);
+
+    return allData;
+
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
 
   const escapeCSV = (field) => {
     const string = String(field ?? "");
@@ -363,16 +294,18 @@ console.log("caschekey",userId);
     };
   };
 
-  const exportCSV = () => {
-    if (!filteredData.length) {
-      alert("No data to export.");
-      return;
-    }
+  const exportCSV = async () => {
+  const allData = await fetchAllDataForExport();
 
-    const csvRows = filteredData.map((row) => {
-      const { date, time } = formatExportDateTime(row.created_at);
+  if (!allData.length) {
+    alert("No data to export.");
+    return;
+  }
 
-      return {
+  const csvRows = allData.map((row) => {
+    const { date, time } = formatExportDateTime(row.created_at);
+
+        return {
         "Order ID": row.id,
         "User ID": row.user_id,
         "Merchant Name": row.merchant_name,
@@ -395,20 +328,21 @@ console.log("caschekey",userId);
         Status: row.status,
         Date: date,
         Time: time,
-      };
-    });
+    };
+  });
 
-    const headers = Object.keys(csvRows[0]);
+  const headers = Object.keys(csvRows[0]);
 
-    const csv = [
-      headers.map(escapeCSV).join(","),
-      ...csvRows.map((row) =>
-        headers.map((header) => escapeCSV(row[header])).join(",")
-      ),
-    ].join("\n");
+  const csv = [
+    headers.map(escapeCSV).join(","),
+    ...csvRows.map((row) =>
+      headers.map((header) => escapeCSV(row[header])).join(",")
+    ),
+  ].join("\n");
 
-    downloadFile(csv, "payout_statement_filtered.csv", "text/csv");
-  };
+  downloadFile(csv, "upi_statement_filtered.csv", "text/csv");
+};
+
 
   const handleClearAll = () => {
     setTxnSearch("");
@@ -418,17 +352,6 @@ console.log("caschekey",userId);
     setSelectedMerchant(null);
   };
 
-  const handleRefreshData = async () => {
-    clearCache();
-    stopFetchingRef.current = true;
-
-    nextCursorRef.current = null;
-    seenIdsRef.current = new Set();
-    setAllPayoutData([]);
-    setAllLoaded(false);
-
-    await startProgressiveFetch();
-  };
 
   const statusClasses = {
     pending: "bg-[#dfaf03ff] text-white",
@@ -581,21 +504,22 @@ console.log("caschekey",userId);
         <div>
           <h4 className="font-bold text-white text-xl">Payout Statement</h4>
           <p className="text-white/90 text-sm mt-1 hidden">
-            Loaded: {allPayoutData.length}{" "}
+            Loaded: {filteredData.length}{" "}
             {allLoaded ? "(All records loaded)" : "(Loading in background...)"}
           </p>
         </div>
 
-        <button
+        {/* <button
           onClick={handleRefreshData}
           className="bg-white text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hidden"
         >
           Refresh
-        </button>
+        </button> */}
       </div>
 
       <TableFilters
-        rawData={allPayoutData}
+       merchantOptions={merchantOptions}
+        rawData={filteredData}
         txnSearch={txnSearch}
         setTxnSearch={setTxnSearch}
         statusFilter={statusFilter}
@@ -616,7 +540,7 @@ console.log("caschekey",userId);
         totalSuccessAmount={totalSuccessAmount}
       />
 
-      {loading && allPayoutData.length === 0 ? (
+      {loading && filteredData.length === 0 ? (
         <TableSkeleton />
       ) : error ? (
         <div className="text-center py-6 text-red-500">{error}</div>
@@ -627,9 +551,12 @@ console.log("caschekey",userId);
             data={filteredData}
             showPagination={true}
             showDeleteColumn={false}
-            isServerPaginated={false}
+            isServerPaginated={true}
             entriesPerPage={entriesPerPage}
-            setEntriesPerPage={setEntriesPerPage}
+             setEntriesPerPage={setEntriesPerPage}
+  totalPages={totalPages}
+  currentPage={page}   // ✅ ADD THIS
+  onPageChange={(newPage) => setPage(newPage)}
           />
 
           {loadingMore && (
