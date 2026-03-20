@@ -5,18 +5,24 @@ import { REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
 
-const BATCH_SIZE = 3000;
-const FETCH_DELAY = 150;
-const CACHE_TTL_MS = 1000 * 60 * 30; // 30 min
+
 
 const Acc_topup_settlement = () => {
-  const [allTopupData, setAllTopupData] = useState([]);
+  
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [allLoaded, setAllLoaded] = useState(false);
+ 
   const [error, setError] = useState(null);
 
-  const [entriesPerPage, setEntriesPerPage] = useState(50);
+    const [entriesPerPage, setEntriesPerPage] = useState(50);
+
+const [filteredData, setFilteredData] = useState([]);
+const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
+const [totalRecords, setTotalRecords] = useState(0);
+const [totalSuccessAmount, setTotalSuccessAmount] = useState(0);
+
+const [merchantOptions, setMerchantOptions] = useState([]);
+
 
   const [txnSearch, setTxnSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -24,19 +30,12 @@ const Acc_topup_settlement = () => {
   const [endDate, setEndDate] = useState(null);
   const [selectedMerchant, setSelectedMerchant] = useState(null);
 
-  const nextCursorRef = useRef(null);
-  const stopFetchingRef = useRef(false);
-  const seenIdsRef = useRef(new Set());
 
   const userId =
     localStorage.getItem("user_id") ||
     localStorage.getItem("auth") ||
     localStorage.getItem("userid") ||
     "default_user";
-
-  const CACHE_KEY = `topup_settlement_cache_${userId}`;
-
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const normalizeRows = useCallback((rows) => {
     return rows
@@ -57,238 +56,194 @@ const Acc_topup_settlement = () => {
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
 
-  const saveCache = useCallback(
-    (data, nextCursor, finished) => {
-      try {
-        setSafeItem(CACHE_KEY, {
-          data,
-          nextCursor,
-          allLoaded: finished,
-          savedAt: Date.now(),
-        });
-      } catch (err) {
-        console.error("Cache save error:", err);
-      }
-    },
-    [CACHE_KEY]
-  );
 
-  const loadCache = useCallback(() => {
-    try {
-      const parsed = getSafeItem(CACHE_KEY);
-      if (!parsed?.data || !Array.isArray(parsed.data)) return null;
-
-      const isExpired = Date.now() - (parsed.savedAt || 0) > CACHE_TTL_MS;
-      if (isExpired) {
-        removeSafeItem(CACHE_KEY);
-        return null;
-      }
-
-      return parsed;
-    } catch (err) {
-      console.error("Cache read error:", err);
-      return null;
-    }
-  }, [CACHE_KEY]);
-
-  const clearCache = useCallback(() => {
-    removeSafeItem(CACHE_KEY);
-  }, [CACHE_KEY]);
-
-  const fetchBatch = useCallback(
-    async (isFirstLoad = false) => {
-      try {
-        if (isFirstLoad) {
-          setLoading(true);
-          setError(null);
-        } else {
-          setLoadingMore(true);
-        }
-
-        const token = localStorage.getItem("token");
-
-        const params = new URLSearchParams();
-        params.append("product[]", "topup_payout");
-        params.append("product[]", "take_back_from_wallet");
-        params.append("per_page", String(BATCH_SIZE));
-        if (nextCursorRef.current) params.append("cursor", nextCursorRef.current);
-
-        const query = params.toString();
-
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const json = await res.json();
-
-        if (!res.ok || !json?.status) {
-          throw new Error(json?.message || "Invalid response");
-        }
-
-        const rows = Array.isArray(json.data) ? json.data : [];
-
-        const uniqueRows = rows.filter((item) => {
-          if (!item?.id) return false;
-          if (seenIdsRef.current.has(item.id)) return false;
-          seenIdsRef.current.add(item.id);
-          return true;
-        });
-
-        const formattedRows = normalizeRows(uniqueRows);
-
-        setAllTopupData((prev) => {
-          const merged = [...prev, ...formattedRows].sort(
-            (a, b) => new Date(b.created_at) - new Date(a.created_at)
-          );
-
-          const nextCursor = json.next_cursor || null;
-          const finished = !nextCursor;
-
-          saveCache(merged, nextCursor, finished);
-          return merged;
-        });
-
-        nextCursorRef.current = json.next_cursor || null;
-
-        if (!json.next_cursor) {
-          setAllLoaded(true);
-          stopFetchingRef.current = true;
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load Topup statements");
-        stopFetchingRef.current = true;
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [normalizeRows, saveCache]
-  );
-
-  const startProgressiveFetch = useCallback(async () => {
-    stopFetchingRef.current = false;
-    seenIdsRef.current = new Set();
-
-    await fetchBatch(true);
-
-    while (!stopFetchingRef.current && nextCursorRef.current) {
-      await sleep(FETCH_DELAY);
-      await fetchBatch(false);
-    }
-  }, [fetchBatch]);
-
+  
   useEffect(() => {
-    const cached = loadCache();
+  setPage(1);
+}, [entriesPerPage, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
 
-    if (cached) {
-      setAllTopupData(cached.data || []);
-      setAllLoaded(Boolean(cached.allLoaded));
-      nextCursorRef.current = cached.nextCursor || null;
-      seenIdsRef.current = new Set((cached.data || []).map((item) => item.id));
-      setLoading(false);
 
-      if (!cached.allLoaded && cached.nextCursor) {
-        startProgressiveFetch();
+const fetchMerchants = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/get-merchants`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
 
-      return;
+    const result = await res.json();
+
+    if (!res.ok || !result?.status) {
+      throw new Error(result?.message);
     }
 
-    nextCursorRef.current = null;
-    setAllTopupData([]);
-    setAllLoaded(false);
-    startProgressiveFetch();
+    // ✅ Convert to dropdown format
+    const options = (result.data || []).map((m) => ({
+      label: m.name,   // or m.business_name depending on API
+      value: m.id,
+    }));
 
-    return () => {
-      stopFetchingRef.current = true;
+    setMerchantOptions(options);
+
+  } catch (err) {
+    console.error("Merchant fetch error:", err);
+    setMerchantOptions([]);
+  }
+};
+
+useEffect(() => {
+  fetchMerchants();
+}, []);
+
+useEffect(() => {
+  fetchFilteredData();
+}, [page, entriesPerPage, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
+
+const fetchFilteredData = async () => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+
+    const params = {
+      page,
+      per_page: entriesPerPage,
+      status: statusFilter !== "all" ? statusFilter : undefined,
+
+      from_date: startDate
+        ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
+            .toISOString()
+            .split("T")[0]
+        : undefined,
+
+      to_date: endDate
+        ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+            .toISOString()
+            .split("T")[0]
+        : undefined,
+
+      // ✅ IMPORTANT: MULTIPLE PRODUCTS
+      "product[]": ["topup_payout", "take_back_from_wallet"],
+
+      searchdata: txnSearch || undefined,
+      user_id: selectedMerchant?.value || undefined,
     };
-  }, [loadCache, startProgressiveFetch]);
 
-  const parseDate = (value) => {
-    if (!value) return null;
+    // 👇 FIX for array params
+    const query = new URLSearchParams();
 
-    if (value instanceof Date && !isNaN(value)) {
-      const d = new Date(value);
-      d.setHours(0, 0, 0, 0);
-      return d;
-    }
+    Object.entries(params).forEach(([key, value]) => {
+      if (!value) return;
 
-    const d = new Date(value);
-    if (!isNaN(d)) {
-      d.setHours(0, 0, 0, 0);
-      return d;
-    }
-
-    if (typeof value === "string") {
-      const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
-      if (match) {
-        const fixed = new Date(match[1]);
-        fixed.setHours(0, 0, 0, 0);
-        return fixed;
+      if (Array.isArray(value)) {
+        value.forEach((v) => query.append(key, v));
+      } else {
+        query.append(key, value);
       }
+    });
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/reportrecords-List?${query.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok || !result?.status) {
+      throw new Error(result?.message);
     }
 
-    return null;
-  };
+    // ✅ success amount from backend
+    setTotalSuccessAmount(result.success_amount || 0);
 
-  const parseEndDate = (value) => {
-    const d = parseDate(value);
-    if (!d) return null;
-    d.setHours(23, 59, 59, 999);
-    return d;
-  };
+    const formatted = normalizeRows(result.data || []);
+    setFilteredData(formatted);
 
-  const filteredData = useMemo(() => {
-    return allTopupData.filter((row) => {
-      const searchValue = txnSearch.trim().toLowerCase();
+    // ✅ pagination
+    setTotalPages(result.pagination?.last_page || 1);
+    setTotalRecords(result.pagination?.total || 0);
 
-      const searchText = [
-        row.id,
-        row.user_id,
-        row.merchant_name,
-        row.merchant_details_text,
-        row.txnid,
-        row.product_type,
-        row.amount,
-      ]
-        .map((v) => String(v || "").toLowerCase())
-        .join(" ");
+  } catch (err) {
+    console.error(err);
+    setFilteredData([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const matchesTxn = !searchValue || searchText.includes(searchValue);
+const fetchAllDataForExport = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        String(row.status || "").toLowerCase() === statusFilter.toLowerCase();
+    let currentPage = 1;
+    let lastPage = 1;
+    let allData = [];
 
-      const rowDate = parseDate(row.created_at);
-      const start = parseDate(startDate);
-      const end = parseEndDate(endDate);
+    do {
+      const params = {
+        page: currentPage,
+        per_page: entriesPerPage, // ✅ use same pagination size
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        from_date: startDate
+          ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
+              .toISOString()
+              .split("T")[0]
+          : undefined,
+        to_date: endDate
+          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+              .toISOString()
+              .split("T")[0]
+          : undefined,
+        product: "UPI",
+        searchdata: txnSearch || undefined,
+        user_id: selectedMerchant?.value || undefined,
+      };
 
-      const matchesDate =
-        (!start || (rowDate && rowDate >= start)) &&
-        (!end || (rowDate && rowDate <= end));
+      const query = new URLSearchParams(
+        Object.entries(params).filter(([_, v]) => v !== undefined)
+      ).toString();
 
-      const matchesMerchant =
-        !selectedMerchant || String(row.user_id) === String(selectedMerchant.value);
+      const res = await fetch(
+        `https://uatfintech.spay.live/api/reportrecords-List?${query}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      return matchesTxn && matchesStatus && matchesDate && matchesMerchant;
-    });
-  }, [allTopupData, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
+      const result = await res.json();
 
-  const totalSuccessAmount = useMemo(() => {
-    return filteredData
-      .filter((row) => {
-        const status = String(row.status || "").toLowerCase();
-        return status === "success" || status === "completed";
-      })
-      .reduce((sum, row) => sum + (Number(row.numericAmount) || 0), 0);
-  }, [filteredData]);
+      if (!res.ok || !result?.status) {
+        throw new Error(result?.message);
+      }
+
+      const formatted = normalizeRows(result.data || []);
+
+      allData = [...allData, ...formatted];
+
+      // ✅ update loop control
+      lastPage = result.pagination?.last_page || 1;
+      currentPage++;
+
+    } while (currentPage <= lastPage);
+
+    return allData;
+
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
+
 
   const escapeCSV = (field) => {
     const string = String(field ?? "");
@@ -330,7 +285,7 @@ const Acc_topup_settlement = () => {
     }
 
     return {
-      date: d.toLocaleDateString("en-GB"), // DD/MM/YYYY
+      date: d.toLocaleDateString("en-GB"),
       time: d.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
@@ -340,17 +295,20 @@ const Acc_topup_settlement = () => {
     };
   };
 
-  const exportCSV = () => {
-    if (!filteredData.length) {
-      alert("No data to export.");
-      return;
-    }
+const exportCSV = async () => {
+  const allData = await fetchAllDataForExport();
 
-    const csvRows = filteredData.map((row) => {
-      const { date, time } = formatExportDateTime(row.created_at);
+  if (!allData.length) {
+    alert("No data to export.");
+    return;
+  }
 
-      return {
-        "Order ID": row.id,
+  const csvRows = allData.map((row) => {
+    const { date, time } = formatExportDateTime(row.created_at);
+
+    return {
+
+       "Order ID": row.id,
         "User ID": row.user_id,
         "Merchant Name": row.merchant_name,
         "Merchant Details": row.merchant_details_text,
@@ -362,21 +320,20 @@ const Acc_topup_settlement = () => {
         "Time": time,
         "Opening Bal": row.payout_opening_balance,
         "Closing Bal": row.payout_closing_balance,
-      };
-    });
+    };
+  });
 
-    const headers = Object.keys(csvRows[0]);
+  const headers = Object.keys(csvRows[0]);
 
-    const csv = [
-      headers.map(escapeCSV).join(","),
-      ...csvRows.map((row) =>
-        headers.map((header) => escapeCSV(row[header])).join(",")
-      ),
-    ].join("\n");
+  const csv = [
+    headers.map(escapeCSV).join(","),
+    ...csvRows.map((row) =>
+      headers.map((header) => escapeCSV(row[header])).join(",")
+    ),
+  ].join("\n");
 
-    downloadFile(csv, "topup_settlement_filtered.csv", "text/csv");
-  };
-
+  downloadFile(csv, "upi_settlement.csv", "text/csv");
+};
   const handleClearAll = () => {
     setTxnSearch("");
     setStatusFilter("all");
@@ -385,18 +342,7 @@ const Acc_topup_settlement = () => {
     setSelectedMerchant(null);
   };
 
-  const handleRefreshData = async () => {
-    clearCache();
-    stopFetchingRef.current = true;
-
-    nextCursorRef.current = null;
-    seenIdsRef.current = new Set();
-    setAllTopupData([]);
-    setAllLoaded(false);
-
-    await startProgressiveFetch();
-  };
-
+ 
   const statusClasses = {
     pending: "bg-[#dfaf03ff] text-white",
     initiated: "bg-blue-400 text-white",
@@ -501,22 +447,13 @@ const Acc_topup_settlement = () => {
           <h4 className="font-bold text-white text-xl">
             Topup Settlement Statement
           </h4>
-          <p className="text-white/90 text-sm mt-1 hidden">
-            Loaded: {allTopupData.length}{" "}
-            {allLoaded ? "(All records loaded)" : "(Loading in background...)"}
-          </p>
+         
         </div>
-
-        <button
-          onClick={handleRefreshData}
-          className="bg-white text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hidden"
-        >
-          Refresh
-        </button>
       </div>
 
       <TableFilters
-        rawData={allTopupData}
+      merchantOptions={merchantOptions}
+        rawData={filteredData}
         txnSearch={txnSearch}
         setTxnSearch={setTxnSearch}
         statusFilter={statusFilter}
@@ -537,7 +474,7 @@ const Acc_topup_settlement = () => {
         totalSuccessAmount={totalSuccessAmount}
       />
 
-      {loading && allTopupData.length === 0 ? (
+      {loading  ? (
         <TableSkeleton />
       ) : error ? (
         <div className="text-center py-6 text-red-500">Error: {error}</div>
@@ -548,16 +485,11 @@ const Acc_topup_settlement = () => {
             data={filteredData}
             showPagination={true}
             showDeleteColumn={false}
-            isServerPaginated={false}
+            isServerPaginated={true}
             entriesPerPage={entriesPerPage}
             setEntriesPerPage={setEntriesPerPage}
           />
 
-          {loadingMore && (
-            <div className="text-center py-3 text-sm text-gray-500">
-              Loading next records...
-            </div>
-          )}
         </>
       )}
     </div>

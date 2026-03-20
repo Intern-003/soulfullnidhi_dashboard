@@ -559,11 +559,7 @@ const fetchAllDataForExport = async () => {
   onPageChange={(newPage) => setPage(newPage)}
           />
 
-          {loadingMore && (
-            <div className="text-center py-3 text-sm text-gray-500">
-              Loading next 50 records...
-            </div>
-          )}
+
         </>
       )}
     </div>

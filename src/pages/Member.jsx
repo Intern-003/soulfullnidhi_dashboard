@@ -636,7 +636,7 @@ export const Member = () => {
           showExport={true}
           showStatusFilter={true}
           showDateFilter={true}
-          showSelectUserFilter={true}
+          showSelectUserFilter={false}
           onExportCSV={exportMembersCSV}
           onClearAll={handleClearAll}
           totalSuccessAmount={0}

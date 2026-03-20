@@ -5,7 +5,6 @@ import Table from "../components/Table";
 import useAutoFetch from "../hooks/useAutoFetch";
 import DashboardSkeleton from "../components/DashboardSkeleton";
 import { useNavigate } from "react-router-dom";
-// import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
 
 export const Dashboard = () => {
   const DASHBOARD_LOCK_KEY = "payment_dashboard_logged_in";
@@ -15,21 +14,21 @@ export const Dashboard = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // ─── Cursor pagination states ───
-  const [rawRecords, setRawRecords] = useState([]);
-  const [currentCursor, setCurrentCursor] = useState(null);   // what we send to API
-  const [nextCursor, setNextCursor] = useState(null);         // candidate from last response
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+ 
+//  server pagination
+const [tableData, setTableData] = useState([]);
+const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
+const [totalRecords, setTotalRecords] = useState(0);
+const [tableLoading, setTableLoading] = useState(false);
   const [entriesPerPage, setEntriesPerPage] = useState(50);
 
 
   // ─── Dashboard states ───
   const [role] = useState(atob(localStorage.getItem("role") || "") || "admin");
-  const [transactionData, setTransactionData] = useState([]);
-  const [largeTransactionData, setLargeTransactionData] = useState([]);
+ 
   const [initialLoad, setInitialLoad] = useState(true);
-  // const [statusFilter, setStatusFilter] = useState("SUCCESS");
+
   const [statusFilter, setStatusFilter] = useState(() => {
   return localStorage.getItem("dashboard_status_filter") || "SUCCESS";
 });
@@ -46,149 +45,138 @@ const { data: monthwiseData, loading: monthLoading } = useAutoFetch("/collection
 const { data: cashfreeData, loading: cashfreeLoading } = useAutoFetch("/collection-cashfree");
 
 useEffect(() => {
-  localStorage.setItem("dashboard_status_filter", statusFilter);
+  // localStorage.setItem("dashboard_status_filter", statusFilter);
+ setPage(1);
 }, [statusFilter]);
 
 
-  // Dynamic URL for cursor-based pagination
-  const getTableUrl = () => {
-    const params = new URLSearchParams({
-      // per_page: "50",   // ← changed to 150 (good balance)
-       per_page: entriesPerPage.toString(),
-      ...(currentCursor && { cursor: currentCursor }),
-      ...(statusFilter !== "ALL" && { status: statusFilter }),
-    });
-    return `/reportrecords-List?${params.toString()}`;
-  };
+useEffect(() => {
+  fetchDashboardTable();
+}, [page, entriesPerPage, statusFilter]);
 
-  const { data: pageData, loading: pageLoading } = useAutoFetch(getTableUrl());
+const fetchDashboardTable = async () => {
+  try {
+    setTableLoading(true);
 
-  // Merge incoming page into accumulated records – NO automatic cursor advance
-  useEffect(() => {
-    if (pageLoading || !pageData) return;
+    const token = localStorage.getItem("token");
 
-    const newRecords = pageData?.data || pageData?.records || pageData?.result || [];
+    const params = {
+      page,
+      per_page: entriesPerPage,
+      // status: statusFilter !== "ALL" ? statusFilter : undefined,
+    };
 
-    setRawRecords((prev) => {
-      const seen = new Set(prev.map((r) => r.txnid || r.id || r._id));
-      const uniqueNew = newRecords.filter((r) => !seen.has(r.txnid || r.id || r._id));
-      return [...prev, ...uniqueNew];
-    });
+    // ✅ differentiate filters
+if (statusFilter !== "ALL") {
+  const chargebackStatuses = ["ACCEPTED", "REVERSE"];
 
-    // Only store next cursor – wait for user to click Load More
-    const candidate = pageData?.next_cursor || pageData?.next || pageData?.next_page || null;
-    setNextCursor(candidate);
-    setHasMore(!!candidate);
+  if (chargebackStatuses.includes(statusFilter)) {
+    params.chargeback_status = statusFilter;
+    params.product = "chargeback"; // optional but recommended
+  } else {
+    params.status = statusFilter;
+  }
+}
 
-    setIsLoadingMore(false); // re-enable button
-  }, [pageData, pageLoading]);
+    const query = new URLSearchParams(
+      Object.entries(params).filter(([_, v]) => v !== undefined)
+    ).toString();
 
-  // Reset pagination on mount
-  useEffect(() => {
-    setRawRecords([]);
-    setCurrentCursor(null);
-    setNextCursor(null);
-    setHasMore(true);
-    setIsLoadingMore(false);
-  }, [entriesPerPage]);
-
-  // ─── Load More Handler ───
-  const handleLoadMore = () => {
-    if (!nextCursor || pageLoading || isLoadingMore) return;
-    
-    setIsLoadingMore(true);
-    setCurrentCursor(nextCursor); // This triggers new fetch via useAutoFetch
-  };
-
-  // ─── Data processing ───
-  const sortedRecords = useMemo(() => {
-    return [...rawRecords].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-  }, [rawRecords]);
-
-  const filteredTableData = useMemo(() => {
-    if (statusFilter === "ALL") return sortedRecords;
-    return sortedRecords.filter(
-      (item) => (item.status || "").toUpperCase() === statusFilter
-    );
-  }, [sortedRecords, statusFilter]);
-
-  const topLargeTransactions = useMemo(() => {
-    return [...rawRecords]
-      .sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0))
-      .slice(0, 4);
-  }, [rawRecords]);
-
-
-  // ─── Format table rows + large transactions ───
-  useEffect(() => {
-    const formatted = filteredTableData.map((item, index) => {
-      const date = new Date(item.created_at);
-      const formattedDate = date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "2-digit",
-      });
-      const formattedTime = date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-
-      const statusUpper = (item.status || "UNKNOWN").toUpperCase();
-      let statusClass = "bg-gray-100 text-gray-700 border-gray-300 font-medium";
-
-      switch (statusUpper) {
-        case "SUCCESS":
-        case "COMPLETED":
-          statusClass = "bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold";
-          break;
-        case "PENDING":
-        case "INITIATED":
-          statusClass = "bg-amber-50 text-amber-700 border-amber-200 font-semibold";
-          break;
-        case "FAILED":
-        case "REVERSED":
-        case "REFUNDED":
-          statusClass = "bg-rose-50 text-rose-700 border-rose-200 font-semibold";
-          break;
-        default:
-          break;
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
 
-      return {
-        sqno: index + 1,
-        txnid: item.txnid || "—",
-        name: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
-        type: item.product || "—",
-        amount: item.amount,
-        status: (
-          <span
-            className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide border shadow-sm ${statusClass}`}
-          >
-            {statusUpper}
-          </span>
-        ),
-        time: (
-          <div className="flex flex-col leading-tight">
-            <span className="font-medium text-gray-900">{formattedDate}</span>
-            <span className="text-xs text-gray-500 mt-0.5">{formattedTime}</span>
-          </div>
-        ),
-      };
+    const result = await res.json();
+
+    if (!res.ok || !result?.status) {
+      throw new Error(result?.message);
+    }
+
+    // ✅ set data directly (NO merging)
+    setTableData(result.data || []);
+
+    // ✅ pagination from API
+    setTotalPages(result.pagination?.last_page || 1);
+    setTotalRecords(result.pagination?.total || 0);
+
+  } catch (err) {
+    console.error(err);
+    setTableData([]);
+  } finally {
+    setTableLoading(false);
+  }
+};
+
+
+const transactionData = useMemo(() => {
+  return tableData.map((item, index) => {
+    const date = new Date(item.created_at);
+
+    const formattedDate = date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "2-digit",
     });
 
-    setTransactionData(formatted);
+    const formattedTime = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
 
-    const formattedLarge = topLargeTransactions.map((item) => ({
+    // ✅ MAIN CHANGE HERE
+    const isChargeback = item.product?.toUpperCase() === "CHARGEBACK";
+
+
+    const statusValue = isChargeback
+      ? (item.chargeback_status || "UNKNOWN")
+      : (item.status || "UNKNOWN");
+
+ const statusUpper = statusValue.toUpperCase();
+
+    // const statusUpper = (item.status || "UNKNOWN").toUpperCase();
+
+    let statusClass = "bg-gray-100 text-gray-700";
+
+    if (["SUCCESS", "COMPLETED"].includes(statusUpper)) {
+      statusClass = "bg-emerald-50 text-emerald-700";
+    } else if (["PENDING", "INITIATED"].includes(statusUpper)) {
+      statusClass = "bg-amber-50 text-amber-700";
+    } else if (["FAILED", "REVERSED", "REFUNDED"].includes(statusUpper)) {
+      statusClass = "bg-rose-50 text-rose-700";
+    }else if (["ACCEPTED"].includes(statusUpper)) {
+      statusClass = "bg-orange-50 text-orange-700";
+    }
+    else if (["REVERSE"].includes(statusUpper)) {
+      statusClass = "bg-purple-50 text-purple-700";
+    }
+
+    return {
+      txnid: item.txnid || "—",
       name: `${item.user?.name ?? "N/A"} (${item.user_id ?? "N/A"})`,
-      product: item.product,
+      type: item.product || "—",
       amount: item.amount,
-    }));
+      status: (
+        <span className={`px-3 py-1 rounded-full text-xs ${statusClass}`}>
+          {statusUpper}
+        </span>
+      ),
+      time: (
+        <div>
+          <div>{formattedDate}</div>
+          <div className="text-xs text-gray-500">{formattedTime}</div>
+        </div>
+      ),
+    };
+  });
+}, [tableData]);
 
-    setLargeTransactionData(formattedLarge);
-  }, [filteredTableData, topLargeTransactions]);
+
 
   // ─── Auth check ───
   useEffect(() => {
@@ -344,6 +332,8 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
                   <option value="REFUNDED">Refunded</option>
                   <option value="COMPLETED">Completed</option>
                   <option value="INITIATED">Initiated</option>
+                   <option value="ACCEPTED">Accepted</option>
+                    <option value="REVERSE">Reverse</option>
                 </select>
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">▼</span>
               </div>
@@ -361,15 +351,15 @@ const lineChartData = useMemo(() => monthwiseData || [], [monthwiseData]);
               showDeleteColumn={false}
               showDateFilter={false}
 
-              isServerPaginated={true}           // Tell Table to use server logic
-              hasMore={hasMore}
-              isLoadingMore={isLoadingMore}
-              onLoadNext={handleLoadMore}
-              pageLoading={pageLoading}
-
-              
+              isServerPaginated={true}     // Tell Table to use server logic
               entriesPerPage={entriesPerPage}
               setEntriesPerPage={setEntriesPerPage}
+
+                totalPages={totalPages}
+  currentPage={page}
+  onPageChange={(newPage) => setPage(newPage)}
+
+  loading={tableLoading}
             />
 
           
