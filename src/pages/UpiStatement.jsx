@@ -13,6 +13,8 @@ const [merchantOptions, setMerchantOptions] = useState([]);
   const [error, setError] = useState(null);
   const [totalSuccessAmount, setTotalSuccessAmount] = useState(0);
 
+const [exporting, setExporting] = useState(false);
+
   const [entriesPerPage, setEntriesPerPage] = useState(50);
 // const [perPage] = useState(50);
 
@@ -296,46 +298,94 @@ const fetchAllDataForExport = async () => {
   };
 
 const exportCSV = async () => {
-  const allData = await fetchAllDataForExport();
+  try {
+     setExporting(true); 
+    const token = localStorage.getItem("token");
 
-  if (!allData.length) {
-    alert("No data to export.");
-    return;
-  }
-
-  const csvRows = allData.map((row) => {
-    const { date, time } = formatExportDateTime(row.created_at);
-
-    return {
-      "Order ID": row.id,
-      "User ID": row.user_id,
-      "Merchant Name": row.merchant_name,
-      "Merchant Details": row.merchant_details_text,
-      "Payee VPA": row.payee_vpa,
-      "Ref No": row.refno,
-      "Payee Txnid": row.mytxnid,
-      "TxnId": row.txnid,
-      "Amount": row.amount,
-      "Charges": row.charge,
-      "GST": row.gst,
-      "Payin Rolling Amount": row.payin_rolling_amount,
-      "Status": row.status,
-      "Reason": row.option2,
-      "Date": date,
-      "Time": time,
+    const params = {
+      exportdata: 1, // ✅ IMPORTANT
+      status: statusFilter !== "all" ? statusFilter : undefined,
+      from_date: startDate
+        ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
+            .toISOString()
+            .split("T")[0]
+        : undefined,
+      to_date: endDate
+        ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+            .toISOString()
+            .split("T")[0]
+        : undefined,
+      product: "UPI",
+      searchdata: txnSearch || undefined,
+      user_id: selectedMerchant?.value || undefined,
     };
-  });
 
-  const headers = Object.keys(csvRows[0]);
+    const query = new URLSearchParams(
+      Object.entries(params).filter(([_, v]) => v !== undefined)
+    ).toString();
 
-  const csv = [
-    headers.map(escapeCSV).join(","),
-    ...csvRows.map((row) =>
-      headers.map((header) => escapeCSV(row[header])).join(",")
-    ),
-  ].join("\n");
+    const res = await fetch(
+      `https://uatfintech.spay.live/api/reportrecords-List?${query}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  downloadFile(csv, "upi_statement_filtered.csv", "text/csv");
+    const result = await res.json();
+
+    if (!res.ok || !result?.status) {
+      throw new Error(result?.message);
+    }
+
+    const formatted = normalizeRows(result.data || []);
+
+    if (!formatted.length) {
+      alert("No data to export.");
+      return;
+    }
+
+    const csvRows = formatted.map((row) => {
+      const { date, time } = formatExportDateTime(row.created_at);
+
+      return {
+        "Order ID": row.id,
+        "User ID": row.user_id,
+        "Merchant Name": row.merchant_name,
+        "Merchant Details": row.merchant_details_text,
+        "Payee VPA": row.payee_vpa,
+        "Ref No": row.refno,
+        "Payee Txnid": row.mytxnid,
+        "TxnId": row.txnid,
+        "Amount": row.amount,
+        "Charges": row.charge,
+        "GST": row.gst,
+        "Payin Rolling Amount": row.payin_rolling_amount,
+        "Status": row.status,
+        "Reason": row.option2,
+        "Date": date,
+        "Time": time,
+      };
+    });
+
+    const headers = Object.keys(csvRows[0]);
+
+    const csv = [
+      headers.map(escapeCSV).join(","),
+      ...csvRows.map((row) =>
+        headers.map((header) => escapeCSV(row[header])).join(",")
+      ),
+    ].join("\n");
+
+    downloadFile(csv, "upi_statement_filtered.csv", "text/csv");
+
+  } catch (err) {
+    console.error(err);
+    alert("Export failed");
+  }finally{
+     setExporting(false); 
+  }
 };
 
   const handleClearAll = () => {
@@ -603,7 +653,9 @@ const handleAccept = async (row) => {
         showStatusFilter={true}
         showDateFilter={true}
         showSelectUserFilter={true}
-        onExportCSV={exportCSV}
+        // onExportCSV={exportCSV}
+          onExportCSV={exportCSV}
+  exporting={exporting}
         onClearAll={handleClearAll}
         totalSuccessAmount={totalSuccessAmount}
       />

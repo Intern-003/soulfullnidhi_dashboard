@@ -26,6 +26,9 @@ const [page, setPage] = useState(1);
 const [totalPages, setTotalPages] = useState(1);
 const [totalRecords, setTotalRecords] = useState(0);
 
+const [exporting, setExporting] = useState(false);
+
+
   const [txnSearch, setTxnSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [startDate, setStartDate] = useState(null);
@@ -61,7 +64,8 @@ const [filteredData, setFilteredData] = useState([]);
 
         opening_wallet_amount: item.payout_opening_balance ?? 0,
         pay_amount: item.amount ?? 0,
-        total_charges: item.profit ?? 0,
+        charges: item.charge ?? 0,
+        gst: item.gst ?? 0,
         total_debited_amount: (
           Number(item.amount ?? 0) + Number(item.profit ?? 0)
         ).toFixed(2),
@@ -189,6 +193,7 @@ const fetchAllDataForExport = async () => {
 
     do {
       const params = {
+         exportdata: 1, 
         page: currentPage,
         per_page: entriesPerPage, // ✅ use same pagination size
         status: statusFilter !== "all" ? statusFilter : undefined,
@@ -295,12 +300,16 @@ const fetchAllDataForExport = async () => {
   };
 
   const exportCSV = async () => {
-  const allData = await fetchAllDataForExport();
+    try{
+      setExporting(true);
+           const allData = await fetchAllDataForExport();
 
   if (!allData.length) {
     alert("No data to export.");
     return;
-  }
+
+    }
+
 
   const csvRows = allData.map((row) => {
     const { date, time } = formatExportDateTime(row.created_at);
@@ -321,7 +330,8 @@ const fetchAllDataForExport = async () => {
         TxnId: row.txnid,
         "Opening Wallet Amount": row.opening_wallet_amount,
         "Pay Amount": row.pay_amount,
-        "Total Charges": row.total_charges,
+        "Charges": row.charges,
+         "GST": row.gst,
         "Total Debited Amount": row.total_debited_amount,
         "Closing Wallet Amount": row.closing_wallet_amount,
         Note: row.note,
@@ -341,6 +351,12 @@ const fetchAllDataForExport = async () => {
   ].join("\n");
 
   downloadFile(csv, "upi_statement_filtered.csv", "text/csv");
+}catch(err){
+   console.error(err);
+    alert("Export failed");
+}finally {
+    setExporting(false); // ✅ stop loader
+  }
 };
 
 
@@ -462,7 +478,10 @@ const fetchAllDataForExport = async () => {
             Pay Amount: <b>{row.pay_amount}</b>
           </span>
           <span>
-            Total Charges: <b>{row.total_charges}</b>
+            Charges: <b>{row.charges}</b>
+          </span>
+                    <span>
+            GST: <b>{row.gst}</b>
           </span>
           <span>
             Total Debited Amount: <b>{row.total_debited_amount}</b>
@@ -535,7 +554,10 @@ const fetchAllDataForExport = async () => {
         showStatusFilter={true}
         showDateFilter={true}
         showSelectUserFilter={true}
-        onExportCSV={exportCSV}
+        // onExportCSV={exportCSV}
+  onExportCSV={exportCSV}
+  exporting={exporting}
+
         onClearAll={handleClearAll}
         totalSuccessAmount={totalSuccessAmount}
       />

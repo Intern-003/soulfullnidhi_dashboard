@@ -21,6 +21,7 @@ const TableFilters = ({
   showDateFilter = true,
   showSelectUserFilter = false,
   onExportCSV,
+  exporting,
   onClearAll,
   totalSuccessAmount = 0,
     merchantOptions = [],   
@@ -174,34 +175,47 @@ const TableFilters = ({
         </div>
 
         <div className="flex items-center gap-3 ml-auto flex-wrap">
-          {showExport && (
-            <div className="relative" ref={exportRef}>
-              <Button
-                onClick={() => setOpenExport((prev) => !prev)}
-                className="text-blue-800 px-4 py-2 rounded-lg shadow-md flex items-center gap-2 min-w-[110px] h-[42px] justify-center"
-                style={{
-                  background: "linear-gradient(275deg, #a2c1f3ff, #d4d6ddff)",
-                }}
-              >
-                <i className="fa-solid fa-download"></i> Export
-              </Button>
+   {showExport && (
+  <div className="relative" ref={exportRef}>
+    <Button
+      onClick={() => !exporting && setOpenExport((prev) => !prev)}
+      disabled={exporting}
+      className={`text-blue-800 px-4 py-2 rounded-lg shadow-md flex items-center gap-2 min-w-[110px] h-[42px] justify-center ${
+        exporting ? "opacity-60 cursor-not-allowed" : ""
+      }`}
+      style={{
+        background: "linear-gradient(275deg, #a2c1f3ff, #d4d6ddff)",
+      }}
+    >
+      {exporting ? (
+        <>
+          <span className="animate-spin h-4 w-4 border-2 border-blue-800 border-t-transparent rounded-full"></span>
+          Exporting...
+        </>
+      ) : (
+        <>
+          <i className="fa-solid fa-download"></i> Export
+        </>
+      )}
+    </Button>
 
-              {openExport && (
-                <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg p-2 w-40 z-50">
-                  <button
-                    onClick={() => {
-                      onExportCSV?.();
-                      setOpenExport(false);
-                    }}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md"
-                  >
-                    CSV
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
+    {/* ✅ Hide dropdown while exporting */}
+    {openExport && !exporting && (
+      <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-lg p-2 w-40 z-50">
+        <button
+          onClick={() => {
+            onExportCSV?.();
+            // ❌ don't close immediately
+            // setOpenExport(false);
+          }}
+          className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md"
+        >
+          CSV
+        </button>
+      </div>
+    )}
+  </div>
+)}
           <Button
             className="text-white px-4 py-2 rounded-lg shadow-md transition min-w-[110px] h-[42px] flex items-center justify-center"
             onClick={onClearAll}
