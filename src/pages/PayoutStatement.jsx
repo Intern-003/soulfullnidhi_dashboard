@@ -76,6 +76,8 @@ const [filteredData, setFilteredData] = useState([]);
 
         status: item.status ?? "N/A",
         created_at: item.created_at,
+         updated_at: item.updated_at,   
+
         numericAmount: parseFloat(item.amount) || 0,
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -121,6 +123,7 @@ useEffect(() => {
   fetchFilteredData();
 }, [page, entriesPerPage, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
 
+
 const fetchFilteredData = async () => {
   try {
     setLoading(true);
@@ -130,7 +133,7 @@ const fetchFilteredData = async () => {
       page,
       per_page: entriesPerPage,
       status: statusFilter !== "all" ? statusFilter : undefined,
-  from_date: startDate
+ from_date: startDate
   ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
       .toISOString()
       .split("T")[0]
@@ -160,6 +163,7 @@ const fetchFilteredData = async () => {
     );
 
     const result = await res.json();
+console.log("FILTER API RESPONSE:", result);
 
     if (!res.ok || !result?.status) {
       throw new Error(result?.message);
@@ -197,16 +201,8 @@ const fetchAllDataForExport = async () => {
         page: currentPage,
         per_page: entriesPerPage, // ✅ use same pagination size
         status: statusFilter !== "all" ? statusFilter : undefined,
-        from_date: startDate
-          ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
-              .toISOString()
-              .split("T")[0]
-          : undefined,
-        to_date: endDate
-          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
-              .toISOString()
-              .split("T")[0]
-          : undefined,
+  from_date: formatDateForAPI(startDate),
+to_date: formatDateForAPI(endDate, true),
         product: "payout",
         searchdata: txnSearch || undefined,
         user_id: selectedMerchant?.value || undefined,
@@ -299,6 +295,32 @@ const fetchAllDataForExport = async () => {
     };
   };
 
+
+  const formatDateForAPI = (date, isEnd = false) => {
+  if (!date) return undefined;
+
+  const d = new Date(date);
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = d.toLocaleString("en-US", { month: "short" });
+  const year = d.getFullYear();
+
+  if (isEnd) {
+    d.setHours(23, 59);
+  } else {
+    d.setHours(0, 0);
+  }
+
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `${day} ${month} ${year}, ${time}`;
+}; 
+
+
   const exportCSV = async () => {
     try{
       setExporting(true);
@@ -350,7 +372,7 @@ const fetchAllDataForExport = async () => {
     ),
   ].join("\n");
 
-  downloadFile(csv, "upi_statement_filtered.csv", "text/csv");
+  downloadFile(csv, "Payout_statement_filtered.csv", "text/csv");
 }catch(err){
    console.error(err);
     alert("Export failed");
@@ -380,36 +402,58 @@ const fetchAllDataForExport = async () => {
   };
 
   const payoutColumn = [
-    {
-      header: "Order ID",
-      accessor: "id",
-      Cell: ({ row }) => {
-        const d = new Date(row.created_at);
-        return (
-          <div className="flex flex-col text-left">
-            <span>
-              <b>{row.id}</b>
+{
+  header: "Order Id",
+  accessor: "id",
+  Cell: ({ row }) => {
+    const created = new Date(row.created_at);
+    const updated = new Date(row.updated_at);
+
+    const formatDate = (d) =>
+      isNaN(d)
+        ? "N/A"
+        : `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+
+    const formatTime = (d) =>
+      isNaN(d)
+        ? "N/A"
+        : d
+            .toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })
+            .toUpperCase();
+
+    return (
+      <div className="flex flex-col text-left w-20">
+        {/* Order ID */}
+        <span>
+          <b>{row.id}</b>
+        </span>
+
+        {/* Created */}
+        <span>{formatDate(created)}</span>
+        <span className="text-xs text-gray-500">
+          {formatTime(created)}
+        </span>
+
+        {/* Updated */}
+        {row.updated_at && (
+          <>
+            <span className="mt-1">
+              Updated at:<br />
+              {formatDate(updated)}
             </span>
-            <span>
-              {isNaN(d)
-                ? "N/A"
-                : `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`}
+            <span className="text-xs text-blue-500">
+              {formatTime(updated)}
             </span>
-            <span className="text-sm text-gray-500">
-              {isNaN(d)
-                ? "N/A"
-                : d
-                    .toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })
-                    .toUpperCase()}
-            </span>
-          </div>
-        );
-      },
-    },
+          </>
+        )}
+      </div>
+    );
+  },
+},
     {
       header: "Merchant Details",
       accessor: "merchant_details_text",

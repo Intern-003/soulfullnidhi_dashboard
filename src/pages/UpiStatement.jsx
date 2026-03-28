@@ -67,13 +67,15 @@ const [filteredData, setFilteredData] = useState([]);
         payin_rolling_amount: item.payin_rolling_amount ?? "0",
         status: item.status ?? "N/A",
         created_at: item.created_at,
+         updated_at: item.updated_at,
         numericAmount: parseFloat(item.amount) || 0,
         apitxnid: item.apitxnid || "N/A",
         mid: item.option4 || "N/A",
          chargeback_status: item.chargeback_status || "N/A",
           option2: item.option2 || "N/A",
       }))
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      // .sort((c, d) => new Date(d.updated_at) - new Date(c.updated_at));
   }, []);
 
 
@@ -158,6 +160,7 @@ const fetchFilteredData = async () => {
     );
 
     const result = await res.json();
+console.log("FILTER API RESPONSE:", result);
 
     if (!res.ok || !result?.status) {
       throw new Error(result?.message);
@@ -178,71 +181,6 @@ const fetchFilteredData = async () => {
     setFilteredData([]);
   } finally {
     setLoading(false);
-  }
-};
-
-const fetchAllDataForExport = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    let currentPage = 1;
-    let lastPage = 1;
-    let allData = [];
-
-    do {
-      const params = {
-        page: currentPage,
-        per_page: entriesPerPage, // ✅ use same pagination size
-        status: statusFilter !== "all" ? statusFilter : undefined,
-        from_date: startDate
-          ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
-              .toISOString()
-              .split("T")[0]
-          : undefined,
-        to_date: endDate
-          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
-              .toISOString()
-              .split("T")[0]
-          : undefined,
-        product: "UPI",
-        searchdata: txnSearch || undefined,
-        user_id: selectedMerchant?.value || undefined,
-      };
-
-      const query = new URLSearchParams(
-        Object.entries(params).filter(([_, v]) => v !== undefined)
-      ).toString();
-
-      const res = await fetch(
-        `https://uatfintech.spay.live/api/reportrecords-List?${query}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const result = await res.json();
-
-      if (!res.ok || !result?.status) {
-        throw new Error(result?.message);
-      }
-
-      const formatted = normalizeRows(result.data || []);
-
-      allData = [...allData, ...formatted];
-
-      // ✅ update loop control
-      lastPage = result.pagination?.last_page || 1;
-      currentPage++;
-
-    } while (currentPage <= lastPage);
-
-    return allData;
-
-  } catch (err) {
-    console.error(err);
-    return [];
   }
 };
 
@@ -270,32 +208,53 @@ const fetchAllDataForExport = async () => {
     document.body.removeChild(link);
   };
 
-  const formatExportDateTime = (value) => {
-    if (!value) {
-      return { date: "", time: "" };
-    }
+ const formatExportDateTime = (value) => {
+  if (!value) return { date: "", time: "" };
 
-    const d = new Date(value);
+  const d = new Date(value);
 
-    if (isNaN(d.getTime())) {
-      const raw = String(value).trim();
-      const parts = raw.split(" ");
-      return {
-        date: parts[0] || "",
-        time: parts[1] || "",
-      };
-    }
+  if (isNaN(d)) {
+    return { date: value, time: "" };
+  }
 
-    return {
-      date: d.toLocaleDateString("en-GB"),
-      time: d.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-      }),
-    };
-  };
+  const date = `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+
+  const time = d
+    .toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+    .toUpperCase();
+
+  return { date, time };
+};
+
+
+const formatDateForAPI = (date, isEnd = false) => {
+  if (!date) return undefined;
+
+  const d = new Date(date);
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = d.toLocaleString("en-US", { month: "short" });
+  const year = d.getFullYear();
+
+  if (isEnd) {
+    d.setHours(23, 59);
+  } else {
+    d.setHours(0, 0);
+  }
+
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `${day} ${month} ${year}, ${time}`;
+};  
+
 
 const exportCSV = async () => {
   try {
@@ -305,23 +264,15 @@ const exportCSV = async () => {
     const params = {
       exportdata: 1, // ✅ IMPORTANT
       status: statusFilter !== "all" ? statusFilter : undefined,
-      from_date: startDate
-        ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
-            .toISOString()
-            .split("T")[0]
-        : undefined,
-      to_date: endDate
-        ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
-            .toISOString()
-            .split("T")[0]
-        : undefined,
+from_date: formatDateForAPI(startDate),
+to_date: formatDateForAPI(endDate, true),
       product: "UPI",
       searchdata: txnSearch || undefined,
       user_id: selectedMerchant?.value || undefined,
     };
 
     const query = new URLSearchParams(
-      Object.entries(params).filter(([_, v]) => v !== undefined)
+      Object.entries(params).filter(([ , v]) => v !== undefined)
     ).toString();
 
     const res = await fetch(
@@ -334,7 +285,7 @@ const exportCSV = async () => {
     );
 
     const result = await res.json();
-
+console.log("upi result" ,result);
     if (!res.ok || !result?.status) {
       throw new Error(result?.message);
     }
@@ -347,8 +298,13 @@ const exportCSV = async () => {
     }
 
     const csvRows = formatted.map((row) => {
-      const { date, time } = formatExportDateTime(row.created_at);
+      // const { date, time } = formatExportDateTime(row.created_at);
+const { date: createdDate, time: createdTime } =
+  formatExportDateTime(row.created_at);
 
+const { date: updatedDate, time: updatedTime } =
+  formatExportDateTime(row.updated_at);
+    
       return {
         "Order ID": row.id,
         "User ID": row.user_id,
@@ -358,14 +314,19 @@ const exportCSV = async () => {
         "Ref No": row.refno,
         "Payee Txnid": row.mytxnid,
         "TxnId": row.txnid,
+      ...(role === "admin" && {
+      "Airpay_id": row.apitxnid,
+    }),
         "Amount": row.amount,
         "Charges": row.charge,
         "GST": row.gst,
         "Payin Rolling Amount": row.payin_rolling_amount,
         "Status": row.status,
         "Reason": row.option2,
-        "Date": date,
-        "Time": time,
+        "created Date": createdDate,
+        "Created Time": createdTime,
+        "updated Date":updatedDate,
+        "updated Time":updatedTime,
       };
     });
 
@@ -454,36 +415,60 @@ const handleAccept = async (row) => {
 };
 
   const upiColumn = [
-    {
-      header: "Order Id",
-      accessor: "id",
-      Cell: ({ row }) => {
-        const d = new Date(row.created_at);
-        return (
-          <div className="flex flex-col text-left">
-            <span>
-              <b>{row.id}</b>
+ {
+  header: "Order Id",
+  accessor: "id",
+  Cell: ({ row }) => {
+    const created = new Date(row.created_at);
+    const updated = new Date(row.updated_at);
+
+    const formatDate = (d) =>
+      isNaN(d)
+        ? "N/A"
+        : `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+
+    const formatTime = (d) =>
+      isNaN(d)
+        ? "N/A"
+        : d
+            .toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })
+            .toUpperCase();
+
+    return (
+      <div className="flex flex-col text-left w-20">
+        {/* Order ID */}
+        <span>
+          <b>{row.id}</b>
+        </span>
+
+        {/* Created */}
+        <span>
+           {formatDate(created)}
+        </span>
+        <span className="text-xs text-gray-500">
+          {formatTime(created)}
+        </span>
+
+        {/* Updated */}
+        {row.updated_at && (
+          <>
+            <span className="mt-1">
+              Updated at:<br/>
+               {formatDate(updated)}
             </span>
-            <span>
-              {isNaN(d)
-                ? "N/A"
-                : `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`}
+            <span className="text-xs text-blue-500">
+             {formatTime(updated)}
             </span>
-            <span className="text-sm text-gray-500">
-              {isNaN(d)
-                ? "N/A"
-                : d
-                    .toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })
-                    .toUpperCase()}
-            </span>
-          </div>
-        );
-      },
-    },
+          </>
+        )}
+      </div>
+    );
+  },
+},
     {
       header: "Merchant Details",
       accessor: "merchant_details_text",

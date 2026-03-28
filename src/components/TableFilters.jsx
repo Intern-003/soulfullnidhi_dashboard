@@ -29,6 +29,8 @@ const TableFilters = ({
   const [openExport, setOpenExport] = useState(false);
   const exportRef = useRef(null);
 
+
+    const role = atob(localStorage.getItem("role"));
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (exportRef.current && !exportRef.current.contains(event.target)) {
@@ -153,7 +155,7 @@ const TableFilters = ({
             </select>
           )}
 
-          {showSelectUserFilter && (
+          {showSelectUserFilter &&  role === "admin" &&  (
             <select
               value={selectedMerchant?.value || ""}
               onChange={(e) => {

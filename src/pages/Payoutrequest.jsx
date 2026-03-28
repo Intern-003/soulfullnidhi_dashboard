@@ -141,7 +141,7 @@
           upi_number: AddUpi,
           beneficiary_name: AddBeneName,
           beneficiary_mobile_no: beneMobile,
-          beneficiary_email_id: AddBeneEmail,
+          beneficiary_email_id: AddBeneEmail || "test@gmail.com",
           beneficiary_address: AddAddress,
         };
         const data = await addbeneficiary(payload);
@@ -167,20 +167,9 @@
       { header: "Action", accessor: "action" },
     ];
 
-    // const memberdata = [
-    //   {
-    //     beneficiaryid: "1",
-    //     bankdetails: "Yuvraj",
-    //     beneficiarydetails: "Rs.1000",
-    //   },
-    //   {
-    //     beneficiaryid: "2",
-    //     bankdetails: "Aakash",
-    //     beneficiarydetails: "Rs.4000",
-    //   },
-    // ];
-
-    const tableDataWithActions = beneficiary.map((row, index) => ({
+ const tableDataWithActions = [...beneficiary]
+  .sort((a, b) => b.id - a.id) 
+  .map((row, index) => ({
       id: row.id,
       sqno: index + 1,
       beneficiaryid: row.id,
@@ -622,6 +611,7 @@
           }}
           className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
           placeholder=" "
+         
         />
         <label className="absolute text-sm text-gray-500 transform -translate-y-6 scale-75 top-3 origin-[0] peer-focus:text-blue-600">
           Beneficiary Email

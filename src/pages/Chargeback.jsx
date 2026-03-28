@@ -6,6 +6,7 @@
   import { TableSkeleton } from "../components/TableSkeleton";
   import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
   import { usePost } from '../hooks/usePost';
+  
 
 
   const Chargeback = () => {
@@ -14,6 +15,9 @@
     const [loadingMore, setLoadingMore] = useState(false);
     const [allLoaded, setAllLoaded] = useState(false);
     const [error, setError] = useState(null);
+
+    const [exporting, setExporting] = useState(false);
+
 
     const [entriesPerPage, setEntriesPerPage] = useState(50);
 
@@ -60,7 +64,10 @@
           status: item.chargeback_status ?? "N/A",
           option3: item.option3 ?? "N/A",
           created_at: item.created_at,
+          updated_at: item.updated_at,
           chargeback_id: item.glide_uiwidget_sessionid ?? "N/A",
+          mytxnid: item.mytxnid ?? "N/A",
+          apitxnid: item.apitxnid ?? "N/A",
         }))
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     }, []);
@@ -113,34 +120,105 @@
   }, [page, entriesPerPage, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
 
 
-  const fetchFilteredData = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
+const fetchFilteredData = async () => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem("token");
 
+    const params = {
+      page,
+      per_page: entriesPerPage,
+      status: statusFilter !== "all" ? statusFilter : undefined,
+
+          from_date: formatDateForAPI(startDate),
+to_date: formatDateForAPI(endDate, true),
+
+      // ✅ IMPORTANT: MULTIPLE PRODUCTS
+ product: "chargeback",
+      searchdata: txnSearch || undefined,
+      user_id: selectedMerchant?.value || undefined,
+    };
+
+    // 👇 FIX for array params
+    const query = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (!value) return;
+
+      if (Array.isArray(value)) {
+        value.forEach((v) => query.append(key, v));
+      } else {
+        query.append(key, value);
+      }
+    });
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/reportrecords-List?${query.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok || !result?.status) {
+      throw new Error(result?.message);
+    }
+
+    // ✅ success amount from backend
+    setTotalSuccessAmount(result.success_amount || 0);
+
+    const formatted = normalizeRows(result.data || []);
+    setFilteredData(formatted);
+
+    // ✅ pagination
+    setTotalPages(result.pagination?.last_page || 1);
+    setTotalRecords(result.pagination?.total || 0);
+
+  } catch (err) {
+    console.error(err);
+    setFilteredData([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const fetchAllDataForExport = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    let currentPage = 1;
+    let lastPage = 1;
+    let allData = [];
+
+    do {
       const params = {
-        page,
-        per_page: entriesPerPage,
+        page: currentPage,
+        per_page: entriesPerPage, // ✅ use same pagination size
         status: statusFilter !== "all" ? statusFilter : undefined,
-  from_date: startDate
-    ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
-        .toISOString()
-        .split("T")[0]
-    : undefined,
 
-    to_date: endDate
-    ? new Date(
-        new Date(endDate).setHours(23, 59, 59, 999)
-      ).toISOString().split("T")[0]
-    : undefined,
-        product: "chargeback",
-        searchdata: txnSearch || undefined,
-        user_id: selectedMerchant?.value || undefined,
+          from_date: formatDateForAPI(startDate),
+to_date: formatDateForAPI(endDate, true),
+    
+ product: "chargeback",
+ searchdata: txnSearch || undefined,
+         user_id: selectedMerchant?.value || undefined,
       };
 
-      const query = new URLSearchParams(
-        Object.entries(params).filter(([_, v]) => v !== undefined)
-      ).toString();
+const query = new URLSearchParams();
+
+Object.entries(params).forEach(([key, value]) => {
+  if (!value) return;
+
+  if (Array.isArray(value)) {
+    value.forEach((v) => query.append(key, v));
+  } else {
+    query.append(key, value);
+  }
+});
 
       const res = await fetch(
         `https://uatfintech.spay.live/api/reportrecords-List?${query}`,
@@ -157,87 +235,23 @@
         throw new Error(result?.message);
       }
 
-      // ✅ IMPORTANT
-      setTotalSuccessAmount(result.success_amount || 0);
-
       const formatted = normalizeRows(result.data || []);
-      setFilteredData(formatted);
 
-      // ✅ SET PAGINATION FROM API
-      setTotalPages(result.pagination?.last_page || 1);
-      setTotalRecords(result.pagination?.total || 0);
+      allData = [...allData, ...formatted];
 
-    } catch (err) {
-      console.error(err);
-      setFilteredData([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const fetchAllDataForExport = async () => {
-    try {
-      const token = localStorage.getItem("token");
+      // ✅ update loop control
+      lastPage = result.pagination?.last_page || 1;
+      currentPage++;
 
-      let currentPage = 1;
-      let lastPage = 1;
-      let allData = [];
+    } while (currentPage <= lastPage);
 
-      do {
-        const params = {
-          page: currentPage,
-          per_page: entriesPerPage, // ✅ use same pagination size
-          status: statusFilter !== "all" ? statusFilter : undefined,
-          from_date: startDate
-            ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
-                .toISOString()
-                .split("T")[0]
-            : undefined,
-          to_date: endDate
-            ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
-                .toISOString()
-                .split("T")[0]
-            : undefined,
-          product: "chargeback",
-          searchdata: txnSearch || undefined,
-          user_id: selectedMerchant?.value || undefined,
-        };
+    return allData;
 
-        const query = new URLSearchParams(
-          Object.entries(params).filter(([_, v]) => v !== undefined)
-        ).toString();
-
-        const res = await fetch(
-          `https://uatfintech.spay.live/api/reportrecords-List?${query}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const result = await res.json();
-
-        if (!res.ok || !result?.status) {
-          throw new Error(result?.message);
-        }
-
-        const formatted = normalizeRows(result.data || []);
-
-        allData = [...allData, ...formatted];
-
-        // ✅ update loop control
-        lastPage = result.pagination?.last_page || 1;
-        currentPage++;
-
-      } while (currentPage <= lastPage);
-
-      return allData;
-
-    } catch (err) {
-      console.error(err);
-      return [];
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
 
 
     const escapeCSV = (field) => {
@@ -263,44 +277,69 @@
       document.body.removeChild(link);
     };
 
-    const formatExportDateTime = (value) => {
-      if (!value) {
-        return { date: "", time: "" };
-      }
-
-      const d = new Date(value);
-
-      if (isNaN(d.getTime())) {
-        const raw = String(value).trim();
-        const parts = raw.split(" ");
-        return {
-          date: parts[0] || "",
-          time: parts[1] || "",
-        };
-      }
-
-      return {
-        date: d.toLocaleDateString("en-GB"),
-        time: d.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
-        }),
-      };
-    };
-
-  const exportCSV = async () => {
-    const allData = await fetchAllDataForExport();
-
-    if (!allData.length) {
-      alert("No data to export.");
-      return;
+  const formatExportDateTime = (value) => {
+    if (!value) {
+      return { date: "", time: "" };
     }
 
-    const csvRows = allData.map((row) => {
-      const { date, time } = formatExportDateTime(row.created_at);
+    const d = new Date(value);
 
+    if (isNaN(d.getTime())) {
+      const raw = String(value).trim();
+      const parts = raw.split(" ");
+      return {
+        date: parts[0] || "",
+        time: parts[1] || "",
+      };
+    }
+
+    return {
+      date: d.toLocaleDateString("en-GB"),
+      time: d.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }),
+    };
+  };
+
+  const formatDateForAPI = (date, isEnd = false) => {
+  if (!date) return undefined;
+
+  const d = new Date(date);
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = d.toLocaleString("en-US", { month: "short" });
+  const year = d.getFullYear();
+
+  if (isEnd) {
+    d.setHours(23, 59);
+  } else {
+    d.setHours(0, 0);
+  }
+
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `${day} ${month} ${year}, ${time}`;
+};
+
+  const exportCSV = async () => {
+   try{
+   setExporting(true);
+  const allData = await fetchAllDataForExport();
+
+  if (!allData.length) {
+    alert("No data to export.");
+    return;
+  }
+
+  const csvRows = allData.map((row) => {
+    const { date, time } = formatExportDateTime(row.created_at);
       return {
 
         "Order ID": row.id,
@@ -328,6 +367,12 @@
     ].join("\n");
 
     downloadFile(csv, "chargeback.csv", "text/csv");
+     }catch(err){
+   console.error(err);
+    alert("Export failed");
+}finally {
+    setExporting(false); // ✅ stop loader
+  }
   };
 
 
@@ -388,7 +433,12 @@
       {
         header: "SQ NO",
         accessor: "id",
-        Cell: ({ row }) => <span>{row.id}</span>,
+        Cell: ({ row }) => 
+          <>
+        <span>{row.id}</span>
+        
+
+          </>
       },
       {
         header: "Merchant Details",
@@ -409,6 +459,11 @@
         <div className="w-70 flex flex-col">
           <span>txnid: <b>{row.txnid}</b></span>
           <span>chargeback id : <b>{row.chargeback_id}</b></span>
+          <span>mytxnid : <b>{row.mytxnid}</b></span>
+
+          {role === "admin" && (
+           <span>Airpay_id : <b>{row.apitxnid}</b></span>
+          )}
         </div>
         ),
       },
@@ -550,6 +605,7 @@
           showDateFilter={true}
           showSelectUserFilter={true}
           onExportCSV={exportCSV}
+            exporting={exporting}
           onClearAll={handleClearAll}
           totalSuccessAmount={totalSuccessAmount}
         />

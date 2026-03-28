@@ -23,6 +23,8 @@ const [totalSuccessAmount, setTotalSuccessAmount] = useState(0);
 
 const [merchantOptions, setMerchantOptions] = useState([]);
 
+const [exporting, setExporting] = useState(false);
+
 
   const [txnSearch, setTxnSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -52,6 +54,8 @@ const [merchantOptions, setMerchantOptions] = useState([]);
         payout_closing_balance: item.payout_closing_balance ?? "0.0",
         status: item.status ?? "N/A",
         created_at: item.created_at,
+        updated_at: item.updated_at,
+
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
@@ -192,24 +196,25 @@ const fetchAllDataForExport = async () => {
         page: currentPage,
         per_page: entriesPerPage, // ✅ use same pagination size
         status: statusFilter !== "all" ? statusFilter : undefined,
-        from_date: startDate
-          ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
-              .toISOString()
-              .split("T")[0]
-          : undefined,
-        to_date: endDate
-          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
-              .toISOString()
-              .split("T")[0]
-          : undefined,
-        product: "UPI",
-        searchdata: txnSearch || undefined,
+
+          from_date: formatDateForAPI(startDate),
+to_date: formatDateForAPI(endDate, true),
+    
+"product[]": ["topup_payout", "take_back_from_wallet"],        searchdata: txnSearch || undefined,
         user_id: selectedMerchant?.value || undefined,
       };
 
-      const query = new URLSearchParams(
-        Object.entries(params).filter(([_, v]) => v !== undefined)
-      ).toString();
+const query = new URLSearchParams();
+
+Object.entries(params).forEach(([key, value]) => {
+  if (!value) return;
+
+  if (Array.isArray(value)) {
+    value.forEach((v) => query.append(key, v));
+  } else {
+    query.append(key, value);
+  }
+});
 
       const res = await fetch(
         `https://uatfintech.spay.live/api/reportrecords-List?${query}`,
@@ -295,7 +300,35 @@ const fetchAllDataForExport = async () => {
     };
   };
 
+  const formatDateForAPI = (date, isEnd = false) => {
+  if (!date) return undefined;
+
+  const d = new Date(date);
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = d.toLocaleString("en-US", { month: "short" });
+  const year = d.getFullYear();
+
+  if (isEnd) {
+    d.setHours(23, 59);
+  } else {
+    d.setHours(0, 0);
+  }
+
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `${day} ${month} ${year}, ${time}`;
+}; 
+
+
 const exportCSV = async () => {
+
+  try{
+   setExporting(true);
   const allData = await fetchAllDataForExport();
 
   if (!allData.length) {
@@ -332,7 +365,17 @@ const exportCSV = async () => {
     ),
   ].join("\n");
 
-  downloadFile(csv, "upi_settlement.csv", "text/csv");
+  
+  downloadFile(csv, "topup_settlement.csv", "text/csv");
+  }catch(err){
+   console.error(err);
+    alert("Export failed");
+}finally {
+    setExporting(false); // ✅ stop loader
+  }
+
+
+
 };
   const handleClearAll = () => {
     setTxnSearch("");
@@ -470,6 +513,7 @@ const exportCSV = async () => {
         showDateFilter={true}
         showSelectUserFilter={true}
         onExportCSV={exportCSV}
+          exporting={exporting}
         onClearAll={handleClearAll}
         totalSuccessAmount={totalSuccessAmount}
       />

@@ -65,6 +65,12 @@ export const Sidebar = ({ open, setOpen }) => {
               { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
             ],
           },
+          {
+            label: "VPA",
+            icon: "fa-money-bill-transfer",
+            dropdown: "payment1",
+            items: [{ label: "Request1", link: "/vpa" }],
+          },
         ]
       : []),
 
