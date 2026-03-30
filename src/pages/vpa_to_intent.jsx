@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "../css/vpa_to_intent.css";
+import spay_logo from "/src/images/logo.png";
+import { usePost } from "../hooks/usePost";
 
 
 const vpa_to_intent = () => {
@@ -8,13 +9,27 @@ const vpa_to_intent = () => {
   const [timeLeft, setTimeLeft] = useState(300); // like screenshot
   const [status, setStatus] = useState("Waiting for payment...");
 
-  useEffect(() => {
-    axios.post("https://uatfintech.spay.live/api/vpa-intent", { })
-      .then(res => setData(res.data.data))
-      .catch(err => console.log(err));
-  }, []);
+const { execute: vpa } = usePost("/vpa-intent");
 
-  useEffect(() => {
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const res = await vpa({}); // same as axios.post body
+      console.log("response:", res);
+
+      // same as res.data.data
+      setData(res?.data);
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchData();
+}, []);
+
+
+  useEffect(() => { 
     if (!data) return;
 
     const timer = setInterval(() => {
@@ -51,7 +66,7 @@ const vpa_to_intent = () => {
 
       {/* Header */}
       <div className="header">
-        <img src="/src/images/logo.png" alt="logo" />
+        <img src={spay_logo} alt="logo" />
         <div>
           <h2>SPAY FINTECH PRIVATE LIMITED</h2>
           <p>Secure and fast payment processing</p>
