@@ -22,7 +22,7 @@ const [selectedToken, setSelectedToken] = useState("");
 
   const { data } = useAutoFetch("/collection-record");
   // const { execute: executePayin, loading } = usePost("/Airpay/request");
-  const { execute: executePayin, loading } = usePost("/payin/request");
+  const { execute: executePayin, loading } = usePost("/payin/upi/request");
   const { execute: executeCheckStatus } = usePost("/payin/status");
   // console.log("collection records", data);
   // const payin_wallet = collection_data?.data;
