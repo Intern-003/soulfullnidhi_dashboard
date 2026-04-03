@@ -30,7 +30,7 @@ const [tableLoading, setTableLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
   const [statusFilter, setStatusFilter] = useState(() => {
-  return localStorage.getItem("dashboard_status_filter") || "SUCCESS";
+  return localStorage.getItem("dashboard_status_filter") || "ALL STATUS";
 });
 
 
@@ -200,8 +200,8 @@ const transactionData = useMemo(() => {
   const savedFilter = localStorage.getItem("dashboard_status_filter");
 
   if (!savedFilter) {
-    localStorage.setItem("dashboard_status_filter", "SUCCESS");
-    setStatusFilter("SUCCESS");
+    localStorage.setItem("dashboard_status_filter", "ALL");
+    setStatusFilter("ALL");
   }
 }
     };

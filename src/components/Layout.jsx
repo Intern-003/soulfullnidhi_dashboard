@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
-import { Outlet } from "react-router-dom";
+import { Outlet,useLocation  } from "react-router-dom";
 import { ProfileSidebar } from "./ProfileSidebar";
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const location = useLocation();
+  const [refreshKey, setRefreshKey] = useState(0);
 
+  useEffect(() => {
+    if (location.state?.refresh) {
+      setRefreshKey(Date.now()); // 🔁 trigger re-mount
+    }
+  }, [location.state]);
   return (
     <div className="">
       {/* Sidebar — visible fixed on desktop, overlay on mobile */}
@@ -37,7 +44,7 @@ const Layout = () => {
           // bg-[#d5f5f2] 
           bg-white
           shadow-md  rounded-lg w-full px-2">
-            <Outlet />
+            <Outlet key={refreshKey} />
           </div>
         </main>
       </div>

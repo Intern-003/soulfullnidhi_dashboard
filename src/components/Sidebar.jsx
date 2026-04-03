@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation,useNavigate  } from "react-router-dom";
 import "../css/sidebar.css";
 import Logo from "../images/logo.png";
 
@@ -10,9 +10,12 @@ export const Sidebar = ({ open, setOpen }) => {
   const location = useLocation();
   const currentPath = location.pathname;
 
+  const navigate = useNavigate();
+
   const toggleDropdown = (name) => {
     setActiveDropdown((prev) => (prev === name ? null : name));
   };
+  
 
   // MENU CONFIG - unchanged
   const menu = [
@@ -199,6 +202,14 @@ export const Sidebar = ({ open, setOpen }) => {
                 {!item.dropdown ? (
                   <Link
                     to={item.link}
+onDoubleClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (currentPath === item.link) {
+    navigate(item.link, { state: { refresh: Date.now() } });
+  }
+}}
                     className={`group flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer
                       ${
                         currentPath === item.link
@@ -255,7 +266,15 @@ export const Sidebar = ({ open, setOpen }) => {
                           const isActive = currentPath === sub.link;
 
                           return (
-                            <Link key={j} to={sub.link}>
+                            <Link key={j} to={sub.link}
+  onDoubleClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (currentPath === sub.link) {
+    navigate(sub.link, { state: { refresh: Date.now() } });
+  }
+}}>
                               <div
                                 className={`flex items-center gap-2.5 px-5 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer
                                   ${
