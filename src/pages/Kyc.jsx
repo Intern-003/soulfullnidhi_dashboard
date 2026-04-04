@@ -215,102 +215,102 @@ export const Kyc = () => {
       pattern: emailRegex,
       message: "Email is not valid",
     },
-    business_mcc: {
-      required: true,
-      pattern: numberRegex,
-      message: "Business MCC must be 4 digits",
-    },
-    city: {
-      required: true,
-      minLength: 2,
-      pattern: /^[A-Za-z ]+$/,
-      message: "Valid city name required",
-    },
-    state: {
-      required: true,
-      minLength: 2,
-      pattern: /^[A-Za-z ]+$/,
-      message: "Valid state name required",
-    },
-    district: {
-      required: true,
-      minLength: 2,
-      pattern: /^[A-Za-z ]+$/,
-      message: "Valid district name required",
-    },
-    address: {
-      required: true,
-      minLength: 10,
-      message: "Address must be at least 10 characters",
-    },
-    pin_code: {
-      required: true,
-      pattern: pinnumberRegex,
-      message: "Pin code must be 6 digits",
-    },
-    website_url: {
-      required: true,
-      pattern: websiteRegex,
-      message: "Website URL must be like https://example.com",
-    },
-    cin_llpin: {
-      required: true,
-      pattern: cinRegex,
-      message: "CIN is not valid (e.g. L12345MH2010PLC123456)",
-    },
-    company_pan_no: {
-      required: true,
-      pattern: panRegex,
-      message: "Company PAN is not valid (e.g. ABCDE1234F)",
-    },
-    company_gst_no: {
-      required: true,
-      pattern: gstRegex,
-      message: "GST is not valid (e.g. 27AAAPZ1234C1Z1)",
-    },
-    director_name: {
-      required: true,
-      pattern: nameRegex,
-      message: "Director name is not valid",
-    },
-    director_pan_no: {
-      required: true,
-      pattern: panRegex,
-      message: "Director PAN is not valid (e.g. ABCDE1234F)",
-    },
-    director_aadhar_no: {
-      required: true,
-      pattern: aadharRegex,
-      message: "Aadhaar is not valid",
-    },
-    company_type: {
-      required: true,
-      message: "Please select company type",
-    },
-    director_gender: {
-      required: true,
-      message: "Please select gender",
-    },
-    director_dob: {
-      required: true,
-      message: "Date of birth is required",
-    },
+    // business_mcc: {
+    //   required: true,
+    //   pattern: numberRegex,
+    //   message: "Business MCC must be 4 digits",
+    // },
+    // city: {
+    //   required: true,
+    //   minLength: 2,
+    //   pattern: /^[A-Za-z ]+$/,
+    //   message: "Valid city name required",
+    // },
+    // state: {
+    //   required: true,
+    //   minLength: 2,
+    //   pattern: /^[A-Za-z ]+$/,
+    //   message: "Valid state name required",
+    // },
+    // district: {
+    //   required: true,
+    //   minLength: 2,
+    //   pattern: /^[A-Za-z ]+$/,
+    //   message: "Valid district name required",
+    // },
+    // address: {
+    //   required: true,
+    //   minLength: 10,
+    //   message: "Address must be at least 10 characters",
+    // },
+    // pin_code: {
+    //   required: true,
+    //   pattern: pinnumberRegex,
+    //   message: "Pin code must be 6 digits",
+    // },
+    // website_url: {
+    //   required: true,
+    //   pattern: websiteRegex,
+    //   message: "Website URL must be like https://example.com",
+    // },
+    // cin_llpin: {
+    //   required: true,
+    //   pattern: cinRegex,
+    //   message: "CIN is not valid (e.g. L12345MH2010PLC123456)",
+    // },
+    // company_pan_no: {
+    //   required: true,
+    //   pattern: panRegex,
+    //   message: "Company PAN is not valid (e.g. ABCDE1234F)",
+    // },
+    // company_gst_no: {
+    //   required: true,
+    //   pattern: gstRegex,
+    //   message: "GST is not valid (e.g. 27AAAPZ1234C1Z1)",
+    // },
+    // director_name: {
+    //   required: true,
+    //   pattern: nameRegex,
+    //   message: "Director name is not valid",
+    // },
+    // director_pan_no: {
+    //   required: true,
+    //   pattern: panRegex,
+    //   message: "Director PAN is not valid (e.g. ABCDE1234F)",
+    // },
+    // director_aadhar_no: {
+    //   required: true,
+    //   pattern: aadharRegex,
+    //   message: "Aadhaar is not valid",
+    // },
+    // company_type: {
+    //   required: true,
+    //   message: "Please select company type",
+    // },
+    // director_gender: {
+    //   required: true,
+    //   message: "Please select gender",
+    // },
+    // director_dob: {
+    //   required: true,
+    //   message: "Date of birth is required",
+    // },
     vkyc_session_id: {
       required: true,
       message: "Please generate Video KYC link first",
     },
-    company_pan_no_doc: {
-      required: true,
-      message: "Company PAN document is required",
-    },
-    company_gst_no_doc: {
-      required: true,
-      message: "GST document is required",
-    },
-    cancel_cheque_doc: {
-      required: true,
-      message: "Cancel cheque document is required",
-    },
+    // company_pan_no_doc: {
+    //   required: true,
+    //   message: "Company PAN document is required",
+    // },
+    // company_gst_no_doc: {
+    //   required: true,
+    //   message: "GST document is required",
+    // },
+    // cancel_cheque_doc: {
+    //   required: true,
+    //   message: "Cancel cheque document is required",
+    // },
   };
 
   const validateStep = () => {
@@ -873,10 +873,10 @@ export const Kyc = () => {
   };
 
   const handleNext = () => {
-    if (validateStep()) {
+    // if (validateStep()) {
       if (currentStep < 4) {
         setCurrentStep(currentStep + 1);
-      }
+      // }
     }
   };
 
@@ -1232,7 +1232,7 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                             name="address"
                             value={memberFormData.address || ""}
                             onChange={handleChange}
-                            readOnly={gstAddressLocked}
+                            // readOnly={gstAddressLocked}
                             className={`w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4] ${
                               gstAddressLocked
                                 ? "bg-gray-100 cursor-not-allowed"
@@ -1572,10 +1572,10 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                               </label>
                               <input
                                 name="director_name"
-                                readOnly
+                                
                                 value={director.director_name || ""}
                                 placeholder="Will auto fill after fetch"
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 "
                               />
                               {errors?.director?.[index]?.director_name && (
                                 <p className="text-red-600 text-xs mt-1">

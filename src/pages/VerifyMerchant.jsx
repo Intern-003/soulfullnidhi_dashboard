@@ -189,48 +189,134 @@ const handleReject = async () => {
     );
   }
 
+// const DocumentPreview = ({ label, filePath }) => {
+//   if (!filePath)
+//     return <span className="text-gray-400 text-sm">Not uploaded</span>;
+
+//   const BASE_URL = "https://uatfintech.spay.live";
+
+//   // 🚀 FIX: convert server path → public URL
+//   const normalizePath = (path) => {
+//     // remove server root till /storage
+//     const storageIndex = path.indexOf("/storage/");
+//     if (storageIndex !== -1) {
+//       return BASE_URL + path.substring(storageIndex);
+//     }
+//     return path.startsWith("http") ? path : `${BASE_URL}/${path}`;
+//   };
+
+//   const fullUrl = normalizePath(filePath);
+
+//   const isImage = /\.(jpg|jpeg|png)$/i.test(fullUrl);
+//   const isVideo = fullUrl.includes("videokyc");
+
+//   return (
+//     <div>
+//       <p className="text-xs font-medium text-gray-600 mb-1">{label}</p>
+
+//       {isImage && (
+//         <a href={fullUrl} target="_blank" rel="noopener noreferrer">
+//           <img
+//             src={fullUrl}
+//             alt={label}
+//             className="w-full max-w-sm rounded-md shadow hover:shadow-md transition"
+//           />
+//         </a>
+//       )}
+
+//       {isVideo && (
+//         <video controls className="w-full max-w-xl rounded-md shadow mt-2">
+//           <source src={fullUrl} type="video/mp4" />
+//         </video>
+//       )}
+
+//       {!isImage && !isVideo && (
+//         <a
+//           href={fullUrl}
+//           target="_blank"
+//           rel="noopener noreferrer"
+//           className="text-sm text-blue-600 hover:underline"
+//         >
+//           View / Download File
+//         </a>
+//       )}
+//     </div>
+//   );
+// };
+
+
+
+
 const DocumentPreview = ({ label, filePath }) => {
-  if (!filePath)
+  if (!filePath) {
     return <span className="text-gray-400 text-sm">Not uploaded</span>;
+  }
 
   const BASE_URL = "https://uatfintech.spay.live";
 
-  // 🚀 FIX: convert server path → public URL
+  // ✅ Normalize path properly
   const normalizePath = (path) => {
-    // remove server root till /storage
+    if (!path) return "";
+
+    // If already full URL
+    if (path.startsWith("http")) return path;
+
+    // If contains /storage/
     const storageIndex = path.indexOf("/storage/");
     if (storageIndex !== -1) {
       return BASE_URL + path.substring(storageIndex);
     }
-    return path.startsWith("http") ? path : `${BASE_URL}/${path}`;
+
+    // fallback
+    return `${BASE_URL}/storage/${path.replace(/^\/+/, "")}`;
   };
 
   const fullUrl = normalizePath(filePath);
 
-  const isImage = /\.(jpg|jpeg|png)$/i.test(fullUrl);
-  const isVideo = fullUrl.includes("videokyc");
+  // ✅ Detect file type properly
+  const isImage = /\.(jpg|jpeg|png|webp)$/i.test(fullUrl);
+  const isVideo = /\.(mp4|webm|ogg)$/i.test(fullUrl);
+  const isPdf = /\.pdf$/i.test(fullUrl);
 
   return (
     <div>
       <p className="text-xs font-medium text-gray-600 mb-1">{label}</p>
 
+      {/* ✅ IMAGE */}
       {isImage && (
         <a href={fullUrl} target="_blank" rel="noopener noreferrer">
           <img
             src={fullUrl}
             alt={label}
             className="w-full max-w-sm rounded-md shadow hover:shadow-md transition"
+            onError={(e) => (e.target.style.display = "none")}
           />
         </a>
       )}
 
+      {/* ✅ VIDEO */}
       {isVideo && (
-        <video controls className="w-full max-w-xl rounded-md shadow mt-2">
+        <video
+          controls
+          className="w-full max-w-xl rounded-md shadow mt-2"
+        >
+          <source src={fullUrl} type="video/webm" />
           <source src={fullUrl} type="video/mp4" />
+          Your browser does not support the video tag.
         </video>
       )}
 
-      {!isImage && !isVideo && (
+      {/* ✅ PDF */}
+      {isPdf && (
+        <iframe
+          src={fullUrl}
+          title={label}
+          className="w-full h-64 border rounded-md"
+        />
+      )}
+
+      {/* ✅ OTHER FILE */}
+      {!isImage && !isVideo && !isPdf && (
         <a
           href={fullUrl}
           target="_blank"
@@ -243,8 +329,6 @@ const DocumentPreview = ({ label, filePath }) => {
     </div>
   );
 };
-
-
   return (
     <div className="w-full py-6 px-4"
     // style={{ background: "linear-gradient(275deg, #7993bdff, #a2b8f5ff)" }}
