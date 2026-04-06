@@ -316,6 +316,7 @@ const { date: updatedDate, time: updatedTime } =
         "TxnId": row.txnid,
       ...(role === "admin" && {
       "Airpay_id": row.apitxnid,
+      "MID": row.mid,
     }),
         "Amount": row.amount,
         "Charges": row.charge,

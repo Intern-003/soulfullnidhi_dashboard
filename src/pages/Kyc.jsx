@@ -905,13 +905,13 @@ export const Kyc = () => {
       director_info: [
         ...prev.director_info,
         {
-          director_name: "",
-          director_gender: "",
-          director_pan_no: "",
-          director_aadhar_no: "",
+          director_name: null,
+          director_gender: null,
+          director_pan_no: null,
+          director_aadhar_no: null,
           user_pan_doc: null,
           user_addhar_doc: null,
-          director_dob: "",
+          director_dob: null,
         },
       ],
     }));
