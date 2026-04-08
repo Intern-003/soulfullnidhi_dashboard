@@ -4,6 +4,8 @@ import TableFilters from "../components/TableFilters";
 import { REPORT_STATUSES } from "../constants/Constants";
 import { TableSkeleton } from "../components/TableSkeleton";
 import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
+import { usePost } from "../hooks/usePost";
+
 
 
 
@@ -25,6 +27,12 @@ const [merchantOptions, setMerchantOptions] = useState([]);
 
 const [exporting, setExporting] = useState(false);
 
+
+  const [role] = useState(atob(localStorage.getItem("role")) || "admin");
+const  {execute:requestApporve }= usePost("/approve-fund-request");
+
+
+const [actionLoading, setActionLoading] = useState(null);
 
   const [txnSearch, setTxnSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -52,15 +60,55 @@ const [exporting, setExporting] = useState(false);
         numericAmount: parseFloat(item.amount) || 0,
         payout_opening_balance: item.payout_opening_balance ?? "0.0",
         payout_closing_balance: item.payout_closing_balance ?? "0.0",
-        status: item.status ?? "N/A",
+        status: (item.status || "").toLowerCase().trim(),
         created_at: item.created_at,
         updated_at: item.updated_at,
+            option1: item.option1 ?? "N/A", // ✅ ADD THIS
+
 
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
 
+const handleAccept = async (row) => {
+  try {
+    setActionLoading(row.id);
 
+    const payload = {
+      txnid: row.txnid,
+    };
+
+    const res = await requestApporve(payload);
+
+    if (res) {
+      // ✅ Sirf uss row ko update karo
+      setFilteredData((prev) =>
+        prev.map((item) =>
+          item.id === row.id
+            ? {
+                ...item,
+                status: "completed",
+                // optional: agar backend ye values change karta hai
+                payout_opening_balance: res?.payout_opening_balance ?? item.payout_opening_balance,
+                payout_closing_balance: res?.payout_closing_balance ?? item.payout_closing_balance,
+                updated_at: new Date().toISOString(),
+              }
+            : item
+        )
+      );
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert(
+      err?.response?.data?.message ||
+      err?.message ||
+      "Something went wrong"
+    );
+  } finally {
+    setActionLoading(null);
+  }
+};
   
   useEffect(() => {
   setPage(1);
@@ -418,10 +466,21 @@ const exportCSV = async () => {
       header: "Transaction Id",
       accessor: "txnid",
     },
-    {
-      header: "Product Type",
-      accessor: "product_type",
-    },
+{
+  header: "Product Type",
+  accessor: "product_type",
+  Cell: ({ row }) => (
+    <div className="flex flex-col text-left">
+      <span className="font-medium">{row.product_type}</span>
+      {role === "admin" && (
+   <span className="text-xs text-gray-500">
+        Remark: {row.option1}
+      </span>
+      )}
+   
+    </div>
+  ),
+},
     {
       header: "Amount",
       accessor: "amount",
@@ -429,7 +488,9 @@ const exportCSV = async () => {
     {
       header: "Status",
       accessor: "status",
-      Cell: ({ row }) => (
+      Cell: ({ row }) => {
+        console.log("status,",row.status);
+        return(
         <span
           className={`px-2 py-1 rounded-full text-sm font-medium ${
             statusClasses[String(row.status || "").toLowerCase()] ?? "bg-gray-100 text-gray-800"
@@ -437,8 +498,41 @@ const exportCSV = async () => {
         >
           {row.status}
         </span>
-      ),
+        );
+
     },
+    },
+...(role === "admin"
+  ? [
+      {
+        header: "Action",
+        accessor: "action",
+        Cell: ({ row }) => {
+          if (row.status === "pending") {
+            return (
+              <button
+                onClick={() => handleAccept(row)}
+                disabled={actionLoading === row.id}
+                className="px-3 py-1 bg-blue-500 text-white rounded-2xl hover:bg-blue-700"
+              >
+                {actionLoading === row.id ? "Processing..." : "Accept"}
+              </button>
+            );
+          }
+
+          if (row.status === "completed") {
+            return (
+              <span className="text-green-600 font-medium">
+                Accepted
+              </span>
+            );
+          }
+
+          return null;
+        },
+      },
+    ]
+  : []),
     {
       header: "Date",
       accessor: "created_at",

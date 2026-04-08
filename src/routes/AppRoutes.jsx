@@ -31,6 +31,8 @@ import { VerifyMerchant } from "../pages/VerifyMerchant";
 import { PendingVerificationModal } from "../components/PendingVerificationModal";
 import Chargeback from "../pages/Chargeback";
 import VpaToIntent from "../pages/vpa_to_intent";    
+import Invoice from "../pages/Invoice";
+import FundRequest from "../pages/FundRequest";
 
 
 const AppRoutes = () => {
@@ -158,6 +160,15 @@ const AppRoutes = () => {
                     </PrivateRoute>
                 }
                 />
+
+                <Route
+                path = "/Invoice-Generate"
+                element = {
+                    <PrivateRoute role = {"admin"}>
+                        <Invoice />
+                    </PrivateRoute>
+                }
+                />                
                                 <Route
                 path = "/VerifyMerchant/:id"
                 element = {
@@ -230,6 +241,14 @@ const AppRoutes = () => {
                     </PrivateRoute>
                     }
                 />
+                <Route
+                    path="/fund-request"
+                    element={
+                    <PrivateRoute role={"user"}>
+                        <FundRequest />
+                    </PrivateRoute>
+                    }
+                />                
                 <Route
                     path="/topup-statement"
                     element={
