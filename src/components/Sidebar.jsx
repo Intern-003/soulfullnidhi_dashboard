@@ -68,11 +68,11 @@ export const Sidebar = ({ open, setOpen }) => {
               { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
             ],
           },
-           { 
-            label: "Invoice Generate", 
-            icon: "fa-chart-pie", 
-            link: "/Invoice-Generate" 
-          },
+          //  { 
+          //   label: "Invoice Generate", 
+          //   icon: "fa-chart-pie", 
+          //   link: "/Invoice-Generate" 
+          // },
           // {
           //   label: "VPA",
           //   icon: "fa-money-bill-transfer",
