@@ -115,7 +115,7 @@ export const Sidebar = ({ open, setOpen }) => {
             ],
           },
           {
-            label:"Fund-Request",
+            label:"Fund Request",
             icon:"fa-layer-group",
             link:"fund-request"
           },

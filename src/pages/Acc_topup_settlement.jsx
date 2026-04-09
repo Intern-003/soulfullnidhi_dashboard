@@ -63,7 +63,9 @@ const [actionLoading, setActionLoading] = useState(null);
         status: (item.status || "").toLowerCase().trim(),
         created_at: item.created_at,
         updated_at: item.updated_at,
-            option1: item.option1 ?? "N/A", // ✅ ADD THIS
+        option1: item.option1 ?? "N/A", // ✅ ADD THIS
+        refno:item.refno ?? "N/A",
+        mytxnid:item.mytxnid ?? "N/A"
 
 
       }))
@@ -265,7 +267,7 @@ Object.entries(params).forEach(([key, value]) => {
 });
 
       const res = await fetch(
-        `https://uatfintech.spay.live/api/reportrecords-List?${query}`,
+        `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -462,10 +464,30 @@ const exportCSV = async () => {
         </div>
       ),
     },
-    {
-      header: "Transaction Id",
-      accessor: "txnid",
-    },
+{
+  header: "Transaction Id",
+  accessor: "txnid",
+  Cell: ({ row }) => (
+    <div>
+      {/* Always visible */}
+      <span className="font-medium text-black ">
+        {row.txnid}
+      </span>
+
+      {/* Admin only */}
+      {role === "admin" && (
+        <>
+          <span className="block text-xs text-gray-700 mt-2">
+            UTR: {row.refno ?? "-"}
+          </span>
+          <span className="block text-xs text-gray-700">
+            Reference No: {row.mytxnid ?? "-"}
+          </span>
+        </>
+      )}
+    </div>
+  ),
+},
 {
   header: "Product Type",
   accessor: "product_type",
@@ -473,9 +495,12 @@ const exportCSV = async () => {
     <div className="flex flex-col text-left">
       <span className="font-medium">{row.product_type}</span>
       {role === "admin" && (
+        <>
    <span className="text-xs text-gray-500">
         Remark: {row.option1}
       </span>
+
+      </>
       )}
    
     </div>

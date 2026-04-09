@@ -62,9 +62,9 @@ const FundRequest = () => {
   };
 const bankDetails = [
   {
-    bankName: "Equitas",
-    ifsc: "ESFB0014004",
-    accountNumber: "202122232425"
+    bankName: "HDFC BANK",
+    ifsc: "HDFC0003704",
+    accountNumber: "99910026071984"
   },
 
 ];
