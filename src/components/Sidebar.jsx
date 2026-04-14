@@ -68,11 +68,11 @@ export const Sidebar = ({ open, setOpen }) => {
               { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
             ],
           },
-          //  { 
-          //   label: "Invoice Generate", 
-          //   icon: "fa-chart-pie", 
-          //   link: "/Invoice-Generate" 
-          // },
+           { 
+            label: "Invoice Generate", 
+            icon: "fa-file-invoice", 
+            link: "/Invoice-Generate" 
+          },
           // {
           //   label: "VPA",
           //   icon: "fa-money-bill-transfer",
@@ -116,7 +116,7 @@ export const Sidebar = ({ open, setOpen }) => {
           },
           {
             label:"Fund Request",
-            icon:"fa-layer-group",
+            icon:"fa-piggy-bank",
             link:"fund-request"
           },
           {

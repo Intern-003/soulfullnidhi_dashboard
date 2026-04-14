@@ -31,6 +31,8 @@ const [exporting, setExporting] = useState(false);
   const [role] = useState(atob(localStorage.getItem("role")) || "admin");
 const  {execute:requestApporve }= usePost("/approve-fund-request");
 
+const { execute: reverseTopup } = usePost("/payout-take-back");
+
 
 const [actionLoading, setActionLoading] = useState(null);
 
@@ -71,6 +73,48 @@ const [actionLoading, setActionLoading] = useState(null);
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
+
+
+const handleReverse = async (row) => {
+  try {
+    setActionLoading(row.id);
+
+    const payload = {
+      user_id: row.user_id,
+      txnid: row.txnid, // 🔥 important
+      remark: "Reversed from admin panel",
+    };
+
+    const res = await reverseTopup(payload);
+
+    if (res) {
+      setFilteredData((prev) =>
+        prev.map((item) =>
+          item.id === row.id
+            ? {
+                ...item,
+                status: "reversed",
+                payout_closing_balance:
+                  res?.new_balance ?? item.payout_closing_balance,
+                updated_at: new Date().toISOString(),
+              }
+            : item
+        )
+      );
+    }
+  } catch (err) {
+    console.error(err);
+    alert(
+      err?.response?.data?.message ||
+        err?.message ||
+        "Reverse failed"
+    );
+  } finally {
+    setActionLoading(null);
+  }
+};
+
+
 
 const handleAccept = async (row) => {
   try {
@@ -532,29 +576,44 @@ const exportCSV = async () => {
       {
         header: "Action",
         accessor: "action",
-        Cell: ({ row }) => {
-          if (row.status === "pending") {
-            return (
-              <button
-                onClick={() => handleAccept(row)}
-                disabled={actionLoading === row.id}
-                className="px-3 py-1 bg-blue-500 text-white rounded-2xl hover:bg-blue-700"
-              >
-                {actionLoading === row.id ? "Processing..." : "Accept"}
-              </button>
-            );
-          }
+Cell: ({ row }) => {
+  // ✅ Pending → Accept button
+  if (row.status === "pending") {
+    return (
+      <button
+        onClick={() => handleAccept(row)}
+        disabled={actionLoading === row.id}
+        className="px-3 py-1 bg-blue-500 text-white rounded-2xl hover:bg-blue-700"
+      >
+        {actionLoading === row.id ? "Processing..." : "Accept"}
+      </button>
+    );
+  }
 
-          if (row.status === "completed") {
-            return (
-              <span className="text-green-600 font-medium">
-                Accepted
-              </span>
-            );
-          }
+  // ✅ Completed → Reverse button
+  if (row.status === "completed") {
+    return (
+      <button
+        onClick={() => handleReverse(row)}
+        disabled={actionLoading === row.id}
+        className="px-3 py-1 bg-red-500 text-white rounded-2xl hover:bg-red-700"
+      >
+        {actionLoading === row.id ? "Reversing..." : "Reverse"}
+      </button>
+    );
+  }
 
-          return null;
-        },
+  // ✅ Reversed → label
+  if (row.status === "reversed") {
+    return (
+      <span className="text-red-400 font-medium">
+        Reversed
+      </span>
+    );
+  }
+
+  return null;
+}
       },
     ]
   : []),
@@ -596,6 +655,7 @@ const exportCSV = async () => {
       accessor: "payout_closing_balance",
     },
   ];
+  
 
   return (
     <div className="p-4 space-y-4">
