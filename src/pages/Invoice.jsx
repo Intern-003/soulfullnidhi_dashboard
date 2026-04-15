@@ -172,13 +172,8 @@ const renderInvoice = () => {
         {/* 🔹 DOWNLOAD BUTTON */}
         <button
           onClick={handlePrint}
-          disabled={!data}
-          className={`mt-5 px-5 py-2 rounded-lg text-white transition 
-      ${
-        data
-          ? "bg-green-600 hover:bg-green-700"
-          : "bg-gray-400 cursor-not-allowed"
-      }`}
+          // disabled={!data}
+          className={`mt-5 px-5 py-2 rounded-lg text-white transition bg-green-600`}
         >
           Download / Print
         </button>
