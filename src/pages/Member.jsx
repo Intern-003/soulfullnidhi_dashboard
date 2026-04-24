@@ -66,10 +66,12 @@ export const Member = () => {
 
   const initialDataOfMerchants = useMemo(
     () => dataOfMerchants?.data ?? [],
-    [dataOfMerchants]
+    [dataOfMerchants],
   );
 
-  const { data: summaryData } = useAutoFetch(`/collection-summary?user_ids=${m_id}`);
+  const { data: summaryData } = useAutoFetch(
+    `/collection-summary?user_ids=${m_id}`,
+  );
 
   useEffect(() => {
     if (!merchantLoading && dataOfMerchants) setInitialLoad(false);
@@ -139,7 +141,8 @@ export const Member = () => {
 
   const handlePayinToggle = async (v, rowId, accountStatus) => {
     try {
-      if (accountStatus) await updateSingle({ user_id: rowId, payin_status: v });
+      if (accountStatus)
+        await updateSingle({ user_id: rowId, payin_status: v });
     } catch (err) {
       console.log("Payin Toggle Failed: ", err);
     }
@@ -147,7 +150,8 @@ export const Member = () => {
 
   const handlePayoutToggle = async (v, rowId, accountStatus) => {
     try {
-      if (accountStatus) await updateSingle({ user_id: rowId, payout_status: v });
+      if (accountStatus)
+        await updateSingle({ user_id: rowId, payout_status: v });
     } catch (err) {
       console.log("Payout Toggle Failed: ", err);
     }
@@ -174,7 +178,7 @@ export const Member = () => {
 
       if (response) {
         setMerchantData((prev) =>
-          prev.map((item) => ({ ...item, payin: item.account ? v : false }))
+          prev.map((item) => ({ ...item, payin: item.account ? v : false })),
         );
       }
     } catch (err) {
@@ -189,7 +193,7 @@ export const Member = () => {
 
       if (response) {
         setMerchantData((prev) =>
-          prev.map((item) => ({ ...item, payout: item.account ? v : false }))
+          prev.map((item) => ({ ...item, payout: item.account ? v : false })),
         );
       }
     } catch (err) {
@@ -202,7 +206,7 @@ export const Member = () => {
 
     const formattedMerchantData = initialDataOfMerchants.map((item) => {
       const filteredCredentials = credentialsData?.data?.filter(
-        (cred) => cred.bank_id === item.payin_bank?.id
+        (cred) => cred.bank_id === item.payin_bank?.id,
       );
 
       const payinBank = (
@@ -283,8 +287,8 @@ export const Member = () => {
           item.kyc === 1
             ? "verified"
             : item.kyc_rejected === 1
-            ? "rejected"
-            : "pending",
+              ? "rejected"
+              : "pending",
 
         payin_bank: payinBank,
         payin: item.payin_status,
@@ -412,7 +416,14 @@ export const Member = () => {
 
       return matchesTxn && matchesStatus && matchesDate && matchesMerchant;
     });
-  }, [merchantData, txnSearch, statusFilter, startDate, endDate, filterMerchant]);
+  }, [
+    merchantData,
+    txnSearch,
+    statusFilter,
+    startDate,
+    endDate,
+    filterMerchant,
+  ]);
 
   const exportMembersCSV = () => {
     if (!filteredMerchantData.length) {
@@ -490,7 +501,7 @@ export const Member = () => {
     const csv = [
       headers.map(escapeCSV).join(","),
       ...csvRows.map((row) =>
-        headers.map((header) => escapeCSV(row[header])).join(",")
+        headers.map((header) => escapeCSV(row[header])).join(","),
       ),
     ].join("\n");
 
@@ -535,8 +546,12 @@ export const Member = () => {
             className="mt-1"
           />
         </div>
-        <span className="text-xs text-blue-400 font-semibold mt-2">{row.date}</span>
-        <span className="text-xs text-blue-400 font-semibold mt-1">{row.kyc}</span>
+        <span className="text-xs text-blue-400 font-semibold mt-2">
+          {row.date}
+        </span>
+        <span className="text-xs text-blue-400 font-semibold mt-1">
+          {row.kyc}
+        </span>
       </div>
     ),
     action: (
@@ -583,7 +598,9 @@ export const Member = () => {
     <div className="p-4 space-y-4">
       <div
         className="rounded-lg flex justify-between items-center p-4 shadow-md"
-        style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}
+        style={{
+          background: "linear-gradient(275deg, #b4902d , #8A6D1F )",
+        }}
       >
         <h4 className="font-bold text-white text-xl">Member List</h4>
 
@@ -613,7 +630,7 @@ export const Member = () => {
 
         <Button
           onClick={() => navigate("/member-create")}
-          className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+          className="bg-white border border-sky-200 text-[#3d3200] font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-sky-50 hover:border-[#3d3200]/30 transition-all duration-200"
         >
           + Create New
         </Button>
@@ -697,7 +714,9 @@ export const Member = () => {
               </span>
 
               <button
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="px-3 py-1 border rounded text-sm disabled:opacity-50"
               >

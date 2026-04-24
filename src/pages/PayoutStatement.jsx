@@ -12,7 +12,6 @@ const CACHE_TTL_MS = 1000 * 60 * 30; // 30 min
 const PayoutStatement = () => {
   const [merchantOptions, setMerchantOptions] = useState([]);
 
-
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [allLoaded, setAllLoaded] = useState(false);
@@ -20,21 +19,20 @@ const PayoutStatement = () => {
   const [totalSuccessAmount, setTotalSuccessAmount] = useState(0);
 
   const [entriesPerPage, setEntriesPerPage] = useState(50);
-// const [perPage] = useState(50);
+  // const [perPage] = useState(50);
 
-const [page, setPage] = useState(1);
-const [totalPages, setTotalPages] = useState(1);
-const [totalRecords, setTotalRecords] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
 
-const [exporting, setExporting] = useState(false);
-
+  const [exporting, setExporting] = useState(false);
 
   const [txnSearch, setTxnSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [selectedMerchant, setSelectedMerchant] = useState(null);
-const [filteredData, setFilteredData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
 
   const userId =
     localStorage.getItem("user_id") ||
@@ -42,7 +40,6 @@ const [filteredData, setFilteredData] = useState([]);
     localStorage.getItem("userid") ||
     "default_user";
 
-  
   const normalizeRows = useCallback((rows) => {
     return rows
       .map((item) => ({
@@ -76,140 +73,84 @@ const [filteredData, setFilteredData] = useState([]);
 
         status: item.status ?? "N/A",
         created_at: item.created_at,
-         updated_at: item.updated_at,   
+        updated_at: item.updated_at,
 
         numericAmount: parseFloat(item.amount) || 0,
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
 
-useEffect(() => {
-  fetchMerchants();
-}, []);
+  useEffect(() => {
+    fetchMerchants();
+  }, []);
 
-const fetchMerchants = async () => {
-  try {
-    const token = localStorage.getItem("token");
+  const fetchMerchants = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/get-merchants`,
-      {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/get-merchants`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result?.status) {
+        throw new Error(result?.message);
       }
-    );
 
-    const result = await res.json();
+      // ✅ Convert to dropdown format
+      const options = (result.data || []).map((m) => ({
+        label: m.name, // or m.business_name depending on API
+        value: m.id,
+      }));
 
-    if (!res.ok || !result?.status) {
-      throw new Error(result?.message);
+      setMerchantOptions(options);
+    } catch (err) {
+      console.error("Merchant fetch error:", err);
+      setMerchantOptions([]);
     }
+  };
+  useEffect(() => {
+    fetchFilteredData();
+  }, [
+    page,
+    entriesPerPage,
+    txnSearch,
+    statusFilter,
+    startDate,
+    endDate,
+    selectedMerchant,
+  ]);
 
-    // ✅ Convert to dropdown format
-    const options = (result.data || []).map((m) => ({
-      label: m.name,   // or m.business_name depending on API
-      value: m.id,
-    }));
+  const fetchFilteredData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
 
-    setMerchantOptions(options);
-
-  } catch (err) {
-    console.error("Merchant fetch error:", err);
-    setMerchantOptions([]);
-  }
-};
-useEffect(() => {
-  fetchFilteredData();
-}, [page, entriesPerPage, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
-
-
-const fetchFilteredData = async () => {
-  try {
-    setLoading(true);
-    const token = localStorage.getItem("token");
-
-    const params = {
-      page,
-      per_page: entriesPerPage,
-      status: statusFilter !== "all" ? statusFilter : undefined,
- from_date: startDate
-  ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
-      .toISOString()
-      .split("T")[0]
-  : undefined,
-
-  to_date: endDate
-  ? new Date(
-      new Date(endDate).setHours(23, 59, 59, 999)
-    ).toISOString().split("T")[0]
-  : undefined,
-      product: "payout",
-      searchdata: txnSearch || undefined,
-      user_id: selectedMerchant?.value || undefined,
-    };
-
-    const query = new URLSearchParams(
-      Object.entries(params).filter(([_, v]) => v !== undefined)
-    ).toString();
-
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const result = await res.json();
-console.log("FILTER API RESPONSE:", result);
-
-    if (!res.ok || !result?.status) {
-      throw new Error(result?.message);
-    }
-
-    // ✅ IMPORTANT
-    setTotalSuccessAmount(result.success_amount || 0);
-
-    const formatted = normalizeRows(result.data || []);
-    setFilteredData(formatted);
-
-    // ✅ SET PAGINATION FROM API
-    setTotalPages(result.pagination?.last_page || 1);
-    setTotalRecords(result.pagination?.total || 0);
-
-  } catch (err) {
-    console.error(err);
-    setFilteredData([]);
-  } finally {
-    setLoading(false);
-  }
-};
-
-const fetchAllDataForExport = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    let currentPage = 1;
-    let lastPage = 1;
-    let allData = [];
-
-    do {
       const params = {
-         exportdata: 1, 
-        page: currentPage,
-        per_page: entriesPerPage, // ✅ use same pagination size
+        page,
+        per_page: entriesPerPage,
         status: statusFilter !== "all" ? statusFilter : undefined,
-  from_date: formatDateForAPI(startDate),
-to_date: formatDateForAPI(endDate, true),
+        from_date: startDate
+          ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
+              .toISOString()
+              .split("T")[0]
+          : undefined,
+
+        to_date: endDate
+          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+              .toISOString()
+              .split("T")[0]
+          : undefined,
         product: "payout",
         searchdata: txnSearch || undefined,
         user_id: selectedMerchant?.value || undefined,
       };
 
       const query = new URLSearchParams(
-        Object.entries(params).filter(([_, v]) => v !== undefined)
+        Object.entries(params).filter(([_, v]) => v !== undefined),
       ).toString();
 
       const res = await fetch(
@@ -218,32 +159,88 @@ to_date: formatDateForAPI(endDate, true),
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const result = await res.json();
+      console.log("FILTER API RESPONSE:", result);
 
       if (!res.ok || !result?.status) {
         throw new Error(result?.message);
       }
 
+      // ✅ IMPORTANT
+      setTotalSuccessAmount(result.success_amount || 0);
+
       const formatted = normalizeRows(result.data || []);
+      setFilteredData(formatted);
 
-      allData = [...allData, ...formatted];
+      // ✅ SET PAGINATION FROM API
+      setTotalPages(result.pagination?.last_page || 1);
+      setTotalRecords(result.pagination?.total || 0);
+    } catch (err) {
+      console.error(err);
+      setFilteredData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // ✅ update loop control
-      lastPage = result.pagination?.last_page || 1;
-      currentPage++;
+  const fetchAllDataForExport = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-    } while (currentPage <= lastPage);
+      let currentPage = 1;
+      let lastPage = 1;
+      let allData = [];
 
-    return allData;
+      do {
+        const params = {
+          exportdata: 1,
+          page: currentPage,
+          per_page: entriesPerPage, // ✅ use same pagination size
+          status: statusFilter !== "all" ? statusFilter : undefined,
+          from_date: formatDateForAPI(startDate),
+          to_date: formatDateForAPI(endDate, true),
+          product: "payout",
+          searchdata: txnSearch || undefined,
+          user_id: selectedMerchant?.value || undefined,
+        };
 
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
-};
+        const query = new URLSearchParams(
+          Object.entries(params).filter(([_, v]) => v !== undefined),
+        ).toString();
+
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const result = await res.json();
+
+        if (!res.ok || !result?.status) {
+          throw new Error(result?.message);
+        }
+
+        const formatted = normalizeRows(result.data || []);
+
+        allData = [...allData, ...formatted];
+
+        // ✅ update loop control
+        lastPage = result.pagination?.last_page || 1;
+        currentPage++;
+      } while (currentPage <= lastPage);
+
+      return allData;
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  };
 
   const escapeCSV = (field) => {
     const string = String(field ?? "");
@@ -295,92 +292,87 @@ to_date: formatDateForAPI(endDate, true),
     };
   };
 
-
   const formatDateForAPI = (date, isEnd = false) => {
-  if (!date) return undefined;
+    if (!date) return undefined;
 
-  const d = new Date(date);
+    const d = new Date(date);
 
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = d.toLocaleString("en-US", { month: "short" });
-  const year = d.getFullYear();
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = d.toLocaleString("en-US", { month: "short" });
+    const year = d.getFullYear();
 
-  if (isEnd) {
-    d.setHours(23, 59);
-  } else {
-    d.setHours(0, 0);
-  }
-
-  const time = d.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-
-  return `${day} ${month} ${year}, ${time}`;
-}; 
-
-
-  const exportCSV = async () => {
-    try{
-      setExporting(true);
-           const allData = await fetchAllDataForExport();
-
-  if (!allData.length) {
-    alert("No data to export.");
-    return;
-
+    if (isEnd) {
+      d.setHours(23, 59);
+    } else {
+      d.setHours(0, 0);
     }
 
+    const time = d.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
 
-  const csvRows = allData.map((row) => {
-    const { date, time } = formatExportDateTime(row.created_at);
+    return `${day} ${month} ${year}, ${time}`;
+  };
+
+  const exportCSV = async () => {
+    try {
+      setExporting(true);
+      const allData = await fetchAllDataForExport();
+
+      if (!allData.length) {
+        alert("No data to export.");
+        return;
+      }
+
+      const csvRows = allData.map((row) => {
+        const { date, time } = formatExportDateTime(row.created_at);
 
         return {
-        "Order ID": row.id,
-        "User ID": row.user_id,
-        "Merchant Name": row.merchant_name,
-        "Merchant Details": row.merchant_details_text,
-        Holder: row.holder,
-        Account: row.account,
-        IFSC: row.ifsc,
-        "UPI Id": row.upi_id,
-        Mobile: row.mobile,
-        "Payment Mode": row.payment_mode,
-        "Ref No": row.refno,
-        "Order Ref ID": row.mytxnid,
-        TxnId: row.txnid,
-        "Opening Wallet Amount": row.opening_wallet_amount,
-        "Pay Amount": row.pay_amount,
-        "Charges": row.charges,
-         "GST": row.gst,
-        "Total Debited Amount": row.total_debited_amount,
-        "Closing Wallet Amount": row.closing_wallet_amount,
-        Note: row.note,
-        Status: row.status,
-        Date: date,
-        Time: time,
-    };
-  });
+          "Order ID": row.id,
+          "User ID": row.user_id,
+          "Merchant Name": row.merchant_name,
+          "Merchant Details": row.merchant_details_text,
+          Holder: row.holder,
+          Account: row.account,
+          IFSC: row.ifsc,
+          "UPI Id": row.upi_id,
+          Mobile: row.mobile,
+          "Payment Mode": row.payment_mode,
+          "Ref No": row.refno,
+          "Order Ref ID": row.mytxnid,
+          TxnId: row.txnid,
+          "Opening Wallet Amount": row.opening_wallet_amount,
+          "Pay Amount": row.pay_amount,
+          Charges: row.charges,
+          GST: row.gst,
+          "Total Debited Amount": row.total_debited_amount,
+          "Closing Wallet Amount": row.closing_wallet_amount,
+          Note: row.note,
+          Status: row.status,
+          Date: date,
+          Time: time,
+        };
+      });
 
-  const headers = Object.keys(csvRows[0]);
+      const headers = Object.keys(csvRows[0]);
 
-  const csv = [
-    headers.map(escapeCSV).join(","),
-    ...csvRows.map((row) =>
-      headers.map((header) => escapeCSV(row[header])).join(",")
-    ),
-  ].join("\n");
+      const csv = [
+        headers.map(escapeCSV).join(","),
+        ...csvRows.map((row) =>
+          headers.map((header) => escapeCSV(row[header])).join(","),
+        ),
+      ].join("\n");
 
-  downloadFile(csv, "Payout_statement_filtered.csv", "text/csv");
-}catch(err){
-   console.error(err);
-    alert("Export failed");
-}finally {
-    setExporting(false); // ✅ stop loader
-  }
-};
-
+      downloadFile(csv, "Payout_statement_filtered.csv", "text/csv");
+    } catch (err) {
+      console.error(err);
+      alert("Export failed");
+    } finally {
+      setExporting(false); // ✅ stop loader
+    }
+  };
 
   const handleClearAll = () => {
     setTxnSearch("");
@@ -389,7 +381,6 @@ to_date: formatDateForAPI(endDate, true),
     setEndDate(null);
     setSelectedMerchant(null);
   };
-
 
   const statusClasses = {
     pending: "bg-[#dfaf03ff] text-white",
@@ -402,58 +393,57 @@ to_date: formatDateForAPI(endDate, true),
   };
 
   const payoutColumn = [
-{
-  header: "Order Id",
-  accessor: "id",
-  Cell: ({ row }) => {
-    const created = new Date(row.created_at);
-    const updated = new Date(row.updated_at);
+    {
+      header: "Order Id",
+      accessor: "id",
+      Cell: ({ row }) => {
+        const created = new Date(row.created_at);
+        const updated = new Date(row.updated_at);
 
-    const formatDate = (d) =>
-      isNaN(d)
-        ? "N/A"
-        : `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+        const formatDate = (d) =>
+          isNaN(d)
+            ? "N/A"
+            : `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
 
-    const formatTime = (d) =>
-      isNaN(d)
-        ? "N/A"
-        : d
-            .toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            })
-            .toUpperCase();
+        const formatTime = (d) =>
+          isNaN(d)
+            ? "N/A"
+            : d
+                .toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+                .toUpperCase();
 
-    return (
-      <div className="flex flex-col text-left w-20">
-        {/* Order ID */}
-        <span>
-          <b>{row.id}</b>
-        </span>
-
-        {/* Created */}
-        <span>{formatDate(created)}</span>
-        <span className="text-xs text-gray-500">
-          {formatTime(created)}
-        </span>
-
-        {/* Updated */}
-        {row.updated_at && (
-          <>
-            <span className="mt-1">
-              Updated at:<br />
-              {formatDate(updated)}
+        return (
+          <div className="flex flex-col text-left w-20">
+            {/* Order ID */}
+            <span>
+              <b>{row.id}</b>
             </span>
-            <span className="text-xs text-blue-500">
-              {formatTime(updated)}
-            </span>
-          </>
-        )}
-      </div>
-    );
-  },
-},
+
+            {/* Created */}
+            <span>{formatDate(created)}</span>
+            <span className="text-xs text-gray-500">{formatTime(created)}</span>
+
+            {/* Updated */}
+            {row.updated_at && (
+              <>
+                <span className="mt-1">
+                  Updated at:
+                  <br />
+                  {formatDate(updated)}
+                </span>
+                <span className="text-xs text-blue-500">
+                  {formatTime(updated)}
+                </span>
+              </>
+            )}
+          </div>
+        );
+      },
+    },
     {
       header: "Merchant Details",
       accessor: "merchant_details_text",
@@ -524,7 +514,7 @@ to_date: formatDateForAPI(endDate, true),
           <span>
             Charges: <b>{row.charges}</b>
           </span>
-                    <span>
+          <span>
             GST: <b>{row.gst}</b>
           </span>
           <span>
@@ -545,7 +535,8 @@ to_date: formatDateForAPI(endDate, true),
       Cell: ({ row }) => (
         <span
           className={`px-2 py-1 rounded-full text-sm font-medium ${
-            statusClasses[String(row.status || "").toLowerCase()] ?? "bg-gray-600 text-white"
+            statusClasses[String(row.status || "").toLowerCase()] ??
+            "bg-gray-600 text-white"
           }`}
         >
           {row?.status
@@ -561,7 +552,7 @@ to_date: formatDateForAPI(endDate, true),
       <div
         className="rounded-lg flex justify-between items-center p-4 shadow-md"
         style={{
-          background: "linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)",
+          background: "linear-gradient(250deg, #b4902d 0%, #8A6D1F 100%)",
         }}
       >
         <div>
@@ -581,7 +572,7 @@ to_date: formatDateForAPI(endDate, true),
       </div>
 
       <TableFilters
-       merchantOptions={merchantOptions}
+        merchantOptions={merchantOptions}
         rawData={filteredData}
         txnSearch={txnSearch}
         setTxnSearch={setTxnSearch}
@@ -599,9 +590,8 @@ to_date: formatDateForAPI(endDate, true),
         showDateFilter={true}
         showSelectUserFilter={true}
         // onExportCSV={exportCSV}
-  onExportCSV={exportCSV}
-  exporting={exporting}
-
+        onExportCSV={exportCSV}
+        exporting={exporting}
         onClearAll={handleClearAll}
         totalSuccessAmount={totalSuccessAmount}
       />
@@ -619,13 +609,11 @@ to_date: formatDateForAPI(endDate, true),
             showDeleteColumn={false}
             isServerPaginated={true}
             entriesPerPage={entriesPerPage}
-             setEntriesPerPage={setEntriesPerPage}
-  totalPages={totalPages}
-  currentPage={page}   // ✅ ADD THIS
-  onPageChange={(newPage) => setPage(newPage)}
+            setEntriesPerPage={setEntriesPerPage}
+            totalPages={totalPages}
+            currentPage={page} // ✅ ADD THIS
+            onPageChange={(newPage) => setPage(newPage)}
           />
-
-
         </>
       )}
     </div>

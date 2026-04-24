@@ -28,9 +28,9 @@ export const DonutChart = ({ data }) => {
   // ────────────────────────────────────────────────
   const txData = data?.[mode] || {};
   const pending = Number(txData.initiated) || 0;
-  const success = Number(txData.success)   || 0;
-  const failed  = Number(txData.failed)    || 0;
-  const total   = pending + success + failed;
+  const success = Number(txData.success) || 0;
+  const failed = Number(txData.failed) || 0;
+  const total = pending + success + failed;
   const isEmpty = total === 0;
 
   const series = isEmpty ? [1] : [pending, success, failed];
@@ -53,7 +53,12 @@ export const DonutChart = ({ data }) => {
     }
 
     const displayLabel = selectedLabel || (isEmpty ? "—" : "Total");
-    const displayValue = selectedValue !== null ? selectedValue.toLocaleString() : (isEmpty ? "" : total.toLocaleString());
+    const displayValue =
+      selectedValue !== null
+        ? selectedValue.toLocaleString()
+        : isEmpty
+          ? ""
+          : total.toLocaleString();
 
     const options = {
       series,
@@ -75,7 +80,9 @@ export const DonutChart = ({ data }) => {
           },
         },
       },
-      colors: isEmpty ? ["#e2e8f0"] : ["#3187afff", "#369c36", "#1a5b8a"],
+      colors: isEmpty
+        ? ["#e2e8f0"]
+        : ["rgb(116, 92, 20)", "#b8962e", "#fee185"],
       stroke: { show: true, width: 5, colors: ["#e9eeecff"] },
       plotOptions: {
         pie: {
@@ -102,7 +109,9 @@ export const DonutChart = ({ data }) => {
         gradient: {
           shade: "dark",
           type: "radial",
-          gradientToColors: isEmpty ? ["#9ca3af"] : ["#0d35b9ff", "#3b82f6", "#14b8a6"],
+          gradientToColors: isEmpty
+            ? ["#9ca3af"]
+            : ["#5e4c19", "#b8962e", "#fee185"],
           stops: [0, 0, 100],
         },
       },
@@ -112,8 +121,15 @@ export const DonutChart = ({ data }) => {
         fontSize: isMobile ? "12px" : "13px",
         fontWeight: 600, // Bold by default
         offsetY: isMobile ? 4 : 6,
-        markers: { width: isMobile ? 10 : 12, height: isMobile ? 10 : 12, radius: 10 },
-        itemMargin: { horizontal: isMobile ? 10 : 14, vertical: isMobile ? 4 : 6 },
+        markers: {
+          width: isMobile ? 10 : 12,
+          height: isMobile ? 10 : 12,
+          radius: 10,
+        },
+        itemMargin: {
+          horizontal: isMobile ? 10 : 14,
+          vertical: isMobile ? 4 : 6,
+        },
       },
       tooltip: {
         enabled: !isEmpty,
@@ -153,7 +169,17 @@ export const DonutChart = ({ data }) => {
         chartInstance.current = null;
       }
     };
-  }, [mode, data, isMobile, selectedLabel, selectedValue, isAnimating, total, series, labels]); // Dependencies include selection states
+  }, [
+    mode,
+    data,
+    isMobile,
+    selectedLabel,
+    selectedValue,
+    isAnimating,
+    total,
+    series,
+    labels,
+  ]); // Dependencies include selection states
 
   // Prevent rapid mode spam (optional but improves UX)
   const changeMode = (newMode) => {
@@ -162,7 +188,7 @@ export const DonutChart = ({ data }) => {
     }
   };
 
-  const accentColor = mode === "UPI" ? "#3187afff" : "#369c36";
+  const accentColor = mode === "UPI" ? "#745C14" : "#ebc751";
 
   return (
     <div
@@ -210,16 +236,24 @@ export const DonutChart = ({ data }) => {
           width: "100%",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: "1 1 auto", minWidth: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            flex: "1 1 auto",
+            minWidth: 0,
+          }}
+        >
           <div
-            // style={{
-            //   width: "12px",
-            //   height: "12px",
-            //   borderRadius: "50%",
-            //   background: accentColor,
-            //   boxShadow: `0 0 12px ${accentColor}50`,
-            //   animation: isAnimating ? "breathe 2s infinite ease-in-out" : "none",
-            // }}
+          // style={{
+          //   width: "12px",
+          //   height: "12px",
+          //   borderRadius: "50%",
+          //   background: accentColor,
+          //   boxShadow: `0 0 12px ${accentColor}50`,
+          //   animation: isAnimating ? "breathe 2s infinite ease-in-out" : "none",
+          // }}
           />
           <div>
             <h5
@@ -266,7 +300,8 @@ export const DonutChart = ({ data }) => {
               border: "none",
               cursor: "pointer",
               transition: "all 0.28s ease",
-              boxShadow: mode === "UPI" ? "0 2px 8px rgba(49,135,175,0.3)" : "none",
+              boxShadow:
+                mode === "UPI" ? "0 2px 8px rgba(49,135,175,0.3)" : "none",
               whiteSpace: "nowrap",
               flex: "1",
               display: "flex",
@@ -289,7 +324,8 @@ export const DonutChart = ({ data }) => {
               border: "none",
               cursor: "pointer",
               transition: "all 0.28s ease",
-              boxShadow: mode !== "UPI" ? "0 2px 8px rgba(54,156,54,0.3)" : "none",
+              boxShadow:
+                mode !== "UPI" ? "0 2px 8px rgba(189, 248, 189, 0.3)" : "none",
               whiteSpace: "nowrap",
               flex: "1",
               display: "flex",
@@ -343,7 +379,15 @@ export const DonutChart = ({ data }) => {
               height: "100%",
             }}
           >
-            <div style={{ fontSize: isMobile ? "2.5rem" : "2.8rem", marginBottom: "8px", opacity: 0.7 }}>📊</div>
+            <div
+              style={{
+                fontSize: isMobile ? "2.5rem" : "2.8rem",
+                marginBottom: "8px",
+                opacity: 0.7,
+              }}
+            >
+              📊
+            </div>
             No data
           </div>
         )}

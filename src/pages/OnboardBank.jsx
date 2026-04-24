@@ -50,8 +50,8 @@ const OnboardBank = () => {
           prev.map((item) =>
             item.id === rowId
               ? { ...item, status: checked ? "Active" : "Inactive" }
-              : item
-          )
+              : item,
+          ),
         );
         activeTab === "payin" ? payinRefetch() : payoutRefetch();
       }
@@ -68,7 +68,8 @@ const OnboardBank = () => {
           sqno: index + 1,
           id: item.id,
           bank_name: item.onboard_payin_bank,
-          status: item.onboarded_payin_bank_status === 1 ? "Active" : "Inactive",
+          status:
+            item.onboarded_payin_bank_status === 1 ? "Active" : "Inactive",
         })) || [];
       setBankData(mapped);
     } else {
@@ -102,34 +103,39 @@ const OnboardBank = () => {
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className=" rounded-lg flex justify-between items-center p-2 shadow-md"
-      style={{ background: 'linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)' }}>
+      <div
+        className=" rounded-lg flex justify-between items-center p-2 shadow-md"
+        style={{
+          background: "linear-gradient(250deg, #b4902d 0%, #8A6D1F 100%)",
+        }}
+      >
         <h4 className="font-bold text-white text-xl">Onboard Bank</h4>
         <Button
-          className="bg-white border border-sky-200 text-sky-800 font-semibold px-4 py-1 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+          className="bg-white border border-sky-200 text-[#574D22] font-semibold px-4 py-1 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
           onClick={handleModal}
         >
           ADD BANK
         </Button>
-
       </div>
 
       {/* Tabs */}
       <div className="flex gap-4">
         <Button
-          className={`px-4 py-2 rounded-lg font-medium ${activeTab === "payin"
-              ? "bg-blue-100 text-blue-600 shadow-md"
-              : "bg-white text-gray-600 hover:bg-blue-50 transition"
-            }`}
+          className={`px-4 py-2 rounded-lg font-medium ${
+            activeTab === "payin"
+              ? "bg-[#D0B160] text-yellow-800 shadow-md"
+              : "bg-white text-gray-600 hover:bg-[#FAF7EB] transition"
+          }`}
           onClick={() => setActiveTab("payin")}
         >
           Payin Bank List
         </Button>
         <Button
-          className={`px-4 py-2 rounded-lg font-medium ${activeTab === "payout"
-              ? "bg-blue-100 text-blue-600 shadow-md"
-              : "bg-white text-gray-600 hover:bg-blue-50 transition"
-            }`}
+          className={`px-4 py-2 rounded-lg font-medium ${
+            activeTab === "payout"
+              ? "bg-[#D0B160] text-yellow-800 shadow-md"
+              : "bg-white text-gray-600 hover:bg-[#FAF7EB] transition"
+          }`}
           onClick={() => setActiveTab("payout")}
         >
           Payout Bank List
@@ -139,7 +145,9 @@ const OnboardBank = () => {
       {/* Table */}
       <div className="bg-white shadow-lg rounded-lg p-4">
         {activeTab === "payin" ? (
-          payinLoading ? <TableSkeleton /> : null
+          payinLoading ? (
+            <TableSkeleton />
+          ) : null
         ) : payoutLoading ? (
           <TableSkeleton />
         ) : null}

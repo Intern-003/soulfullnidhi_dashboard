@@ -20,21 +20,22 @@ const Scheme = () => {
     const handleChange = (checked) => {
       if (onToggle) onToggle(id, sqno, checked);
     };
-    return <Toggle defaultChecked={value === "Active"} onChange={handleChange} />;
+    return (
+      <Toggle defaultChecked={value === "Active"} onChange={handleChange} />
+    );
   };
-
 
   useEffect(() => {
     if (data?.data) {
       const formattedData = data.data.map((item, index) => ({
         id: item.id,
-        sqno: item.id,  //index + 1,
+        sqno: item.id, //index + 1,
         name: item.name,
         status: item.status ? "Active" : "Inactive",
         action: (
           <Button
             onClick={() => handleEdit(item)}
-            className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md shadow-md transition"
+            className="bg-yellow-600 hover:bg-yellow-500 text-white text-xs font-medium px-3 py-1.5 rounded-md shadow-md transition"
           >
             Edit
           </Button>
@@ -61,8 +62,8 @@ const Scheme = () => {
         prev.map((item) =>
           item.sqno === sqno
             ? { ...item, status: checked ? "Active" : "Inactive" }
-            : item
-        )
+            : item,
+        ),
       );
     }
   };
@@ -88,17 +89,19 @@ const Scheme = () => {
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className=" rounded-lg flex justify-between items-center p-2 shadow-md"
-      style={{ background: 'linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)' }}>
+      <div
+        className=" rounded-lg flex justify-between items-center p-2 shadow-md"
+        style={{
+          background: "linear-gradient(250deg, #b4902d 0%, #8A6D1F 100%)",
+        }}
+      >
         <h4 className="font-bold text-white text-xl">Scheme Manager</h4>
-      <Button
-  className="bg-white h-8 text-sky-800 font-bold px-4 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
-  onClick={handleModal}
->
-  Add New
-</Button>
-
-
+        <Button
+          className="bg-white h-8 text-[#3d3200] font-bold px-4 rounded-lg shadow-md hover:bg-sky-50 hover:border-sky-300 transition-all duration-200"
+          onClick={handleModal}
+        >
+          Add New
+        </Button>
       </div>
 
       <SchemeModal
@@ -119,7 +122,9 @@ const Scheme = () => {
           data={schemedata}
           className="shadow-lg rounded-lg overflow-hidden border border-gray-200"
           rowClassName={(rowIndex) =>
-            rowIndex % 2 === 0 ? "bg-white hover:bg-blue-50" : "bg-gray-50 hover:bg-blue-50"
+            rowIndex % 2 === 0
+              ? "bg-white hover:bg-blue-50"
+              : "bg-gray-50 hover:bg-blue-50"
           }
           paginationClassName="flex justify-end gap-2 mt-4"
           previousClassName="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow-sm cursor-pointer transition"

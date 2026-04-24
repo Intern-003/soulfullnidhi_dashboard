@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation,useNavigate  } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../css/sidebar.css";
 import Logo from "../images/logo.png";
 
@@ -15,7 +15,6 @@ export const Sidebar = ({ open, setOpen }) => {
   const toggleDropdown = (name) => {
     setActiveDropdown((prev) => (prev === name ? null : name));
   };
-  
 
   // MENU CONFIG - unchanged
   const menu = [
@@ -65,13 +64,16 @@ export const Sidebar = ({ open, setOpen }) => {
             dropdown: "account",
             items: [
               { label: "Topup Statement", link: "/topup-statement" },
-              { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
+              {
+                label: "Settlement Payin Statement",
+                link: "/settlement-payin-statement",
+              },
             ],
           },
-           { 
-            label: "Invoice Generate", 
-            icon: "fa-file-invoice", 
-            link: "/Invoice-Generate" 
+          {
+            label: "Invoice Generate",
+            icon: "fa-file-invoice",
+            link: "/Invoice-Generate",
           },
           // {
           //   label: "VPA",
@@ -111,13 +113,16 @@ export const Sidebar = ({ open, setOpen }) => {
             dropdown: "account",
             items: [
               { label: "Topup Statement", link: "/topup-statement" },
-              { label: "Settlement Payin Statement", link: "/settlement-payin-statement" },
+              {
+                label: "Settlement Payin Statement",
+                link: "/settlement-payin-statement",
+              },
             ],
           },
           {
-            label:"Fund Request",
-            icon:"fa-piggy-bank",
-            link:"fund-request"
+            label: "Fund Request",
+            icon: "fa-piggy-bank",
+            link: "fund-request",
           },
           {
             label: "Api Settings",
@@ -136,11 +141,11 @@ export const Sidebar = ({ open, setOpen }) => {
           },
         ]
       : []),
-           { 
-            label: "Chargeback Statement", 
-            icon: "fa-chart-pie", 
-            link: "/Chargeback" 
-          },
+    {
+      label: "Chargeback Statement",
+      icon: "fa-chart-pie",
+      link: "/Chargeback",
+    },
     ...(role === "crypto"
       ? [
           {
@@ -155,7 +160,7 @@ export const Sidebar = ({ open, setOpen }) => {
 
   return (
     <>
-      <style >{`
+      <style>{`
         .scrollbar-hide {
           -ms-overflow-style: none;  /* IE and Edge */
           scrollbar-width: none;  /* Firefox */
@@ -167,7 +172,9 @@ export const Sidebar = ({ open, setOpen }) => {
       {/* Mobile Overlay */}
       <div
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300 ${
-          open ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
+          open
+            ? "opacity-100 visible"
+            : "opacity-0 invisible pointer-events-none"
         }`}
         onClick={() => setOpen(false)}
       />
@@ -175,14 +182,14 @@ export const Sidebar = ({ open, setOpen }) => {
       {/* Sidebar - Light blue theme */}
       <div
         className={`fixed top-0 left-0 h-full w-64 md:w-72 flex flex-col
-          bg-gradient-to-b from-blue-50 via-blue-100 to-blue-200
-          shadow-2xl shadow-blue-600/20 border-r border-blue-200/60
+          bg-gradient-to-b from-[#fffdf5] via-[#fff7d6] to-[#f5e6a3]
+          shadow-2xl shadow-[#D4AF37]/20 border-r border-[#D4AF37]/30
           z-40 transform transition-transform duration-400 ease-out
           md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"} scrollbar-hide`}
       >
         {/* Mobile Close Button */}
         <button
-          className="absolute top-5 right-5 text-blue-700 hover:text-blue-900 transition-colors md:hidden z-10"
+          className="absolute top-5 right-5 text-blue-700 hover:text-[#3d3200] transition-colors md:hidden z-10"
           onClick={() => setOpen(false)}
           aria-label="Close sidebar"
         >
@@ -190,7 +197,7 @@ export const Sidebar = ({ open, setOpen }) => {
         </button>
 
         {/* Logo - Larger size restored */}
-        <div className="flex-shrink-0 py-6 px-6 flex justify-center border-b border-blue-200/50">
+        <div className="flex-shrink-0 py-6 px-6 flex justify-center border-b border-[#D4AF37]/20">
           <Link to="/dashboard">
             <img
               src={Logo}
@@ -212,23 +219,23 @@ export const Sidebar = ({ open, setOpen }) => {
                 {!item.dropdown ? (
                   <Link
                     to={item.link}
-onDoubleClick={(e) => {
-  e.preventDefault();
-  e.stopPropagation();
+                    onDoubleClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
 
-  if (currentPath === item.link) {
-    navigate(item.link, { state: { refresh: Date.now() } });
-  }
-}}
+                      if (currentPath === item.link) {
+                        navigate(item.link, { state: { refresh: Date.now() } });
+                      }
+                    }}
                     className={`group flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer
                       ${
                         currentPath === item.link
-                          ? "bg-blue-600/10 text-blue-900 font-semibold shadow-sm border-l-4 border-blue-600"
-                          : "text-blue-800 hover:bg-blue-100/70 hover:text-blue-900 hover:shadow-md hover:border-l-4 hover:border-blue-500"
+                          ? "bg-[#D4AF37]/15 text-[#3d3200] font-semibold shadow-sm border-l-4 border-[#D4AF37]"
+                          : "text-[#5c4a00] hover:bg-[#D4AF37]/10 hover:text-[#3d3200] hover:shadow-md hover:border-l-4 hover:border-[#D4AF37]"
                       }`}
                   >
                     <i
-                      className={`fa-solid ${item.icon} w-6 text-center text-blue-600 group-hover:text-blue-700 transition-colors`}
+                      className={`fa-solid ${item.icon} w-6 text-center text-[#D4AF37] group-hover:text-[#b8962e] transition-colors`}
                     />
                     <span className="text-sm">{item.label}</span>
                   </Link>
@@ -239,15 +246,17 @@ onDoubleClick={(e) => {
                       className={`group flex items-center gap-3.5 w-full px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer
                         ${
                           isParentActive || activeDropdown === item.dropdown
-                            ? "bg-blue-600/8 text-blue-900 font-medium shadow-sm border-l-4 border-blue-500"
-                            : "text-blue-800 hover:bg-blue-100/70 hover:text-blue-900 hover:shadow-md hover:border-l-4 hover:border-blue-500"
+                            ? "bg-[#D4AF37]/10 text-[#3d3200] font-medium shadow-sm border-l-4 border-[#D4AF37]"
+                            : "text-[#5c4a00] hover:bg-[#D4AF37]/10 hover:text-[#3d3200] hover:shadow-md hover:border-l-4 hover:border-[#D4AF37]"
                         }`}
                       onClick={() => toggleDropdown(item.dropdown)}
                     >
                       <i
-                        className={`fa-solid ${item.icon} w-6 text-center text-blue-600 group-hover:text-blue-700 transition-colors`}
+                        className={`fa-solid ${item.icon} w-6 text-center text-[#D4AF37] group-hover:text-[#b8962e] transition-colors`}
                       />
-                      <span className="flex-1 text-left text-sm">{item.label}</span>
+                      <span className="flex-1 text-left text-sm">
+                        {item.label}
+                      </span>
 
                       <svg
                         className={`w-3 h-3 transition-transform duration-300 ${
@@ -276,26 +285,33 @@ onDoubleClick={(e) => {
                           const isActive = currentPath === sub.link;
 
                           return (
-                            <Link key={j} to={sub.link}
-  onDoubleClick={(e) => {
-  e.preventDefault();
-  e.stopPropagation();
+                            <Link
+                              key={j}
+                              to={sub.link}
+                              onDoubleClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
 
-  if (currentPath === sub.link) {
-    navigate(sub.link, { state: { refresh: Date.now() } });
-  }
-}}>
+                                if (currentPath === sub.link) {
+                                  navigate(sub.link, {
+                                    state: { refresh: Date.now() },
+                                  });
+                                }
+                              }}
+                            >
                               <div
                                 className={`flex items-center gap-2.5 px-5 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer
                                   ${
                                     isActive
-                                      ? "bg-blue-50 text-blue-900 font-medium border-l-4 border-blue-500"
-                                      : "text-blue-700 hover:bg-blue-100/80 hover:text-blue-900 hover:border-l-4 hover:border-blue-500"
+                                      ? "bg-[#fff7d6] text-[#3d3200] font-medium border-l-4 border-[#D4AF37]"
+                                      : "text-[#5c4a00] hover:bg-[#D4AF37]/10 hover:text-[#3d3200] hover:border-l-4 hover:border-[#D4AF37]"
                                   }`}
                               >
                                 <i
                                   className={`fa-solid fa-circle text-[7px] ${
-                                    isActive ? "text-blue-600" : "text-blue-300"
+                                    isActive
+                                      ? "text-[#D4AF37]"
+                                      : "text-[#d4c27a]"
                                   }`}
                                 />
                                 {sub.label}
@@ -313,8 +329,8 @@ onDoubleClick={(e) => {
         </ul>
 
         {/* Footer */}
-        <div className="px-4 py-3 text-xs text-blue-600/70 text-center border-t border-blue-200/50">
-          SPay Fintech Pvt Ltd Dashboard • {new Date().getFullYear()}
+        <div className="px-4 py-3 text-xs text-[#3d3200]/70 text-center border-t border-[#D4AF37]/20">
+          Soulful Nidhi Limited Dashboard • {new Date().getFullYear()}
         </div>
       </div>
     </>

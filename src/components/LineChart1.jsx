@@ -9,14 +9,33 @@ export const LineChart1 = ({ data }) => {
 
   // ================= MONTH CONSTANTS =================
   const DEFAULT_MONTHS = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
   const MONTH_MAP = {
-    January: "Jan", February: "Feb", March: "Mar", April: "Apr",
-    May: "May", June: "Jun", July: "Jul", August: "Aug",
-    September: "Sep", October: "Oct", November: "Nov", December: "Dec",
+    January: "Jan",
+    February: "Feb",
+    March: "Mar",
+    April: "Apr",
+    May: "May",
+    June: "Jun",
+    July: "Jul",
+    August: "Aug",
+    September: "Sep",
+    October: "Oct",
+    November: "Nov",
+    December: "Dec",
   };
 
   // ================= DYNAMIC MONTH RANGE (last 12 months from today) =================
@@ -47,7 +66,10 @@ export const LineChart1 = ({ data }) => {
     const map = {};
 
     if (!Array.isArray(data)) {
-      console.warn("[LineChart1] Invalid data: expected array, received:", data);
+      console.warn(
+        "[LineChart1] Invalid data: expected array, received:",
+        data,
+      );
       return map;
     }
 
@@ -61,9 +83,12 @@ export const LineChart1 = ({ data }) => {
       let monthPart = rawMonth.split(/[\s\-/]/)[0];
       let yearPartFromMonth = rawMonth.match(/\d{4}|\d{2}/)?.[0];
 
-      const month = MONTH_MAP[monthPart] ||
-                    MONTH_MAP[monthPart.charAt(0).toUpperCase() + monthPart.slice(1).toLowerCase()] ||
-                    "Jan";
+      const month =
+        MONTH_MAP[monthPart] ||
+        MONTH_MAP[
+          monthPart.charAt(0).toUpperCase() + monthPart.slice(1).toLowerCase()
+        ] ||
+        "Jan";
 
       let year = item.year ?? yearPartFromMonth ?? new Date().getFullYear();
       if (typeof year === "string") {
@@ -73,7 +98,11 @@ export const LineChart1 = ({ data }) => {
       }
 
       if (isNaN(year) || year < 2000 || year > new Date().getFullYear() + 5) {
-        console.warn(`[LineChart1] Invalid year for item:`, item, "→ using current year");
+        console.warn(
+          `[LineChart1] Invalid year for item:`,
+          item,
+          "→ using current year",
+        );
         year = new Date().getFullYear();
       }
 
@@ -99,8 +128,16 @@ export const LineChart1 = ({ data }) => {
       const key = `${month}-${year}`;
       const entry = dataMap[key] || {};
 
-      if (month === "Dec" && year === 2025 && !entry.payinAmount && !entry.payoutAmount) {
-        console.warn(`Dec 2025 missing! Expected key: ${key} | Available keys:`, Object.keys(dataMap));
+      if (
+        month === "Dec" &&
+        year === 2025 &&
+        !entry.payinAmount &&
+        !entry.payoutAmount
+      ) {
+        console.warn(
+          `Dec 2025 missing! Expected key: ${key} | Available keys:`,
+          Object.keys(dataMap),
+        );
       }
 
       return {
@@ -135,7 +172,8 @@ export const LineChart1 = ({ data }) => {
       unit = "";
     }
 
-    const formatted = value < 10 ? value.toFixed(1) : Math.round(value).toString();
+    const formatted =
+      value < 10 ? value.toFixed(1) : Math.round(value).toString();
     return (num < 0 ? "-" : "") + formatted + unit;
   };
 
@@ -182,7 +220,7 @@ export const LineChart1 = ({ data }) => {
       series,
 
       // Fixed: Assign colors by name instead of index slicing
-      colors: series.map(s => s.name === "Payin" ? "#2563EB" : "#22C55E"),
+      colors: series.map((s) => (s.name === "Payin" ? "#ffe285" : "#8a6d1f")),
 
       stroke: { curve: "smooth", width: 3 },
 
@@ -218,7 +256,9 @@ export const LineChart1 = ({ data }) => {
           shade: "light",
           type: "vertical",
           shadeIntensity: 0.4,
-          gradientToColors: series.map(s => s.name === "Payin" ? "#60A5FA" : "#86EFAC"),
+          gradientToColors: series.map((s) =>
+            s.name === "Payin" ? "#ffe285" : "#8a6d1f",
+          ),
           opacityFrom: 0.65,
           opacityTo: 0.15,
           stops: [0, 90, 100],
@@ -272,30 +312,30 @@ export const LineChart1 = ({ data }) => {
   }, [series, months, chartData, yAxisMax, showPayin, showPayout]);
 
   return (
-    <div className="w-full rounded-lg md:p-6 bg-white shadow-sm">
-      <p className="text-xl font-bold text-gray-700 mb-4">
+    <div className="w-full rounded-lg md:p-6 bg-white shadow-[0_10px_30px_rgba(212,175,55,0.15)] border border-[#D4AF37]/30">
+      <p className="text-xl font-bold text-[#3d3200] mb-4">
         Monthly Success Volume (Payin + Payout)
       </p>
 
       <div ref={chartRef} />
 
-      <div className="flex justify-center gap-10 mt-5 text-sm font-medium text-gray-700">
-        <label className="flex items-center gap-2.5 cursor-pointer hover:text-blue-600 transition">
+      <div className="flex justify-center gap-10 mt-5 text-sm font-medium text-[#3d3200]">
+        <label className="flex items-center gap-2.5 cursor-pointer hover:text-[#FEE185] transition">
           <input
             type="checkbox"
             checked={showPayin}
             onChange={() => setShowPayin((p) => !p)}
-            className="w-4 h-4 accent-blue-600"
+            className="w-4 h-4 accent-[#FEE185]"
           />
           Payin
         </label>
 
-        <label className="flex items-center gap-2.5 cursor-pointer hover:text-green-600 transition">
+        <label className="flex items-center gap-2.5 cursor-pointer hover:text-[#b8962e] transition">
           <input
             type="checkbox"
             checked={showPayout}
             onChange={() => setShowPayout((p) => !p)}
-            className="w-4 h-4 accent-green-600"
+            className="w-4 h-4 accent-[#b8962e]"
           />
           Payout
         </label>

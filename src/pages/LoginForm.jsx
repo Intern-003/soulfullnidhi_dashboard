@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../images/logo.png";
-import paymentGatewayBg from "../images/login-background.jpg";
+import paymentGatewayBg from "../images/login-background.png";
 import { usePost } from "../hooks/usePost";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
@@ -83,8 +83,7 @@ function LoginForm() {
   const [prekycmodal, setprekycmodal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   // const [formData, setFormData] = useState({ mobile_no: "", password: "" });
-    const [formData, setFormData] = useState({ login_id: "", password: "" });
-
+  const [formData, setFormData] = useState({ login_id: "", password: "" });
 
   const navigate = useNavigate();
   const channelRef = useRef(null);
@@ -120,28 +119,28 @@ function LoginForm() {
     return () => window.removeEventListener("beforeunload", handleUnload);
   }, []);
 
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  
-  setFormData({
-    ...formData,
-    [name]: value,
-  });
-  // if (name === "mobile_no") {
-  //   // Allow only numbers and max 10 digits
-  //   const cleanedValue = value.replace(/\D/g, "").slice(0, 10);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  //   setFormData({
-  //     ...formData,
-  //     [name]: cleanedValue,
-  //   });
-  // } else {
-  //   setFormData({
-  //     ...formData,
-  //     [name]: value,
-  //   });
-  // }
-};
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+    // if (name === "mobile_no") {
+    //   // Allow only numbers and max 10 digits
+    //   const cleanedValue = value.replace(/\D/g, "").slice(0, 10);
+
+    //   setFormData({
+    //     ...formData,
+    //     [name]: cleanedValue,
+    //   });
+    // } else {
+    //   setFormData({
+    //     ...formData,
+    //     [name]: value,
+    //   });
+    // }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -149,11 +148,11 @@ const handleChange = (e) => {
     try {
       // const response = await login(formData);
       const payload = {
-  username: formData.login_id,
-  password: formData.password
-};
+        username: formData.login_id,
+        password: formData.password,
+      };
 
-const response = await login(payload);
+      const response = await login(payload);
       if (response) {
         const user = response.user;
         localStorage.setItem("token", response.token);
@@ -163,7 +162,6 @@ const response = await login(payload);
         localStorage.setItem("user", JSON.stringify(response.user));
         localStorage.setItem("user_id", JSON.stringify(response.user.id));
 
- 
         // setSafeItem("token", response.token);
         // setSafeItem("email", response.user.mobile_no);
         // setSafeItem("login_id", response.user.login_id);
@@ -172,7 +170,7 @@ const response = await login(payload);
 
         localStorage.setItem(
           DASHBOARD_LOCK_KEY,
-          JSON.stringify({ userId: response.user.id, tabId: TAB_ID })
+          JSON.stringify({ userId: response.user.id, tabId: TAB_ID }),
         );
 
         channelRef.current?.postMessage({
@@ -180,17 +178,19 @@ const response = await login(payload);
           userId: response.user.id,
         });
 
-      if (user.role_type === "admin") {
-        navigate("dashboard", { replace: true });
-        return;
-      }
+        if (user.role_type === "admin") {
+          navigate("dashboard", { replace: true });
+          return;
+        }
 
         if (user.kyc === 1 && user.pre_kyc === 1) {
           navigate("/dashboard", { replace: true });
         } else if (user.kyc === 0 && user.pre_kyc === 0) {
           alert("Please complete KYC first!");
-          navigate("/kyc", { replace: true, state: { 
-                merchant: {
+          navigate("/kyc", {
+            replace: true,
+            state: {
+              merchant: {
                 id: user.id,
                 name: user.name,
                 email: user.email,
@@ -198,24 +198,25 @@ const response = await login(payload);
               },
               token: response.token,
               from: "login",
-            } });
+            },
+          });
         } else if (user.pre_kyc === 1 && user.kyc === 0) {
           setModalHeading(
-            user.kyc_rejected === 1 ? "KYC Rejected" : "KYC Pending Approval"
+            user.kyc_rejected === 1 ? "KYC Rejected" : "KYC Pending Approval",
           );
           setModalBody(
             user.kyc_rejected === 1
               ? "Your KYC has been rejected by the admin. Please contact support or re-submit your documents."
-              : "Your KYC has been submitted successfully. Please wait up to 24 hours for admin approval."
+              : "Your KYC has been submitted successfully. Please wait up to 24 hours for admin approval.",
           );
           setprekycmodal(true);
         }
       }
     } catch (err) {
       console.log("Login failed:", err);
-        if (/^\d+$/.test(formData.login_id)) {
-    alert("Please login using your email.");
-  }
+      if (/^\d+$/.test(formData.login_id)) {
+        alert("Please login using your email.");
+      }
     }
   };
 
@@ -242,8 +243,6 @@ const response = await login(payload);
         >
           {/* <div className="px-3 py-6 sm:px-4 sm:py-7 space-y-6"> */}
           <div className="px-4 py-5 sm:px-5 sm:py-7 space-y-6">
-
-
             <div className="text-center space-y-3">
               <div className="inline-block p-2 bg-gradient-to-br from-blue-50/70 to-indigo-50/50 rounded-xl shadow-sm transition-transform duration-500 hover:scale-105">
                 <img
@@ -257,7 +256,7 @@ const response = await login(payload);
                 <h1
                   className="
                   text-xl font-extrabold
-                  bg-gradient-to-r from-blue-700 to-blue-500
+                  bg-gradient-to-r from-[#b8962e] via-[#D4AF37] to-[#f5e6a3]
                   bg-clip-text text-transparent
                   tracking-tight
                 "
@@ -295,7 +294,6 @@ const response = await login(payload);
               {/* Password field – 80% width, centered */}
               {/* <div className="w-full relative"> */}
               <div className="w-[92%] mx-auto relative">
-
                 <FloatingInput
                   placeholder="Password"
                   type={showPassword ? "text" : "password"}
@@ -337,10 +335,10 @@ const response = await login(payload);
                   py-2.5 text-[15px] font-semibold
                   rounded-xl
                   transition-all duration-300
-                  bg-gradient-to-r from-[#12319B] to-[#1299D0]
-                  hover:brightness-110
-                  text-white
-                  shadow-lg shadow-blue-600/25
+                  bg-gradient-to-r from-[#b8962e] via-[#D4AF37] to-[#f5e6a3]
+                  hover:brightness-105
+                  text-[#3d3200]
+                  shadow-lg shadow-[#D4AF37]/30
                   active:scale-[0.97]
                 "
               >
@@ -373,7 +371,7 @@ const response = await login(payload);
               New to SPay?{" "}
               <button
                 onClick={() => navigate("/register")}
-                className="font-semibold text-blue-700 hover:text-blue-800 underline-offset-4 hover:underline transition-colors duration-200"
+                className="font-semibold text-[#3d3200] hover:text-[#5e4f0b] underline-offset-4 hover:underline transition-colors duration-200"
               >
                 Create an account
               </button>

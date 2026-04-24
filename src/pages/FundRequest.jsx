@@ -1,21 +1,19 @@
-import React, { useState } from 'react';
-import { usePost } from '../hooks/usePost';
+import React, { useState } from "react";
+import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
-
 
 const FundRequest = () => {
   const [formData, setFormData] = useState({
-    utr: '',
-    referenceNumber: '',
-    remark: ''
+    utr: "",
+    referenceNumber: "",
+    remark: "",
   });
-  const {execute : formrequest} =  usePost("/create-fund-request");
-    const user_id = localStorage.getItem("user_id");
+  const { execute: formrequest } = usePost("/create-fund-request");
+  const user_id = localStorage.getItem("user_id");
   const toast = useToast();
-  const [loading,setloading]=useState(false);
+  const [loading, setloading] = useState(false);
 
-
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setloading(true);
 
@@ -33,12 +31,11 @@ const FundRequest = () => {
       if (res) {
         toast.success("Transaction Initiated");
         setFormData({
-        utr: '',
-        referenceNumber: '',
-        amount: '',
-        remark: ''
-      });
-
+          utr: "",
+          referenceNumber: "",
+          amount: "",
+          remark: "",
+        });
       }
     } catch (err) {
       const errorMessage =
@@ -48,8 +45,8 @@ const FundRequest = () => {
         "Something went wrong!";
 
       toast.error(errorMessage);
-    }finally{
-        setloading(false);
+    } finally {
+      setloading(false);
     }
   };
 
@@ -57,46 +54,45 @@ const FundRequest = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
-const bankDetails = [
-  {
-    bankName: "HDFC BANK",
-    ifsc: "HDFC0003704",
-    accountNumber: "99910026071984"
-  },
-
-];
+  const bankDetails = [
+    {
+      bankName: "HDFC BANK",
+      ifsc: "HDFC0003704",
+      accountNumber: "99910026071984",
+    },
+  ];
   return (
     <div style={{ padding: "20px", background: "#f5f6fa", minHeight: "100vh" }}>
-      
       {/* Header */}
-      <div style={{
-        background: "linear-gradient(90deg, #1d5fa7, #3a8edb)",
-        color: "#fff",
-        padding: "15px 20px",
-        borderRadius: "8px",
-        fontSize: "20px",
-        fontWeight: "600",
-        marginBottom: "20px"
-      }}>
+      <div
+        style={{
+          background: "linear-gradient(90deg, #b4902d, #8A6D1F)",
+          color: "#fff",
+          padding: "15px 20px",
+          borderRadius: "8px",
+          fontSize: "20px",
+          fontWeight: "600",
+          marginBottom: "20px",
+        }}
+      >
         Fund Request
       </div>
 
       {/* Card */}
-      <div style={{
-        background: "#fff",
-        padding: "25px",
-        borderRadius: "10px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-      }}>
-
+      <div
+        style={{
+          background: "#fff",
+          padding: "25px",
+          borderRadius: "10px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
         <form onSubmit={handleSubmit}>
-
           {/* Row */}
           <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-            
             {/* UTR */}
             <div style={{ flex: 1 }}>
               <label style={label}>UTR</label>
@@ -126,10 +122,7 @@ const bankDetails = [
             </div>
           </div>
 
-
-
           <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
-            
             {/* UTR */}
             <div style={{ flex: 1 }}>
               <label style={label}>amount</label>
@@ -159,74 +152,69 @@ const bankDetails = [
             </div>
           </div>
 
-
           {/* Button */}
           <div style={{ textAlign: "center" }}>
             <button type="submit" style={buttonStyle} disabled={loading}>
               {loading ? "submitting..." : "submit"}
             </button>
           </div>
-
         </form>
       </div>
 
-<div
-  style={{
-    marginTop: "20px",
-    background: "#fff",
-    borderRadius: "10px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    overflow: "hidden"
-  }}
->
-  <div
-    style={{
-      padding: "15px 20px",
-      borderBottom: "1px solid #eee",
-      fontWeight: "600",
-      fontSize: "16px"
-    }}
-  >
-    Bank Details
-  </div>
+      <div
+        style={{
+          marginTop: "20px",
+          background: "#fff",
+          borderRadius: "10px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            padding: "15px 20px",
+            borderBottom: "1px solid #eee",
+            fontWeight: "600",
+            fontSize: "16px",
+          }}
+        >
+          Bank Details
+        </div>
 
-  <table style={{ width: "100%", borderCollapse: "collapse" }}>
-    <thead>
-      <tr style={{ background: "#f0f4f8", textAlign: "left" }}>
-        <th style={thStyle}>Bank Name</th>
-        <th style={thStyle}>Account Number</th>
-        <th style={thStyle}>IFSC</th>
-      </tr>
-    </thead>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ background: "#f0f4f8", textAlign: "left" }}>
+              <th style={thStyle}>Bank Name</th>
+              <th style={thStyle}>Account Number</th>
+              <th style={thStyle}>IFSC</th>
+            </tr>
+          </thead>
 
-    <tbody>
-      {bankDetails.map((bank, index) => (
-        <tr key={index} style={{ borderBottom: "1px solid #eee" }}>
-          <td style={tdStyle}>{bank.bankName}</td>
-          <td style={tdStyle}>{bank.accountNumber}</td>
-          <td style={tdStyle}>{bank.ifsc}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-
-
+          <tbody>
+            {bankDetails.map((bank, index) => (
+              <tr key={index} style={{ borderBottom: "1px solid #eee" }}>
+                <td style={tdStyle}>{bank.bankName}</td>
+                <td style={tdStyle}>{bank.accountNumber}</td>
+                <td style={tdStyle}>{bank.ifsc}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
 const thStyle = {
   padding: "12px",
   fontSize: "13px",
-  color: "#333"
+  color: "#333",
 };
 
 const tdStyle = {
   padding: "12px",
   fontSize: "13px",
-  color: "#555"
+  color: "#555",
 };
-
 
 // Common styles
 const inputStyle = {
@@ -236,21 +224,21 @@ const inputStyle = {
   borderBottom: "1px solid #ccc",
   outline: "none",
   fontSize: "12px",
-  marginTop: "5px"
+  marginTop: "5px",
 };
 
-const label= {
-    fontSize:"14px",
+const label = {
+  fontSize: "14px",
 };
 
 const buttonStyle = {
-  background: "linear-gradient(90deg, #1d5fa7, #3a8edb)",
+  background: "linear-gradient(90deg, #8A6D1F, #b4902d)",
   color: "#fff",
   border: "none",
   padding: "10px 25px",
   borderRadius: "6px",
   cursor: "pointer",
-  fontSize: "15px"
+  fontSize: "15px",
 };
 
 export default FundRequest;

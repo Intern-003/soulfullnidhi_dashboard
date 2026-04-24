@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { usePost } from "../hooks/usePost";
 import { useToast } from "../contexts/ToastContext";
-import paymentGatewayBg from "../images/login-background.jpg";
+import paymentGatewayBg from "../images/login-background.png";
 
 export const Kyc = () => {
   const location = useLocation();
@@ -127,11 +127,17 @@ export const Kyc = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("directorRequestIds", JSON.stringify(directorRequestIds));
+    localStorage.setItem(
+      "directorRequestIds",
+      JSON.stringify(directorRequestIds),
+    );
   }, [directorRequestIds]);
 
   useEffect(() => {
-    localStorage.setItem("directorFetchedDocs", JSON.stringify(directorFetchedDocs));
+    localStorage.setItem(
+      "directorFetchedDocs",
+      JSON.stringify(directorFetchedDocs),
+    );
   }, [directorFetchedDocs]);
 
   useEffect(() => {
@@ -197,8 +203,7 @@ export const Kyc = () => {
   const numberRegex = /^[0-9]{4}$/;
   const pinnumberRegex = /^[0-9]{6}$/;
   const aadharRegex = /^[0-9Xx]{8,12}$/;
-  const gstRegex =
-    /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
   const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
   const websiteRegex =
     /^(https?:\/\/)(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/;
@@ -346,7 +351,8 @@ export const Kyc = () => {
           if (!newErrors.director) newErrors.director = [];
           newErrors.director[idx] = {
             ...newErrors.director[idx],
-            fetch_documents: "Please complete DigiLocker and click Fetch Documents",
+            fetch_documents:
+              "Please complete DigiLocker and click Fetch Documents",
           };
         }
 
@@ -392,7 +398,9 @@ export const Kyc = () => {
   };
 
   const splitAddressParts = (rawAddress = "") => {
-    const cleaned = String(rawAddress || "").replace(/\s+/g, " ").trim();
+    const cleaned = String(rawAddress || "")
+      .replace(/\s+/g, " ")
+      .trim();
 
     if (!cleaned) {
       return {
@@ -434,7 +442,10 @@ export const Kyc = () => {
         city = parts[parts.length - 3] || "";
       }
 
-      address = parts.slice(0, parts.length - 2).join(", ").trim();
+      address = parts
+        .slice(0, parts.length - 2)
+        .join(", ")
+        .trim();
     } else if (parts.length === 3) {
       state = parts[2] || "";
       district = parts[1] || "";
@@ -546,7 +557,7 @@ export const Kyc = () => {
             business_gstin_number: gst,
             financial_year: "2023-24",
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -580,7 +591,7 @@ export const Kyc = () => {
         "";
 
       const jurisdictionData = extractStateDistrictFromJurisdiction(
-        resultNode?.state_jurisdiction || ""
+        resultNode?.state_jurisdiction || "",
       );
 
       const parsedAddress = splitAddressParts(rawAddress);
@@ -659,22 +670,19 @@ export const Kyc = () => {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-        }
+        },
       );
 
       const data = await res.json();
 
       if (!res.ok) {
         const msg =
-          data?.message ||
-          data?.error ||
-          "DigiLocker verification failed";
+          data?.message || data?.error || "DigiLocker verification failed";
         setDirectorVerifyError((prev) => ({ ...prev, [index]: msg }));
         return;
       }
 
-      const sdkUrl =
-        data?.data?.sdk_url || data?.api?.data?.sdk_url || "";
+      const sdkUrl = data?.data?.sdk_url || data?.api?.data?.sdk_url || "";
 
       const requestId =
         data?.data?.request_id || data?.api?.data?.request_id || "";
@@ -741,7 +749,7 @@ export const Kyc = () => {
           body: JSON.stringify({
             request_id: requestId,
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -785,9 +793,7 @@ export const Kyc = () => {
             updated[index]?.director_gender ||
             "",
           director_pan_no:
-            panInfo?.pan_number ||
-            updated[index]?.director_pan_no ||
-            "",
+            panInfo?.pan_number || updated[index]?.director_pan_no || "",
           director_aadhar_no:
             uidMasked || updated[index]?.director_aadhar_no || "",
         };
@@ -837,9 +843,9 @@ export const Kyc = () => {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-          body: JSON.stringify({
-    user_id: memberFormData.id, // ✅ send real merchant id
-  }),
+        body: JSON.stringify({
+          user_id: memberFormData.id, // ✅ send real merchant id
+        }),
       });
 
       const data = await res.json();
@@ -852,7 +858,7 @@ export const Kyc = () => {
       const sessionId = data?.data?.session_id || "";
       const link = data?.data?.link || "";
       const purpose = data?.data?.purpose || "";
-// console.log("Saved VKYC Session:", sessionId); 
+      // console.log("Saved VKYC Session:", sessionId);
       setMemberFormData((prev) => ({
         ...prev,
         vkyc_session_id: sessionId,
@@ -874,8 +880,8 @@ export const Kyc = () => {
 
   const handleNext = () => {
     // if (validateStep()) {
-      if (currentStep < 4) {
-        setCurrentStep(currentStep + 1);
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1);
       // }
     }
   };
@@ -889,8 +895,8 @@ export const Kyc = () => {
         name === "company_pan_no"
           ? value.toUpperCase()
           : name === "company_gst_no"
-          ? value.toUpperCase().replace(/\s/g, "")
-          : value,
+            ? value.toUpperCase().replace(/\s/g, "")
+            : value,
     }));
 
     setErrors((prev) => ({
@@ -994,7 +1000,7 @@ export const Kyc = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-// console.log("Submitting VKYC Session:", memberFormData.vkyc_session_id);
+    // console.log("Submitting VKYC Session:", memberFormData.vkyc_session_id);
     if (!validateStep()) return;
 
     try {
@@ -1021,13 +1027,13 @@ export const Kyc = () => {
           formData.append(key, memberFormData[key] ?? "");
         }
       });
-formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
+      formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
       ["company_pan_no_doc", "company_gst_no_doc", "cancel_cheque_doc"].forEach(
         (fileKey) => {
           if (memberFormData[fileKey] instanceof File) {
             formData.append(fileKey, memberFormData[fileKey]);
           }
-        }
+        },
       );
 
       memberFormData.director_info.forEach((director, idx) => {
@@ -1119,7 +1125,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
-                            Business Name <span className="text-red-600">*</span>
+                            Business Name{" "}
+                            <span className="text-red-600">*</span>
                           </label>
                           <input
                             name="name"
@@ -1128,13 +1135,16 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
                           />
                           {errors?.name && (
-                            <p className="text-red-600 text-xs mt-1">{errors.name}</p>
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.name}
+                            </p>
                           )}
                         </div>
 
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
-                            Business Mobile <span className="text-red-600">*</span>
+                            Business Mobile{" "}
+                            <span className="text-red-600">*</span>
                           </label>
                           <input
                             name="mobile_no"
@@ -1151,7 +1161,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
 
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 tracking-wide ml-2">
-                            Business Email <span className="text-red-600">*</span>
+                            Business Email{" "}
+                            <span className="text-red-600">*</span>
                           </label>
                           <input
                             name="email"
@@ -1160,7 +1171,9 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
                           />
                           {errors?.email && (
-                            <p className="text-red-600 text-xs mt-1">{errors.email}</p>
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.email}
+                            </p>
                           )}
                         </div>
 
@@ -1196,7 +1209,9 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                               if (value.length === 15) verifyGST(value);
                             }}
                             className={`w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#375EF4] ${
-                              gstVerified ? "bg-gray-100 cursor-not-allowed" : ""
+                              gstVerified
+                                ? "bg-gray-100 cursor-not-allowed"
+                                : ""
                             }`}
                           />
 
@@ -1212,7 +1227,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                 Company Name (as per GST):
                               </p>
                               <p className="text-sm font-semibold text-green-700">
-                                {gstCompanyName || "Company name not returned by API"}
+                                {gstCompanyName ||
+                                  "Company name not returned by API"}
                               </p>
                             </div>
                           )}
@@ -1262,7 +1278,9 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                             }`}
                           />
                           {errors?.city && (
-                            <p className="text-red-600 text-xs mt-1">{errors.city}</p>
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.city}
+                            </p>
                           )}
                         </div>
 
@@ -1282,7 +1300,9 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                             }`}
                           />
                           {errors?.state && (
-                            <p className="text-red-600 text-xs mt-1">{errors.state}</p>
+                            <p className="text-red-600 text-xs mt-1">
+                              {errors.state}
+                            </p>
                           )}
                         </div>
 
@@ -1339,10 +1359,14 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                             type="text"
                             readOnly
                             placeholder="Upload GST document"
-                            value={memberFormData.company_gst_no_doc?.name || ""}
+                            value={
+                              memberFormData.company_gst_no_doc?.name || ""
+                            }
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                             onClick={() =>
-                              document.getElementById("company_gst_no_doc").click()
+                              document
+                                .getElementById("company_gst_no_doc")
+                                .click()
                             }
                           />
 
@@ -1404,7 +1428,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
 
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            Company PAN Number <span className="text-red-600">*</span>
+                            Company PAN Number{" "}
+                            <span className="text-red-600">*</span>
                           </label>
                           <input
                             name="company_pan_no"
@@ -1435,10 +1460,14 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                             type="text"
                             readOnly
                             placeholder="Upload PAN document"
-                            value={memberFormData.company_pan_no_doc?.name || ""}
+                            value={
+                              memberFormData.company_pan_no_doc?.name || ""
+                            }
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                             onClick={() =>
-                              document.getElementById("company_pan_no_doc").click()
+                              document
+                                .getElementById("company_pan_no_doc")
+                                .click()
                             }
                           />
 
@@ -1499,7 +1528,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
 
                         <div>
                           <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                            Cancel Cheque <span className="text-red-600">*</span>
+                            Cancel Cheque{" "}
+                            <span className="text-red-600">*</span>
                           </label>
 
                           <input
@@ -1509,7 +1539,9 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                             value={memberFormData.cancel_cheque_doc?.name || ""}
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 cursor-pointer bg-white focus:outline-none focus:ring-1 focus:ring-[#375EF4]"
                             onClick={() =>
-                              document.getElementById("cancel_cheque_doc").click()
+                              document
+                                .getElementById("cancel_cheque_doc")
+                                .click()
                             }
                           />
 
@@ -1544,15 +1576,19 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                               Director {index + 1}
                             </h3> */}
                             <h3 className="text-base font-semibold text-gray-700 mb-3 mt-4">
-                              Director {index + 1}<br/>
-                             <span className="text-red-800 bg-red-500/20 block mt-2 p-2 rounded-xl text-sm font-medium shadow-[0_0_6px_rgba(255,0,0,0.4)]">
-                              <b >note:</b> <br/>
-                              <div className="mt-2">
-                               step 1: click verify Pan + Aadhaar button to auto fetch director details.</div>
-                                <div className="mt-2">step 2: After completion of submit redirect back to this page. </div>
-
-                               </span>
-
+                              Director {index + 1}
+                              <br />
+                              <span className="text-red-800 bg-red-500/20 block mt-2 p-2 rounded-xl text-sm font-medium shadow-[0_0_6px_rgba(255,0,0,0.4)]">
+                                <b>note:</b> <br />
+                                <div className="mt-2">
+                                  step 1: click verify Pan + Aadhaar button to
+                                  auto fetch director details.
+                                </div>
+                                <div className="mt-2">
+                                  step 2: After completion of submit redirect
+                                  back to this page.{" "}
+                                </div>
+                              </span>
                             </h3>
                             {index > 0 && (
                               <button
@@ -1568,11 +1604,11 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Director Name <span className="text-red-600">*</span>
+                                Director Name{" "}
+                                <span className="text-red-600">*</span>
                               </label>
                               <input
                                 name="director_name"
-                                
                                 value={director.director_name || ""}
                                 placeholder="Will auto fill after fetch"
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 "
@@ -1592,7 +1628,9 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                 readOnly
                                 value={
                                   director.director_gender
-                                    ? director.director_gender.charAt(0).toUpperCase() +
+                                    ? director.director_gender
+                                        .charAt(0)
+                                        .toUpperCase() +
                                       director.director_gender.slice(1)
                                     : ""
                                 }
@@ -1608,7 +1646,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
 
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Date of Birth <span className="text-red-600">*</span>
+                                Date of Birth{" "}
+                                <span className="text-red-600">*</span>
                               </label>
                               <input
                                 type="date"
@@ -1625,7 +1664,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
 
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                PAN Number <span className="text-red-600">*</span>
+                                PAN Number{" "}
+                                <span className="text-red-600">*</span>
                               </label>
                               <input
                                 readOnly
@@ -1648,7 +1688,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                 type="text"
                                 readOnly
                                 value={
-                                  directorFetchedDocs?.[index]?.pan?.document_name || ""
+                                  directorFetchedDocs?.[index]?.pan
+                                    ?.document_name || ""
                                 }
                                 placeholder="Will auto fill after fetch"
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
@@ -1657,7 +1698,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
 
                             <div>
                               <label className="block mb-1 text-xs font-semibold text-gray-600 ml-2">
-                                Aadhaar Number <span className="text-red-600">*</span>
+                                Aadhaar Number{" "}
+                                <span className="text-red-600">*</span>
                               </label>
                               <input
                                 readOnly
@@ -1665,7 +1707,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                 placeholder="Will auto fill after fetch"
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
                               />
-                              {errors?.director?.[index]?.director_aadhar_no && (
+                              {errors?.director?.[index]
+                                ?.director_aadhar_no && (
                                 <p className="text-red-600 text-xs mt-1">
                                   {errors.director[index].director_aadhar_no}
                                 </p>
@@ -1680,7 +1723,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                 type="text"
                                 readOnly
                                 value={
-                                  directorFetchedDocs?.[index]?.aadhaar?.document_name || ""
+                                  directorFetchedDocs?.[index]?.aadhaar
+                                    ?.document_name || ""
                                 }
                                 placeholder="Will auto fill after fetch"
                                 className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
@@ -1748,13 +1792,14 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                     Aadhaar Card
                                   </h4>
                                   <span className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-700">
-                                    {directorFetchedDocs[index]?.aadhaar?.status || "N/A"}
+                                    {directorFetchedDocs[index]?.aadhaar
+                                      ?.status || "N/A"}
                                   </span>
                                 </div>
 
                                 <div className="flex gap-4">
-                                  {directorFetchedDocs[index]?.aadhaar?.aadhaar_data
-                                    ?.photo_base64 && (
+                                  {directorFetchedDocs[index]?.aadhaar
+                                    ?.aadhaar_data?.photo_base64 && (
                                     <img
                                       src={`data:image/jpeg;base64,${
                                         directorFetchedDocs[index]?.aadhaar
@@ -1767,24 +1812,35 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
 
                                   <div className="flex-1 space-y-2 text-sm text-gray-700">
                                     <p>
-                                      <span className="font-semibold">Name:</span>{" "}
-                                      {directorFetchedDocs[index]?.aadhaar?.aadhaar_data
-                                        ?.personal_info?.name || "-"}
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold">DOB:</span>{" "}
-                                      {directorFetchedDocs[index]?.aadhaar?.aadhaar_data
-                                        ?.personal_info?.dob || "-"}
-                                    </p>
-                                    <p>
-                                      <span className="font-semibold">Gender:</span>{" "}
+                                      <span className="font-semibold">
+                                        Name:
+                                      </span>{" "}
                                       {directorFetchedDocs[index]?.aadhaar
-                                        ?.aadhaar_data?.personal_info?.gender || "-"}
+                                        ?.aadhaar_data?.personal_info?.name ||
+                                        "-"}
                                     </p>
                                     <p>
-                                      <span className="font-semibold">UID:</span>{" "}
-                                      {directorFetchedDocs[index]?.aadhaar?.aadhaar_data
-                                        ?.uid || "-"}
+                                      <span className="font-semibold">
+                                        DOB:
+                                      </span>{" "}
+                                      {directorFetchedDocs[index]?.aadhaar
+                                        ?.aadhaar_data?.personal_info?.dob ||
+                                        "-"}
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        Gender:
+                                      </span>{" "}
+                                      {directorFetchedDocs[index]?.aadhaar
+                                        ?.aadhaar_data?.personal_info?.gender ||
+                                        "-"}
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        UID:
+                                      </span>{" "}
+                                      {directorFetchedDocs[index]?.aadhaar
+                                        ?.aadhaar_data?.uid || "-"}
                                     </p>
                                   </div>
                                 </div>
@@ -1793,8 +1849,8 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                   <p className="font-semibold mb-1">Address:</p>
                                   <p className="leading-6">
                                     {formatAadhaarAddress(
-                                      directorFetchedDocs[index]?.aadhaar?.aadhaar_data
-                                        ?.address
+                                      directorFetchedDocs[index]?.aadhaar
+                                        ?.aadhaar_data?.address,
                                     ) || "-"}
                                   </p>
                                 </div>
@@ -1806,40 +1862,51 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                     PAN Card
                                   </h4>
                                   <span className="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700">
-                                    {directorFetchedDocs[index]?.pan?.status || "N/A"}
+                                    {directorFetchedDocs[index]?.pan?.status ||
+                                      "N/A"}
                                   </span>
                                 </div>
 
                                 <div className="space-y-3 text-sm text-gray-700">
                                   <p>
-                                    <span className="font-semibold">PAN Number:</span>{" "}
-                                    {directorFetchedDocs[index]?.pan?.pancard_data
-                                      ?.pan_number || "-"}
+                                    <span className="font-semibold">
+                                      PAN Number:
+                                    </span>{" "}
+                                    {directorFetchedDocs[index]?.pan
+                                      ?.pancard_data?.pan_number || "-"}
                                   </p>
                                   <p>
-                                    <span className="font-semibold">Holder Name:</span>{" "}
-                                    {directorFetchedDocs[index]?.pan?.pancard_data
-                                      ?.holder_name || "-"}
+                                    <span className="font-semibold">
+                                      Holder Name:
+                                    </span>{" "}
+                                    {directorFetchedDocs[index]?.pan
+                                      ?.pancard_data?.holder_name || "-"}
                                   </p>
                                   <p>
                                     <span className="font-semibold">DOB:</span>{" "}
-                                    {directorFetchedDocs[index]?.pan?.pancard_data
-                                      ?.holder_dob || "-"}
+                                    {directorFetchedDocs[index]?.pan
+                                      ?.pancard_data?.holder_dob || "-"}
                                   </p>
                                   <p>
                                     <span className="font-semibold">
                                       Certificate Number:
                                     </span>{" "}
-                                    {directorFetchedDocs[index]?.pan?.pancard_data
-                                      ?.certificate_number || "-"}
+                                    {directorFetchedDocs[index]?.pan
+                                      ?.pancard_data?.certificate_number || "-"}
                                   </p>
                                   <p>
-                                    <span className="font-semibold">Issuer:</span>{" "}
-                                    {directorFetchedDocs[index]?.pan?.issuer || "-"}
+                                    <span className="font-semibold">
+                                      Issuer:
+                                    </span>{" "}
+                                    {directorFetchedDocs[index]?.pan?.issuer ||
+                                      "-"}
                                   </p>
                                   <p>
-                                    <span className="font-semibold">Document Name:</span>{" "}
-                                    {directorFetchedDocs[index]?.pan?.document_name || "-"}
+                                    <span className="font-semibold">
+                                      Document Name:
+                                    </span>{" "}
+                                    {directorFetchedDocs[index]?.pan
+                                      ?.document_name || "-"}
                                   </p>
                                 </div>
                               </div>
@@ -1853,9 +1920,9 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                   {currentStep === 4 && (
                     <div className="space-y-6 mb-6">
                       <p className="text-sm text-gray-600 text-center max-w-2xl mx-auto">
-                        Click the button below to generate your Video KYC session.
-                        The VKYC page will open in a new tab. Complete the process there,
-                        then come back and submit this form.
+                        Click the button below to generate your Video KYC
+                        session. The VKYC page will open in a new tab. Complete
+                        the process there, then come back and submit this form.
                       </p>
 
                       <div className="border border-gray-200 rounded-2xl p-5 bg-gray-50 max-w-3xl mx-auto">
@@ -1879,7 +1946,9 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                 : "bg-purple-600 hover:bg-purple-700"
                             }`}
                           >
-                            {vkycLoading ? "Generating..." : "Generate VKYC Link"}
+                            {vkycLoading
+                              ? "Generating..."
+                              : "Generate VKYC Link"}
                           </button>
 
                           {memberFormData.vkyc_link && (
@@ -1889,7 +1958,7 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
                                 window.open(
                                   memberFormData.vkyc_link,
                                   "_blank",
-                                  "noopener,noreferrer"
+                                  "noopener,noreferrer",
                                 )
                               }
                               className="px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
@@ -1913,7 +1982,9 @@ formData.append("vkyc_session_id", memberFormData.vkyc_session_id);
 
                             <div className="mt-3 space-y-2 text-sm text-gray-700 break-all">
                               <p>
-                                <span className="font-semibold">Session ID:</span>{" "}
+                                <span className="font-semibold">
+                                  Session ID:
+                                </span>{" "}
                                 {memberFormData.vkyc_session_id}
                               </p>
                               <p>

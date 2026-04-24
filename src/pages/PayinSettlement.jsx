@@ -16,104 +16,99 @@ const PayinSettlement = () => {
     remark: "",
   });
 
-const [rawData, setRawData] = useState([]);
-const [payinSettlementData, setPayinSettlementData] = useState([]);
+  const [rawData, setRawData] = useState([]);
+  const [payinSettlementData, setPayinSettlementData] = useState([]);
 
-const [cursor, setCursor] = useState(null);
-const [hasMore, setHasMore] = useState(true);
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState(null);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-const [entriesPerPage, setEntriesPerPage] = useState(50);
-const lastCursorRef = useRef(null);
+  const [entriesPerPage, setEntriesPerPage] = useState(50);
+  const lastCursorRef = useRef(null);
 
-const fetchMerchantsPayin = async (force = false) => {
-  if (!force) {
-    if (loading || !hasMore) return;
-    if (cursor !== null && lastCursorRef.current === cursor) return;
-  }
-
-  lastCursorRef.current = cursor;
-  setLoading(true);
-
-  try {
-    const token = localStorage.getItem("token");
-
-  const query = new URLSearchParams({ 
-    per_page: entriesPerPage,
-    ...(cursor && !force ? { cursor } : {}),
-  }).toString();
-
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/get-merchants?${query}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    const json = await res.json();
-
-    if (json?.status) {
-      setRawData((prev) => {
-        const ids = new Set(prev.map((i) => i.id));
-        const unique = json.data.filter((i) => !ids.has(i.id));
-        return [...prev, ...unique];
-      });
-
-      setCursor(json.next_cursor);
-      setHasMore(Boolean(json.next_cursor));
-    } else {
-      throw new Error("Invalid response");
+  const fetchMerchantsPayin = async (force = false) => {
+    if (!force) {
+      if (loading || !hasMore) return;
+      if (cursor !== null && lastCursorRef.current === cursor) return;
     }
-  } catch (err) {
-    console.error(err);
-    setError("Failed to load merchants");
-  } finally {
-    setLoading(false);
-  }
-};
 
+    lastCursorRef.current = cursor;
+    setLoading(true);
 
-useEffect(() => {
-  fetchMerchantsPayin();
-}, []);
+    try {
+      const token = localStorage.getItem("token");
 
+      const query = new URLSearchParams({
+        per_page: entriesPerPage,
+        ...(cursor && !force ? { cursor } : {}),
+      }).toString();
 
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/get-merchants?${query}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
-useEffect(() => {
-  setRawData([]);
-  setCursor(null);
-  setHasMore(true);
-  lastCursorRef.current = null;
-  // fetchMerchants();
-  setTimeout(() => {
-    fetchMerchantsPayin(true);
-  }, 0);
-}, [entriesPerPage]);
+      const json = await res.json();
+
+      if (json?.status) {
+        setRawData((prev) => {
+          const ids = new Set(prev.map((i) => i.id));
+          const unique = json.data.filter((i) => !ids.has(i.id));
+          return [...prev, ...unique];
+        });
+
+        setCursor(json.next_cursor);
+        setHasMore(Boolean(json.next_cursor));
+      } else {
+        throw new Error("Invalid response");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load merchants");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMerchantsPayin();
+  }, []);
+
+  useEffect(() => {
+    setRawData([]);
+    setCursor(null);
+    setHasMore(true);
+    lastCursorRef.current = null;
+    // fetchMerchants();
+    setTimeout(() => {
+      fetchMerchantsPayin(true);
+    }, 0);
+  }, [entriesPerPage]);
   // const { data: tableData, refetch, loading } = useGet("/get-merchants");
   const { execute: payinSettlement } = usePost("/payin-settlement");
 
   // const initialDataOfPayinWallet = tableData?.data;
 
-useEffect(() => {
-  if (!rawData.length) return;
+  useEffect(() => {
+    if (!rawData.length) return;
 
-  const formatted = rawData.map((item, index) => ({
-    sqno: index + 1,
-    id: item.id,
-    name: item.name,
-    payin_wallet: item.payin_wallet,
-  }));
+    const formatted = rawData.map((item, index) => ({
+      sqno: index + 1,
+      id: item.id,
+      name: item.name,
+      payin_wallet: item.payin_wallet,
+    }));
 
-  setPayinSettlementData(formatted);
-}, [rawData]);
+    setPayinSettlementData(formatted);
+  }, [rawData]);
 
-const handleLoadMore = () => {
-  if (!hasMore || loading) return;
-  fetchMerchantsPayin();
-};
-
-
+  const handleLoadMore = () => {
+    if (!hasMore || loading) return;
+    fetchMerchantsPayin();
+  };
 
   const membercolumn = [
     { header: "User Id", accessor: "id" },
@@ -130,7 +125,7 @@ const handleLoadMore = () => {
           setSelectedUser(row);
           setShowModal(true);
         }}
-        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
+        className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium px-4 py-1.5 rounded-md shadow-md transition-all"
       >
         Payin Settlement
       </Button>
@@ -156,20 +151,20 @@ const handleLoadMore = () => {
         toast.success("Settlement done successfully!!");
 
         setRawData([]);
-setCursor(null);
-setHasMore(true);
-lastCursorRef.current = null;
+        setCursor(null);
+        setHasMore(true);
+        lastCursorRef.current = null;
 
-fetchMerchantsPayin(true);
+        fetchMerchantsPayin(true);
         setShowModal(false);
       }
     } catch (err) {
       console.log(err);
       // toast.error("Something went wrong!");
-            const errorMessage =
-        err?.response?.data?.message ||  // Axios-style
-        err?.data?.message ||            // Custom hook style
-        err?.message ||                  // JS error
+      const errorMessage =
+        err?.response?.data?.message || // Axios-style
+        err?.data?.message || // Custom hook style
+        err?.message || // JS error
         "Something went wrong!";
 
       toast.error(errorMessage);
@@ -179,29 +174,32 @@ fetchMerchantsPayin(true);
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className="rounded-lg flex justify-between items-center p-4 shadow-md"
-      style={{ background: 'linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)' }}>
+      <div
+        className="rounded-lg flex justify-between items-center p-4 shadow-md"
+        style={{
+          background: "linear-gradient(250deg, #b4902d 0%, #8A6D1F 100%)",
+        }}
+      >
         <h4 className="font-bold text-white text-xl">Payin Settlement</h4>
       </div>
 
       {/* Table */}
       {loading ? (
         <TableSkeleton />
-      ) : ( 
+      ) : (
         <Table
           columns={membercolumn}
           data={tableDataWithActions}
           showDeleteColumn={false}
           showDateFilter={false}
           showStatusFilter={false}
-           showExport={false}
-            isServerPaginated
+          showExport={false}
+          isServerPaginated
           hasMore={hasMore}
           isLoadingMore={loading}
           onLoadNext={handleLoadMore}
           entriesPerPage={entriesPerPage}
           setEntriesPerPage={setEntriesPerPage}
-          
         />
       )}
 
@@ -229,10 +227,7 @@ fetchMerchantsPayin(true);
             </div>
 
             {/* Modal Body */}
-            <form
-              className="p-6 space-y-4"
-              onSubmit={handleSubmit}
-            >
+            <form className="p-6 space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label className="block mb-1 text-sm font-medium">Amount</label>
                 <input

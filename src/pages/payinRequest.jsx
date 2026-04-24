@@ -16,7 +16,7 @@ export const PayinRequest = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
   const [tokens, setTokens] = useState([]);
-const [selectedToken, setSelectedToken] = useState("");
+  const [selectedToken, setSelectedToken] = useState("");
 
   const intervalRef = useRef(null);
 
@@ -26,12 +26,12 @@ const [selectedToken, setSelectedToken] = useState("");
   const { execute: executeCheckStatus } = usePost("/payin/status");
   // console.log("collection records", data);
   // const payin_wallet = collection_data?.data;
-const { data: tokenData } = useAutoFetch("/get-tokens");
-useEffect(() => {
-  if (tokenData?.data) {
-    setTokens(tokenData.data);
-  }
-}, [tokenData]);
+  const { data: tokenData } = useAutoFetch("/get-tokens");
+  useEffect(() => {
+    if (tokenData?.data) {
+      setTokens(tokenData.data);
+    }
+  }, [tokenData]);
   const payingAmount = data?.PayingAmount ?? "0.00";
   // Generate unique order ID on mount
   useEffect(() => {
@@ -59,7 +59,7 @@ useEffect(() => {
         setPayerMobile("");
         setPayerEmail("");
         const uniqueOrderId = `DSB${Date.now()}${Math.floor(
-          Math.random() * 1000
+          Math.random() * 1000,
         )}`;
         setPayerOrderId(uniqueOrderId);
       }, 5000);
@@ -67,7 +67,6 @@ useEffect(() => {
     }
   }, [showSuccess, showFailed]);
 
-  
   const handlePayinSubmit = async () => {
     if (qrUrl || orderId) return;
     if (Number(amount) < 10) {
@@ -76,7 +75,7 @@ useEffect(() => {
     }
     try {
       const payload = {
-        token :selectedToken,
+        token: selectedToken,
         name: payerName,
         phone: payerMobile,
         email: payerEmail,
@@ -87,8 +86,8 @@ useEffect(() => {
       if (data.status === "success") {
         setQrUrl(
           `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-            data.data.qrcode_string
-          )}`
+            data.data.qrcode_string,
+          )}`,
         );
         setOrderId(data.data.orderid);
         setShowSuccess(false);
@@ -153,12 +152,12 @@ useEffect(() => {
       <div
         className="rounded-lg p-4 shadow-md flex items-center"
         style={{
-          background: "linear-gradient(250deg, #2a91d9 0%, #0555afff 100%)",
+          background: "linear-gradient(250deg, #b4902d 0%, #8A6D1F 100%)",
         }}
       >
         {/* Left Side */}
         <div className="flex-1">
-          <h4 className="text-white font-bold text-xl">Load Wallet</h4>
+          <h4 className="text-white font-bold text-xl">QR Code</h4>
         </div>
 
         {/* Right Side */}
@@ -216,7 +215,7 @@ useEffect(() => {
                   setAmountError(
                     value && Number(value) < 10
                       ? "Amount must be at least ₹10"
-                      : ""
+                      : "",
                   );
                 }}
                 className="peer block w-full border-b-2 border-gray-300 py-2 px-0 text-gray-900 focus:border-blue-600 focus:outline-none placeholder-transparent"
@@ -319,24 +318,24 @@ useEffect(() => {
             </div>
 
             <div className="relative w-full">
-  <select
-    value={selectedToken}
-    onChange={(e) => setSelectedToken(e.target.value)}
-    className="block w-full text-sm text-gray-500 border-b-2 border-gray-300 py-2 px-0 bg-transparent focus:outline-none focus:border-blue-600"
-  >
-    <option value="">Select Token</option>
+              <select
+                value={selectedToken}
+                onChange={(e) => setSelectedToken(e.target.value)}
+                className="block w-full text-sm text-gray-500 border-b-2 border-gray-300 py-2 px-0 bg-transparent focus:outline-none focus:border-yellow-600"
+              >
+                <option value="">Select Token</option>
 
-    {tokens.map((item) => (
-      <option key={item.id} value={item.token}>
-        {item.token}
-      </option>
-    ))}
-  </select>
+                {tokens.map((item) => (
+                  <option key={item.id} value={item.token}>
+                    {item.token}
+                  </option>
+                ))}
+              </select>
 
-  <label className="absolute -top-3 text-blue-600 text-xs">
-    Token
-  </label>
-</div>
+              <label className="absolute -top-3 text-yellow-600 text-xs">
+                Token
+              </label>
+            </div>
           </div>
 
           <div className="flex justify-center mt-4">

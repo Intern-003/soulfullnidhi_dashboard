@@ -6,42 +6,35 @@ import { TableSkeleton } from "../components/TableSkeleton";
 import { setSafeItem, getSafeItem, removeSafeItem } from "../utils/localSecure";
 import { usePost } from "../hooks/usePost";
 
-
-
-
 const Acc_topup_settlement = () => {
-  
   const [loading, setLoading] = useState(true);
- 
+
   const [error, setError] = useState(null);
 
-    const [entriesPerPage, setEntriesPerPage] = useState(50);
+  const [entriesPerPage, setEntriesPerPage] = useState(50);
 
-const [filteredData, setFilteredData] = useState([]);
-const [page, setPage] = useState(1);
-const [totalPages, setTotalPages] = useState(1);
-const [totalRecords, setTotalRecords] = useState(0);
-const [totalSuccessAmount, setTotalSuccessAmount] = useState(0);
+  const [filteredData, setFilteredData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [totalSuccessAmount, setTotalSuccessAmount] = useState(0);
 
-const [merchantOptions, setMerchantOptions] = useState([]);
+  const [merchantOptions, setMerchantOptions] = useState([]);
 
-const [exporting, setExporting] = useState(false);
-
+  const [exporting, setExporting] = useState(false);
 
   const [role] = useState(atob(localStorage.getItem("role")) || "admin");
-const  {execute:requestApporve }= usePost("/approve-fund-request");
+  const { execute: requestApporve } = usePost("/approve-fund-request");
 
-const { execute: reverseTopup } = usePost("/payout-take-back");
+  const { execute: reverseTopup } = usePost("/payout-take-back");
 
-
-const [actionLoading, setActionLoading] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
 
   const [txnSearch, setTxnSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [selectedMerchant, setSelectedMerchant] = useState(null);
-
 
   const userId =
     localStorage.getItem("user_id") ||
@@ -66,257 +59,191 @@ const [actionLoading, setActionLoading] = useState(null);
         created_at: item.created_at,
         updated_at: item.updated_at,
         option1: item.option1 ?? "N/A", // ✅ ADD THIS
-        refno:item.refno ?? "N/A",
-        mytxnid:item.mytxnid ?? "N/A"
-
-
+        refno: item.refno ?? "N/A",
+        mytxnid: item.mytxnid ?? "N/A",
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, []);
 
+  const handleReverse = async (row) => {
+    try {
+      setActionLoading(row.id);
 
-const handleReverse = async (row) => {
-  try {
-    setActionLoading(row.id);
+      const payload = {
+        user_id: row.user_id,
+        txnid: row.txnid, // 🔥 important
+        remark: "Reversed from admin panel",
+      };
 
-    const payload = {
-      user_id: row.user_id,
-      txnid: row.txnid, // 🔥 important
-      remark: "Reversed from admin panel",
-    };
+      const res = await reverseTopup(payload);
 
-    const res = await reverseTopup(payload);
-
-    if (res) {
-      setFilteredData((prev) =>
-        prev.map((item) =>
-          item.id === row.id
-            ? {
-                ...item,
-                status: "reversed",
-                payout_closing_balance:
-                  res?.new_balance ?? item.payout_closing_balance,
-                updated_at: new Date().toISOString(),
-              }
-            : item
-        )
-      );
+      if (res) {
+        setFilteredData((prev) =>
+          prev.map((item) =>
+            item.id === row.id
+              ? {
+                  ...item,
+                  status: "reversed",
+                  payout_closing_balance:
+                    res?.new_balance ?? item.payout_closing_balance,
+                  updated_at: new Date().toISOString(),
+                }
+              : item,
+          ),
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err?.response?.data?.message || err?.message || "Reverse failed");
+    } finally {
+      setActionLoading(null);
     }
-  } catch (err) {
-    console.error(err);
-    alert(
-      err?.response?.data?.message ||
-        err?.message ||
-        "Reverse failed"
-    );
-  } finally {
-    setActionLoading(null);
-  }
-};
+  };
 
+  const handleAccept = async (row) => {
+    try {
+      setActionLoading(row.id);
 
+      const payload = {
+        txnid: row.txnid,
+      };
 
-const handleAccept = async (row) => {
-  try {
-    setActionLoading(row.id);
+      const res = await requestApporve(payload);
 
-    const payload = {
-      txnid: row.txnid,
-    };
-
-    const res = await requestApporve(payload);
-
-    if (res) {
-      // ✅ Sirf uss row ko update karo
-      setFilteredData((prev) =>
-        prev.map((item) =>
-          item.id === row.id
-            ? {
-                ...item,
-                status: "completed",
-                // optional: agar backend ye values change karta hai
-                payout_opening_balance: res?.payout_opening_balance ?? item.payout_opening_balance,
-                payout_closing_balance: res?.payout_closing_balance ?? item.payout_closing_balance,
-                updated_at: new Date().toISOString(),
-              }
-            : item
-        )
+      if (res) {
+        // ✅ Sirf uss row ko update karo
+        setFilteredData((prev) =>
+          prev.map((item) =>
+            item.id === row.id
+              ? {
+                  ...item,
+                  status: "completed",
+                  // optional: agar backend ye values change karta hai
+                  payout_opening_balance:
+                    res?.payout_opening_balance ?? item.payout_opening_balance,
+                  payout_closing_balance:
+                    res?.payout_closing_balance ?? item.payout_closing_balance,
+                  updated_at: new Date().toISOString(),
+                }
+              : item,
+          ),
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      alert(
+        err?.response?.data?.message || err?.message || "Something went wrong",
       );
+    } finally {
+      setActionLoading(null);
     }
+  };
 
-  } catch (err) {
-    console.error(err);
-    alert(
-      err?.response?.data?.message ||
-      err?.message ||
-      "Something went wrong"
-    );
-  } finally {
-    setActionLoading(null);
-  }
-};
-  
   useEffect(() => {
-  setPage(1);
-}, [entriesPerPage, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
+    setPage(1);
+  }, [
+    entriesPerPage,
+    txnSearch,
+    statusFilter,
+    startDate,
+    endDate,
+    selectedMerchant,
+  ]);
 
+  const fetchMerchants = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-const fetchMerchants = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/get-merchants`,
-      {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/get-merchants`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result?.status) {
+        throw new Error(result?.message);
       }
-    );
 
-    const result = await res.json();
+      // ✅ Convert to dropdown format
+      const options = (result.data || []).map((m) => ({
+        label: m.name, // or m.business_name depending on API
+        value: m.id,
+      }));
 
-    if (!res.ok || !result?.status) {
-      throw new Error(result?.message);
+      setMerchantOptions(options);
+    } catch (err) {
+      console.error("Merchant fetch error:", err);
+      setMerchantOptions([]);
     }
+  };
 
-    // ✅ Convert to dropdown format
-    const options = (result.data || []).map((m) => ({
-      label: m.name,   // or m.business_name depending on API
-      value: m.id,
-    }));
+  useEffect(() => {
+    fetchMerchants();
+  }, []);
 
-    setMerchantOptions(options);
+  useEffect(() => {
+    fetchFilteredData();
+  }, [
+    page,
+    entriesPerPage,
+    txnSearch,
+    statusFilter,
+    startDate,
+    endDate,
+    selectedMerchant,
+  ]);
 
-  } catch (err) {
-    console.error("Merchant fetch error:", err);
-    setMerchantOptions([]);
-  }
-};
+  const fetchFilteredData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
 
-useEffect(() => {
-  fetchMerchants();
-}, []);
-
-useEffect(() => {
-  fetchFilteredData();
-}, [page, entriesPerPage, txnSearch, statusFilter, startDate, endDate, selectedMerchant]);
-
-const fetchFilteredData = async () => {
-  try {
-    setLoading(true);
-    const token = localStorage.getItem("token");
-
-    const params = {
-      page,
-      per_page: entriesPerPage,
-      status: statusFilter !== "all" ? statusFilter : undefined,
-
-      from_date: startDate
-        ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
-            .toISOString()
-            .split("T")[0]
-        : undefined,
-
-      to_date: endDate
-        ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
-            .toISOString()
-            .split("T")[0]
-        : undefined,
-
-      // ✅ IMPORTANT: MULTIPLE PRODUCTS
-      "product[]": ["topup_payout", "take_back_from_wallet"],
-
-      searchdata: txnSearch || undefined,
-      user_id: selectedMerchant?.value || undefined,
-    };
-
-    // 👇 FIX for array params
-    const query = new URLSearchParams();
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (!value) return;
-
-      if (Array.isArray(value)) {
-        value.forEach((v) => query.append(key, v));
-      } else {
-        query.append(key, value);
-      }
-    });
-
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/reportrecords-List?${query.toString()}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const result = await res.json();
-
-    if (!res.ok || !result?.status) {
-      throw new Error(result?.message);
-    }
-
-    // ✅ success amount from backend
-    setTotalSuccessAmount(result.success_amount || 0);
-
-    const formatted = normalizeRows(result.data || []);
-    setFilteredData(formatted);
-
-    // ✅ pagination
-    setTotalPages(result.pagination?.last_page || 1);
-    setTotalRecords(result.pagination?.total || 0);
-
-  } catch (err) {
-    console.error(err);
-    setFilteredData([]);
-  } finally {
-    setLoading(false);
-  }
-};
-
-const fetchAllDataForExport = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    let currentPage = 1;
-    let lastPage = 1;
-    let allData = [];
-
-    do {
       const params = {
-        page: currentPage,
-        per_page: entriesPerPage, // ✅ use same pagination size
+        page,
+        per_page: entriesPerPage,
         status: statusFilter !== "all" ? statusFilter : undefined,
 
-          from_date: formatDateForAPI(startDate),
-to_date: formatDateForAPI(endDate, true),
-    
-"product[]": ["topup_payout", "take_back_from_wallet"],        searchdata: txnSearch || undefined,
+        from_date: startDate
+          ? new Date(new Date(startDate).setHours(0, 0, 0, 0))
+              .toISOString()
+              .split("T")[0]
+          : undefined,
+
+        to_date: endDate
+          ? new Date(new Date(endDate).setHours(23, 59, 59, 999))
+              .toISOString()
+              .split("T")[0]
+          : undefined,
+
+        // ✅ IMPORTANT: MULTIPLE PRODUCTS
+        "product[]": ["topup_payout", "take_back_from_wallet"],
+
+        searchdata: txnSearch || undefined,
         user_id: selectedMerchant?.value || undefined,
       };
 
-const query = new URLSearchParams();
+      // 👇 FIX for array params
+      const query = new URLSearchParams();
 
-Object.entries(params).forEach(([key, value]) => {
-  if (!value) return;
+      Object.entries(params).forEach(([key, value]) => {
+        if (!value) return;
 
-  if (Array.isArray(value)) {
-    value.forEach((v) => query.append(key, v));
-  } else {
-    query.append(key, value);
-  }
-});
+        if (Array.isArray(value)) {
+          value.forEach((v) => query.append(key, v));
+        } else {
+          query.append(key, value);
+        }
+      });
 
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
+        `${import.meta.env.VITE_API_URL}/reportrecords-List?${query.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const result = await res.json();
@@ -325,24 +252,87 @@ Object.entries(params).forEach(([key, value]) => {
         throw new Error(result?.message);
       }
 
+      // ✅ success amount from backend
+      setTotalSuccessAmount(result.success_amount || 0);
+
       const formatted = normalizeRows(result.data || []);
+      setFilteredData(formatted);
 
-      allData = [...allData, ...formatted];
+      // ✅ pagination
+      setTotalPages(result.pagination?.last_page || 1);
+      setTotalRecords(result.pagination?.total || 0);
+    } catch (err) {
+      console.error(err);
+      setFilteredData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // ✅ update loop control
-      lastPage = result.pagination?.last_page || 1;
-      currentPage++;
+  const fetchAllDataForExport = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-    } while (currentPage <= lastPage);
+      let currentPage = 1;
+      let lastPage = 1;
+      let allData = [];
 
-    return allData;
+      do {
+        const params = {
+          page: currentPage,
+          per_page: entriesPerPage, // ✅ use same pagination size
+          status: statusFilter !== "all" ? statusFilter : undefined,
 
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
-};
+          from_date: formatDateForAPI(startDate),
+          to_date: formatDateForAPI(endDate, true),
 
+          "product[]": ["topup_payout", "take_back_from_wallet"],
+          searchdata: txnSearch || undefined,
+          user_id: selectedMerchant?.value || undefined,
+        };
+
+        const query = new URLSearchParams();
+
+        Object.entries(params).forEach(([key, value]) => {
+          if (!value) return;
+
+          if (Array.isArray(value)) {
+            value.forEach((v) => query.append(key, v));
+          } else {
+            query.append(key, value);
+          }
+        });
+
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/reportrecords-List?${query}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const result = await res.json();
+
+        if (!res.ok || !result?.status) {
+          throw new Error(result?.message);
+        }
+
+        const formatted = normalizeRows(result.data || []);
+
+        allData = [...allData, ...formatted];
+
+        // ✅ update loop control
+        lastPage = result.pagination?.last_page || 1;
+        currentPage++;
+      } while (currentPage <= lastPage);
+
+      return allData;
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  };
 
   const escapeCSV = (field) => {
     const string = String(field ?? "");
@@ -395,82 +385,75 @@ Object.entries(params).forEach(([key, value]) => {
   };
 
   const formatDateForAPI = (date, isEnd = false) => {
-  if (!date) return undefined;
+    if (!date) return undefined;
 
-  const d = new Date(date);
+    const d = new Date(date);
 
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = d.toLocaleString("en-US", { month: "short" });
-  const year = d.getFullYear();
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = d.toLocaleString("en-US", { month: "short" });
+    const year = d.getFullYear();
 
-  if (isEnd) {
-    d.setHours(23, 59);
-  } else {
-    d.setHours(0, 0);
-  }
+    if (isEnd) {
+      d.setHours(23, 59);
+    } else {
+      d.setHours(0, 0);
+    }
 
-  const time = d.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+    const time = d.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
 
-  return `${day} ${month} ${year}, ${time}`;
-}; 
+    return `${day} ${month} ${year}, ${time}`;
+  };
 
+  const exportCSV = async () => {
+    try {
+      setExporting(true);
+      const allData = await fetchAllDataForExport();
 
-const exportCSV = async () => {
+      if (!allData.length) {
+        alert("No data to export.");
+        return;
+      }
 
-  try{
-   setExporting(true);
-  const allData = await fetchAllDataForExport();
+      const csvRows = allData.map((row) => {
+        const { date, time } = formatExportDateTime(row.created_at);
 
-  if (!allData.length) {
-    alert("No data to export.");
-    return;
-  }
+        return {
+          "Order ID": row.id,
+          "User ID": row.user_id,
+          "Merchant Name": row.merchant_name,
+          "Merchant Details": row.merchant_details_text,
+          "Transaction ID": row.txnid,
+          "Product Type": row.product_type,
+          Amount: row.amount,
+          Status: row.status,
+          Date: date,
+          Time: time,
+          "Opening Bal": row.payout_opening_balance,
+          "Closing Bal": row.payout_closing_balance,
+        };
+      });
 
-  const csvRows = allData.map((row) => {
-    const { date, time } = formatExportDateTime(row.created_at);
+      const headers = Object.keys(csvRows[0]);
 
-    return {
+      const csv = [
+        headers.map(escapeCSV).join(","),
+        ...csvRows.map((row) =>
+          headers.map((header) => escapeCSV(row[header])).join(","),
+        ),
+      ].join("\n");
 
-       "Order ID": row.id,
-        "User ID": row.user_id,
-        "Merchant Name": row.merchant_name,
-        "Merchant Details": row.merchant_details_text,
-        "Transaction ID": row.txnid,
-        "Product Type": row.product_type,
-        "Amount": row.amount,
-        "Status": row.status,
-        "Date": date,
-        "Time": time,
-        "Opening Bal": row.payout_opening_balance,
-        "Closing Bal": row.payout_closing_balance,
-    };
-  });
-
-  const headers = Object.keys(csvRows[0]);
-
-  const csv = [
-    headers.map(escapeCSV).join(","),
-    ...csvRows.map((row) =>
-      headers.map((header) => escapeCSV(row[header])).join(",")
-    ),
-  ].join("\n");
-
-  
-  downloadFile(csv, "topup_settlement.csv", "text/csv");
-  }catch(err){
-   console.error(err);
-    alert("Export failed");
-}finally {
-    setExporting(false); // ✅ stop loader
-  }
-
-
-
-};
+      downloadFile(csv, "topup_settlement.csv", "text/csv");
+    } catch (err) {
+      console.error(err);
+      alert("Export failed");
+    } finally {
+      setExporting(false); // ✅ stop loader
+    }
+  };
   const handleClearAll = () => {
     setTxnSearch("");
     setStatusFilter("all");
@@ -479,7 +462,6 @@ const exportCSV = async () => {
     setSelectedMerchant(null);
   };
 
- 
   const statusClasses = {
     pending: "bg-[#dfaf03ff] text-white",
     initiated: "bg-blue-400 text-white",
@@ -508,48 +490,44 @@ const exportCSV = async () => {
         </div>
       ),
     },
-{
-  header: "Transaction Id",
-  accessor: "txnid",
-  Cell: ({ row }) => (
-    <div>
-      {/* Always visible */}
-      <span className="font-medium text-black ">
-        {row.txnid}
-      </span>
+    {
+      header: "Transaction Id",
+      accessor: "txnid",
+      Cell: ({ row }) => (
+        <div>
+          {/* Always visible */}
+          <span className="font-medium text-black ">{row.txnid}</span>
 
-      {/* Admin only */}
-      {role === "admin" && (
-        <>
-          <span className="block text-xs text-gray-700 mt-2">
-            UTR: {row.refno ?? "-"}
-          </span>
-          <span className="block text-xs text-gray-700">
-            Reference No: {row.mytxnid ?? "-"}
-          </span>
-        </>
-      )}
-    </div>
-  ),
-},
-{
-  header: "Product Type",
-  accessor: "product_type",
-  Cell: ({ row }) => (
-    <div className="flex flex-col text-left">
-      <span className="font-medium">{row.product_type}</span>
-      {role === "admin" && (
-        <>
-   <span className="text-xs text-gray-500">
-        Remark: {row.option1}
-      </span>
-
-      </>
-      )}
-   
-    </div>
-  ),
-},
+          {/* Admin only */}
+          {role === "admin" && (
+            <>
+              <span className="block text-xs text-gray-700 mt-2">
+                UTR: {row.refno ?? "-"}
+              </span>
+              <span className="block text-xs text-gray-700">
+                Reference No: {row.mytxnid ?? "-"}
+              </span>
+            </>
+          )}
+        </div>
+      ),
+    },
+    {
+      header: "Product Type",
+      accessor: "product_type",
+      Cell: ({ row }) => (
+        <div className="flex flex-col text-left">
+          <span className="font-medium">{row.product_type}</span>
+          {role === "admin" && (
+            <>
+              <span className="text-xs text-gray-500">
+                Remark: {row.option1}
+              </span>
+            </>
+          )}
+        </div>
+      ),
+    },
     {
       header: "Amount",
       accessor: "amount",
@@ -558,65 +536,63 @@ const exportCSV = async () => {
       header: "Status",
       accessor: "status",
       Cell: ({ row }) => {
-        console.log("status,",row.status);
-        return(
-        <span
-          className={`px-2 py-1 rounded-full text-sm font-medium ${
-            statusClasses[String(row.status || "").toLowerCase()] ?? "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {row.status}
-        </span>
+        console.log("status,", row.status);
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-sm font-medium ${
+              statusClasses[String(row.status || "").toLowerCase()] ??
+              "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {row.status}
+          </span>
         );
-
-    },
-    },
-...(role === "admin"
-  ? [
-      {
-        header: "Action",
-        accessor: "action",
-Cell: ({ row }) => {
-  // ✅ Pending → Accept button
-  if (row.status === "pending") {
-    return (
-      <button
-        onClick={() => handleAccept(row)}
-        disabled={actionLoading === row.id}
-        className="px-3 py-1 bg-blue-500 text-white rounded-2xl hover:bg-blue-700"
-      >
-        {actionLoading === row.id ? "Processing..." : "Accept"}
-      </button>
-    );
-  }
-
-  // ✅ Completed → Reverse button
-  if (row.status === "completed") {
-    return (
-      <button
-        onClick={() => handleReverse(row)}
-        disabled={actionLoading === row.id}
-        className="px-3 py-1 bg-red-500 text-white rounded-2xl hover:bg-red-700"
-      >
-        {actionLoading === row.id ? "Reversing..." : "Reverse"}
-      </button>
-    );
-  }
-
-  // ✅ Reversed → label
-  if (row.status === "reversed") {
-    return (
-      <span className="text-red-400 font-medium">
-        Reversed
-      </span>
-    );
-  }
-
-  return null;
-}
       },
-    ]
-  : []),
+    },
+    ...(role === "admin"
+      ? [
+          {
+            header: "Action",
+            accessor: "action",
+            Cell: ({ row }) => {
+              // ✅ Pending → Accept button
+              if (row.status === "pending") {
+                return (
+                  <button
+                    onClick={() => handleAccept(row)}
+                    disabled={actionLoading === row.id}
+                    className="px-3 py-1 bg-blue-500 text-white rounded-2xl hover:bg-blue-700"
+                  >
+                    {actionLoading === row.id ? "Processing..." : "Accept"}
+                  </button>
+                );
+              }
+
+              // ✅ Completed → Reverse button
+              if (row.status === "completed") {
+                return (
+                  <button
+                    onClick={() => handleReverse(row)}
+                    disabled={actionLoading === row.id}
+                    className="px-3 py-1 bg-red-500 text-white rounded-2xl hover:bg-red-700"
+                  >
+                    {actionLoading === row.id ? "Reversing..." : "Reverse"}
+                  </button>
+                );
+              }
+
+              // ✅ Reversed → label
+              if (row.status === "reversed") {
+                return (
+                  <span className="text-red-400 font-medium">Reversed</span>
+                );
+              }
+
+              return null;
+            },
+          },
+        ]
+      : []),
     {
       header: "Date",
       accessor: "created_at",
@@ -655,26 +631,24 @@ Cell: ({ row }) => {
       accessor: "payout_closing_balance",
     },
   ];
-  
 
   return (
     <div className="p-4 space-y-4">
       <div
         className="rounded-lg flex justify-between items-center p-4 shadow-md"
         style={{
-          background: "linear-gradient(250deg, #55abe9ff 0%, #00418c 100%)",
+          background: "linear-gradient(250deg, #b4902d 0%, #8A6D1F 100%)",
         }}
       >
         <div>
           <h4 className="font-bold text-white text-xl">
             Topup Settlement Statement
           </h4>
-         
         </div>
       </div>
 
       <TableFilters
-      merchantOptions={merchantOptions}
+        merchantOptions={merchantOptions}
         rawData={filteredData}
         txnSearch={txnSearch}
         setTxnSearch={setTxnSearch}
@@ -692,12 +666,12 @@ Cell: ({ row }) => {
         showDateFilter={true}
         showSelectUserFilter={true}
         onExportCSV={exportCSV}
-          exporting={exporting}
+        exporting={exporting}
         onClearAll={handleClearAll}
         totalSuccessAmount={totalSuccessAmount}
       />
 
-      {loading  ? (
+      {loading ? (
         <TableSkeleton />
       ) : error ? (
         <div className="text-center py-6 text-red-500">Error: {error}</div>
@@ -712,7 +686,6 @@ Cell: ({ row }) => {
             entriesPerPage={entriesPerPage}
             setEntriesPerPage={setEntriesPerPage}
           />
-
         </>
       )}
     </div>

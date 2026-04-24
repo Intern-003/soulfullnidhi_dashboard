@@ -18,7 +18,7 @@ const Table = ({
   onLoadNext = () => {},
   entriesPerPage = 50,
   setEntriesPerPage = () => {},
-    currentPage = 1,
+  currentPage = 1,
   totalPages = 1,
   onPageChange = () => {},
 }) => {
@@ -27,14 +27,13 @@ const Table = ({
   const [recordId, setRecordId] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-
-
   const handleConfirmModal = (id) => {
     setRecordId(id);
     setShowConfirmModal(true);
   };
 
-  const modifiedEndpoint = endPoint && recordId ? `${endPoint}/${recordId}` : null;
+  const modifiedEndpoint =
+    endPoint && recordId ? `${endPoint}/${recordId}` : null;
   const { execute: deleteRecord } = usePost(modifiedEndpoint || "");
 
   const handleDelete = async () => {
@@ -58,13 +57,13 @@ const Table = ({
 
   // const totalPages = Math.ceil(data.length / entriesPerPage) || 1;
 
-const paginatedData = useMemo(() => {
-  if (isServerPaginated) return data;
-  return data.slice(
-    (currentPage - 1) * entriesPerPage,
-    currentPage * entriesPerPage
-  );
-}, [data, currentPage, entriesPerPage, isServerPaginated]);
+  const paginatedData = useMemo(() => {
+    if (isServerPaginated) return data;
+    return data.slice(
+      (currentPage - 1) * entriesPerPage,
+      currentPage * entriesPerPage,
+    );
+  }, [data, currentPage, entriesPerPage, isServerPaginated]);
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -73,7 +72,7 @@ const paginatedData = useMemo(() => {
           <thead
             className="uppercase text-white top-0 z-20"
             style={{
-              background: "linear-gradient(250deg, #2a91d9 0%, #00418c 100%)",
+              background: "linear-gradient(250deg, #f5c95a 0%, #ccae61 100%)",
             }}
           >
             <tr>
@@ -100,8 +99,8 @@ const paginatedData = useMemo(() => {
                 <tr
                   key={row.id || idx}
                   className={`transition-all duration-150 ${
-                    idx % 2 === 0 ? "bg-[#e6efff]" : "bg-white"
-                  } hover:bg-blue-100`}
+                    idx % 2 === 0 ? "bg-[#D4AF37]/10" : "bg-white"
+                  } hover:bg-[#D4AF37]/10`}
                 >
                   {columns.map((col, ci) => (
                     <td
@@ -131,7 +130,9 @@ const paginatedData = useMemo(() => {
             ) : (
               <tr>
                 <td
-                  colSpan={showDeleteColumn ? columns.length + 1 : columns.length}
+                  colSpan={
+                    showDeleteColumn ? columns.length + 1 : columns.length
+                  }
                   className="text-center text-gray-600 py-10 bg-white"
                 >
                   <img
@@ -146,66 +147,63 @@ const paginatedData = useMemo(() => {
           </tbody>
         </table>
       </div>
-{showPagination && data.length > 0 && (
-  <div className="flex flex-col md:flex-row justify-between items-center px-4 py-3 bg-gray-200 rounded-b-2xl border-t border-gray-300 shadow-inner">
-    
-    {/* Entries selector */}
-    <div className="flex items-center gap-2 text-sm text-gray-800 font-medium">
-      <span>Show</span>
-      <select
-        value={entriesPerPage}
-        onChange={(e) => {
-          setEntriesPerPage(Number(e.target.value));
-          onPageChange(1); // reset to first page
-        }}
-        className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-sky-400 outline-none"
-      >
-        {[50, 100, 150, 200].map((num) => (
-          <option key={num} value={num}>
-            {num}
-          </option>
-        ))}
-      </select>
-      <span>entries</span>
-    </div>
+      {showPagination && data.length > 0 && (
+        <div className="flex flex-col md:flex-row justify-between items-center px-4 py-3 bg-gray-200 rounded-b-2xl border-t border-gray-300 shadow-inner">
+          {/* Entries selector */}
+          <div className="flex items-center gap-2 text-sm text-gray-800 font-medium">
+            <span>Show</span>
+            <select
+              value={entriesPerPage}
+              onChange={(e) => {
+                setEntriesPerPage(Number(e.target.value));
+                onPageChange(1); // reset to first page
+              }}
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-yellow-400 outline-none"
+            >
+              {[50, 100, 150, 200].map((num) => (
+                <option key={num} value={num}>
+                  {num}
+                </option>
+              ))}
+            </select>
+            <span>entries</span>
+          </div>
 
-    {/* Pagination controls */}
-    <div className="flex items-center gap-3 mt-2 md:mt-0">
+          {/* Pagination controls */}
+          <div className="flex items-center gap-3 mt-2 md:mt-0">
+            {/* Prev Button */}
+            <button
+              onClick={() => {
+                if (currentPage > 1) {
+                  onPageChange(currentPage - 1);
+                }
+              }}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm rounded-md font-medium bg-yellow-700 text-white disabled:bg-gray-300"
+            >
+              Prev
+            </button>
 
-      {/* Prev Button */}
-      <button
-        onClick={() => {
-          if (currentPage > 1) {
-            onPageChange(currentPage - 1);
-          }
-        }}
-        disabled={currentPage === 1}
-        className="px-3 py-1 text-sm rounded-md font-medium bg-blue-600 text-white disabled:bg-gray-300"
-      >
-        Prev
-      </button>
+            {/* Page Info */}
+            <span className="text-sm font-medium text-gray-800">
+              Page {currentPage} of {totalPages}
+            </span>
 
-      {/* Page Info */}
-      <span className="text-sm font-medium text-gray-800">
-        Page {currentPage} of {totalPages}
-      </span>
-
-      {/* Next Button */}
-      <button
-        onClick={() => {
-          if (currentPage < totalPages) {
-            onPageChange(currentPage + 1);
-          }
-        }}
-        disabled={currentPage === totalPages}
-        className="px-3 py-1 text-sm rounded-md font-medium bg-blue-600 text-white disabled:bg-gray-300"
-      >
-        Next
-      </button>
-
-    </div>
-  </div>
-)}
+            {/* Next Button */}
+            <button
+              onClick={() => {
+                if (currentPage < totalPages) {
+                  onPageChange(currentPage + 1);
+                }
+              }}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-sm rounded-md font-medium bg-yellow-700 text-white disabled:bg-gray-300"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       <ConfirmModal
         showConfirmModal={showConfirmModal}

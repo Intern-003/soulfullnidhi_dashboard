@@ -22,9 +22,9 @@ export const Header = ({ onMenuClick }) => {
 
   const payingAmount = merchantData?.data?.payin_wallet ?? "0.00";
   const Payoutwallet = merchantData?.payout_wallet ?? "0.00";
-   const PayinRollingAmount = merchantData?.data?.rolling_amount ?? "0.00";
-    const PayinTotalCharges = merchantData?.data?.total_charges ?? "0.00";
-// console.log(PayinRollingAmount);
+  const PayinRollingAmount = merchantData?.data?.rolling_amount ?? "0.00";
+  const PayinTotalCharges = merchantData?.data?.total_charges ?? "0.00";
+  // console.log(PayinRollingAmount);
   // State for role
   const [role, setRole] = useState(atob(localStorage.getItem("role"))); // admin / user / crypto
   const email = localStorage.getItem("email");
@@ -60,46 +60,43 @@ export const Header = ({ onMenuClick }) => {
     },
   ];
 
-
   return (
-    <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-indigo-500/50">
+    <nav className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-lg shadow-[#D4AF37]/25 border-b border-[#D4AF37]/20">
       {/* left side buttons */}
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          className="md:hidden text-2xl text-blue-600"
+          className="md:hidden text-2xl text-[#D4AF37]"
         >
           ☰
         </button>
 
-          {/* {role === "user" && (
-    <div className="hidden lg:flex items-center gap-6 ml-6">
-      {userStats.map((stat) => (
-        <div
-          key={stat.id}
-          className="flex items-center gap-2 text-sm font-medium text-gray-700"
-        >
-          <i className={stat.icon}></i>
-          <span>{stat.label}:</span>
-          <span className="font-semibold text-gray-900">
-            ₹{stat.value}
-          </span>
-        </div>
-      ))}
-    </div>
-  )} */}
+        {/* {role === "user" && (
+          <div className="hidden lg:flex items-center gap-6 ml-6">
+            {userStats.map((stat) => (
+              <div
+                key={stat.id}
+                className="flex items-center gap-2 text-sm font-medium text-gray-700"
+              >
+                <i className={stat.icon}></i>
+                <span>{stat.label}:</span>
+                <span className="font-semibold text-gray-900">
+                  ₹{stat.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        )} */}
       </div>
 
       {/* right side */}
-      
 
-    
       <div className="flex items-center justify-end gap-4">
         {/* {role === "admin" && ( */}
-        <div className="text-gray-800 font-semibold flex items-center gap-1">
+        <div className="text-[#3d3200] font-semibold flex items-center gap-1">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-gray-600"
+            className="h-5 w-5 text-[#8a6d1f]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -117,26 +114,26 @@ export const Header = ({ onMenuClick }) => {
           <span>
             ₹
             {Number(
-              role === "admin" ? data?.payout_balance : data?.payout_balance
+              role === "admin" ? data?.payout_balance : data?.payout_balance,
             ).toFixed(2)}
           </span>
         </div>
-{/* )} */}
+        {/* )} */}
         {/* Profile Icon */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setOpen(!open)}
-            className="flex items-center focus:outline-none"
+            className="flex items-center focus:outline-none cursor-pointer"
           >
             <img
-              className="w-10 h-10 rounded-full border"
+              className="w-10 h-10 rounded-full border filter sepia-[1] hue-rotate-[20deg] saturate-[1.6] brightness-[1.05]"
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRduYoJopcD2_WmDjt978P3pjTLl-oQX-ZsTOaof805POhNgFzpYEy5LnA&s"
               alt="profile"
             />
           </button>
         </div>
       </div>
-  
+
       {/* Profile Sidebar */}
       <ProfileSidebar
         open={open}
@@ -144,8 +141,8 @@ export const Header = ({ onMenuClick }) => {
         data={merchantData?.data}
         role={role}
         payingAmount={payingAmount}
-        PayinRollingAmount = {PayinRollingAmount}
-        PayinTotalCharges = {PayinTotalCharges}
+        PayinRollingAmount={PayinRollingAmount}
+        PayinTotalCharges={PayinTotalCharges}
       />
     </nav>
   );
