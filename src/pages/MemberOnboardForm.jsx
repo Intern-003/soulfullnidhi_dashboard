@@ -442,7 +442,7 @@ const handleSubmit = async (e) => {
   return (
     <>
       <div className=" flex justify-between items-center mb-3 p-2.5"
-      style={{ background: "linear-gradient(275deg, #062f70ff, #0d3dc4ff)" }}>
+      style={{ background: "linear-gradient(275deg,  #b4902d 0%, #8A6D1F 100%)" }}>
         <h4 className="font-bold text-white text-lg py-2">
           {/* Add New Merchant Details */}
           {
@@ -1395,8 +1395,8 @@ const handleSubmit = async (e) => {
               type="button"
               className={`text-white font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-3 ${
                 currentStep === 1
-                  ? "disabled bg-gray-500 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-800 cursor-pointer"
+                  ? "disabled bg-yellow-500 cursor-not-allowed"
+                  : "bg-yellow-500 hover:bg-yellow-600 cursor-pointer"
               }`}
               onClick={handlePrev}
             >
@@ -1406,7 +1406,7 @@ const handleSubmit = async (e) => {
             {currentStep < 4 && (
               <button
                 type="button"
-                className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                className="cursor-pointer text-white bg-yellow-600 hover:bg-yellow-500 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
                 onClick={handleNext}
               >
                 Next &gt;
@@ -1416,7 +1416,7 @@ const handleSubmit = async (e) => {
             {currentStep === 4 && (
               <button
                 type="submit"
-                className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+                className="cursor-pointer text-white bg-yellow-600 hover:bg-yellow-500 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
               >
                 Submit
               </button>
@@ -1427,7 +1427,7 @@ const handleSubmit = async (e) => {
               <Button
                 type="button"
                 onClick={addDirector}
-                className="cursor-pointer px-4 py-2 mr-2 bg-blue-600 text-white rounded-lg hover:bg-blue-800"
+                className="cursor-pointer px-4 py-2 mr-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-500"
               >
                 + Add Director
               </Button>
@@ -1435,7 +1435,7 @@ const handleSubmit = async (e) => {
             <Button
               onClick={() => setShowConfirmModal(!showConfirmModal)}
               type="button"
-              className="cursor-pointer text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+              className="cursor-pointer text-white bg-yellow-500 hover:bg-yellow-600 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
             >
               Go Back
             </Button>

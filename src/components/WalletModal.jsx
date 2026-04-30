@@ -69,7 +69,7 @@ export default function WalletModal({
         className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-yellow-500 via-yellow-600 to-yellow-700 text-white px-6 py-4 flex justify-between items-center">
           <div>
             <h3 className="text-lg font-semibold">
               {mode === "load" ? "Load Wallet" : "Reverse / Return Funds"}
@@ -122,14 +122,14 @@ export default function WalletModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 bg-red-400 hover:bg-red-300 rounded-lg transition"
+              className="flex-1 py-2.5 bg-red-500 hover:bg-red-400 rounded-lg transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               className={`flex-1 py-2.5 text-white font-medium rounded-lg transition ${
-                mode === "load" ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-400 hover:bg-blue-700"
+                mode === "load" ? "bg-yellow-500 hover:bg-yellow-600" : "bg-yellow-500 hover:bg-yellow-600"
               }`}
             >
               {mode === "load" ? "Load Wallet" : "Return Funds"}

@@ -76,7 +76,7 @@ const PayinSettlementModal = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-center bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white rounded-t-lg px-5 py-3">
+        <div className="flex justify-between items-center bg-gradient-to-r from-yellow-500 via-red-600 to-blue-700 text-white rounded-t-lg px-5 py-3">
           <h3 className="text-lg font-semibold">
             Payin Settlement for {merchant.name}
           </h3>

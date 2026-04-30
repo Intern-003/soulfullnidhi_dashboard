@@ -214,7 +214,7 @@ const PayinSettlement = () => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex justify-between items-center bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white rounded-t-lg px-5 py-3">
+            <div className="flex justify-between items-center bg-gradient-to-r from-yellow-500 via-yellow-600 to-yellow-700 text-white rounded-t-lg px-5 py-3">
               <h3 className="text-lg font-semibold">
                 Payin Settlement for {selectedUser?.name}
               </h3>
@@ -255,7 +255,7 @@ const PayinSettlement = () => {
               <Button
                 type="submit"
                 onClick={handleSubmit}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg shadow-md transition"
+                className="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-medium px-5 py-2 rounded-lg shadow-md transition"
               >
                 Submit
               </Button>
